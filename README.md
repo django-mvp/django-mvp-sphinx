@@ -98,6 +98,12 @@ A `PageView` renders each page, and it finds the page's data through a
 `DocsBuild`, which only ever looks inside `build_dir`. To change how a page is
 drawn, subclass `PageView` and pass it to your app as `view_class`.
 
+The images and downloads your pages link to (`_images/` and `_downloads/` in
+the build) are served at the addresses the pages already use, with the file's
+content type. Nothing else in the build is: not the search index, the page data,
+the sources, the static files or Sphinx's pickles. An address that tries to climb
+out of those two folders answers 404.
+
 `build_dir` is read on every request. Rebuild the docs and reload the page to see
 the change, with no restart. It doesn't have to exist when the site starts, so a
 project that hasn't built its docs yet still boots.

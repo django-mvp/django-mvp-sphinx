@@ -63,3 +63,10 @@ Watch: the .po header is makemessages' default (placeholders); the CHANGELOG sti
 
 Did: the docs step of the verify run named `DocsBuild` and `PageView` as public names no page quotes as code, so the README's Usage section now quotes both and the `view_class` hook.
 Verified: re-ran the full verify after this change (result in the completion report).
+
+## 2026-09-30T00:00:00Z · Implementer US2 · T007
+
+Did: DocsBuild.file (only `_images/` and `_downloads/`; the target must resolve inside its own folder, resolved first; `_contained_file` gained an optional `within` folder) and PageView.get step 1: a file answers with a FileResponse and the guessed content type. README says images and downloads are served and nothing else; CHANGELOG entry.
+Verified: red first (`uv run pytest tests/test_docs_build.py -k TestFile`: 18 failed, AttributeError on `file`), then `uv run pytest tests/test_views.py tests/test_docs_build.py -q`: 66 passed; `uv run pytest tests -q`: 78 passed; pre-commit clean (mypy needed a `type: ignore[override]` because a file answers with a streaming response). Mutation probes: dropping the `_images`/`_downloads` check fails 17 tests; comparing against the build root instead of the folder fails 7.
+Next: T008, redirects, not found, missing build, broken page.
+Watch: the guide's image and download are on `page/`, not the front page (the brief says front page); the tests read them from `page/`. The traversal client tests reach the view with the `..` intact (checked: resolver kwargs `path='_images/../environment.pickle'`), so the 404 is DocsBuild's containment, not URL normalisation.

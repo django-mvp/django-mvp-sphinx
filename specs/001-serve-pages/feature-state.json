@@ -160,8 +160,24 @@
       "tasks": [
         {
           "id": "T007",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_docs_build.py::TestFile",
+              "tests/test_views.py::TestFiles"
+            ],
+            "commands": [
+              "uv run pytest tests/test_docs_build.py -k TestFile -q (red: 18 failed, AttributeError DocsBuild has no attribute file)",
+              "uv run pytest tests/test_views.py tests/test_docs_build.py -q: 66 passed",
+              "uv run pytest tests -q: 78 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "code": [
+              "mvp_sphinx/docs_build.py:56",
+              "mvp_sphinx/views.py:36"
+            ]
+          }
         }
       ]
     },

@@ -16,6 +16,8 @@ class DocsBuild:
         root: The directory ``sphinx-build -b json`` wrote to. It need not exist.
     """
 
+    FILE_FOLDERS = ("_images", "_downloads")
+
     def __init__(self, root: str | Path) -> None:
         self.root = Path(root).resolve()
 
@@ -51,19 +53,42 @@ class DocsBuild:
                 return data
         return None
 
-    def _contained_file(self, relative: str) -> Path | None:
+    def file(self, path: str) -> Path | None:
+        """Return the image or download served at ``path``, or ``None``.
+
+        Only ``_images/`` and ``_downloads/`` are ever files: the page data,
+        search index, sources, static files and pickles beside them never are.
+        The target must resolve inside its own folder, so ``_images/../x`` and a
+        symlink pointing out of the folder are absent.
+
+        Args:
+            path: The address below the documentation app's prefix.
+
+        Returns:
+            The file's resolved path, or ``None`` when ``path`` is not a file
+            inside one of the two folders.
+        """
+        folder = path.split("/", 1)[0]
+        if folder not in self.FILE_FOLDERS:
+            return None
+        return self._contained_file(path, within=folder)
+
+    def _contained_file(self, relative: str, within: str = "") -> Path | None:
         """Return the file ``relative`` names inside the build, or ``None``.
 
         Args:
             relative: An address relative to the build root.
+            within: A folder of the build the file must also sit in; the whole
+                build when empty.
 
         Returns:
             The resolved path when it is a file inside the build, otherwise
             ``None``, including for an address the filesystem rejects.
         """
         try:
+            boundary = (self.root / within).resolve()
             target = (self.root / relative).resolve()
-            if target.is_relative_to(self.root) and target.is_file():
+            if target.is_relative_to(boundary) and target.is_file():
                 return target
         except (ValueError, OSError):
             pass

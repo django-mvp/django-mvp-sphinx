@@ -1,10 +1,12 @@
 """The view that renders a page of the docs build."""
 
+import mimetypes
 from html import unescape
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import FileResponse, Http404, HttpRequest
+from django.http.response import HttpResponseBase
 from django.urls import reverse
 from django.utils.html import strip_tags
 from django.views.generic import TemplateView
@@ -30,8 +32,11 @@ class PageView(PageMixin, TemplateView):
     template_name = "mvp_sphinx/page.html"
     app: "DocumentationApp" = None  # type: ignore[assignment]
 
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        """Render the page at the requested address, or answer not found.
+    # A file answers with a streaming response, which is not an HttpResponse.
+    def get(  # type: ignore[override]
+        self, request: HttpRequest, *args: Any, **kwargs: Any
+    ) -> HttpResponseBase:
+        """Serve the image or download, or render the page, at the requested address.
 
         Args:
             request: The request being served.
@@ -39,12 +44,21 @@ class PageView(PageMixin, TemplateView):
             **kwargs: URL arguments; ``path`` is the address below the app's prefix.
 
         Returns:
-            The rendered page.
+            The file, or the rendered page.
 
         Raises:
-            Http404: The docs build has no page at that address.
+            Http404: The docs build has no file or page at that address.
         """
-        page = DocsBuild(self.app.build_dir).page(kwargs.get("path", ""))
+        build = DocsBuild(self.app.build_dir)
+        path = kwargs.get("path", "")
+        target = build.file(path)
+        if target is not None:
+            content_type, _encoding = mimetypes.guess_type(target.name)
+            return FileResponse(
+                target.open("rb"),
+                content_type=content_type or "application/octet-stream",
+            )
+        page = build.page(path)
         if page is None:
             raise Http404
         self.page_data = page

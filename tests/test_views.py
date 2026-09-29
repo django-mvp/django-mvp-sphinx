@@ -148,3 +148,96 @@ class TestServingWithoutSphinx:
 
         assert response.status_code == 200
         assert TITLE_TEXT[address] in response.content.decode()
+
+
+class TestFiles:
+    @pytest.fixture
+    def linked_page(self, client, db):
+        return client.get("/docs/page/").context["page_data"]["body"]
+
+    def test_the_image_a_page_links_is_served(
+        self, client, db, guide_build, linked_page
+    ) -> None:
+        src = re.search(r'src="([^"]+)"', linked_page).group(1)
+
+        response = client.get(urljoin("/docs/page/", src))
+
+        assert response.status_code == 200
+        assert response["Content-Type"] == "image/png"
+        assert (
+            b"".join(response.streaming_content)
+            == (guide_build / "_images" / "pixel.png").read_bytes()
+        )
+
+    def test_the_download_a_page_links_is_served(
+        self, client, db, guide_build, linked_page
+    ) -> None:
+        href = re.search(r'href="([^"]*_downloads/[^"]+)"', linked_page).group(1)
+
+        response = client.get(urljoin("/docs/page/", href))
+
+        assert response.status_code == 200
+        assert (
+            b"".join(response.streaming_content)
+            == next((guide_build / "_downloads").glob("*/sample.txt")).read_bytes()
+        )
+
+    def test_a_missing_image_is_not_found(self, client, db) -> None:
+        assert client.get("/docs/_images/missing.png").status_code == 404
+
+    @pytest.mark.parametrize(
+        "address",
+        [
+            "_images/../environment.pickle",
+            "_images/../../outside.txt",
+            "_downloads/../index.fjson",
+            "_images/%2e%2e/environment.pickle",
+            "_images/..%2Fenvironment.pickle",
+        ],
+    )
+    def test_an_address_climbing_out_of_the_image_folder_is_not_found(
+        self, client, db, address
+    ) -> None:
+        assert client.get(f"/docs/{address}").status_code == 404
+
+    @pytest.mark.parametrize(
+        "address",
+        [
+            "globalcontext.json",
+            "searchindex.json",
+            "environment.pickle",
+            "index.fjson",
+            "page.fjson",
+            "_sources/index.rst.txt",
+            "_sources/index.rst.txt/",
+            "_static/basic.css",
+            ".doctrees/environment.pickle",
+        ],
+    )
+    def test_nothing_but_images_and_downloads_is_served_as_a_file(
+        self, client, db, guide_build, address
+    ) -> None:
+        response = client.get(f"/docs/{address}")
+
+        served = (
+            b"".join(response.streaming_content)
+            if response.streaming
+            else response.content
+        )
+        assert response.status_code == 404
+        assert served != (guide_build / address.rstrip("/")).read_bytes()
+
+    def test_images_and_downloads_are_served_when_sphinx_cannot_be_imported(
+        self, client, db, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        image = client.get("/docs/_images/pixel.png")
+        assert image.status_code == 200
+        assert image["Content-Type"] == "image/png"
+        assert client.get("/docs/page/").status_code == 200

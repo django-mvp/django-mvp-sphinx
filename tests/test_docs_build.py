@@ -76,3 +76,72 @@ class TestPage:
 
         with pytest.raises(json.JSONDecodeError):
             DocsBuild(broken).page("page/")
+
+
+class TestFile:
+    def test_an_image_is_found_by_its_name(self, build, guide_build) -> None:
+        assert (
+            build.file("_images/pixel.png")
+            == (guide_build / "_images" / "pixel.png").resolve()
+        )
+
+    def test_a_download_is_found_below_its_hash_folder(
+        self, build, guide_build
+    ) -> None:
+        target = next((guide_build / "_downloads").glob("*/sample.txt"))
+        relative = target.relative_to(guide_build).as_posix()
+
+        assert build.file(relative) == target.resolve()
+
+    @pytest.mark.parametrize(
+        "address",
+        [
+            "_images/../environment.pickle",
+            "_images/../../outside.txt",
+            "_downloads/../index.fjson",
+            "_images/../_downloads/x/../../index.fjson",
+        ],
+    )
+    def test_an_address_climbing_out_of_its_folder_is_not_a_file(
+        self, build, address
+    ) -> None:
+        assert build.file(address) is None
+
+    def test_a_symlink_pointing_outside_its_folder_is_not_a_file(
+        self, guide_build, tmp_path
+    ) -> None:
+        copy = tmp_path / "build"
+        shutil.copytree(guide_build, copy)
+        secret = tmp_path / "secret.txt"
+        secret.write_text("secret")
+        (copy / "_images" / "leak.png").symlink_to(secret)
+
+        assert DocsBuild(copy).file("_images/leak.png") is None
+
+    def test_a_missing_name_is_not_a_file(self, build) -> None:
+        assert build.file("_images/missing.png") is None
+
+    def test_a_folder_is_not_a_file(self, build) -> None:
+        assert build.file("_images/") is None
+        assert build.file("_downloads/") is None
+
+    def test_an_address_holding_a_nul_byte_is_not_a_file(self, build) -> None:
+        assert build.file("_images/\x00.png") is None
+
+    @pytest.mark.parametrize(
+        "address",
+        [
+            "globalcontext.json",
+            "searchindex.json",
+            "environment.pickle",
+            "_sources/index.rst.txt",
+            "index.fjson",
+            "page.fjson",
+            "_static/basic.css",
+            ".doctrees/environment.pickle",
+        ],
+    )
+    def test_anything_outside_the_image_and_download_folders_is_not_a_file(
+        self, build, address
+    ) -> None:
+        assert build.file(address) is None

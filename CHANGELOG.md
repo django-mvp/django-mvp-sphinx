@@ -26,3 +26,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The package, generated and not yet doing anything.
 - `DocumentationApp` serves a Sphinx JSON build (`sphinx-build -b json`) as pages of your site. Mount it in your URLs and point `build_dir` at the build, and each page renders inside your application shell with its title in the tab and breadcrumbs back to the front page. Pages are read on every request, so a rebuild shows without a restart, and serving never imports Sphinx.
+- Images and downloads that a page links to are served from the build (`_images/` and `_downloads/`), and nothing else in the build can be fetched as a file.
