@@ -43,7 +43,7 @@ class DocsBuild:
         """
         if path == "":
             candidates = ["index.fjson"]
-        elif path.endswith("/") and self._is_canonical(path[:-1]):
+        elif path.endswith("/") and self.is_canonical(path[:-1]):
             if path[:-1].rsplit("/", 1)[-1] == "index":
                 # The folder's own address serves its index page.
                 return None
@@ -51,7 +51,7 @@ class DocsBuild:
         else:
             return None
         for candidate in candidates:
-            target = self._contained_file(candidate)
+            target = self.contained_file(candidate)
             if target is not None:
                 data: dict[str, Any] = json.loads(target.read_text(encoding="utf-8"))
                 return data
@@ -73,12 +73,12 @@ class DocsBuild:
             inside one of the two folders.
         """
         folder = path.split("/", 1)[0]
-        if folder not in self.FILE_FOLDERS or not self._is_canonical(path):
+        if folder not in self.FILE_FOLDERS or not self.is_canonical(path):
             return None
-        return self._contained_file(path, within=folder)
+        return self.contained_file(path, within=folder)
 
     @staticmethod
-    def _is_canonical(relative: str) -> bool:
+    def is_canonical(relative: str) -> bool:
         """Say whether ``relative`` is a plain relative address.
 
         Args:
@@ -94,7 +94,7 @@ class DocsBuild:
             segment not in ("", ".", "..") for segment in relative.split("/")
         )
 
-    def _contained_file(self, relative: str, within: str = "") -> Path | None:
+    def contained_file(self, relative: str, within: str = "") -> Path | None:
         """Return the file ``relative`` names inside the build, or ``None``.
 
         Args:

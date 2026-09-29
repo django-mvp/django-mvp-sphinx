@@ -63,7 +63,7 @@ class PageView(PageMixin, TemplateView):
         path = kwargs.get("path", "")
         target = build.file(path)
         if target is not None:
-            content_type, _encoding = mimetypes.guess_type(target.name)
+            content_type = mimetypes.guess_type(target.name)[0]
             return FileResponse(
                 target.open("rb"),
                 content_type=content_type or "application/octet-stream",
