@@ -27,3 +27,20 @@ demo's `docs` app (never committed), `TestEveryoneByDefault` fails 5 of 5, so it
 Lint: `uv run pre-commit run --all-files` passed.
 Next: T002 rest (`TestSignedInOnly`, `TestRefusal`, demo sign-in route, docs).
 Watch: the download link on a page is relative, so tests join it to the page address.
+
+## 2026-09-30T00:25:00Z · Implementer US1 · T002
+
+Did: `TestEveryoneByDefault`, `TestSignedInOnly` and `TestRefusal` in `tests/test_mounted.py`; the
+demo's `accounts/login/` route to `SignInView` (`account_login`) ahead of the
+`django.contrib.auth.urls` include; `check` in the `DocumentationApp` docstring (no code change in
+`mvp_sphinx/`); README section *Choosing who can read it*; CHANGELOG entry; CONTEXT.md *Reader rule*.
+Verified: `uv run pytest tests/test_mounted.py -q` → 29 passed. Before the demo route existed, the
+sign-in GET and the round-trip POST failed (`TemplateDoesNotExist: registration/login.html`,
+`NoReverseMatch: account_login`), so they failed for the reason D14 gives. With the rule replaced by
+`True` in a throwaway copy of the file (not committed), 16 of the 18 signed-in and refusal tests
+failed; the two that passed are the signed-in reader's cases, which hold with or without a rule.
+Lint: `uv run pre-commit run --all-files` passed.
+Next: US2 (T003).
+Watch: the entry assertions read the sidebar of the overview page, since the page body has no link to
+`/docs/`. The `docs/` pages describe no name or behaviour this story touched; `docs/ROADMAP.md` is a
+plan and was left alone.

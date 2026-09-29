@@ -1,11 +1,14 @@
 """DocumentationApp is a mounted app that serves one docs build."""
 
 import re
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin
 
 import pytest
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.shortcuts import resolve_url
 from django.urls import reverse
+from flex_menu.checks import user_is_authenticated
 
 from mvp_sphinx.mounted import DocumentationApp
 
@@ -52,6 +55,16 @@ def sidebar(page: str) -> str:
     return page.split('aria-label="Main navigation"', 1)[1].split("</ul>", 1)[0]
 
 
+def sign_in_address(address: str) -> str:
+    return f"{resolve_url(settings.LOGIN_URL)}?next={quote(address, safe='/')}"
+
+
+def body(response) -> bytes:
+    if response.streaming:
+        return b"".join(response.streaming_content)
+    return response.content
+
+
 def asset_addresses(client, guide_build) -> list[str]:
     linked_page = client.get("/docs/page/").content.decode()
     image = next((guide_build / "_images").iterdir()).name
@@ -77,3 +90,129 @@ class TestEveryoneByDefault:
 
     def test_the_overview_page_offers_the_entry(self, overview_page, docs_app):
         assert f'href="{reverse(docs_app.landing)}"' in sidebar(overview_page)
+
+
+class TestSignedInOnly:
+    def test_a_signed_in_reader_gets_what_they_got_without_a_rule(
+        self, client, user, docs_app, guide_build
+    ):
+        client.force_login(user)
+        addresses = ["/docs/", "/docs/page/", *asset_addresses(client, guide_build)]
+        without_rule = [client.get(address) for address in addresses]
+
+        docs_app.check = user_is_authenticated
+        with_rule = [client.get(address) for address in addresses]
+
+        assert [r.status_code for r in with_rule] == [200] * len(addresses)
+        assert [body(r) for r in with_rule] == [body(r) for r in without_rule]
+
+    @pytest.mark.parametrize("address", ["/docs/", "/docs/page/", "/docs/page/?x=1"])
+    def test_an_anonymous_reader_is_sent_to_sign_in_and_back(
+        self, client, db, docs_app, monkeypatch, address
+    ):
+        monkeypatch.setattr(docs_app, "check", user_is_authenticated)
+
+        response = client.get(address)
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address(address)
+        assert response.content == b""
+
+    def test_the_sign_in_address_answers_a_page(
+        self, client, db, docs_app, monkeypatch
+    ):
+        monkeypatch.setattr(docs_app, "check", user_is_authenticated)
+        location = client.get("/docs/page/").url
+
+        assert client.get(location).status_code == 200
+
+    def test_signing_in_lands_on_the_requested_address_with_its_query(
+        self, client, user, docs_app, monkeypatch
+    ):
+        monkeypatch.setattr(docs_app, "check", user_is_authenticated)
+        location = client.get("/docs/page/?x=1").url
+
+        response = client.post(
+            reverse("account_login"),
+            {
+                "username": user.username,
+                "password": "password",
+                "next": "/docs/page/?x=1",
+            },
+        )
+
+        assert location == sign_in_address("/docs/page/?x=1")
+        assert response.status_code == 302
+        assert response["Location"] == "/docs/page/?x=1"
+        assert client.get(response["Location"]).status_code == 200
+
+    def test_the_entry_is_absent_for_an_anonymous_reader(
+        self, client, db, docs_app, monkeypatch
+    ):
+        monkeypatch.setattr(docs_app, "check", user_is_authenticated)
+        page = client.get(reverse("overview")).content.decode()
+
+        assert f'href="{reverse(docs_app.landing)}"' not in sidebar(page)
+
+    def test_the_entry_leads_a_signed_in_reader_to_the_front_page(
+        self, client, user, docs_app, monkeypatch
+    ):
+        monkeypatch.setattr(docs_app, "check", user_is_authenticated)
+        client.force_login(user)
+        page = client.get(reverse("overview")).content.decode()
+
+        assert f'href="{reverse(docs_app.landing)}"' in sidebar(page)
+        assert reverse(docs_app.landing) == "/docs/"
+
+
+class TestRefusal:
+    @pytest.fixture(autouse=True)
+    def signed_in_only(self, docs_app, monkeypatch):
+        monkeypatch.setattr(docs_app, "check", user_is_authenticated)
+
+    @pytest.fixture
+    def addresses(self, client, db, docs_app, guide_build, monkeypatch):
+        # The files' addresses come from a page an admitted reader can open.
+        with monkeypatch.context() as admitted:
+            admitted.setattr(docs_app, "check", True)
+            return asset_addresses(client, guide_build)
+
+    @pytest.mark.parametrize(
+        "address",
+        [
+            "/docs/",
+            "/docs/page/",
+            "/docs/section/",
+            "/docs/section/nested/page/",
+            "/docs/nope/",
+            "/docs/page",
+            "/docs/nope",
+        ],
+    )
+    def test_an_anonymous_reader_is_turned_away_the_same_way(self, client, db, address):
+        response = client.get(address)
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address(address)
+        assert response.content == b""
+
+    @pytest.mark.parametrize("index", [0, 1])
+    def test_an_anonymous_reader_gets_no_file(self, client, addresses, index):
+        address = addresses[index]
+
+        response = client.get(address)
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address(address)
+        assert body(response) == b""
+
+    def test_a_missing_build_is_refused_like_any_other_address(
+        self, client, db, docs_app, monkeypatch, tmp_path
+    ):
+        monkeypatch.setattr(docs_app, "build_dir", tmp_path / "missing")
+
+        response = client.get("/docs/page/")
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address("/docs/page/")
+        assert response.content == b""

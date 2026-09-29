@@ -108,6 +108,31 @@ docs = DocumentationApp(
 )
 ```
 
+### Choosing who can read it
+
+The documentation is open to everyone unless you say otherwise. To keep it for
+signed-in people, import `user_is_authenticated` from `flex_menu.checks` and pass
+it as `check`:
+
+```python
+from flex_menu.checks import user_is_authenticated
+
+docs = DocumentationApp(
+    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    check=user_is_authenticated,
+)
+```
+
+That is one import and one keyword. A reader the rule excludes gets no menu
+entry and no page. An anonymous visitor is sent to your sign-in page and comes
+back to the address they asked for once signed in. The rule covers every address
+under the prefix, including the images and downloads your pages link to, and it
+answers the same way whatever is behind the address, so a reader cannot tell
+which pages exist.
+
+The rule is django-mvp's `check`, described in its
+[mounted apps guide](https://github.com/django-mvp/django-mvp/blob/main/docs/mounted-apps.md#limiting-who-can-reach-an-app).
+
 ### Several documentation apps
 
 Each build is one `DocumentationApp` with its own `namespace` (`docs` unless you
