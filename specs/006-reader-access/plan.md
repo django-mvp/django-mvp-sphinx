@@ -139,6 +139,9 @@ entry, `staff.user@example.com` and `super.user@example.com` → served.
   namespace="staff_guide", check=user_is_staff)` (from `flex_menu.checks`).
 - `demo/urls.py`: `mount("staff-guide/", staff_guide)`. `demo/menus.py`: `staff_guide.menu_item()`.
 - AGENTS.md: the second build command beside the first.
+- The demo's `accounts/login/` routes to django-mvp's `SignInView` (D14, done in T002), since
+  nothing in the project provides the `registration/login.html` that
+  `django.contrib.auth.urls` renders.
 
 The demo's `/docs/` stays open to everyone, so every existing test and the README quickstart keep
 their meaning. Every edit to shared demo files adds lines and moves none, because FS-002 and FS-004
@@ -155,14 +158,17 @@ are editing the same files in parallel.
   `monkeypatch.setattr(app, "check", ...)` on the fixture's app instance, so it is undone after
   each test.
 - Host pages are the demo's overview page (`reverse("overview")`). Menu entry presence is the
-  link to the app's front page in the rendered page. Content absence is the fixture page's own
+  link to the app's front page in the rendered page. Only the demo's apps (`docs`, and
+  `staff_guide` from T004) have entries in `AppMenu`, so every entry assertion uses them. The
+  suite's handbook app has no entry and serves only address-level tests. Content absence is the fixture page's own
   text and the file's bytes.
 - `tests/test_demo.py`: `TestStaffGuideEntry`: absent for anonymous and for a regular user,
   present for staff, on the overview page.
 
 ### Story order
 
-US1 → US2 → US3, one at a time, in this working tree. All three add classes to
+US1 → US2 → US3, one at a time, in this working tree. Within US3, T004 (demo) comes before T005
+(two apps), which uses the demo's second app. All three add classes to
 `tests/test_mounted.py` and paragraphs to the README section, so they cannot run in parallel
 without colliding.
 

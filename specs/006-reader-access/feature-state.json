@@ -2,7 +2,7 @@
   "feature": "006-reader-access",
   "branch": "006-reader-access",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PLAN",
+  "state": "DESIGN_REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -13,6 +13,11 @@
       "state": "PLAN",
       "at": "2026-09-29T23:46:47Z",
       "note": "plan.md, research.md, tasks.md: 3 stories, 5 tasks; no runtime code (D10)"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-29T23:47:36Z",
+      "note": "one design reviewer, three lenses, one round"
     }
   ],
   "gates": {
@@ -22,12 +27,27 @@
       "self_resolved": []
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "notified",
+      "at": "2026-09-29T23:56:21Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam asleep; overnight delegation), not Sam"
+      ]
     },
     "merge": {
       "approved_by": null,
       "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel (request_changes, remedied in plan)",
+      "at": "2026-09-29T23:56:21Z",
+      "self_resolved": [
+        "SPC-001 high: host-page entry assertions moved to the demo apps (docs, staff_guide); demo task T004 now precedes the two-apps task T005",
+        "SPC-002 medium: 403 no-trace check uses the escaped name, paired with an admitted request",
+        "SPC-003 medium: demo sign-in routed to django-mvp SignInView (D14), in T002",
+        "SPC-004 medium: raising rule also errors on host pages; pinned in T003, README, D13",
+        "SEC-001 low: README warns that factories must be called and that non-callables are read as yes/no",
+        "ARC-001 low: README calls signed-in only one import and one keyword; D10 stands"
+      ]
     }
   },
   "stories": [
@@ -101,7 +121,7 @@
       "max": 120
     },
     "design_review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     }
   },

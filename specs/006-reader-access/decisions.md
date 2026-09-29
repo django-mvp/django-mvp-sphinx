@@ -156,3 +156,28 @@ sign in, the regular user gets the forbidden page and no menu entry, and staff a
 read it. Keeping `/docs/` open leaves the existing tests and the README's quickstart meaning what
 they meant. A staff rule shows more states than signed-in only, and the tests cover signed-in only
 on their own.
+
+## D13. A rule that raises breaks every page that draws its menu entry
+
+**Ambiguous:** FR-011 keeps each rule's effect off the host project's other pages. FR-012 makes an
+error in the rule a server error. The menu entry asks the same rule on every host page, so a rule
+that raises cannot satisfy both.
+
+**Chosen:** FR-012 wins. A raising rule is a server error wherever it is asked: on the
+documentation app's pages and on every host page that draws its menu entry, the sign-in page
+included. The tests pin both, and the README says so.
+
+**Why:** Either way the failure is loud, which D8 asks for. Keeping host pages working would mean
+catching the rule's error in the menu entry and hiding the entry, which hides a bug in the host
+project and is new code no requirement asks for. The design review raised it (SPC-004).
+
+## D14. The demo's sign-in page is django-mvp's
+
+**Chosen:** The demo routes `accounts/login/` to django-mvp's `SignInView`, named `account_login`
+because its template posts there. It sits before `django.contrib.auth.urls`, which still serves
+sign-out.
+
+**Why:** Nothing in the demo provides the `registration/login.html` that
+`django.contrib.auth.urls` renders, so a visitor sent to sign in would get an error page instead of
+the sign-in form, and SC-005 could not be seen in the demo. The template carries `next` through,
+so the visitor comes back to the page they asked for.
