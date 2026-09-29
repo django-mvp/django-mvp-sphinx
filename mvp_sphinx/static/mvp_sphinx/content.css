@@ -1,0 +1,5 @@
+/* Styles for what Sphinx writes into a page's body. Every rule sits under
+   .mvp-sphinx-content and every colour comes from the host's django-mvp theme. */
+
+.mvp-sphinx-content {
+}

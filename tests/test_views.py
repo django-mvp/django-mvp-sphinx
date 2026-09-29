@@ -8,6 +8,7 @@ from html import unescape
 from urllib.parse import urljoin
 
 import pytest
+from django.templatetags.static import static
 from django.urls import reverse
 
 pytestmark = pytest.mark.usefixtures("docs_app")
@@ -27,6 +28,16 @@ def headings(response) -> list[str]:
     return [
         re.sub(r"<[^>]+>", "", h)
         for h in re.findall(r"<h1[^>]*>(.*?)</h1>", body, re.S)
+    ]
+
+
+def linked_stylesheets(response) -> list[str]:
+    body = response.content.decode()
+    return [
+        href
+        for tag in re.findall(r"<link\b[^>]*>", body)
+        if 'rel="stylesheet"' in tag
+        for href in re.findall(r'href="([^"]+)"', tag)
     ]
 
 
@@ -418,3 +429,22 @@ class TestTwoAppsSideBySide:
         assert str(handbook_app.name) not in tabs["/docs/"]
         assert str(handbook_app.name) in tabs["/manuals/admin/"]
         assert str(docs_app.name) not in tabs["/manuals/admin/"]
+
+
+class TestContentStyling:
+    STYLESHEET = "mvp_sphinx/content.css"
+
+    def test_a_docs_page_links_the_packages_stylesheet(self, client, db) -> None:
+        response = client.get("/docs/content/")
+
+        assert static(self.STYLESHEET) in linked_stylesheets(response)
+
+    def test_the_hosts_own_pages_do_not_link_the_stylesheet(self, client, db) -> None:
+        response = client.get(reverse("overview"))
+
+        assert static(self.STYLESHEET) not in linked_stylesheets(response)
+
+    def test_no_stylesheet_from_the_docs_build_is_linked(self, client, db) -> None:
+        response = client.get("/docs/content/")
+
+        assert not [s for s in linked_stylesheets(response) if "_static" in s]

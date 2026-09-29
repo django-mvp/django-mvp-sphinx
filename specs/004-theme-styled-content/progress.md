@@ -10,3 +10,15 @@ spec-against-spec re-read. plan.md, research.md, tasks.md written from a probe b
 construct (Sphinx 9.1.0) and django-mvp's installed stylesheet: 5 stories, 8 tasks. Decisions
 D1–D7.
 Next: design review.
+
+## 2026-09-30T00:25+02:00 · Implementer US1 · T001
+
+Did: `mvp_sphinx/static/mvp_sphinx/content.css` (colour-roles rule left empty for T002),
+`page.html` extends `styles` with `{{ block.super }}` and the stylesheet link, `{% load static %}`,
+`mvp-sphinx-content` on the article. Fixture `tests/sphinx/guide/content.rst` (orphan). README
+*How pages look*, CHANGELOG line.
+Verified: `uv run pytest tests/test_views.py::TestContentStyling` red first (link test failed, the two
+absence tests passed as guards), then green; `uv run pytest tests/test_views.py` 58 passed;
+`uv run pre-commit run --all-files` passed.
+Next: T002, admonition colours and the stylesheet tests.
+Watch: none.

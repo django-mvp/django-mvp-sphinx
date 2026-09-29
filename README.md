@@ -153,6 +153,26 @@ redirected by Django's `CommonMiddleware` (`APPEND_SLASH`), as for any other
 mount. A page file that is not valid JSON is a broken build and raises, so it is
 a server error rather than a 404.
 
+## How pages look
+
+Pages take your site's theme with nothing to configure: the colours are
+django-mvp's own, so a page follows the light and dark themes and any theme your
+project defines. The package's page template links one stylesheet,
+`mvp_sphinx/content.css`, served like the rest of your static files, and only
+pages the documentation app renders load it. Sphinx's own stylesheets are never
+used.
+
+If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
+block so the stylesheet still reaches the page:
+
+```django
+{% extends "mvp_sphinx/page.html" %}
+{% block styles %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'yourproject/docs.css' %}">
+{% endblock styles %}
+```
+
 ## Quickstart
 
 <!--
