@@ -24,14 +24,12 @@ SC-001 (pages and links), SC-002, SC-003 (pages).
 `tests/conftest.py`
 
 Research R1, R6. `uv add --group dev "sphinx>=8.1"`. Guide source per plan *Tests and fixtures*
-(front page title with inline code; top-level page; `section/index.rst`;
+(front page title with inline code; top-level page; `section/index.rst` whose title also has
+inline code;
 `section/nested/page.rst`; one PNG image; one `:download:` file; body links between pages);
 handbook source with two pages. Session fixtures `guide_build` and `handbook_build` build each once
 into `tmp_path_factory` with `sphinx.cmd.build.build_main` (quiet, warnings not fatal but the
-fixture sources must build without warnings). Test: the guide build holds `index.fjson`,
-`section/index.fjson`, `section/nested/page.fjson`, one file under `_images/` and one under
-`_downloads/` — a guard that the fixture still shapes the build the other tests rely on
-(put it in `tests/test_docs_build.py`, class `TestFixtureBuild`).
+fixture sources must build without warnings). No test of the fixture itself: T002–T009 fail if it drifts.
 
 ### T002 — `DocsBuild.page`
 
@@ -42,20 +40,23 @@ gives the folder's index page; `"section/nested/page/"` gives the nested page; a
 address gives `None`; an unknown address gives `None`; `"../"`-style and absolute-looking
 addresses (`"../../etc/"`, `"section/../../"`) give `None` even when a matching `.fjson` exists
 just outside the build (create one in `tmp_path`); an address with a NUL byte gives `None`; a
-missing build root gives `None`; a `.fjson` holding invalid JSON raises (D9). Docstrings per
+missing build root gives `None`; a `build_dir` that is a symlink to the build still serves pages; a `.fjson` holding invalid JSON raises (D9). Docstrings per
 `docs/contributing/standards/code-documentation.md`.
 
 ### T003 — `DocumentationApp` and `PageView`: pages inside the shell
 
-**Files**: `mvp_sphinx/mounted.py`, `mvp_sphinx/views.py`,
+**Files**: `pyproject.toml`, `uv.lock`, `mvp_sphinx/mounted.py`, `mvp_sphinx/views.py`,
 `mvp_sphinx/templates/mvp_sphinx/page.html`, `demo/mounted.py`, `demo/urls.py`,
 `tests/test_mounted.py`, `tests/test_views.py`, `tests/conftest.py`
 
-Plan, *Public API* and *PageView* steps 2 and 4 only (files, redirect: later stories). The demo
+Plan, *Public API* and *PageView* steps 2 and 4 only (files, redirect: later stories).
+`pyproject.toml`: `django-mvp>=0.25.0`, add `django-flex-menus>=0.4.5`, remove the
+`DEP002 = ["django-mvp"]` ignore; `uv lock`. Page tests through `client` take the `db` fixture
+(the shell reads `request.site`). The demo
 instance (`demo/mounted.py`, `build_dir` → `demo/docs/_build/json`) is mounted at `docs/`; the
 suite points it at `guide_build` through a fixture that sets `build_dir` on the instance.
 Tests, `TestDocumentationApp`: constructing without `build_dir` raises `ImproperlyConfigured`;
-constructing with a directory that does not exist does not touch the disk and does not raise;
+constructing with a directory that does not exist does not raise;
 its landing reverses to the mount prefix. Tests, `TestPageView` (through `client`): the prefix
 answers 200 with the front page's body inside the shell (the shell's own landmark — e.g. the
 sidebar's `<aside>`/`<main>` — and the fixture page's text are both present); `section/` and
@@ -81,9 +82,7 @@ FR-005); a parent title with markup appears as plain text.
 Tests: change a page's `.fjson` body in a copy of the build between two requests; the second
 response shows the change (scenario 9, FR-012). With `monkeypatch.setitem(sys.modules, "sphinx",
 None)` (and `sphinx.*` submodules already imported popped the same way), the front page and a
-nested page still answer 200 with their content (scenario 10, FR-013, SC-003 pages). A subprocess
-test runs `python -c` importing `mvp_sphinx.mounted`, `mvp_sphinx.views` and
-`mvp_sphinx.docs_build` with `sys.modules["sphinx"] = None` set first, and exits 0.
+nested page still answer 200 with their content (scenario 10, FR-013, SC-003 pages). Import-time use of Sphinx is caught by deptry (Sphinx is dev-only), so no subprocess test.
 
 ### T006 — Documentation, translations and the demo guide
 
@@ -91,11 +90,12 @@ test runs `python -c` importing `mvp_sphinx.mounted`, `mvp_sphinx.views` and
 `mvp_sphinx/locale/en/LC_MESSAGES/django.po`, `tests/test_demo.py`
 
 README: a *Usage* section quoting `DocumentationApp`, `build_dir`, `mount(...)` and the
-`sphinx-build -b json` command, stating Sphinx is not needed where the site runs (FS-005 writes
+`sphinx-build -b json` command, stating Sphinx is not needed where the site runs (#8 writes
 the full quickstart later; this is the minimum the public name needs). CHANGELOG Unreleased
 entry. Demo guide source under `demo/docs/` (front page, one nested page, an image, a download);
 `demo/docs/_build/` gitignored; AGENTS.md *Demo project* gains the build command. Demo menu entry
-`docs.menu_item()` in `demo/menus.py`. `django-admin makemessages -l en` for the package's strings.
+`docs.menu_item()` in `demo/menus.py` — FR-014 is US4's, added here early so the walkthrough
+reaches the guide from the sidebar. `django-admin makemessages -l en` for the package's strings.
 Test (`tests/test_demo.py`): the demo sidebar carries the documentation entry linking to `/docs/`.
 Humanize the README text (public markdown).
 
@@ -135,14 +135,16 @@ Issue: #21. Delivers FR-009 to FR-011, FR-012 (first build); SC-005.
 **Files**: `mvp_sphinx/views.py`, `tests/test_views.py`, `README.md`
 
 Plan, *PageView* steps 3–4. Tests: `section/nested/page?x=1` (no slash) answers 301 to
-`…/page/?x=1` (scenario 1); a slashless address with no page behind it answers 404, not a redirect;
+`…/page/?x=1` (scenario 1); the bare prefix `/docs?x=1` answers 301 to `/docs/?x=1` (Django's
+`CommonMiddleware`, as for any mount — the mount pattern never reaches the view); a slashless address with no page behind it answers 404, not a redirect;
 an unknown address answers 404 rendered with the host's `404.html` — the same template a
 non-documentation unknown address gets (scenario 2, FR-010); an image address is never redirected
 (scenario 5); with `build_dir` pointing at a directory that does not exist, the demo's overview
 page still answers 200 and the prefix, a page address and an image address answer 404
 (scenario 3); creating the build at that path afterwards makes the next request answer 200
 (scenario 4); a page whose `.fjson` is not valid JSON makes the request raise (a server error, not
-404; D9). README: one line on the missing-build behaviour.
+404; D9). README: one line on the missing-build behaviour, and that the prefix without its slash is
+redirected by Django's `CommonMiddleware` (`APPEND_SLASH`), as for any other mount.
 
 ---
 
@@ -160,6 +162,5 @@ Plan, *Public API* (second build). `tests/urls.py` mounts the handbook at `manua
 link resolves to the app's front page and following it from the demo overview answers the front
 page (scenario 1); with a custom name, the tab and the first breadcrumb carry it and not the
 default (scenario 2); a page under each app is served from its own build, and each page's
-breadcrumb links and tab stay within its own prefix and name (scenario 3, FR-016); a menu entry
-is marked current on the app's own pages only (the app's pages, not the other app's). README:
+breadcrumb links and tab stay within its own prefix and name (scenario 3, FR-016); README:
 naming an app, and mounting a second build with its own `namespace`.

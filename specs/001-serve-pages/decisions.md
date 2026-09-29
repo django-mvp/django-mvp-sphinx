@@ -186,3 +186,24 @@ with it once per session, and the demo's guide is built with it. The package nev
 **Why:** A hand-written `.fjson` fixture would drift from what Sphinx writes. Article VII's
 "tooling from the shared bundle" rule is about shared development tools; Sphinx here is test input
 specific to this package. FR-013 is covered by serving with Sphinx blocked from import.
+
+## D18. Design review outcome
+
+One reviewer, three lenses, verdict approve with no critical or high findings. Applied to the
+plan, each checked against the finding's own evidence:
+
+- DR-001: `section/index.rst` gets a title with inline code, so a breadcrumb carries markup and
+  T004's plain-text assertion can fail.
+- DR-002: django-flex-menus declared directly (the package imports `flex_menu`); the stale
+  `DEP002` ignore for django-mvp removed.
+- DR-003: django-mvp floor raised to 0.25.0, the version the plan was read against.
+- DR-004: the build root and file folders are `resolve()`d before containment checks.
+- DR-005: the bare prefix's slash redirect is Django's `CommonMiddleware`; T008 asserts it and the
+  README says so.
+- DR-006: subprocess import test dropped; deptry already fails on a dev-only import.
+- DR-007: the fixture-shape test and the menu-current test dropped (no spec provenance).
+- DR-008: URL name `front_page` and context key `page_data`, not `index` and `doc`, which
+  CONTEXT.md avoids. These become public names at the first release.
+
+Editorial notes swept in the same edit (#5 not #3, #8 not FS-005, menu names unique by
+convention, `db` fixture for page tests, docstring notes on `namespace` and the `index/` alias).

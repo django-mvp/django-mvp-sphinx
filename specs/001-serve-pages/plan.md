@@ -18,9 +18,11 @@ django-sphinx-view dependency and minus the contents menu, which is #5.
 
 **Language/Version**: Python 3.12+, Django 5.2 / 6.0 / 6.1
 
-**Primary Dependencies**: django-mvp ≥ 0.24 (`MountedApp`, `mount`, `PageMixin`, the shell's
-`base.html`), django-flex-menus (the app's own empty `Menu`), django-cotton. No new runtime
-dependency. Sphinx joins the `dev` group only, to build docs for the tests and the demo (R6).
+**Primary Dependencies**: django-mvp ≥ 0.25.0 (`MountedApp`, `mount`, `PageMixin`, the shell's
+`base.html`; the floor rises from 0.24.0 to the version every premise in research.md was read
+from), django-flex-menus ≥ 0.4.5 (the app's own empty `Menu`; already installed through
+django-mvp, now declared directly because the package imports it), django-cotton. Sphinx joins
+the `dev` group only, to build docs for the tests and the demo (R6).
 
 **Storage**: none. The docs build on disk is the only input.
 
@@ -49,7 +51,7 @@ returned as a file (FR-008); a missing build never breaks start-up (FR-011).
 | IV Integration-first | Acceptance tests go through `client` against a mounted app, exactly as a host touches it. |
 | V Security | Containment for every lookup (R5), NUL-byte and traversal tests, no build file other than images/downloads returned. Body rendered `|safe` by stated trust decision D11; titles stripped to text and auto-escaped. |
 | VI Documentation | README gains a usage section and CHANGELOG an Unreleased entry, each story extending it for the names it introduces. |
-| VII Dependencies | No runtime dependency added. `deptry` stays green. |
+| VII Dependencies | django-flex-menus declared directly (imported for the app's `Menu`, already installed through django-mvp); the stale `DEP002` ignore for django-mvp is removed now the package imports it. `deptry` stays green. |
 | VIII i18n | The default name and every template string are translatable; `mvp_sphinx/locale/en` catalogue added. |
 | IX Data model | No models. |
 | X Cohesion | Build lookups are methods of `DocsBuild`; page title and breadcrumbs are view methods; mounting is the `DocumentationApp` class. |
@@ -89,18 +91,23 @@ handbook = DocumentationApp(
   (registered in django-mvp's icon pack), `namespace = "docs"`, `build_dir = None`,
   `view_class = PageView`.
 - `__init__` raises `ImproperlyConfigured` when `build_dir` is not given; builds `urls` as
-  `([path("", view, name="index"), path("<path:path>", view, name="page")], namespace)` with
-  `view = view_class.as_view(app=self)`; sets `landing = f"{namespace}:index"`; sets `menu` to an
+  `([path("", view, name="front_page"), path("<path:path>", view, name="page")], namespace)`
+  with `view = view_class.as_view(app=self)`; sets `landing = f"{namespace}:front_page"`; sets `menu` to an
   empty `flex_menu.Menu` named from the namespace (R3: the shell processes every app's menu on
   unclaimed host pages, and a Menu's name is global). #5 replaces that menu with the contents.
 - The build directory is never touched at construction, so a missing build cannot fail start-up.
+- The docstring says `namespace` is the knob for the URLs, landing and menu: `__init__` derives
+  all three from it, so `urls=`, `landing=` or `menu=` passed by keyword are overwritten.
 
 `DocsBuild` in `mvp_sphinx/docs_build.py`, constructed per request from `app.build_dir`:
 
 - `page(path) -> dict | None`: `""` → `index.fjson`; `"a/b/"` → `a/b/index.fjson`, then
-  `a/b.fjson` (a folder's index first, as the prototype). Any other path (no trailing slash) →
+  `a/b.fjson` (a folder's index first, as the prototype). The second candidate also answers
+  `a/index/` and `index/`, addresses Sphinx never links; the docstring says so. Any other path (no trailing slash) →
   `None`. The candidate must resolve inside the build root and be a file. A file that exists but
   is not valid JSON raises — a broken build is a server error (D9).
+- The build root and each file folder are `resolve()`d before comparison, and every candidate is
+  compared against the resolved root, so a `build_dir` that is or sits under a symlink still works.
 - `file(path) -> Path | None`: only when the first segment is `_images` or `_downloads`; the
   target must resolve inside that folder (not merely the build) and be a file. `ValueError` /
   `OSError` from the filesystem → `None`.
@@ -115,20 +122,20 @@ handbook = DocumentationApp(
    request.get_full_path(force_append_slash=True))` (FR-009, D8).
 4. Otherwise `Http404`, so the host's own 404 handler answers (FR-010, FR-011).
 
-Context: `doc` (the page data, so #3 and #6 can reach `toc`, `prev`, `next` without a view
-change) plus PageMixin's `page`. Page title: `unescape(strip_tags(doc["title"]))`, auto-escaped
+Context: `page_data` (the page's JSON, so #5 and #6 can reach `toc`, `prev`, `next` without a
+view change; not `doc`, which CONTEXT.md avoids) plus PageMixin's `page`. Page title: `unescape(strip_tags(page_data["title"]))`, auto-escaped
 where drawn. Breadcrumbs: front page → `[{"text": app.name}]`; any other page → app name linking to
-`reverse(f"{app.namespace}:index")`, each parent with its relative `link` made absolute against
+`reverse(f"{app.namespace}:front_page")`, each parent with its relative `link` made absolute against
 `request.path`, then the page with no link (FR-005).
 
 Template `mvp_sphinx/templates/mvp_sphinx/page.html`: extends `base.html`; `title` block is
-`page.title`; `content` is `c-page` > `c-container` > `<article class="prose …">{{ doc.body|safe
+`page.title`; `content` is `c-page` > `c-container` > `<article class="prose …">{{ page_data.body|safe
 }}</article>`. No `c-page.title`, so the body's own `<h1>` is the page's only one (R4, D4).
 
 ### Tests and fixtures
 
 - `tests/sphinx/guide/` — Sphinx source: front page whose title contains inline code, a top-level
-  page, `section/index.rst`, `section/nested/page.rst` (parents chain of two), an image, a
+  page, `section/index.rst` (its title also contains inline code, so a breadcrumb carries markup), `section/nested/page.rst` (parents chain of two), an image, a
   `:download:`, cross-page links. `tests/sphinx/handbook/` — a two-page second source.
 - `tests/conftest.py` — session fixtures build each source with
   `sphinx.cmd.build.build_main(["-b", "json", "-q", src, out])` into `tmp_path_factory`; function

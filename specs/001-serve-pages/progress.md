@@ -10,3 +10,8 @@ Next: design review.
 Analyze: every FR-001–FR-017 and SC-001–SC-005 maps to at least one task; spec edge cases (markup
 titles, slash pairs, multi-segment prefix, broken page file) each have a test in T004/T008/T009.
 No CRITICAL findings.
+
+## 2026-09-29T23:05:21Z · S3R design review
+
+Did: one reviewer, three lenses; approve, 3 medium + 5 low, all applied as plan/tasks edits (D18).
+Next: plan notice, then US1.

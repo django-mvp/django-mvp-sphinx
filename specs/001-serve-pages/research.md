@@ -49,8 +49,8 @@ wraps `include(app.urls)`. The shell reads `mounted_app` into the tab title as
 
 `MountedApp.claiming_menu` calls `app.menu.process(request)` on every host page no mount serves,
 so every documentation app needs a real `flex_menu.Menu`, never `None`. `flex_menu.Menu`
-attaches itself to the global root by name, so the name must be unique per app. It is derived
-from the app's namespace.
+attaches itself to the global root by name, and enforces no uniqueness, so names are kept unique by
+convention: each is derived from the app's namespace.
 
 Two mounts with the same instance namespace make `reverse()` ambiguous (Django warns with
 `urls.W005`), so each documentation app has its own `namespace`, defaulting to `docs`.
@@ -71,7 +71,7 @@ own markup (that is #7).
   address only when the slashed one has a page, and otherwise answers not found (FR-009, FR-010).
   `request.get_full_path(force_append_slash=True)` keeps the query string.
 - `<path:path>` captures percent-decoded text, so `..` segments arrive as-is. Every lookup is
-  `resolve()`d and checked with `is_relative_to()` against its own root: the build for pages, the
+  `resolve()`d and checked with `is_relative_to()` against its own root, itself `resolve()`d first: the build for pages, the
   `_images`/`_downloads` folder for files. `resolve()` follows symlinks, so a link pointing out of
   the folder is refused too. A path with a NUL byte raises `ValueError` from the filesystem calls,
   which the lookup answers as not found.
