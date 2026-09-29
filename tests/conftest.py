@@ -9,6 +9,8 @@ from django.urls import reverse
 from django_cotton.compiler_regex import CottonCompiler
 from sphinx.cmd.build import build_main
 
+from tests.factories import GroupFactory, UserFactory
+
 SPHINX_SOURCES = Path(__file__).parent / "sphinx"
 
 
@@ -76,3 +78,13 @@ def handbook_app(handbook_build, monkeypatch):
 
     monkeypatch.setattr(handbook, "build_dir", handbook_build)
     return handbook
+
+
+@pytest.fixture
+def user(db):
+    return UserFactory()
+
+
+@pytest.fixture
+def group(db):
+    return GroupFactory()

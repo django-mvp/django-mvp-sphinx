@@ -17,3 +17,13 @@ Did: one reviewer, three lenses; request_changes, 1 high + 3 medium + 2 low, all
 orchestrator against the code (no handbook entry in AppMenu; no registration/login.html) and
 applied as plan/tasks edits. D13 (raising rule on host pages) and D14 (demo sign-in) appended.
 Next: plan notice, then US1.
+
+## 2026-09-30T00:10:00Z · Implementer US1 · T001
+
+Did: `tests/factories.py` (`UserFactory`, `GroupFactory`) and the `user` and `group` fixtures in
+`tests/conftest.py`. Committed with T002's first class, `TestEveryoneByDefault`, which uses them.
+Verified: `uv run pytest tests/test_mounted.py -x -q` → 11 passed. With `check=False` set on the
+demo's `docs` app (never committed), `TestEveryoneByDefault` fails 5 of 5, so it can fail.
+Lint: `uv run pre-commit run --all-files` passed.
+Next: T002 rest (`TestSignedInOnly`, `TestRefusal`, demo sign-in route, docs).
+Watch: the download link on a page is relative, so tests join it to the page address.
