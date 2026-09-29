@@ -2,7 +2,7 @@
   "feature": "001-serve-pages",
   "branch": "001-serve-pages",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-09-29T23:32:14Z",
       "note": "review fixed and recorded; walkthrough prepared on port 8025"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-09-29T23:37:01Z",
+      "note": "PR #45 merged; approved by forge-aeo-reviewer"
     }
   ],
   "gates": {
@@ -54,39 +59,39 @@
       ]
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-09-29T23:36:56Z"
     },
     "design_review": {
       "approved_by": "design-panel",
       "at": "2026-09-29T23:05:21Z",
       "self_resolved": [
-        "DR-001 medium: markup title on section/index for breadcrumb test (T001) — plan edit",
-        "DR-002 medium: django-flex-menus declared, DEP002 ignore removed (T003) — plan edit",
-        "DR-003 medium: django-mvp floor 0.25.0 (T003) — plan edit",
-        "DR-004 low: roots resolve()d before containment (plan DocsBuild) — plan edit",
-        "DR-005 low: bare-prefix redirect via CommonMiddleware asserted (T008) — plan edit",
-        "DR-006 low: subprocess import test dropped (T005) — plan edit",
-        "DR-007 low: fixture-shape and menu-current tests dropped — plan edit",
-        "DR-008 low: front_page URL name, page_data context key — plan edit"
+        "DR-001 medium: markup title on section/index for breadcrumb test (T001) \u2014 plan edit",
+        "DR-002 medium: django-flex-menus declared, DEP002 ignore removed (T003) \u2014 plan edit",
+        "DR-003 medium: django-mvp floor 0.25.0 (T003) \u2014 plan edit",
+        "DR-004 low: roots resolve()d before containment (plan DocsBuild) \u2014 plan edit",
+        "DR-005 low: bare-prefix redirect via CommonMiddleware asserted (T008) \u2014 plan edit",
+        "DR-006 low: subprocess import test dropped (T005) \u2014 plan edit",
+        "DR-007 low: fixture-shape and menu-current tests dropped \u2014 plan edit",
+        "DR-008 low: front_page URL name, page_data context key \u2014 plan edit"
       ]
     },
     "review": {
       "approved_by": "review-panel",
       "at": "2026-09-29T23:31:45Z",
       "self_resolved": [
-        "COR-001 high: genindex/search pages 500 on missing title — fixed, test first (D21)",
-        "SEC-001 medium: absolute-path addresses reached the build (disk-path oracle, root-mount open redirect) — fixed, test first (D21)",
-        "COR-002 low: index/, a/index/, a// served pages at second addresses — fixed, test first (D21)",
-        "note: text/plain downloads without charset — accepted",
-        "note: inline SVG/HTML from trusted build — accepted under D11"
+        "COR-001 high: genindex/search pages 500 on missing title \u2014 fixed, test first (D21)",
+        "SEC-001 medium: absolute-path addresses reached the build (disk-path oracle, root-mount open redirect) \u2014 fixed, test first (D21)",
+        "COR-002 low: index/, a/index/, a// served pages at second addresses \u2014 fixed, test first (D21)",
+        "note: text/plain downloads without charset \u2014 accepted",
+        "note: inline SVG/HTML from trusted build \u2014 accepted under D11"
       ]
     },
     "walkthrough": {
       "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's 2026-09-30 overnight delegate), on devserver:8025",
       "at": "2026-09-29T23:35:45Z",
       "self_resolved": [
-        "no leading-underscore names in code the branch adds — DocsBuild._contained_file/_is_canonical renamed contained_file/is_canonical, _encoding local removed; Sphinx folder names and the gettext _ alias kept (D22)"
+        "no leading-underscore names in code the branch adds \u2014 DocsBuild._contained_file/_is_canonical renamed contained_file/is_canonical, _encoding local removed; Sphinx folder names and the gettext _ alias kept (D22)"
       ]
     }
   },
@@ -286,7 +291,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 0,
+      "used": 19.09,
       "max": 120
     },
     "design_review_cycles": {
