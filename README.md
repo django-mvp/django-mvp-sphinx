@@ -2,31 +2,6 @@
 
 Serve a project's Sphinx documentation inside its django-mvp application shell.
 
-<!--
-  The README is this package's charter, and it is read in two places: on the
-  repository page and on the package index. Write it for someone deciding
-  whether to install this, who has not read anything else here.
-
-  Every link is absolute. A relative link resolves on GitHub and 404s on PyPI,
-  which is where the person deciding is most likely to be standing.
-
-  Badges go here once the repository is public — the dynamic ones read the
-  GitHub API anonymously and render as "404" or "invalid" against a private
-  repository, which looks worse than having none.
-
-  Sections, in this order:
-    1. One sentence, above. What it does, for whom.
-    2. Scope & philosophy — below. What it is and is not, and the principles
-       that settle a close call.
-    3. Installation.
-    4. Quickstart — the smallest thing that works, end to end.
-    5. The public surface, in full. For a package this small, list it.
-    6. Anything genuinely surprising: what it deliberately does not do, what it
-       leaves to the host project, and the failure modes that are quiet.
-
-  Keep the CHANGELOG out of it. Link to it instead.
--->
-
 ## Scope & philosophy
 
 django-mvp-sphinx serves a project's Sphinx documentation as pages of the
@@ -34,10 +9,11 @@ project itself. The docs render through the project's own templates and theme,
 inside its application shell, and their table of contents becomes the app
 sidebar. Reading the user guide doesn't mean leaving the application.
 
-It reads a Sphinx JSON build (`sphinx-build -b json`) and nothing else. It does
-not run Sphinx for you, and it does not host documentation for several
-projects, keep old versions, or manage translations. Building the docs stays
-the project's job, done however the project already does it.
+It serves a Sphinx JSON build (`sphinx-build -b json`). Serving never needs
+Sphinx installed and never starts a build: the build is a file the project
+produces before a request arrives, however it already does that. A command that
+runs the build for you may come later. It does not host documentation for
+several projects, keep old versions, or manage translations.
 
 When two designs conflict, the one that makes the docs look like the rest of
 the site beats the one that copies a Sphinx theme.

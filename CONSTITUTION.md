@@ -144,19 +144,6 @@ hierarchy built for a second implementation that does not exist.
 
 ## Project articles
 
-<!--
-  Articles XI onward are this package's own. They hold the rules that are
-  specific to what it does — the ones a reviewer would otherwise have to infer
-  from the code.
-
-  Write one when a decision would otherwise be re-argued on every pull request.
-  A rule belongs here if breaking it should block a merge. Anything softer is a
-  convention for the README, and anything that was a one-time choice is a
-  decision record under docs/adr/.
-
-  Two examples of the shape, to be replaced:
--->
-
 ### Article XI — Compatibility
 
 The public API is semver-stable. A deprecation lives one minor version with a
@@ -164,11 +151,33 @@ warning before it is removed, and the CHANGELOG says what replaces it.
 
 ### Article XII — Scope
 
-<!--
-  What this package refuses to do, and why. This is the article that stops
-  scope creep arriving one reasonable-sounding pull request at a time. Name the
-  neighbouring concern that is deliberately somebody else's.
--->
+The package serves a host project's current documentation alongside its
+application. It is not a replacement for everything a Sphinx HTML build does.
+
+- **Serving never needs Sphinx.** A page is read from the docs build on disk.
+  Sphinx is never imported to answer a request, and a request never starts a
+  build. The only code that imports Sphinx is the extension that runs during
+  the build, and Sphinx is never a runtime dependency of the package.
+- **A build command is allowed.** A management command that runs the build for
+  the host project may be added. It runs Sphinx on demand, never as part of
+  serving.
+- **One current build per documentation app.** No versions side by side, no
+  version picker, no translations. A host project that needs two builds mounts
+  two documentation apps.
+- **One project's own documentation.** Documentation for other projects, and
+  uploading builds through the site, belong to a docs platform, which this is
+  not.
+
+### Article XIII — Pages look like the host project
+
+A page is a page of the host project first and a Sphinx page second.
+
+- Pages render through the host's base template, inside the application shell.
+- Every colour comes from the host's django-mvp theme, including admonitions and
+  code highlighting, so a page follows a theme change and dark mode with
+  nothing to configure. No Sphinx theme is shipped or ported.
+- The contents are the app sidebar's menu, drawn through django-mvp's menus, not
+  a navigation column inside the page.
 
 ## Quality bar
 
