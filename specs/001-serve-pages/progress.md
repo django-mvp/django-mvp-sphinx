@@ -29,3 +29,11 @@ Did: mvp_sphinx/docs_build.py with DocsBuild(root).page(path): front page, folde
 Verified: red first (module missing), then `uv run pytest tests/test_docs_build.py -x`: 15 passed. Mutation probes: removing the is_relative_to check fails the 3 outside-the-build cases; dropping the root resolve() fails the symlink case.
 Next: T003, DocumentationApp and PageView.
 Watch: the containment helper is private (_contained_file); US2's file() will need the same check against _images/_downloads.
+
+## 2026-09-29T23:11:29Z · Implementer US1 · T003
+
+Did: DocumentationApp (MountedApp subclass; namespace derives urls, landing and an empty flex_menu Menu; build_dir required but never touched at construction), PageView (PageMixin + TemplateView, reads app.build_dir per request through DocsBuild, Http404 for no page) and mvp_sphinx/page.html (extends base.html, article.prose holding body|safe, no c-page.title). pyproject: django-mvp>=0.25.0, django-flex-menus>=0.4.5, DEP002 ignore removed, uv lock. Demo instance in demo/mounted.py mounted at docs/ in demo/urls.py; `docs_app` fixture points it at guide_build.
+Verified: 34 passed across the touched test files plus the existing demo/smoke tests; mypy and pre-commit clean. Mutation probes: dropping the template's extends fails the shell-landmark test; dropping |safe fails four tests.
+Next: T004, tab title and breadcrumbs.
+Watch: on a docs page the sidebar draws the app's empty menu, so the shell's 'Main navigation' nav is absent; the landmark test asserts the shell's <aside> and <main> instead. The h1 test names each page's title text from the fixture rather than reading page.title, so T004 owns the title's first red.
+Attempts: 2 on T003 (one setup TypeError, fixed with PageView.app = None; one test that asserted a nav the docs sidebar does not draw).

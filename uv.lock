@@ -631,6 +631,7 @@ version = "0.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
+    { name = "django-flex-menus" },
     { name = "django-mvp" },
 ]
 
@@ -643,7 +644,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "django", specifier = ">=5.2" },
-    { name = "django-mvp", specifier = ">=0.24.0" },
+    { name = "django-flex-menus", specifier = ">=0.4.5" },
+    { name = "django-mvp", specifier = ">=0.25.0" },
 ]
 
 [package.metadata.requires-dev]

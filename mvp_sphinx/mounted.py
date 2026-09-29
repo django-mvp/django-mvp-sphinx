@@ -1,0 +1,67 @@
+"""The documentation app a host project mounts to serve its docs build."""
+
+from typing import Any
+
+from django.core.exceptions import ImproperlyConfigured
+from django.urls import path
+from django.utils.translation import gettext_lazy as _
+from flex_menu import Menu
+from mvp.mounted import MountedApp
+
+from mvp_sphinx.views import PageView
+
+
+class DocumentationApp(MountedApp):
+    """One docs build, served under the prefix a host project mounts it at.
+
+    The host creates an instance and mounts it, then adds the entry that
+    ``menu_item()`` returns to its own menus. A second build is a second
+    instance with its own ``namespace``.
+
+    ``namespace`` is the knob for the app's URLs, landing and menu: they are
+    derived from it when the instance is created, so ``urls``, ``landing`` or
+    ``menu`` passed by keyword are overwritten.
+
+    Args:
+        build_dir: The directory ``sphinx-build -b json`` wrote to. It is not
+            read until a page is requested, so it may not exist yet.
+        name: What the documentation is called, in the page title, breadcrumbs
+            and the host's menu entry.
+        icon: The icon name for the host's menu entry.
+        namespace: The URL namespace, ``docs`` unless a host mounts several.
+        view_class: The view that renders a page.
+
+    Raises:
+        ImproperlyConfigured: ``build_dir`` was not given.
+
+    Example::
+
+        docs = DocumentationApp(build_dir=BASE_DIR / "docs" / "_build" / "json")
+
+        urlpatterns = [mount("docs/", docs)]
+    """
+
+    name = _("Documentation")
+    icon = "document"
+    namespace = "docs"
+    build_dir: Any = None
+    view_class = PageView
+    urls: Any = []
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        if self.build_dir is None:
+            raise ImproperlyConfigured(
+                "DocumentationApp needs a build_dir, the directory sphinx-build -b json wrote to."
+            )
+        view = self.view_class.as_view(app=self)
+        self.urls = (
+            [
+                path("", view, name="front_page"),
+                path("<path:path>", view, name="page"),
+            ],
+            self.namespace,
+        )
+        self.landing = f"{self.namespace}:front_page"
+        # The shell processes every app's menu on host pages no mount serves.
+        self.menu = Menu(f"mvp_sphinx-{self.namespace}")

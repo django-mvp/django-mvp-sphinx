@@ -60,3 +60,11 @@ def guide_build(sphinx_json_build):
 @pytest.fixture(scope="session")
 def handbook_build(sphinx_json_build):
     return sphinx_json_build("handbook")
+
+
+@pytest.fixture
+def docs_app(guide_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", guide_build)
+    return docs

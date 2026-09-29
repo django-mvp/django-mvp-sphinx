@@ -99,8 +99,24 @@
         },
         {
           "id": "T003",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests_added": [
+              "tests/test_mounted.py::TestDocumentationApp",
+              "tests/test_views.py::TestPageView"
+            ],
+            "commands": [
+              "uv run pytest tests/test_mounted.py tests/test_views.py (red: ModuleNotFoundError mvp_sphinx.mounted, then TypeError from as_view(app=) until PageView.app existed)",
+              "uv run pytest tests/test_mounted.py tests/test_views.py tests/test_demo.py tests/test_smoke.py tests/test_docs_build.py -q: 34 passed",
+              "uv run mypy: no issues in 5 source files",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "exit_code": 0,
+            "criteria": [
+              "SC-001"
+            ]
+          }
         },
         {
           "id": "T004",
