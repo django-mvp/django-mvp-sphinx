@@ -82,8 +82,20 @@
         },
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests_added": [
+              "tests/test_docs_build.py::TestPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_docs_build.py -x (red: ModuleNotFoundError mvp_sphinx.docs_build)",
+              "uv run pytest tests/test_docs_build.py -x: 15 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "exit_code": 0,
+            "criteria": []
+          }
         },
         {
           "id": "T003",

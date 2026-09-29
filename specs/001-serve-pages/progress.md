@@ -22,3 +22,10 @@ Did: added Sphinx (9.1.0) to the dev group; guide source (front page and section
 Verified: a throwaway probe test (deleted, not committed) requested both fixtures and found index.fjson in each, the image under _images and the download under _downloads; `uv run pre-commit run --all-files` passes. No test of the fixture itself, by the task's design, so there is no red step for T001; T002-T005 fail if it drifts.
 Next: T002, DocsBuild.page.
 Watch: tests/sphinx/ has no __init__.py, so it stays a namespace package and `import sphinx` still resolves to the installed one.
+
+## 2026-09-29T23:09:24Z · Implementer US1 · T002
+
+Did: mvp_sphinx/docs_build.py with DocsBuild(root).page(path): front page, folder index then page file, slashless addresses refused, every candidate resolve()d and checked against the resolved root, filesystem errors (NUL byte) answer None, invalid JSON raises. tests/test_docs_build.py::TestPage (15 cases) against the real guide build.
+Verified: red first (module missing), then `uv run pytest tests/test_docs_build.py -x`: 15 passed. Mutation probes: removing the is_relative_to check fails the 3 outside-the-build cases; dropping the root resolve() fails the symlink case.
+Next: T003, DocumentationApp and PageView.
+Watch: the containment helper is private (_contained_file); US2's file() will need the same check against _images/_downloads.
