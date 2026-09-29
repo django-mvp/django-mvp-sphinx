@@ -2,7 +2,7 @@
   "feature": "002-sidebar-contents",
   "branch": "002-sidebar-contents",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "DESIGN_REVIEW",
+  "state": "IMPLEMENT",
   "state_history": [
     {
       "state": "QUEUED",
@@ -18,6 +18,11 @@
       "state": "DESIGN_REVIEW",
       "at": "2026-09-29T23:45:22Z",
       "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-29T23:52:48Z",
+      "note": "US1 -> US2 -> US3 sequential in wt-sphinx-002"
     }
   ],
   "gates": {
@@ -27,12 +32,29 @@
       "self_resolved": []
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "notified",
+      "at": "2026-09-29T23:52:48Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam's overnight delegation), not Sam"
+      ]
     },
     "merge": {
       "approved_by": null,
       "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel",
+      "at": "2026-09-29T23:52:38Z",
+      "self_resolved": [
+        "ARCH-001 high: non-atomic children swap \u2014 per-menu lock across refresh and processing (D4) \u2014 plan edit",
+        "SPEC-001 high: planned menu-active class assertion \u2014 removed; marking tested on the processed tree \u2014 tasks edit",
+        "ARCH-002 medium: mkstemp 0600 risk \u2014 fixed sibling navigation.json.tmp via write_text, then os.replace \u2014 plan edit",
+        "ARCH-003 medium: loose functions \u2014 NavigationWriter class, DocsBuild staticmethod shape check \u2014 plan edit",
+        "SEC-001 low: entry-address filter removed (D3)",
+        "SPEC-002 low: atomic-write test removed",
+        "SPEC-003 low: sections renamed groups (CONTEXT.md)",
+        "ARCH-004 low: reads catch (OSError, ValueError); invalid UTF-8 case added"
+      ]
     }
   },
   "stories": [

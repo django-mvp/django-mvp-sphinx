@@ -43,12 +43,12 @@ out of the menu (FR-018, R4); the contents is the same tree on every page (FR-00
 | II Simplicity | One extension module, one menu class, one `DocsBuild` method. No settings, no cache beyond "rebuild when the file changed". |
 | III Anti-abstraction | `DocumentationMenu` subclasses flex_menu's `Menu`, the one hook the shell processes; no base class of our own. |
 | IV Integration-first | Acceptance tests open pages through `client` and read the sidebar a person sees. |
-| V Security | Titles and captions are plain text, auto-escaped (FR-014). An entry address is used only when it is a plain relative address (`DocsBuild.is_canonical`), so the file cannot point an entry off the app. |
+| V Security | Titles and captions are plain text, auto-escaped (FR-014). The navigation file is read through `contained_file`, inside the build. |
 | VI Documentation | README gains the `extensions = ["mvp_sphinx.navigation"]` line in the story that introduces it; CHANGELOG Unreleased entry; AGENTS.md's "not built yet" sentence updated. |
 | VII Dependencies | None added. deptry DEP004 ignore for `sphinx`, justified (R6). |
 | VIII i18n | The front page and "page itself" entry labels are `gettext_lazy`; catalogue refreshed. |
 | IX Data model | No models. |
-| X Cohesion | Reading the file is a `DocsBuild` method beside the page and file lookups; turning it into menu items is the menu's. |
+| X Cohesion | Reading, validating and stamping the file are `DocsBuild` methods beside the page and file lookups; the build-time walk is one `NavigationWriter` class; turning the file into menu items is the menu's. |
 | XI Compatibility | New public names only (`mvp_sphinx.navigation`, `DocumentationMenu`); nothing removed. |
 | XII Scope | Sphinx only in the extension; serving reads a file. |
 | XIII Host look | The contents is the app sidebar's menu, drawn by django-mvp's renderer; no navigation column in the page. |
@@ -63,7 +63,7 @@ No violations. Complexity tracking is empty.
 
 ```json
 {
-  "sections": [
+  "groups": [
     {"caption": "Getting started", "entries": [
       {"title": "Install", "url": "install/", "children": []},
       {"title": "Guides", "url": "guides/", "children": [
@@ -75,8 +75,8 @@ No violations. Complexity tracking is empty.
 }
 ```
 
-One section per toctree on the root document, in document order, hidden ones included; `caption`
-is `""` for an uncaptioned toctree. `url` is the JSON builder's address for the page (R2), relative
+One group per toctree on the root document, in document order, hidden ones included; `caption`
+is `""` for an uncaptioned toctree, whose entries the menu places at the top level. `url` is the JSON builder's address for the page (R2), relative
 to the app's prefix. No title for the front page is stored: the front page entry carries a fixed
 label (below).
 
@@ -86,12 +86,19 @@ The module the host names in `conf.py`: `extensions = ["mvp_sphinx.navigation"]`
 `sphinx.addnodes` and `DocsBuild.NAVIGATION_FILE` (from `mvp_sphinx.docs_build`, which imports
 neither Django nor Sphinx), and nothing from Django, so the docs build needs no Django settings.
 
-- `setup(app)` connects `build-finished` and returns `{"version": ..., "parallel_read_safe": True,
-  "parallel_write_safe": True}`.
+- One class, `NavigationWriter`, constructed with the Sphinx `app` (it reads `env` and `builder`
+  from it), holds the walk: the groups of the root document, the entries of one toctree, the
+  toctrees of one page, and the write, as methods (Article X). `setup(app)` and the
+  `build-finished` handler stay module-level and only construct it. `setup` returns
+  `{"version": ..., "parallel_read_safe": True, "parallel_write_safe": True}`.
 - On `build-finished`: return when `exception` is set or `app.builder.name != "json"` (only the
-  JSON build is served; R2). Otherwise build the sections from the root document's toctrees
-  (`app.config.root_doc`) and write the file **atomically**: a temporary file in the output
-  directory, then `os.replace` (R1).
+  JSON build is served; R2). Otherwise build the groups from the root document's toctrees
+  (`app.config.root_doc`) and write the file **atomically**: `Path.write_text` to the fixed
+  sibling name `navigation.json.tmp`, so it takes the umask default like every other file in the
+  build, then `os.replace` onto `navigation.json` (R1). Never `tempfile.mkstemp` or
+  `NamedTemporaryFile`: their 0600 mode would make the file unreadable to a web server running as
+  another user, and FR-018 would silently turn that into a front-page-only sidebar (design review
+  ARCH-002).
 - Entries of a toctree: for each `(title, ref)`, skip it when `ref` is `'self'`, not in
   `env.titles` (external link or missing page), or already on the path from the root down to this
   toctree (a cycle, or a page listing itself) — FR-011, FR-012. Otherwise the entry is
@@ -105,13 +112,17 @@ neither Django nor Sphinx), and nothing from Django, so the docs build needs no 
 ### Reading it — `DocsBuild.navigation()`
 
 `mvp_sphinx/docs_build.py` gains `NAVIGATION_FILE = "navigation.json"` and
-`navigation() -> list[dict] | None`: the file's `sections`, or `None` when the file is absent,
-unreadable (`OSError`), not valid JSON, or not the shape above (sections a list of objects with a
-string `caption` and a list `entries`; each entry an object with string `title`, string `url` and
-list `children`, recursively). The shape check is one small recursive function, so the menu can
-trust what it gets and never needs a broad `except`. Validation also drops (not fails on) an entry
-whose `url` is not `""` or a plain relative address ending in `/` (`is_canonical` on the address
-without its slash), so a hand-edited file cannot send an entry off the app.
+`navigation() -> list[dict] | None`: the file's `groups`, or `None` when the file is absent or
+cannot be read or decoded (`(OSError, ValueError)`, which covers `JSONDecodeError` and
+`UnicodeDecodeError` without a broad `except`), or is not the shape above (groups a list of
+objects with a string `caption` and a list `entries`; each entry an object with string `title`,
+string `url` and list `children`, recursively). The file is found through `contained_file`, like
+every other lookup. The shape check is a recursive `@staticmethod` on `DocsBuild`, so the menu can
+trust what it gets. A `navigation_stamp()` method beside it returns the file's
+`(st_mtime_ns, st_size, st_ino)` or `None`, for the menu's stamp. The file is in the same trust
+domain as the `.fjson` pages the view already renders, so entry addresses are not filtered
+(design review SEC-001); FR-010 holds because the menu prefixes every address with the app's own
+front page address.
 
 ### The menu — `mvp_sphinx/menus.py`
 
@@ -119,21 +130,26 @@ without its slash), so a hand-edited file cannot send an entry off the app.
 `DocumentationMenu(f"mvp_sphinx-{namespace}", app=self)` in place of FS-001's empty `Menu`
 (same name, so nothing else changes).
 
-- `process(request, **kwargs)`: `self.refresh()` then `super().process(...)`.
+- One `threading.Lock` per menu instance, held across `refresh()` **and** the
+  `super().process(...)` call in `process(request, **kwargs)`, so a rebuild's swap of `children`
+  and another request's snapshot of it cannot interleave (research R5; design review ARCH-001).
+  The menu's `extra_context` carries `{"label": app.name}`, so the sidebar's list has a name.
 - `refresh()`: the stamp is `(build_dir as given, the app's front page address, the navigation
-  file's (st_mtime_ns, st_size, st_ino) or None)`. The build directory is part of the stamp because
+  file's `DocsBuild.navigation_stamp()`)`. The build directory is part of the stamp because
   a host (and the suite) may repoint `build_dir`; the front page address because the mount prefix
   can differ per URLconf. Same stamp → return. Otherwise read `DocsBuild(app.build_dir).navigation()`,
-  build the new children list completely, then assign `self.children` in one statement and store
-  the stamp (R5). `stat` failing is a `None` part of the stamp, never an exception.
+  build the new children list completely, then assign `self.children` and store the stamp, all
+  under the lock (R5). `stat` failing is a `None` part of the stamp, never an exception.
 - Children: first a `MenuItem` for the front page, label `_("Overview")` (the prototype's entry,
-  which the owner approved), `url` the front page address. Then per section: a captioned section is
+  which the owner approved), `url` the front page address. Then per group: a captioned group is
   a `MenuGroup` labelled with the caption holding its entries; an uncaptioned one contributes its
   entries at the top level in its place (FR-002–FR-004). An entry with no children is a `MenuItem`
   with `url = front page address + entry url`; one with children is a `MenuCollapse` labelled with
   the title whose first child is a `MenuItem` for the page itself, label `_("Overview")`, followed by
-  its children's items (FR-005). No icons (prototype).
-- Item names are made from the section and entry positions (`"s0-2-1"`-style), unique within the
+  its children's items (FR-005). No icons (prototype). Labels go in `extra_context["label"]`, never
+  a `label=` keyword; items are built bottom-up and passed as `children=`, so none sits on
+  flex_menu's global root on its own.
+- Item names are made from the group and entry positions (`"g0-2-1"`-style), unique within the
   menu; flex_menu requires unique names among siblings.
 - Labels are the plain strings from the file; nothing is marked safe (FR-014).
 - A `None` from `navigation()` gives the front page entry alone (FR-018).
@@ -165,8 +181,9 @@ at `manuals/admin/`.
   `tests/test_docs_build.py` (`TestNavigation`), `tests/test_menus.py` (`DocumentationMenu` through
   `process()` with request-factory requests), `tests/test_views.py` / `tests/test_mounted.py` for
   what a reader sees through `client`.
-- No test asserts label wording, CSS classes as design, or layout (testing standard). Marking is
-  asserted on the processed tree's `selected`, and once through the rendered sidebar.
+- No test asserts label wording, CSS classes, or layout (testing standard). Marking is asserted on
+  the processed tree's `selected`, which is the contract this package supplies; the shell draws it
+  (design review SPEC-001). Rendered-page tests find sidebar links by role and address.
 
 ### Demo
 
@@ -184,7 +201,7 @@ tests, so they cannot run in parallel.
 
 ```text
 mvp_sphinx/
-├── docs_build.py          # + NAVIGATION_FILE, navigation()
+├── docs_build.py          # + NAVIGATION_FILE, navigation(), navigation_stamp()
 ├── menus.py               # new: DocumentationMenu
 ├── mounted.py             # menu = DocumentationMenu(...)
 ├── navigation.py          # new: the Sphinx extension

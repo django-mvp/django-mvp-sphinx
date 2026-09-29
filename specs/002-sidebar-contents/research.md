@@ -39,8 +39,9 @@ Three things do not carry over as written:
   returns `''` for `index`, `a/` for `a/index`, and `a/b/` for `a/b` — exactly the addresses
   `DocsBuild.page()` serves. The builder's `name` is `'json'` (line 157); `pickle` shares the class
   (line 140) and is not a build this package reads.
-- Sphinx itself warns on a self-referencing toctree (`environment/__init__.py:922`), a document in
-  several toctrees (line 952) and a circular toctree (`environment/adapters/toctree.py:335`). The
+- Sphinx itself warns on a self-referencing toctree (`environment/__init__.py:922`) and a circular
+  toctree (`environment/adapters/toctree.py:335`); a document in several toctrees is only logged
+  at info level (line 952). The
   edge-case fixtures provoke those warnings on purpose, so their build cannot assert "no warnings"
   the way `sphinx_json_build` does today.
 
@@ -74,9 +75,13 @@ there must never raise, or a broken docs build breaks the host's home page (US3 
 
 A `Menu` is a module-level singleton registered on flex_menu's global root; `process` copies it per
 request but reads `self.children` from the shared instance (`flex_menu/menu.py:437–466`).
-Replacing `children` when the file changes is a write to shared state. Assigning a freshly built
-list in one statement, after the new tree is fully built, means a concurrent request sees either
-the old tree or the new one — the "rebuild in progress" edge case — never a half-built one.
+Replacing `children` when the file changes is a write to shared state, and it is **not** atomic:
+anytree's `children` setter (`anytree/node/nodemixin.py:240–258`) deletes the old children and
+then attaches the new ones one at a time, and `process` reads `self.children` when it starts
+(`flex_menu/menu.py:463`, `:714`). The design reviewer's probe, two writer threads and one reader,
+saw partial trees and ended with 3282 children instead of 200. A per-menu lock held across the
+refresh and the reader's snapshot is what makes the swap safe; a concurrent request then sees the
+old tree or the new one — the "rebuild in progress" edge case — never a half-built one.
 
 ## R6 — Sphinx in the package, but never at runtime
 

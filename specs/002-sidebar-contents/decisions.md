@@ -109,29 +109,34 @@ documentation app reads. A host that also builds HTML with the same `conf.py` ge
 
 **Revisit if**: the package ever serves another builder's output.
 
-## D3. A bad navigation file is validated once, and entries pointing off the app are dropped
+## D3. A bad navigation file is validated once
 
-**Decided**: `DocsBuild.navigation()` checks the file's shape and returns `None` for any file it
-cannot use, and drops an entry whose address is not a plain relative address ending in `/`.
+**Decided**: `DocsBuild.navigation()` catches `(OSError, ValueError)`, checks the file's shape, and
+returns `None` for any file it cannot use. Entry addresses are not filtered.
 
 **Why**: the menu is processed on every host page (research R4), so an exception there breaks the
-whole site (FR-018). One shape check keeps broad `except` clauses out of the menu. The address check
-costs one line with `is_canonical`, which already exists, and keeps a hand-edited file from making a
-sidebar link that leaves the documentation app.
+whole site (FR-018). One shape check keeps broad `except` clauses out of the menu. The plan first
+also dropped entries whose address was not a plain relative one; the design review (SEC-001) showed
+the file sits in the same trust domain as the pages the view already renders, and the spec rules
+out hand edits to the build, so that guard was removed.
 
 **Revisit if**: the file format gains fields.
 
 ## D4. The menu rebuilds when the file, the build directory or the mount prefix changes
 
 **Decided**: `DocumentationMenu.refresh()` compares a stamp of build directory, front page
-address and the file's `(st_mtime_ns, st_size, st_ino)`, and rebuilds only when it differs,
-assigning the finished list in one statement.
+address and the file's `(st_mtime_ns, st_size, st_ino)`, and rebuilds only when it differs. A
+per-menu lock is held across the refresh and the processing that reads `children`.
 
 **Why**: a read and parse on every host page is the cost the specification's decision "Rebuilds
 show on the next request" steers away from. Nanosecond mtime, size and inode together catch a
 replacement even inside one second, and the extension's atomic replace changes the inode.
 
-**Revisit if**: a host reports a filesystem where none of the three changes on replacement.
+The first plan relied on one assignment being atomic; the design review (ARCH-001) showed anytree's
+`children` setter is not, and a probe produced duplicated trees. The lock replaced that claim.
+
+**Revisit if**: a host reports a filesystem where none of the three changes on replacement, or the
+lock shows up in profiles.
 
 ## D5. The front page and a page's own entry inside its group are both labelled "Overview"
 
@@ -162,3 +167,18 @@ pages of its own already opens as a group (FR-005). Nesting a second kind of gro
 need a shape the sidebar does not have.
 
 **Revisit if**: a real docs set needs sub-captions in the sidebar.
+
+## D8. Design review outcome
+
+**Decided**: every finding applied as a plan edit, one round, no re-review. ARCH-001 (high): the
+menu holds a lock across refresh and processing (D4). SPEC-001 (high): no test asserts the shell's
+`menu-active` class; marking is tested on the processed tree. ARCH-002: the extension writes
+`navigation.json.tmp` with `write_text`, then `os.replace`. ARCH-003: the walk is a
+`NavigationWriter` class, the shape check a `DocsBuild` staticmethod. SEC-001: entry addresses are
+not filtered (D3). SPEC-002: no test of the atomic write. SPEC-003: the file's key and the vocabulary
+are `groups`, not `sections` (CONTEXT.md). ARCH-004: reads catch `(OSError, ValueError)`.
+
+**Why**: each remedy was the smallest edit the finding named, and each was checked against the
+finding's stated evidence by the orchestrator.
+
+**Revisit if**: n/a — a record.
