@@ -2,7 +2,7 @@
   "feature": "001-serve-pages",
   "branch": "001-serve-pages",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-09-29T23:05:41Z",
       "note": "US1..US4 sequential in the feature checkout"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-29T23:23:07Z",
+      "note": "US1-US4 done"
     }
   ],
   "gates": {
@@ -155,7 +160,7 @@
       "priority": "P2",
       "issue": 20,
       "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -186,7 +191,7 @@
       "priority": "P2",
       "issue": 21,
       "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -217,7 +222,7 @@
       "priority": "P3",
       "issue": 22,
       "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -245,7 +250,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {

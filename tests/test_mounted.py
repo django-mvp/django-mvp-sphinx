@@ -34,12 +34,9 @@ class TestMenuEntry:
         assert response.context["page_data"]["current_page_name"] == "index"
 
     def test_a_second_apps_entry_leads_to_its_own_front_page(
-        self, client, db, handbook_build, monkeypatch
+        self, client, db, handbook_app
     ) -> None:
-        from tests.urls import handbook
-
-        monkeypatch.setattr(handbook, "build_dir", handbook_build)
-        url = reverse(handbook.menu_item().view_name)
+        url = reverse(handbook_app.menu_item().view_name)
 
         assert url == "/manuals/admin/"
         assert client.get(url).status_code == 200

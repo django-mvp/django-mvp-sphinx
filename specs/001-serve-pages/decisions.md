@@ -207,3 +207,11 @@ plan, each checked against the finding's own evidence:
 
 Editorial notes swept in the same edit (#5 not #3, #8 not FS-005, menu names unique by
 convention, `db` fixture for page tests, docstring notes on `namespace` and the `index/` alias).
+
+## D19. `tests/urls.py` changed by US4, as planned
+
+**Chosen:** The US4 change to `tests/urls.py`, flagged as a change to a pre-existing test file,
+is accepted.
+
+**Why:** The file is the suite's urlconf, not a test. T009 names it for the second documentation
+app's mount, and the change only adds that mount. No assertion anywhere was altered or removed.

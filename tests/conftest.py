@@ -68,3 +68,11 @@ def docs_app(guide_build, monkeypatch):
 
     monkeypatch.setattr(docs, "build_dir", guide_build)
     return docs
+
+
+@pytest.fixture
+def handbook_app(handbook_build, monkeypatch):
+    from tests.urls import handbook
+
+    monkeypatch.setattr(handbook, "build_dir", handbook_build)
+    return handbook

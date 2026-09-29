@@ -79,7 +79,8 @@ class DocsBuild:
         Args:
             relative: An address relative to the build root.
             within: A folder of the build the file must also sit in; the whole
-                build when empty.
+                build when empty. The file must stay inside the build as well,
+                even when the folder is a link to somewhere else.
 
         Returns:
             The resolved path when it is a file inside the build, otherwise
@@ -88,7 +89,8 @@ class DocsBuild:
         try:
             boundary = (self.root / within).resolve()
             target = (self.root / relative).resolve()
-            if target.is_relative_to(boundary) and target.is_file():
+            inside = target.is_relative_to(self.root) and target.is_relative_to(boundary)
+            if inside and target.is_file():
                 return target
         except (ValueError, OSError):
             pass

@@ -118,6 +118,19 @@ class TestFile:
 
         assert DocsBuild(copy).file("_images/leak.png") is None
 
+    def test_a_file_folder_linked_outside_the_build_is_not_served(
+        self, guide_build, tmp_path
+    ) -> None:
+        copy = tmp_path / "build"
+        shutil.copytree(guide_build, copy)
+        outside = tmp_path / "outside"
+        outside.mkdir()
+        (outside / "secret.txt").write_text("secret")
+        shutil.rmtree(copy / "_images")
+        (copy / "_images").symlink_to(outside, target_is_directory=True)
+
+        assert DocsBuild(copy).file("_images/secret.txt") is None
+
     def test_a_missing_name_is_not_a_file(self, build) -> None:
         assert build.file("_images/missing.png") is None
 

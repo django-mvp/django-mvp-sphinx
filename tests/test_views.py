@@ -327,14 +327,6 @@ class TestBrokenPage:
         assert client.get("/docs/page/").status_code == 500
 
 
-@pytest.fixture
-def handbook_app(handbook_build, monkeypatch):
-    from tests.urls import handbook
-
-    monkeypatch.setattr(handbook, "build_dir", handbook_build)
-    return handbook
-
-
 class TestNamingAnApp:
     def test_the_tab_carries_the_name_the_host_gave(
         self, client, db, handbook_app
