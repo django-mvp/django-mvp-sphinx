@@ -63,7 +63,7 @@
       "priority": "P1",
       "issue": 19,
       "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -74,10 +74,9 @@
             "commands": [
               "uv add --group dev \"sphinx>=8.1\"",
               "uv run pytest (throwaway probe of guide_build and handbook_build): 1 passed",
-              "uv run pre-commit run --all-files: all hooks passed"
-            ],
-            "exit_code": 0,
-            "criteria": []
+              "uv run pre-commit run --all-files: all hooks passed",
+              "exit_code: 0; criteria: []"
+            ]
           }
         },
         {
@@ -85,16 +84,12 @@
           "status": "done",
           "attempts": 1,
           "evidence": {
-            "tests_added": [
-              "tests/test_docs_build.py::TestPage"
-            ],
             "commands": [
               "uv run pytest tests/test_docs_build.py -x (red: ModuleNotFoundError mvp_sphinx.docs_build)",
               "uv run pytest tests/test_docs_build.py -x: 15 passed",
-              "uv run pre-commit run --all-files: all hooks passed"
-            ],
-            "exit_code": 0,
-            "criteria": []
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_docs_build.py::TestPage']; exit_code: 0; criteria: []"
+            ]
           }
         },
         {
@@ -102,20 +97,12 @@
           "status": "done",
           "attempts": 2,
           "evidence": {
-            "tests_added": [
-              "tests/test_mounted.py::TestDocumentationApp",
-              "tests/test_views.py::TestPageView"
-            ],
             "commands": [
               "uv run pytest tests/test_mounted.py tests/test_views.py (red: ModuleNotFoundError mvp_sphinx.mounted, then TypeError from as_view(app=) until PageView.app existed)",
               "uv run pytest tests/test_mounted.py tests/test_views.py tests/test_demo.py tests/test_smoke.py tests/test_docs_build.py -q: 34 passed",
               "uv run mypy: no issues in 5 source files",
-              "uv run pre-commit run --all-files: all hooks passed"
-            ],
-            "exit_code": 0,
-            "criteria": [
-              "SC-001",
-              "SC-002"
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_mounted.py::TestDocumentationApp', 'tests/test_views.py::TestPageView']; exit_code: 0; criteria: ['SC-001', 'SC-002']"
             ]
           }
         },
@@ -124,18 +111,13 @@
           "status": "done",
           "attempts": 1,
           "evidence": {
-            "tests_added": [
-              "tests/test_views.py::TestPageTitle",
-              "tests/test_views.py::TestBreadcrumbs"
-            ],
             "commands": [
               "uv run pytest tests/test_views.py -k \"TestPageTitle or TestBreadcrumbs\" (red: 3 failed, 1 passed)",
               "uv run pytest tests/test_views.py tests/test_mounted.py -q: 15 passed",
               "uv run mypy: no issues",
-              "uv run pre-commit run --all-files: all hooks passed"
-            ],
-            "exit_code": 0,
-            "criteria": []
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_views.py::TestPageTitle', 'tests/test_views.py::TestBreadcrumbs']; exit_code: 0; criteria: []"
+            ]
           }
         },
         {
@@ -143,17 +125,11 @@
           "status": "done",
           "attempts": 1,
           "evidence": {
-            "tests_added": [
-              "tests/test_views.py::TestServingWithoutSphinx"
-            ],
             "commands": [
               "uv run pytest tests/test_views.py -k TestServingWithoutSphinx: 3 passed (behaviour already delivered by T003; locked with mutation probes)",
               "uv run pytest tests/test_views.py -q: 15 passed",
-              "uv run pre-commit run --all-files: all hooks passed"
-            ],
-            "exit_code": 0,
-            "criteria": [
-              "SC-003"
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_views.py::TestServingWithoutSphinx']; exit_code: 0; criteria: ['SC-003']"
             ]
           }
         },
@@ -162,19 +138,13 @@
           "status": "done",
           "attempts": 1,
           "evidence": {
-            "tests_added": [
-              "tests/test_demo.py::TestDocumentationEntry"
-            ],
             "commands": [
               "uv run pytest tests/test_demo.py (red: 1 failed, 3 passed; then 4 passed)",
               "uv run sphinx-build -b json -q -w /tmp/demo-warn.txt demo/docs demo/docs/_build/json: exit 0, empty warnings file",
               "DJANGO_SETTINGS_MODULE=tests.settings PYTHONPATH=.. uv run django-admin makemessages -l en (run in mvp_sphinx/)",
               "uv run pytest tests/test_demo.py tests/test_smoke.py -q: 9 passed",
-              "uv run pre-commit run --all-files: all hooks passed"
-            ],
-            "exit_code": 0,
-            "criteria": [
-              "SC-002"
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_demo.py::TestDocumentationEntry']; exit_code: 0; criteria: ['SC-002']"
             ]
           }
         }
