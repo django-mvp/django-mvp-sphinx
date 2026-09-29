@@ -123,3 +123,94 @@ styling reaches the page with the documentation app itself.
   may fall short of 4.5:1 for some roles (warning yellow on a light background is the usual
   offender in the light theme). The plan may need to mix a token colour toward the text colour to
   meet FR-015, which changes how the highlighting looks but not where its colours come from.
+
+## Planning decisions (S3, 2026-09-30)
+
+Numbered from here on, so later stages can cite them.
+
+## D1. One plain-CSS stylesheet, shipped as a static file and linked by the page template
+
+**Decision:** The styling is `mvp_sphinx/static/mvp_sphinx/content.css`, plain CSS keyed off
+Sphinx's class names and the theme's `--color-*` custom properties, linked from the page
+template's `styles` block after django-mvp's own stylesheet.
+
+**Why:** The prototype put its rules in django-mvp's Tailwind source, which a separate package
+cannot touch. A Tailwind build inside this package would be a build step for us and a second copy
+of Tailwind's reset on the page. Every rule reads a class Sphinx wrote, so nothing needs
+generating. A static file inside an installed app reaches the page through the staticfiles setup
+every django-mvp host already has, which is what FR-017 asks for, and only pages the documentation
+app renders link it (FR-016). (research R3)
+
+**Revisit if:** django-mvp grows a way for an installed app to contribute rules to its own
+stylesheet.
+
+## D2. Accessible names and focusable table areas come from rewriting the body in Python
+
+**Decision:** `BodyRewriter`, on the standard library's `HTMLParser`, rewrites each page body
+before it is rendered: every heading link gets an `aria-label`, every outermost table is wrapped
+in a focusable, named scrolling region. Everything else is re-emitted as written.
+
+**Why:** FR-008 and FR-010 need attributes CSS cannot add. A script would add JavaScript to every
+page, which the spec turns down for the copy button on the same grounds, and a build-time Sphinx
+extension would only help hosts who add it, while FR-017 promises the styling with no step. The
+standard library's parser avoids a new dependency.
+
+**Revisit if:** the package gains a Sphinx extension every host is required to load anyway
+(#5's navigation extension is optional for pages); the rewrite could then move into the build.
+
+## D3. A heading link's name is Sphinx's own title plus the heading's text
+
+**Decision:** `aria-label="<title>: <text of the element holding the link>"`, the title being the
+link's `title` attribute ("Link to this heading", "Link to this term", …).
+
+**Why:** Sphinx writes that title in the docs build's own language and already says what kind of
+thing the link points at, so the package adds no translatable string and a term's link is not
+called a section's. The text makes each name unique on the page (FR-010).
+
+**Revisit if:** a Sphinx release drops the `title` attribute; the label then falls back to the
+text alone, which still meets FR-010.
+
+## D4. Every table gets the scrolling region, wide or not
+
+**Decision:** The rewrite wraps every outermost table, because the server cannot know which will
+overflow on the reader's screen.
+
+**Why:** Width depends on the reader's viewport. The cost is one extra tab stop per table, which
+is the usual pattern for WCAG 2.1.1 on scrollable tables.
+
+**Revisit if:** readers report the extra tab stops as a nuisance on table-heavy pages; a script
+that removes `tabindex` from regions that do not overflow is the known refinement.
+
+## D5. Every colour the stylesheet creates is a named custom property, mixed from theme colours
+
+**Decision:** One rule at the top of the stylesheet declares each colour the package makes
+(`--mvp-sphinx-…`) as a theme colour or a `color-mix(in oklab, …)` of two; every other rule only
+reads them. Code token colours are theme roles mixed toward `--color-base-content`.
+
+**Why:** It makes SC-001 and SC-005 checkable from the file: the test resolves each property
+against django-mvp's default light and dark themes and measures the pairs. Mixing toward the
+theme's own text colour darkens a token in the light theme and lightens it in the dark one, so one
+mix serves both (research R4). The prototype's unmixed status colours fall under 3:1 on the light
+code background.
+
+**Revisit if:** django-mvp ships code-token colour roles of its own.
+
+## D6. The body's ordinary text is left to django-mvp's `prose`
+
+**Decision:** No rules for headings, paragraphs, lists, block quotes, links or inline code.
+
+**Why:** The page template already wraps the body in `prose`, and daisyUI's override of it sets
+every prose colour from the theme (research R2). FR-001 holds today; restyling it would only
+diverge from the rest of the site.
+
+**Revisit if:** a walkthrough finds an ordinary element that reads differently from the site.
+
+## D7. The test fixture page is an orphan
+
+**Decision:** `tests/sphinx/guide/content.rst` carries `:orphan:` rather than joining a toctree.
+
+**Why:** FS-002 is being built at the same time and asserts the contents of the same fixture
+guide. An orphan page adds no entry to the contents, and it keeps the build free of the "not in
+any toctree" warning the fixture forbids.
+
+**Revisit if:** a later feature wants the page in the contents.
