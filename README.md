@@ -9,6 +9,10 @@ project itself. The docs render through the project's own templates and theme,
 inside its application shell, and their table of contents becomes the app
 sidebar. Reading the user guide doesn't mean leaving the application.
 
+It is written first for the people using the application: user guides, how-tos
+and reference for the site itself. Developer documentation should work too, but
+where the two pull in different directions, the user guide wins.
+
 It serves a Sphinx JSON build (`sphinx-build -b json`). Serving never needs
 Sphinx installed and never starts a build: the build is a file the project
 produces before a request arrives, however it already does that. A command that
