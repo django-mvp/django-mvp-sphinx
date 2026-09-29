@@ -1,6 +1,9 @@
 """PageView renders a page of the docs build inside the application shell."""
 
+import json
 import re
+import shutil
+import sys
 from urllib.parse import urljoin
 
 import pytest
@@ -110,3 +113,38 @@ class TestBreadcrumbs:
             ("The section folder", "/docs/section/"),
             ("Nested page", None),
         ]
+
+
+class TestServingWithoutSphinx:
+    def test_a_changed_page_file_shows_on_the_next_request(
+        self, client, db, docs_app, guide_build, tmp_path, monkeypatch
+    ) -> None:
+        build = tmp_path / "build"
+        shutil.copytree(guide_build, build)
+        monkeypatch.setattr(docs_app, "build_dir", build)
+        assert "Welcome to the guide" in client.get("/docs/").content.decode()
+
+        page_file = build / "index.fjson"
+        page = json.loads(page_file.read_text())
+        page["body"] = page["body"].replace("Welcome to the guide", "Rebuilt guide")
+        page_file.write_text(json.dumps(page))
+
+        content = client.get("/docs/").content.decode()
+        assert "Rebuilt guide" in content
+        assert "Welcome to the guide" not in content
+
+    @pytest.mark.parametrize("address", ["", "section/nested/page/"])
+    def test_pages_are_served_when_sphinx_cannot_be_imported(
+        self, client, db, monkeypatch, address
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        response = client.get(f"/docs/{address}")
+
+        assert response.status_code == 200
+        assert TITLE_TEXT[address] in response.content.decode()

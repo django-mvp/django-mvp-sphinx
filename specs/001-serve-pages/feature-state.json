@@ -114,7 +114,8 @@
             ],
             "exit_code": 0,
             "criteria": [
-              "SC-001"
+              "SC-001",
+              "SC-002"
             ]
           }
         },
@@ -134,15 +135,27 @@
               "uv run pre-commit run --all-files: all hooks passed"
             ],
             "exit_code": 0,
-            "criteria": [
-              "SC-002"
-            ]
+            "criteria": []
           }
         },
         {
           "id": "T005",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests_added": [
+              "tests/test_views.py::TestServingWithoutSphinx"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k TestServingWithoutSphinx: 3 passed (behaviour already delivered by T003; locked with mutation probes)",
+              "uv run pytest tests/test_views.py -q: 15 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "exit_code": 0,
+            "criteria": [
+              "SC-003"
+            ]
+          }
         },
         {
           "id": "T006",

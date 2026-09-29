@@ -44,3 +44,10 @@ Did: PageView.get_page_title (title HTML stripped to text and unescaped) and get
 Verified: red first (3 failed; the app-name-in-tab test already passed because the shell adds the mounted app's name), then `uv run pytest tests/test_views.py tests/test_mounted.py -q`: 15 passed. Mutation probes: returning the title unstripped fails the tab and breadcrumb tests; using the parent link unjoined fails the breadcrumb test.
 Next: T005, rebuilds and no-Sphinx tests.
 Watch: none.
+
+## 2026-09-29T23:13:18Z · Implementer US1 · T005
+
+Did: TestServingWithoutSphinx in tests/test_views.py: a page file rewritten in a copy of the build between two requests shows the change on the second (FR-012); with sys.modules['sphinx'] and every imported sphinx.* set to None by monkeypatch, the front page and a nested page still answer 200 with their content (FR-013).
+Verified: `uv run pytest tests/test_views.py -q`: 15 passed. These tests passed on first run because T003's view already reads per request and never imports Sphinx, so there was no red step; instead I mutated the mechanism: a lazy `import sphinx` inside PageView.get fails both no-Sphinx cases, and a cached page read fails the rebuild case.
+Next: T006, documentation, translations, demo guide.
+Watch: a module-level `import sphinx` in mvp_sphinx/ is not caught by the sys.modules test (the module is imported before the patch); deptry is what catches that, as the plan says. Also corrected the criteria lists on T003 (SC-001, SC-002) and T004 (none) in feature-state.json.
