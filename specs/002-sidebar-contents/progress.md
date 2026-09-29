@@ -27,3 +27,10 @@ Did: `mvp_sphinx/navigation.py` (`NavigationWriter`, `write_navigation`, `setup`
 Verified: `uv run pytest tests/test_navigation.py tests/test_docs_build.py -q` → 53 passed; red first (extension module missing); mutating the ancestor guard, the builder-name check and the title lookup each fails a test; `uv run pre-commit run --all-files` → all hooks pass.
 Next: T002, `DocsBuild.navigation()` and `navigation_stamp()`.
 Watch: `ref == "self"` needed no clause of its own, since `self` is never in `env.titles`.
+
+## 2026-09-29T23:59:00Z · Implementer US1 · T002
+
+Did: `DocsBuild.navigation()`, `navigation_stamp()` and the recursive `valid_entries` staticmethod; `TestNavigation` and `TestNavigationStamp` in `tests/test_docs_build.py`.
+Verified: `uv run pytest tests/test_docs_build.py -q` → 57 passed; red first (`navigation` did not exist); mutating the `ValueError` catch, the url check, the top-level dict check and the inode part of the stamp each fails a test (the inode one after the replacement test was made to hold size and mtime equal); `uv run pre-commit run --all-files` → all hooks pass.
+Next: T003, `DocumentationMenu` and the sidebar tests.
+Watch: `navigation()` finds the file through `contained_file`, so a symlink pointing out of the build reads as absent (tested).

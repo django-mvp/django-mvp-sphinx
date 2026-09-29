@@ -83,8 +83,18 @@
         },
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_docs_build.py::TestNavigation",
+              "tests/test_docs_build.py::TestNavigationStamp"
+            ],
+            "commands": [
+              "uv run pytest tests/test_docs_build.py -q (exit 0, 57 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
         },
         {
           "id": "T003",
