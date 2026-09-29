@@ -265,3 +265,21 @@ the scaffold's "not yet doing anything" changelog line removed and US3's behavio
 dispatch would cost more than the change.
 
 **ADR:** none — a record of cleanup, not a decision
+
+## D21. Review fixes
+
+**Chosen:** Fixed in the one review cycle, directly (each a few lines, test first):
+
+- COR-001 (high): Sphinx's general index and search pages carry no `title`, and answered 500.
+  The title now defaults to empty, and both answer 200 (spec Edge Cases, D12).
+- SEC-001 (medium): an address that was an absolute filesystem path reached the build when it
+  pointed inside it. It could reveal where the build sits on disk, and at a root mount the
+  slash redirect sent a browser off-site. Addresses with an absolute path or an empty, `.` or `..`
+  segment are now refused before any lookup, for pages and files alike.
+- COR-002 (low): `index/`, `a/index/` and `a//` rendered a page at a second address, where its
+  relative links break. A page now has its one address only.
+
+**Why:** All three were reachable from the package's own surface, and each fix is a guard at the
+point every lookup already passes through.
+
+**ADR:** none — tightens the boundary docs/adr/0001 already states
