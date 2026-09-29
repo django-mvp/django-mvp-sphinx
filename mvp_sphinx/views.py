@@ -1,8 +1,12 @@
 """The view that renders a page of the docs build."""
 
+from html import unescape
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urljoin
 
 from django.http import Http404, HttpRequest, HttpResponse
+from django.urls import reverse
+from django.utils.html import strip_tags
 from django.views.generic import TemplateView
 from mvp.views.base import PageMixin
 
@@ -45,3 +49,42 @@ class PageView(PageMixin, TemplateView):
             raise Http404
         self.page_data = page
         return self.render_to_response(self.get_context_data(page_data=page))
+
+    @staticmethod
+    def plain_text(markup: str) -> str:
+        """Return the text of a title Sphinx wrote as HTML.
+
+        Args:
+            markup: A title as it appears in a page's JSON, possibly with inline
+                markup such as ``<code>``.
+
+        Returns:
+            The title's text, unescaped, ready for a template to escape.
+        """
+        return unescape(strip_tags(markup))
+
+    def get_page_title(self) -> str:
+        """Return the page's title as plain text, for the tab."""
+        return self.plain_text(self.page_data["title"])
+
+    def get_breadcrumbs(self) -> list[dict[str, Any]]:
+        """Return the trail from the app's front page down to this page.
+
+        The front page's trail is the app's name alone. On any other page the
+        app's name links to the front page, each parent links to its own page,
+        and the page itself has no link.
+        """
+        if self.kwargs.get("path", "") == "":
+            return [{"text": self.app.name}]
+        crumbs: list[dict[str, Any]] = [
+            {"text": self.app.name, "href": reverse(f"{self.app.namespace}:front_page")}
+        ]
+        for parent in self.page_data.get("parents", []):
+            crumbs.append(
+                {
+                    "text": self.plain_text(parent["title"]),
+                    "href": urljoin(self.request.path, parent["link"]),
+                }
+            )
+        crumbs.append({"text": self.get_page_title()})
+        return crumbs

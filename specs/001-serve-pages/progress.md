@@ -37,3 +37,10 @@ Verified: 34 passed across the touched test files plus the existing demo/smoke t
 Next: T004, tab title and breadcrumbs.
 Watch: on a docs page the sidebar draws the app's empty menu, so the shell's 'Main navigation' nav is absent; the landmark test asserts the shell's <aside> and <main> instead. The h1 test names each page's title text from the fixture rather than reading page.title, so T004 owns the title's first red.
 Attempts: 2 on T003 (one setup TypeError, fixed with PageView.app = None; one test that asserted a nav the docs sidebar does not draw).
+
+## 2026-09-29T23:12:21Z · Implementer US1 · T004
+
+Did: PageView.get_page_title (title HTML stripped to text and unescaped) and get_breadcrumbs (front page: app name alone; otherwise app name linking to <namespace>:front_page, each parent's relative link joined to request.path, then the page unlinked). Titles are auto-escaped where the shell draws them.
+Verified: red first (3 failed; the app-name-in-tab test already passed because the shell adds the mounted app's name), then `uv run pytest tests/test_views.py tests/test_mounted.py -q`: 15 passed. Mutation probes: returning the title unstripped fails the tab and breadcrumb tests; using the parent link unjoined fails the breadcrumb test.
+Next: T005, rebuilds and no-Sphinx tests.
+Watch: none.

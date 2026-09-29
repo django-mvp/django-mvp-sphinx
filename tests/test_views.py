@@ -68,3 +68,45 @@ class TestPageView:
         assert len(links) >= 3
         for href in links:
             assert client.get(urljoin("/docs/", href)).status_code == 200
+
+
+class TestPageTitle:
+    def test_the_tab_title_is_the_pages_title_as_plain_text(self, client, db) -> None:
+        response = client.get("/docs/")
+
+        tab = re.search(r"<title>(.*?)</title>", response.content.decode(), re.S).group(
+            1
+        )
+        assert "guide front page" in tab
+        assert "<code" not in tab
+        assert "&lt;" not in tab
+
+    def test_the_tab_title_names_the_documentation(self, client, db, docs_app) -> None:
+        response = client.get("/docs/")
+
+        tab = re.search(r"<title>(.*?)</title>", response.content.decode(), re.S).group(
+            1
+        )
+        assert str(docs_app.name) in tab
+
+
+class TestBreadcrumbs:
+    def test_the_front_page_shows_only_the_apps_name(
+        self, client, db, docs_app
+    ) -> None:
+        crumbs = client.get("/docs/").context["page"]["breadcrumbs"]
+
+        assert [(str(c["text"]), c.get("href")) for c in crumbs] == [
+            (str(docs_app.name), None)
+        ]
+
+    def test_a_nested_page_links_back_through_its_parents(
+        self, client, db, docs_app
+    ) -> None:
+        crumbs = client.get("/docs/section/nested/page/").context["page"]["breadcrumbs"]
+
+        assert [(str(c["text"]), c.get("href")) for c in crumbs] == [
+            (str(docs_app.name), "/docs/"),
+            ("The section folder", "/docs/section/"),
+            ("Nested page", None),
+        ]
