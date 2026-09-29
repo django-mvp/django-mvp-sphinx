@@ -1,0 +1,302 @@
+{
+  "feature": "001-serve-pages",
+  "branch": "001-serve-pages",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:25:46Z",
+      "note": "specification merged to main in PR #17, merge commit 4a9abee1be99fb55cda983edaa9a9d20f1e15ffd; epic #4, stories #19-#22"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-29T22:57:33Z",
+      "note": "plan.md, research.md, tasks.md: 4 stories, 9 tasks"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-29T22:58:19Z",
+      "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-29T23:05:41Z",
+      "note": "US1..US4 sequential in the feature checkout"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-29T23:23:07Z",
+      "note": "US1-US4 done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-29T23:25:32Z",
+      "note": "one reviewer: correctness+spec+docs lens and security lens"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-29T23:32:14Z",
+      "note": "review fixed and recorded; walkthrough prepared on port 8025"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "forge-aeo-reviewer (for Sam, overnight delegation 2026-09-30; merged by django-mvp-bot)",
+      "at": "2026-09-29T22:25:46Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": "notified",
+      "at": "2026-09-29T23:05:41Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam's overnight delegation), not Sam"
+      ]
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel",
+      "at": "2026-09-29T23:05:21Z",
+      "self_resolved": [
+        "DR-001 medium: markup title on section/index for breadcrumb test (T001) — plan edit",
+        "DR-002 medium: django-flex-menus declared, DEP002 ignore removed (T003) — plan edit",
+        "DR-003 medium: django-mvp floor 0.25.0 (T003) — plan edit",
+        "DR-004 low: roots resolve()d before containment (plan DocsBuild) — plan edit",
+        "DR-005 low: bare-prefix redirect via CommonMiddleware asserted (T008) — plan edit",
+        "DR-006 low: subprocess import test dropped (T005) — plan edit",
+        "DR-007 low: fixture-shape and menu-current tests dropped — plan edit",
+        "DR-008 low: front_page URL name, page_data context key — plan edit"
+      ]
+    },
+    "review": {
+      "approved_by": "review-panel",
+      "at": "2026-09-29T23:31:45Z",
+      "self_resolved": [
+        "COR-001 high: genindex/search pages 500 on missing title — fixed, test first (D21)",
+        "SEC-001 medium: absolute-path addresses reached the build (disk-path oracle, root-mount open redirect) — fixed, test first (D21)",
+        "COR-002 low: index/, a/index/, a// served pages at second addresses — fixed, test first (D21)",
+        "note: text/plain downloads without charset — accepted",
+        "note: inline SVG/HTML from trusted build — accepted under D11"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's 2026-09-30 overnight delegate), on devserver:8025",
+      "at": "2026-09-29T23:35:45Z",
+      "self_resolved": [
+        "no leading-underscore names in code the branch adds — DocsBuild._contained_file/_is_canonical renamed contained_file/is_canonical, _encoding local removed; Sphinx folder names and the gettext _ alias kept (D22)"
+      ]
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 19,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv add --group dev \"sphinx>=8.1\"",
+              "uv run pytest (throwaway probe of guide_build and handbook_build): 1 passed",
+              "uv run pre-commit run --all-files: all hooks passed",
+              "exit_code: 0; criteria: []"
+            ]
+          }
+        },
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_docs_build.py -x (red: ModuleNotFoundError mvp_sphinx.docs_build)",
+              "uv run pytest tests/test_docs_build.py -x: 15 passed",
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_docs_build.py::TestPage']; exit_code: 0; criteria: []"
+            ]
+          }
+        },
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_mounted.py tests/test_views.py (red: ModuleNotFoundError mvp_sphinx.mounted, then TypeError from as_view(app=) until PageView.app existed)",
+              "uv run pytest tests/test_mounted.py tests/test_views.py tests/test_demo.py tests/test_smoke.py tests/test_docs_build.py -q: 34 passed",
+              "uv run mypy: no issues in 5 source files",
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_mounted.py::TestDocumentationApp', 'tests/test_views.py::TestPageView']; exit_code: 0; criteria: ['SC-001', 'SC-002']"
+            ]
+          }
+        },
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_views.py -k \"TestPageTitle or TestBreadcrumbs\" (red: 3 failed, 1 passed)",
+              "uv run pytest tests/test_views.py tests/test_mounted.py -q: 15 passed",
+              "uv run mypy: no issues",
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_views.py::TestPageTitle', 'tests/test_views.py::TestBreadcrumbs']; exit_code: 0; criteria: []"
+            ]
+          }
+        },
+        {
+          "id": "T005",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_views.py -k TestServingWithoutSphinx: 3 passed (behaviour already delivered by T003; locked with mutation probes)",
+              "uv run pytest tests/test_views.py -q: 15 passed",
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_views.py::TestServingWithoutSphinx']; exit_code: 0; criteria: ['SC-003']"
+            ]
+          }
+        },
+        {
+          "id": "T006",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_demo.py (red: 1 failed, 3 passed; then 4 passed)",
+              "uv run sphinx-build -b json -q -w /tmp/demo-warn.txt demo/docs demo/docs/_build/json: exit 0, empty warnings file",
+              "DJANGO_SETTINGS_MODULE=tests.settings PYTHONPATH=.. uv run django-admin makemessages -l en (run in mvp_sphinx/)",
+              "uv run pytest tests/test_demo.py tests/test_smoke.py -q: 9 passed",
+              "uv run pre-commit run --all-files: all hooks passed",
+              "tests_added: ['tests/test_demo.py::TestDocumentationEntry']; exit_code: 0; criteria: ['SC-002']"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 20,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T007",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_docs_build.py::TestFile",
+              "tests/test_views.py::TestFiles"
+            ],
+            "commands": [
+              "uv run pytest tests/test_docs_build.py -k TestFile -q (red: 18 failed, AttributeError DocsBuild has no attribute file)",
+              "uv run pytest tests/test_views.py tests/test_docs_build.py -q: 66 passed",
+              "uv run pytest tests -q: 78 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "code": [
+              "mvp_sphinx/docs_build.py:56",
+              "mvp_sphinx/views.py:36"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P2",
+      "issue": 21,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T008",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestAddresses",
+              "tests/test_views.py::TestMissingBuild",
+              "tests/test_views.py::TestBrokenPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k \"TestAddresses or TestMissingBuild or TestBrokenPage\" -q (red: 1 failed, 11 passed; the redirect answered 404 not 301)",
+              "uv run pytest tests/test_views.py -q: 45 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "code": [
+              "mvp_sphinx/views.py:36",
+              "mvp_sphinx/views.py:73"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US4",
+      "priority": "P3",
+      "issue": 22,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T009",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestMenuEntry",
+              "tests/test_views.py::TestNamingAnApp",
+              "tests/test_views.py::TestTwoAppsSideBySide"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k \"Naming or SideBySide\" -q: 5 passed on first run (behaviour already delivered by T003/T004; no red step, locked by mutation probes)",
+              "uv run pytest tests/test_views.py tests/test_mounted.py -q: 57 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "code": [
+              "tests/urls.py:12"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": 45,
+    "draft": false
+  },
+  "escalations": []
+}

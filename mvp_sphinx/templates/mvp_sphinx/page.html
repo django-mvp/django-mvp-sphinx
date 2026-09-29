@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}
+  {{ page.title }}
+{% endblock title %}
+{% block content %}
+  <c-page>
+    <c-container>
+      <article class="prose py-4">
+        {{ page_data.body|safe }}
+      </article>
+    </c-container>
+  </c-page>
+{% endblock content %}

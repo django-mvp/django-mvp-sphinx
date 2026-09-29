@@ -25,6 +25,8 @@ contents in the sidebar (#5) reads that file.
 **Why:** Each feature then asks only for what it uses, and the pages can be tried on any existing
 JSON build.
 
+**ADR:** none — a property of what this feature needs from the build; #5 records its own configuration need
+
 ## D2. A missing build is not found, never a failed start
 
 **Ambiguous:** What a documentation app does when its build directory doesn't exist yet.
@@ -36,6 +38,8 @@ FR-012).
 **Why:** The build is produced outside the site and often after it, on a fresh checkout or in a
 deploy step. Refusing to start would take the whole site down over optional documentation, and a
 startup check would also go stale when the build is removed later.
+
+**ADR:** docs/adr/0001-read-the-docs-build-per-request-and-serve-only-images-and-downloads.md
 
 ## D3. Only images and downloads are served as files
 
@@ -50,6 +54,8 @@ and none of those is for readers. The prototype's first version let `_images/../
 through before it was fixed, so the boundary is a stated requirement with its own scenarios
 (User Story 2, scenarios 4 and 5).
 
+**ADR:** docs/adr/0001-read-the-docs-build-per-request-and-serve-only-images-and-downloads.md
+
 ## D4. The page's own title is the single page heading
 
 **Ambiguous:** Sphinx's page body always opens with the document's title as a heading, and the
@@ -60,6 +66,8 @@ application shell can also draw a page title.
 **Why:** Two top-level headings saying the same thing would fail an accessibility review. The
 prototype kept the document's own heading, restyled to match the site's other page titles. How it
 looks is left to the plan.
+
+**ADR:** none — a template detail of this feature, stated in the template itself
 
 ## D5. The documentation app's name heads the breadcrumbs and the tab
 
@@ -73,6 +81,8 @@ breadcrumbs hold the app's name alone.
 **Why:** django-mvp's mounted apps already name themselves in the tab and breadcrumbs, and the
 prototype followed that. A host with two documentation apps needs to tell them apart.
 
+**ADR:** none — follows django-mvp's own mounted-app title rule
+
 ## D6. The menu entry is part of this feature
 
 **Ambiguous:** The issue doesn't mention how readers find the docs, and #8 and #9 both refer to "the
@@ -85,6 +95,8 @@ page (FR-014, User Story 4).
 excluded readers don't see "the menu entry" needs an entry to exist first. The prototype offered it
 the same way.
 
+**ADR:** none — local to this feature
+
 ## D7. Several documentation apps side by side
 
 **Ambiguous:** The issue speaks of one docs build.
@@ -94,6 +106,8 @@ and none affects another (FR-016).
 
 **Why:** CONTEXT.md and CONSTITUTION.md Article XII both say a project needing two builds mounts two
 documentation apps. That only works if this feature allows more than one.
+
+**ADR:** none — Django's instance namespaces already decide how several mounts coexist; the requirement is FR-016
 
 ## D8. The trailing-slash redirect is permanent, keeps the query string, and skips files
 
@@ -106,6 +120,8 @@ download addresses are never redirected (FR-009).
 for the relative links Sphinx writes into them to resolve, and a file address with a slash
 appended would no longer name the file.
 
+**ADR:** none — Django's own APPEND_SLASH behaviour, nothing a reader would ask about
+
 ## D9. A page file that can't be read is a server error
 
 **Ambiguous:** What happens when a page's data file exists but can't be read as page data.
@@ -114,6 +130,8 @@ appended would no longer name the file.
 
 **Why:** A corrupt file is a broken build, and the host project needs to see it in its error
 reporting. Answering "not found" would hide the fault behind a response that looks like a typo.
+
+**ADR:** none — local to the view; the docstring states it
 
 ## D10. No access rule and no styling in this feature
 
@@ -124,6 +142,8 @@ page, or previous and next links (#5, #6).
 **Why:** Each has its own feature request, and each depends on this one. Folding any of them in
 would make this feature wait on decisions that belong to them.
 
+**ADR:** none — scope split between features, recorded in their specs
+
 ## D11. The page body is trusted HTML
 
 **Chosen:** A page's body is displayed as the HTML Sphinx wrote, without escaping.
@@ -132,6 +152,8 @@ would make this feature wait on decisions that belong to them.
 same trust level as its templates. Escaping it would break every page. Uploading builds through
 the site, the case where this would be unsafe, is ruled out by CONSTITUTION.md Article XII.
 
+**ADR:** none — the trust boundary is CONSTITUTION Article XII (no uploaded builds)
+
 ## D12. Sphinx's own index and search pages get no special handling
 
 **Chosen:** If the build contains Sphinx's general index or search page, they are served like any
@@ -139,3 +161,137 @@ other page. Nothing makes them work as an index or a search.
 
 **Why:** Search is #10. A working general index hasn't been asked for, and it would need its own
 feature request.
+
+## Decisions made while planning
+
+**ADR:** none — nothing built
+
+## D13. The page body sits in the shell's `prose` styles
+
+**Chosen:** The body is wrapped in an `<article>` carrying the `prose` class django-mvp's
+stylesheet already emits. No stylesheet of this package's own, and no styling of Sphinx-specific
+markup.
+
+**Why:** Without it the shell's CSS reset leaves headings, lists and paragraphs indistinguishable,
+and the walkthrough would judge an unreadable page. `prose` is the host's own typography, so
+Article XIII holds. Admonitions, code blocks and tables are #7's (D10).
+
+**ADR:** none — a styling choice #7 will revisit
+
+## D14. A slashless address redirects only when the slashed one is a page
+
+**Chosen:** The trailing-slash redirect fires only when the slashed address has a page behind it.
+A slashless address with nothing behind it is not found straight away.
+
+**Why:** That is how Django's own `APPEND_SLASH` behaves, and it keeps FR-010 true for
+slashless typos: redirecting first would answer an unknown address with a 301 and then a 404.
+
+**ADR:** none — matches Django's APPEND_SLASH
+
+## D15. Every documentation app has its own namespace
+
+**Chosen:** `DocumentationApp` has a `namespace` attribute, `docs` by default. A host mounting a
+second app gives it a different one. The app's empty sidebar menu is named from it.
+
+**Why:** Two mounts under one instance namespace make `reverse()` pick one of them for both (Django
+warns with `urls.W005`), and django-flex-menus registers every `Menu` by a global name. Deriving
+both from one attribute the host already sets for the second app keeps FR-016 to one keyword.
+
+**ADR:** none — follows from Django's instance namespaces; documented in the README
+
+## D16. Page lookups are confined to the build like file lookups are
+
+**Chosen:** The page lookup resolves its candidate `.fjson` and refuses anything outside the
+build directory, the same check the file lookup makes against its folder.
+
+**Why:** The prototype's upstream view joined the address onto the build directory unchecked, so
+`../` could read any `.fjson` file on the disk. Only `.fjson` files were reachable and they are
+rendered, not returned, but nothing about a page address should reach outside the build.
+
+**ADR:** docs/adr/0001-read-the-docs-build-per-request-and-serve-only-images-and-downloads.md
+
+## D17. Tests and the demo build real docs with Sphinx
+
+**Chosen:** Sphinx is added to the development dependency group. The suite builds its fixture docs
+with it once per session, and the demo's guide is built with it. The package never imports it.
+
+**Why:** A hand-written `.fjson` fixture would drift from what Sphinx writes. Article VII's
+"tooling from the shared bundle" rule is about shared development tools; Sphinx here is test input
+specific to this package. FR-013 is covered by serving with Sphinx blocked from import.
+
+**ADR:** none — CONSTITUTION Article XII already states that serving never needs Sphinx
+
+## D18. Design review outcome
+
+One reviewer, three lenses, verdict approve with no critical or high findings. Applied to the
+plan, each checked against the finding's own evidence:
+
+- DR-001: `section/index.rst` gets a title with inline code, so a breadcrumb carries markup and
+  T004's plain-text assertion can fail.
+- DR-002: django-flex-menus declared directly (the package imports `flex_menu`); the stale
+  `DEP002` ignore for django-mvp removed.
+- DR-003: django-mvp floor raised to 0.25.0, the version the plan was read against.
+- DR-004: the build root and file folders are `resolve()`d before containment checks.
+- DR-005: the bare prefix's slash redirect is Django's `CommonMiddleware`; T008 asserts it and the
+  README says so.
+- DR-006: subprocess import test dropped; deptry already fails on a dev-only import.
+- DR-007: the fixture-shape test and the menu-current test dropped (no spec provenance).
+- DR-008: URL name `front_page` and context key `page_data`, not `index` and `doc`, which
+  CONTEXT.md avoids. These become public names at the first release.
+
+Editorial notes swept in the same edit (#5 not #3, #8 not FS-005, menu names unique by
+convention, `db` fixture for page tests, docstring notes on `namespace` and the `index/` alias).
+
+**ADR:** none — a record of the design review, not a decision
+
+## D19. `tests/urls.py` changed by US4, as planned
+
+**Chosen:** The US4 change to `tests/urls.py`, flagged as a change to a pre-existing test file,
+is accepted.
+
+**Why:** The file is the suite's urlconf, not a test. T009 names it for the second documentation
+app's mount, and the change only adds that mount. No assertion anywhere was altered or removed.
+
+**ADR:** none — a triage record for this branch
+
+## D20. Convergence cleanup done directly
+
+**Chosen:** Three small cleanups made without a dispatch: a file lookup must now stay inside the
+build as well as its folder, so a `_images` folder that is itself a symlink cannot widen the
+boundary (test first); the handbook fixture moved to `tests/conftest.py` in place of two copies;
+the scaffold's "not yet doing anything" changelog line removed and US3's behaviour added.
+
+**Why:** Each is a few lines inside this feature's own diff, found reading it at convergence. A
+dispatch would cost more than the change.
+
+**ADR:** none — a record of cleanup, not a decision
+
+## D21. Review fixes
+
+**Chosen:** Fixed in the one review cycle, directly (each a few lines, test first):
+
+- COR-001 (high): Sphinx's general index and search pages carry no `title`, and answered 500.
+  The title now defaults to empty, and both answer 200 (spec Edge Cases, D12).
+- SEC-001 (medium): an address that was an absolute filesystem path reached the build when it
+  pointed inside it. It could reveal where the build sits on disk, and at a root mount the
+  slash redirect sent a browser off-site. Addresses with an absolute path or an empty, `.` or `..`
+  segment are now refused before any lookup, for pages and files alike.
+- COR-002 (low): `index/`, `a/index/` and `a//` rendered a page at a second address, where its
+  relative links break. A page now has its one address only.
+
+**Why:** All three were reachable from the package's own surface, and each fix is a guard at the
+point every lookup already passes through.
+
+**ADR:** none — tightens the boundary docs/adr/0001 already states
+
+## D22. No leading-underscore names
+
+**Chosen:** `DocsBuild._contained_file` and `DocsBuild._is_canonical` are now `contained_file` and
+`is_canonical`. The throwaway `_encoding` local in `PageView.get` is gone. Two kinds of underscore
+name stay: `_images`, `_downloads`, `_build`, `_sources` and `_static` are folder names Sphinx
+writes, and `_` is the `gettext_lazy` alias CONSTITUTION Article VIII requires.
+
+**Why:** Asked for at the walkthrough. The maintainer's standard is that the code this project
+writes never uses leading-underscore names: helpers, methods, templates or constants.
+
+**ADR:** none — a naming standard, not a decision of this feature

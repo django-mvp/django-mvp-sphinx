@@ -18,3 +18,10 @@ class TestOverviewPage:
         sidebar = overview_page.split('aria-label="Main navigation"', 1)[1]
         sidebar = sidebar.split("</ul>", 1)[0]
         assert f'href="{reverse("overview")}"' in sidebar
+
+
+class TestDocumentationEntry:
+    def test_the_sidebar_links_the_documentation(self, overview_page: str) -> None:
+        sidebar = overview_page.split('aria-label="Main navigation"', 1)[1]
+        sidebar = sidebar.split("</ul>", 1)[0]
+        assert 'href="/docs/"' in sidebar
