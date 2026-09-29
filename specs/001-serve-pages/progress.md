@@ -64,21 +64,21 @@ Watch: the .po header is makemessages' default (placeholders); the CHANGELOG sti
 Did: the docs step of the verify run named `DocsBuild` and `PageView` as public names no page quotes as code, so the README's Usage section now quotes both and the `view_class` hook.
 Verified: re-ran the full verify after this change (result in the completion report).
 
-## 2026-09-30T00:00:00Z · Implementer US2 · T007
+## 2026-09-29T23:19:02Z · Implementer US2 · T007
 
 Did: DocsBuild.file (only `_images/` and `_downloads/`; the target must resolve inside its own folder, resolved first; `_contained_file` gained an optional `within` folder) and PageView.get step 1: a file answers with a FileResponse and the guessed content type. README says images and downloads are served and nothing else; CHANGELOG entry.
 Verified: red first (`uv run pytest tests/test_docs_build.py -k TestFile`: 18 failed, AttributeError on `file`), then `uv run pytest tests/test_views.py tests/test_docs_build.py -q`: 66 passed; `uv run pytest tests -q`: 78 passed; pre-commit clean (mypy needed a `type: ignore[override]` because a file answers with a streaming response). Mutation probes: dropping the `_images`/`_downloads` check fails 17 tests; comparing against the build root instead of the folder fails 7.
 Next: T008, redirects, not found, missing build, broken page.
 Watch: the guide's image and download are on `page/`, not the front page (the brief says front page); the tests read them from `page/`. The traversal client tests reach the view with the `..` intact (checked: resolver kwargs `path='_images/../environment.pickle'`), so the 404 is DocsBuild's containment, not URL normalisation.
 
-## 2026-09-30T00:10:00Z · Implementer US3 · T008
+## 2026-09-29T23:20:09Z · Implementer US3 · T008
 
 Did: PageView.get step 3 (a slashless address with no page but a page at its slashed form answers a permanent redirect to `request.get_full_path(force_append_slash=True)`), step 4 stays Http404. Tests: TestAddresses (301 with query, `/docs?x=1` redirect from CommonMiddleware, slashless unknown 404, image never redirected, unknown address renders the same templates as a non-documentation unknown address, incl. 404.html), TestMissingBuild (overview 200; prefix, page and image 404; a build copied in afterwards is served by the next request), TestBrokenPage (raises JSONDecodeError; 500 with raise_request_exception off). README: missing-build behaviour, slash redirects and CommonMiddleware/APPEND_SLASH, broken build.
 Verified: red first (`uv run pytest tests/test_views.py -k "TestAddresses or TestMissingBuild or TestBrokenPage"`: 1 failed, 11 passed; the other tests describe behaviour T002/T003/T007 already delivered), then `uv run pytest tests/test_views.py -q`: 45 passed; pre-commit clean. Mutation probes: catching ValueError around page() fails the broken-page raise test; redirecting without checking that the slashed page exists fails 16 tests.
 Next: T009, menu entry, naming, two apps.
 Watch: no code was needed for the bare-prefix redirect or the missing build; the tests lock them.
 
-## 2026-09-30T00:25:00Z · Implementer US4 · T009
+## 2026-09-29T23:21:20Z · Implementer US4 · T009
 
 Did: tests/urls.py mounts a second DocumentationApp (`handbook`, name "Administrator's handbook", namespace `handbook`, build_dir a placeholder until a test points it at handbook_build) at `manuals/admin/`. Tests: TestMenuEntry (entry's view resolves to the front page, following it answers it; a second app's entry leads to its own prefix), TestNamingAnApp (tab and first breadcrumb, front page and nested, carry the host's name and not "Documentation"), TestTwoAppsSideBySide (each build served only at its own prefix; breadcrumb hrefs stay within each prefix; each tab names only its own app). README: naming an app, several apps; CHANGELOG entry. No code change in mvp_sphinx/.
 Verified: `uv run pytest tests/test_views.py tests/test_mounted.py -q`: 57 passed; pre-commit clean. These tests passed on first run because T003/T004 already read name and namespace from the app per request, so there was no red step; mutation probes instead: hard-coding the `docs:front_page` reverse fails the side-by-side breadcrumb test, hard-coding "Documentation" as the front-page crumb fails a test only after I added the named front-page breadcrumb test.
