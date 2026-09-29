@@ -53,7 +53,7 @@ read from `mvp/static/css/django-mvp.css`). Headings, paragraphs, lists, block q
 inline code therefore already read as the site's own text and follow the theme.
 
 FR-001 needs no new styling for those elements: daisyUI's override also drops Typography's
-backticks around inline code and draws it as a bordered chip from `--color-base-300`. What `prose`
+backticks around inline code and draws it on `--color-base-200` with a `--color-base-300` border. What `prose`
 does not cover is Sphinx's own class names (admonitions, Pygments tokens, captions, glossary,
 labels, menu paths). The stylesheet adds those and nothing that `prose` already does.
 

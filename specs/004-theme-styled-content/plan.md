@@ -99,7 +99,8 @@ values (research R5). Appearance is judged at the walkthrough, per the testing s
 ### The page template
 
 `mvp_sphinx/templates/mvp_sphinx/page.html` extends the `styles` block with `{{ block.super }}`
-and one `<link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">`, and adds
+and one `<link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">` (the template
+loads `static`; `extends` does not inherit loads), and adds
 `mvp-sphinx-content` to the article's classes (US1). US3 switches the article to render the
 rewritten body from the context instead of `page_data.body`. Nothing else in the template changes:
 width and layout belong to #4 and the sibling features.
@@ -114,20 +115,27 @@ class BodyRewriter(HTMLParser):
     def rewrite(cls, markup: str) -> str: ...
 ```
 
-`rewrite` feeds the body through a fresh parser and returns it with two changes, everything else
-re-emitted exactly as it arrived (start tags from `get_starttag_text()`, entity and character
-references as written, comments kept; `convert_charrefs=False`):
+`rewrite` feeds the body through a fresh parser that only **records insertion points**, as
+offsets into the original string (from `getpos()`), and then returns the original string with
+those insertions spliced in. Nothing the parser reads is re-emitted, so every byte it does not
+insert beside comes back as it arrived by construction: entity references with or without their
+semicolon, a bare `&` from a `raw` directive, tag case and whitespace (design review ARCH-001).
+The two insertions:
 
 - **Every outermost `<table>` is wrapped** (US3, FR-008) in
-  `<div class="mvp-sphinx-scroll" role="region" tabindex="0" aria-label="…">`. The label is the
-  table's caption text when it has one, else the translated word "Table" (`gettext`, the one new
-  string). A table nested in a table is not wrapped again. The wrapper's opening tag can only be
-  written once the caption has been read, so the table's output is held until its closing tag.
-- **Every `a.headerlink` gets an `aria-label`** (US4, FR-010; US5 checks glossary terms): the text
+  `<div class="mvp-sphinx-scroll" role="region" tabindex="0" aria-label="…">`, inserted before
+  the table's start tag, with `</div>` after its end tag. The label is the text of the table's
+  `<caption>` up to its heading link (the `span.caption-text`), else the translated word "Table"
+  (`gettext_lazy as _`, `str()`ed; the one new string, added to `django.po` with
+  `makemessages`). A table nested in a table is not wrapped again. The wrapper's opening tag is
+  inserted at its recorded offset once the caption has been read.
+- **Every `a.headerlink` gets an `aria-label`** (US4, FR-010, glossary terms included): the text
   of the element that directly holds the link, up to the link, whitespace collapsed; prefixed by
-  the link's `title` and a colon when it has one (`Link to this heading: Installing`). The title
-  is already in the docs build's language (research R1), so the package adds no string. The label
-  is built from unescaped text and escaped once for the attribute.
+  the link's `title` and a colon when it has one (`Link to this heading: Installing`). Inserted
+  just after `<a`. The title is already in the docs build's language (research R1), so the
+  package adds no string.
+
+Both labels are built from unescaped text and escaped once with `django.utils.html.escape`.
 
 `PageView.get` passes `page["body"]` through `BodyRewriter.rewrite` and hands the result to the
 template as `body`, marked safe: the body is the host's own build, trusted as in FS-001, and the
@@ -155,7 +163,8 @@ rewrite escapes the only text it moves into an attribute. One request, one pass.
   nothing is left); every selector starts with `.mvp-sphinx-content` (FR-016); the contrast of
   every pair the package creates is at least 4.5:1 in django-mvp's `[data-theme=light]` and
   `[data-theme=dark]` values, read from the installed `mvp/static/css/django-mvp.css` (research
-  R5). Pairs: base-content on each admonition background (US1); code text, each token colour and
+  R5). Pairs: base-content and the muted colour on base-100 and on each admonition background
+  (US1; design review SPEC-001: captions and heading-link glyphs sit inside admonitions); code text, each token colour and
   the line-number colour on the code background and on the emphasised-line background (US2).
 - No test asserts a colour value, a layout, a width, a class chosen for looks, or wording.
 
@@ -202,5 +211,5 @@ README.md, CHANGELOG.md               # every story, for what it adds
 | Choice | Why the simpler option does not do |
 |---|---|
 | An HTML rewrite in Python | CSS cannot give a link an accessible name or make an element focusable (research R1). A script would add JavaScript to every page, which the spec rules out for the copy button on the same grounds. |
-| Holding a table's output until it closes | The wrapper's label comes from the caption, which follows the `<table>` tag. |
+| Splicing into the original rather than re-emitting | A token-by-token re-emission alters bare ampersands, semicolon-less references and tag case (ARCH-001); insertions at recorded offsets leave everything else untouched. |
 | A contrast computation in the tests | There are no browser tests in this repository, and FR-015 is a number. |

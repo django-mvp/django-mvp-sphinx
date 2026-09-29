@@ -214,3 +214,19 @@ guide. An orphan page adds no entry to the contents, and it keeps the build free
 any toctree" warning the fixture forbids.
 
 **Revisit if:** a later feature wants the page in the contents.
+
+## D8. Design review outcome (S3R)
+
+**Decision:** One reviewer, three lenses: approve, no critical or high findings. All four
+findings were applied as plan edits because each was cheaper to fix than to carry. ARCH-001
+(medium): the rewrite splices insertions into the original string instead of re-emitting parsed
+tokens, which altered bare ampersands and semicolon-less references; T004's byte-for-byte test
+gains those inputs. SPEC-001 (medium): the muted text colour joins the contrast pairs, on base-100
+and on every admonition background. SPEC-002 (low): the glossary-term label test moves from T008
+to T006, where it can be red. ARCH-002 (medium): the contrast helpers sit on one class in the test
+module. Notes applied: caption label without the glyph, `gettext_lazy`, `{% load static %}`,
+`django.utils.html.escape`, no unknown lexer in the demo.
+
+**Why:** Each remedy is a paragraph in the plan; none adds a task.
+
+**Revisit if:** the S6 reviewer finds a defect one of these remedies introduced.

@@ -42,10 +42,10 @@ Plan, *The stylesheet* items 1–2 and *Tests and fixtures* (the stylesheet test
 `[tool.forge.conformance] non-mirror-paths = ["tests/test_static/"]`. Tests, class
 `TestContentStylesheet`: no literal colour in any colour-bearing declaration (SC-001); every
 selector is scoped under `.mvp-sphinx-content` (FR-016); base-content on every
-`--mvp-sphinx-admonition-*-bg` is ≥ 4.5:1 in django-mvp's light and dark themes, read from the
+`--mvp-sphinx-admonition-*-bg`, and the muted colour on base-100 and on every admonition background, is ≥ 4.5:1 in django-mvp's light and dark themes, read from the
 installed `mvp/static/css/django-mvp.css` (FR-015, SC-005; research R5). The contrast helpers
-(OKLCH parse, `color-mix` in OKLab, OKLab → sRGB, WCAG contrast) live in the test module, each a
-small named function. Demo: `content-tour.rst` with every admonition meaning, an unknown kind, a
+(OKLCH parse, `color-mix` in OKLab, OKLab → sRGB, WCAG contrast) live on one class in the test module
+as classmethods (Article X; design review ARCH-002). Demo: `content-tour.rst` with every admonition meaning, an unknown kind, a
 generic admonition with a custom title, a nested admonition, a see-also box and the three version
 notes; linked from `demo/docs/index.rst` and listed in its hidden toctree. CHANGELOG line.
 
@@ -64,7 +64,7 @@ text, each token colour and the line-number colour, each on `--mvp-sphinx-code-b
 with headroom; record the chosen mixes in `decisions.md` only if a role had to move far from its
 hue. Demo: Python, a shell session and JSON; one block with a caption, `:linenos:` and
 `:emphasize-lines:`; one block in a language Pygments cannot lex (`.. code-block:: text` or an
-unknown lexer that builds without a warning). CHANGELOG line.
+(no unknown lexer builds without a warning in Sphinx 9.1). CHANGELOG line.
 
 ## US3 — Wide content stays inside the page (P2)
 
@@ -82,7 +82,8 @@ Plan, *The body rewrite* (the table half) and *The page template*. Tests, class
 uncaptioned table's label is not empty; a table nested in a table is wrapped once; a table inside
 an admonition or a list item is wrapped; caption text holding `&amp;` or `"` is escaped once in
 the attribute; markup with no table comes back byte-for-byte, entity references (`&amp;`,
-`&#8217;`) and comments included. `tests/test_views.py`: the fixture page's tables render
+`&#8217;`), a bare `R&D`, a semicolon-less `&copy`, an upper-case `</TABLE >` and comments
+included (ARCH-001). The table's label is its caption text without the heading link's glyph. `tests/test_views.py`: the fixture page's tables render
 wrapped (the view uses the rewrite). README: `BodyRewriter` in *How pages look*, what it adds and
 that a `PageView` subclass gets it. Docstrings per `docs/contributing/standards/code-documentation.md`.
 
@@ -109,7 +110,8 @@ Plan, *The body rewrite* (the heading-link half). Tests: a heading's link is lab
 too; a link with no `title` is labelled with the text alone; heading text with `&amp;` is
 unescaped then escaped once; the link's `href` is untouched. `tests/test_views.py`: every heading
 link on the fixture page has an `aria-label` holding its heading's text, and its `href` is the
-heading's anchor on the page. README line.
+heading's anchor on the page. Also: a glossary term's link (`<dt id="term-…">`) is labelled with
+its `title` and the term's text (moved from T008, design review SPEC-002). README line.
 
 ### T007 — Heading links revealed on hover and focus, anchors clear of the top bar
 
@@ -124,11 +126,9 @@ Issue: #38. Delivers FR-010 (glossary terms), FR-012, FR-013.
 
 ### T008 — Glossary terms, cross-references, keys, labels and menu paths
 
-**Files**: `mvp_sphinx/static/mvp_sphinx/content.css`, `tests/test_page_body.py`,
-`tests/sphinx/guide/content.rst`, `demo/docs/content-tour.rst`, `CHANGELOG.md`
+**Files**: `mvp_sphinx/static/mvp_sphinx/content.css`, `demo/docs/content-tour.rst`, `CHANGELOG.md`
 
-Plan, *The stylesheet* item 6. Test: a glossary term's link (`<dt id="term-…">`) is labelled with
-its `title` and the term's text. Demo: a glossary, cross-references to its terms and to another
+Plan, *The stylesheet* item 6. No test (appearance; the term's link name is T006's). Demo: a glossary, cross-references to its terms and to another
 page, `:kbd:`, `:guilabel:` and `:menuselection:`. CHANGELOG line.
 
 ---
@@ -143,7 +143,7 @@ page, `:kbd:`, `:guilabel:` and `:menuselection:`. CHANGELOG line.
 | FR-004, FR-005 | T002 |
 | FR-006, FR-007 | T003 |
 | FR-008, FR-009, SC-003 | T004, T005 |
-| FR-010, SC-004 | T006, T008 |
+| FR-010, SC-004 | T006, T007 |
 | FR-011, FR-018 | T007 |
 | FR-012, FR-013 | T008 |
 | FR-014, SC-002 | T001–T003 (every colour is a theme custom property) |

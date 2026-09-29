@@ -2,7 +2,7 @@
   "feature": "004-theme-styled-content",
   "branch": "004-theme-styled-content",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PLAN",
+  "state": "DESIGN_REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -13,6 +13,11 @@
       "state": "PLAN",
       "at": "2026-09-29T23:45:47Z",
       "note": "plan.md, research.md, tasks.md: 5 stories, 8 tasks"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-29T23:47:12Z",
+      "note": "one design reviewer, three lenses, one round"
     }
   ],
   "gates": {
@@ -28,6 +33,16 @@
     "merge": {
       "approved_by": null,
       "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel",
+      "at": "2026-09-29T23:55:43Z",
+      "self_resolved": [
+        "ARCH-001 medium: rewrite splices into the original string (T004 byte-for-byte inputs added) - plan edit",
+        "SPEC-001 medium: muted colour added to contrast pairs (T002) - plan edit",
+        "SPEC-002 low: glossary-term label test moved T008 -> T006 - plan edit",
+        "ARCH-002 medium: contrast helpers on one test class (T002) - plan edit"
+      ]
     }
   },
   "stories": [
@@ -136,9 +151,13 @@
       "max": 120
     },
     "design_review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     }
   },
-  "escalations": []
+  "escalations": [],
+  "pr": {
+    "number": 48,
+    "draft": true
+  }
 }
