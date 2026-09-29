@@ -7,7 +7,8 @@ and serving its pages through a documentation app: the pages render in the host'
 shell and theme, and the contents become the app sidebar's menu. Serving never
 imports Sphinx. The only Sphinx code is the extension that writes the
 navigation file during the build. `CONSTITUTION.md` Article XII lists what stays
-out of scope. None of it is built yet.
+out of scope. Only page serving is built so far, and the contents menu and the
+Sphinx extension are not.
 
 ## Stack and commands
 
@@ -48,6 +49,14 @@ resolved renders as empty output, a Tailwind class the packaged stylesheet does
 not emit does nothing, and a menu entry whose URL will not resolve is dropped
 from the tree. None of them raise, which is why `tests/test_demo.py` asserts
 against the rendered page rather than against the objects behind it.
+
+The demo serves its own user guide, whose source is in `demo/docs/`, through a
+documentation app mounted at `/docs/`. The build is gitignored, so build it before
+opening that page and again after editing the guide:
+
+```bash
+uv run sphinx-build -b json demo/docs demo/docs/_build/json
+```
 
 **Adding a page** takes four things: a view in `demo/views.py` on
 `mvp.views.MVPTemplateView`, a route in `demo/urls.py`, a template extending

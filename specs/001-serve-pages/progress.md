@@ -51,3 +51,10 @@ Did: TestServingWithoutSphinx in tests/test_views.py: a page file rewritten in a
 Verified: `uv run pytest tests/test_views.py -q`: 15 passed. These tests passed on first run because T003's view already reads per request and never imports Sphinx, so there was no red step; instead I mutated the mechanism: a lazy `import sphinx` inside PageView.get fails both no-Sphinx cases, and a cached page read fails the rebuild case.
 Next: T006, documentation, translations, demo guide.
 Watch: a module-level `import sphinx` in mvp_sphinx/ is not caught by the sys.modules test (the module is imported before the patch); deptry is what catches that, as the plan says. Also corrected the criteria lists on T003 (SC-001, SC-002) and T004 (none) in feature-state.json.
+
+## 2026-09-29T23:14:37Z · Implementer US1 · T006
+
+Did: README Usage section (sphinx-build -b json, DocumentationApp, build_dir, mount, menu_item, Sphinx not needed where the site runs); CHANGELOG Unreleased entry; demo guide source in demo/docs/ (front page, getting-started with an image and a download, tutorials/index and tutorials/first-page), demo/docs/_build/ gitignored, AGENTS.md demo section gains the build command (and its 'none of it is built yet' sentence now says page serving is); docs.menu_item() in demo/menus.py; mvp_sphinx/locale/en/LC_MESSAGES/django.po from makemessages; TestDocumentationEntry in tests/test_demo.py.
+Verified: red first (the sidebar had no /docs/ link), then green; the demo guide builds with an empty warnings file; pre-commit clean.
+Next: full verify, then the completion report.
+Watch: the .po header is makemessages' default (placeholders); the CHANGELOG still carries the scaffold line 'not yet doing anything'.

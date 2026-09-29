@@ -159,8 +159,24 @@
         },
         {
           "id": "T006",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests_added": [
+              "tests/test_demo.py::TestDocumentationEntry"
+            ],
+            "commands": [
+              "uv run pytest tests/test_demo.py (red: 1 failed, 3 passed; then 4 passed)",
+              "uv run sphinx-build -b json -q -w /tmp/demo-warn.txt demo/docs demo/docs/_build/json: exit 0, empty warnings file",
+              "DJANGO_SETTINGS_MODULE=tests.settings PYTHONPATH=.. uv run django-admin makemessages -l en (run in mvp_sphinx/)",
+              "uv run pytest tests/test_demo.py tests/test_smoke.py -q: 9 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "exit_code": 0,
+            "criteria": [
+              "SC-002"
+            ]
+          }
         }
       ]
     },

@@ -42,6 +42,62 @@ This package requires [django-mvp](https://github.com/django-mvp/django-mvp).
 It renders inside django-mvp's layout and reads its colours from the theme
 django-mvp supplies, so it does nothing useful on its own.
 
+## Usage
+
+Build your Sphinx documentation as JSON, point a `DocumentationApp` at the
+folder it writes to, and mount it in your URLs.
+
+```bash
+sphinx-build -b json docs docs/_build/json
+```
+
+Sphinx is needed where you run that command and nowhere else. The site that
+serves the pages reads the files the build left behind and never imports Sphinx,
+so it can stay out of your production requirements.
+
+Create the app once, in a module of its own, and give it the build's folder as
+`build_dir`:
+
+```python
+# yourproject/mounted.py
+from mvp_sphinx.mounted import DocumentationApp
+
+from yourproject.settings import BASE_DIR
+
+docs = DocumentationApp(build_dir=BASE_DIR / "docs" / "_build" / "json")
+```
+
+Then mount it under whatever prefix you like, and add its entry to your menu:
+
+```python
+# yourproject/urls.py
+from mvp.mounted import mount
+
+from yourproject.mounted import docs
+
+urlpatterns = [
+    mount("docs/", docs),
+]
+```
+
+```python
+# yourproject/menus.py
+from mvp.menus import AppMenu
+
+from yourproject.mounted import docs
+
+AppMenu.append(docs.menu_item())
+```
+
+Each page of the build now answers under `docs/`, drawn by your own `base.html`
+inside the application shell. The tab title carries the page's title and the
+app's `name` (Documentation unless you change it), and the breadcrumbs lead back
+through the page's parents to the front page.
+
+`build_dir` is read on every request. Rebuild the docs and reload the page to see
+the change, with no restart. It doesn't have to exist when the site starts, so a
+project that hasn't built its docs yet still boots.
+
 ## Quickstart
 
 <!--
