@@ -93,7 +93,8 @@ class PageView(PageMixin, TemplateView):
 
     def get_page_title(self) -> str:
         """Return the page's title as plain text, for the tab."""
-        return self.plain_text(self.page_data["title"])
+        # Sphinx's general index and search pages carry no title.
+        return self.plain_text(self.page_data.get("title", ""))
 
     def get_breadcrumbs(self) -> list[dict[str, Any]]:
         """Return the trail from the app's front page down to this page.
@@ -101,6 +102,10 @@ class PageView(PageMixin, TemplateView):
         The front page's trail is the app's name alone. On any other page the
         app's name links to the front page, each parent links to its own page,
         and the page itself has no link.
+
+        Returns:
+            The breadcrumbs, each a dict with ``text`` and, except the last,
+            ``href``.
         """
         if self.kwargs.get("path", "") == "":
             return [{"text": self.app.name}]

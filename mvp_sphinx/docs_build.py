@@ -26,9 +26,10 @@ class DocsBuild:
 
         A page is served at a slash-terminated address: ``""`` is the front
         page, and ``"a/b/"`` is the index page of folder ``a/b`` if there is
-        one, otherwise the page ``a/b``. ``"a/index/"`` and ``"index/"`` also
-        resolve, though Sphinx never links them. An address without a trailing
-        slash is not a page.
+        one, otherwise the page ``a/b``. Every page has that one address only:
+        ``"index/"``, ``"a/index/"``, empty, ``.`` or ``..`` segments and
+        absolute paths are not pages. An address without a trailing slash is
+        not a page.
 
         Args:
             path: The address below the documentation app's prefix.
@@ -42,7 +43,10 @@ class DocsBuild:
         """
         if path == "":
             candidates = ["index.fjson"]
-        elif path.endswith("/"):
+        elif path.endswith("/") and self._is_canonical(path[:-1]):
+            if path[:-1].rsplit("/", 1)[-1] == "index":
+                # The folder's own address serves its index page.
+                return None
             candidates = [f"{path}index.fjson", f"{path[:-1]}.fjson"]
         else:
             return None
@@ -69,9 +73,26 @@ class DocsBuild:
             inside one of the two folders.
         """
         folder = path.split("/", 1)[0]
-        if folder not in self.FILE_FOLDERS:
+        if folder not in self.FILE_FOLDERS or not self._is_canonical(path):
             return None
         return self._contained_file(path, within=folder)
+
+    @staticmethod
+    def _is_canonical(relative: str) -> bool:
+        """Say whether ``relative`` is a plain relative address.
+
+        Args:
+            relative: An address below the documentation app's prefix, without
+                its trailing slash.
+
+        Returns:
+            ``False`` for an absolute path or one with an empty, ``.`` or ``..``
+            segment, which would otherwise name the same file by a second
+            address, or a path on the disk.
+        """
+        return not relative.startswith("/") and all(
+            segment not in ("", ".", "..") for segment in relative.split("/")
+        )
 
     def _contained_file(self, relative: str, within: str = "") -> Path | None:
         """Return the file ``relative`` names inside the build, or ``None``.

@@ -2,7 +2,7 @@
   "feature": "001-serve-pages",
   "branch": "001-serve-pages",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "CONVERGE",
+  "state": "REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -28,6 +28,11 @@
       "state": "CONVERGE",
       "at": "2026-09-29T23:23:07Z",
       "note": "US1-US4 done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-29T23:25:32Z",
+      "note": "one reviewer: correctness+spec+docs lens and security lens"
     }
   ],
   "gates": {
@@ -254,7 +259,7 @@
       "max": 2
     },
     "review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     },
     "tokens": {

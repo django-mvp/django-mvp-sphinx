@@ -76,6 +76,14 @@ class TestPageView:
             assert client.get(urljoin("/docs/", href)).status_code == 200
 
 
+class TestSphinxsOwnPages:
+    @pytest.mark.parametrize("address", ["/docs/genindex/", "/docs/search/"])
+    def test_the_general_index_and_search_pages_are_served(
+        self, client, db, docs_app, address
+    ) -> None:
+        assert client.get(address).status_code == 200
+
+
 class TestPageTitle:
     def test_the_tab_title_is_the_pages_title_as_plain_text(self, client, db) -> None:
         response = client.get("/docs/")
@@ -276,6 +284,26 @@ class TestAddresses:
         assert inside.status_code == outside.status_code == 404
         assert [t.name for t in inside.templates] == [t.name for t in outside.templates]
         assert "404.html" in [t.name for t in inside.templates]
+
+
+class TestAddressesNamingTheDisk:
+    def test_an_absolute_path_under_the_prefix_is_not_found(
+        self, client, db, docs_app, guide_build
+    ) -> None:
+        response = client.get(
+            f"/docs/{guide_build.resolve().as_posix().lstrip('/')}//section/"
+        )
+
+        assert response.status_code == 404
+
+    def test_an_absolute_path_without_its_slash_is_not_redirected(
+        self, client, db, docs_app, guide_build
+    ) -> None:
+        absolute = guide_build.resolve().as_posix().replace("/", "%2F")
+
+        response = client.get(f"/docs/{absolute}%2Fsection")
+
+        assert response.status_code == 404
 
 
 class TestMissingBuild:

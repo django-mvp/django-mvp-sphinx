@@ -24,6 +24,20 @@ class TestPage:
         page = build.page("section/nested/page/")
         assert page["current_page_name"] == "section/nested/page"
 
+    @pytest.mark.parametrize(
+        "address",
+        ["index/", "section/index/", "section//", "page/../section/", "./section/"],
+    )
+    def test_a_page_has_only_its_own_address(self, build, address) -> None:
+        assert build.page(address) is None
+
+    def test_an_absolute_address_is_not_a_page_even_inside_the_build(
+        self, build, guide_build
+    ) -> None:
+        address = f"{guide_build.resolve().as_posix()}/section/"
+
+        assert build.page(address) is None
+
     def test_a_top_level_page_is_found_by_its_name(self, build) -> None:
         assert build.page("page/")["current_page_name"] == "page"
 
