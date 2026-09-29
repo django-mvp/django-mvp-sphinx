@@ -94,3 +94,8 @@ Next: review.
 
 Did: one reviewer, correctness/spec/docs and security lenses; request_changes with 1 high, 1 medium, 1 low. All three fixed test first in one cycle (D21) and each remedy checked against the reviewer's reproduction on the running server.
 Next: walkthrough and ready for review.
+
+## 2026-09-29T23:35:45Z · S7 walkthrough round 2
+
+Did: walkthrough passed; the one request (no leading-underscore names) done: contained_file, is_canonical, no _encoding local (D22). Full verify green.
+Next: checks green, then merge by the orchestrator.

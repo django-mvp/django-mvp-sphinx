@@ -83,10 +83,10 @@
       ]
     },
     "walkthrough": {
-      "approved_by": "forge (every state opened on devserver:8025 before handoff; the gate itself is held by the orchestrating session under Sam's 2026-09-30 overnight delegation)",
-      "at": "2026-09-29T23:32:59Z",
+      "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's 2026-09-30 overnight delegate), on devserver:8025",
+      "at": "2026-09-29T23:35:45Z",
       "self_resolved": [
-        "nothing asked yet — live at http://devserver:8025/docs/ for the orchestrator; any request it makes is recorded as a further round"
+        "no leading-underscore names in code the branch adds — DocsBuild._contained_file/_is_canonical renamed contained_file/is_canonical, _encoding local removed; Sphinx folder names and the gettext _ alias kept (D22)"
       ]
     }
   },

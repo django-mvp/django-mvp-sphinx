@@ -283,3 +283,15 @@ dispatch would cost more than the change.
 point every lookup already passes through.
 
 **ADR:** none — tightens the boundary docs/adr/0001 already states
+
+## D22. No leading-underscore names
+
+**Chosen:** `DocsBuild._contained_file` and `DocsBuild._is_canonical` are now `contained_file` and
+`is_canonical`. The throwaway `_encoding` local in `PageView.get` is gone. Two kinds of underscore
+name stay: `_images`, `_downloads`, `_build`, `_sources` and `_static` are folder names Sphinx
+writes, and `_` is the `gettext_lazy` alias CONSTITUTION Article VIII requires.
+
+**Why:** Asked for at the walkthrough. The maintainer's standard is that the code this project
+writes never uses leading-underscore names: helpers, methods, templates or constants.
+
+**ADR:** none — a naming standard, not a decision of this feature
