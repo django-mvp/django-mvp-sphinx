@@ -182,3 +182,18 @@ are `groups`, not `sections` (CONTEXT.md). ARCH-004: reads catch `(OSError, Valu
 finding's stated evidence by the orchestrator.
 
 **Revisit if**: n/a — a record.
+
+## D9. Sphinx cannot build a toctree cycle, so the guard is tested on a stand-in
+
+**Decided**: the `tests/sphinx/contents/` source has no toctree pointing back up the tree, and
+`sphinx_json_build` gains no keyword to allow warnings. The extension keeps skipping an entry that is
+already on the path from the root, and that skip is tested on a stand-in environment built from real
+docutils nodes.
+
+**Why**: Sphinx 9.1's `_traverse_toctree` stops the whole build with a recursion error on any cycle
+of two or more pages, before `build-finished`, and a page listing itself is dropped by the directive.
+No real build reaches the extension with a cycle, and the remaining fixture entries build without a
+warning, so the keyword would be unused.
+
+**Revisit if**: a Sphinx release lets a cycle through to `build-finished`; then the fixture can carry
+the back-pointing toctree.

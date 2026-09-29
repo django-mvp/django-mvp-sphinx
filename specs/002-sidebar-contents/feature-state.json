@@ -68,8 +68,18 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_navigation.py::TestNavigationFile",
+              "tests/test_navigation.py::TestNavigationWriter"
+            ],
+            "commands": [
+              "uv run pytest tests/test_navigation.py tests/test_docs_build.py -q (exit 0, 53 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
         },
         {
           "id": "T002",

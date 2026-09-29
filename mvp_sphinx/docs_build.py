@@ -17,6 +17,7 @@ class DocsBuild:
     """
 
     FILE_FOLDERS = ("_images", "_downloads")
+    NAVIGATION_FILE = "navigation.json"
 
     def __init__(self, root: str | Path) -> None:
         self.root = Path(root).resolve()

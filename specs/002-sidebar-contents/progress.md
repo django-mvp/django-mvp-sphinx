@@ -20,3 +20,10 @@ DocsBuild staticmethod), 4 low (SEC-001 url filter removed; SPEC-002 atomic-writ
 SPEC-003 `sections` → `groups`; ARCH-004 catch ValueError, invalid UTF-8 case). All applied as
 plan/research/tasks/decisions edits and checked against each finding's evidence (D8).
 Next: plan notice, then US1.
+
+## 2026-09-29T23:57:00Z · Implementer US1 · T001
+
+Did: `mvp_sphinx/navigation.py` (`NavigationWriter`, `write_navigation`, `setup`), `DocsBuild.NAVIGATION_FILE`, the deptry DEP004 ignore for `sphinx`, the `tests/sphinx/contents/` source, the `sphinx_build` and `contents_build` fixtures, `tests/test_navigation.py`. Sphinx 9.1 stops with a recursion error on any toctree cycle, so the back-pointing toctree is not in the fixture and the fixture builds without warnings: the planned `sphinx_json_build` keyword to allow warnings is not added (D9). The ancestor guard is tested on a stand-in environment.
+Verified: `uv run pytest tests/test_navigation.py tests/test_docs_build.py -q` → 53 passed; red first (extension module missing); mutating the ancestor guard, the builder-name check and the title lookup each fails a test; `uv run pre-commit run --all-files` → all hooks pass.
+Next: T002, `DocsBuild.navigation()` and `navigation_stamp()`.
+Watch: `ref == "self"` needed no clause of its own, since `self` is never in `env.titles`.

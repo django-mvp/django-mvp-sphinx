@@ -52,6 +52,17 @@ def sphinx_json_build(tmp_path_factory):
     return build
 
 
+@pytest.fixture
+def sphinx_build(tmp_path):
+    def build(source, builder="json"):
+        out = tmp_path / f"{builder}-build"
+        status = build_main(["-b", builder, "-q", str(source), str(out)])
+        assert status == 0
+        return out
+
+    return build
+
+
 @pytest.fixture(scope="session")
 def guide_build(sphinx_json_build):
     return sphinx_json_build("guide")
@@ -60,6 +71,11 @@ def guide_build(sphinx_json_build):
 @pytest.fixture(scope="session")
 def handbook_build(sphinx_json_build):
     return sphinx_json_build("handbook")
+
+
+@pytest.fixture(scope="session")
+def contents_build(sphinx_json_build):
+    return sphinx_json_build("contents")
 
 
 @pytest.fixture
