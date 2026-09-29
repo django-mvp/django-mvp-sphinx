@@ -2,7 +2,7 @@
   "feature": "004-theme-styled-content",
   "branch": "004-theme-styled-content",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "DESIGN_REVIEW",
+  "state": "IMPLEMENT",
   "state_history": [
     {
       "state": "QUEUED",
@@ -18,6 +18,11 @@
       "state": "DESIGN_REVIEW",
       "at": "2026-09-29T23:47:12Z",
       "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-29T23:55:53Z",
+      "note": "US1..US5 sequential in the feature worktree"
     }
   ],
   "gates": {
@@ -27,8 +32,11 @@
       "self_resolved": []
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "notified",
+      "at": "2026-09-29T23:55:53Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam's overnight delegation), not Sam"
+      ]
     },
     "merge": {
       "approved_by": null,
