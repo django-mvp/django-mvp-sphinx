@@ -77,3 +77,10 @@ Did: PageView.get step 3 (a slashless address with no page but a page at its sla
 Verified: red first (`uv run pytest tests/test_views.py -k "TestAddresses or TestMissingBuild or TestBrokenPage"`: 1 failed, 11 passed; the other tests describe behaviour T002/T003/T007 already delivered), then `uv run pytest tests/test_views.py -q`: 45 passed; pre-commit clean. Mutation probes: catching ValueError around page() fails the broken-page raise test; redirecting without checking that the slashed page exists fails 16 tests.
 Next: T009, menu entry, naming, two apps.
 Watch: no code was needed for the bare-prefix redirect or the missing build; the tests lock them.
+
+## 2026-09-30T00:25:00Z · Implementer US4 · T009
+
+Did: tests/urls.py mounts a second DocumentationApp (`handbook`, name "Administrator's handbook", namespace `handbook`, build_dir a placeholder until a test points it at handbook_build) at `manuals/admin/`. Tests: TestMenuEntry (entry's view resolves to the front page, following it answers it; a second app's entry leads to its own prefix), TestNamingAnApp (tab and first breadcrumb, front page and nested, carry the host's name and not "Documentation"), TestTwoAppsSideBySide (each build served only at its own prefix; breadcrumb hrefs stay within each prefix; each tab names only its own app). README: naming an app, several apps; CHANGELOG entry. No code change in mvp_sphinx/.
+Verified: `uv run pytest tests/test_views.py tests/test_mounted.py -q`: 57 passed; pre-commit clean. These tests passed on first run because T003/T004 already read name and namespace from the app per request, so there was no red step; mutation probes instead: hard-coding the `docs:front_page` reverse fails the side-by-side breadcrumb test, hard-coding "Documentation" as the front-page crumb fails a test only after I added the named front-page breadcrumb test.
+Next: full verify, then reports.
+Watch: the fixture that points `handbook` at its build lives in tests/test_views.py and is repeated inline in test_mounted.py, because conftest.py is outside this task's file list.

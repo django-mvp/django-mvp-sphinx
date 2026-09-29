@@ -4,6 +4,7 @@ import json
 import re
 import shutil
 import sys
+from html import unescape
 from urllib.parse import urljoin
 
 import pytest
@@ -11,6 +12,7 @@ from django.urls import reverse
 
 pytestmark = pytest.mark.usefixtures("docs_app")
 
+DEFAULT_NAME = "Documentation"
 FRONT_PAGE_TEXT = "Welcome to the guide"
 TITLE_TEXT = {
     "": "front page",
@@ -323,3 +325,76 @@ class TestBrokenPage:
         client.raise_request_exception = False
 
         assert client.get("/docs/page/").status_code == 500
+
+
+@pytest.fixture
+def handbook_app(handbook_build, monkeypatch):
+    from tests.urls import handbook
+
+    monkeypatch.setattr(handbook, "build_dir", handbook_build)
+    return handbook
+
+
+class TestNamingAnApp:
+    def test_the_tab_carries_the_name_the_host_gave(
+        self, client, db, handbook_app
+    ) -> None:
+        response = client.get("/manuals/admin/")
+
+        tab = re.search(r"<title>(.*?)</title>", response.content.decode(), re.S).group(
+            1
+        )
+        assert str(handbook_app.name) in unescape(tab)
+        assert str(DEFAULT_NAME) not in unescape(tab)
+
+    def test_the_first_breadcrumb_carries_the_name_the_host_gave(
+        self, client, db, handbook_app
+    ) -> None:
+        crumbs = client.get("/manuals/admin/backups/").context["page"]["breadcrumbs"]
+
+        assert str(crumbs[0]["text"]) == str(handbook_app.name)
+        assert str(DEFAULT_NAME) not in [str(c["text"]) for c in crumbs]
+
+    def test_the_front_page_breadcrumb_is_the_name_the_host_gave(
+        self, client, db, handbook_app
+    ) -> None:
+        crumbs = client.get("/manuals/admin/").context["page"]["breadcrumbs"]
+
+        assert [str(c["text"]) for c in crumbs] == [str(handbook_app.name)]
+
+
+class TestTwoAppsSideBySide:
+    def test_each_app_serves_pages_from_its_own_build(
+        self, client, db, handbook_app
+    ) -> None:
+        assert "Start with" in client.get("/manuals/admin/").content.decode()
+        assert "Welcome to the guide" in client.get("/docs/").content.decode()
+        assert (
+            "Welcome to the guide" not in client.get("/manuals/admin/").content.decode()
+        )
+        assert client.get("/manuals/admin/page/").status_code == 404
+        assert client.get("/docs/backups/").status_code == 404
+
+    def test_a_nested_page_keeps_its_breadcrumbs_within_its_own_prefix(
+        self, client, db, handbook_app, docs_app
+    ) -> None:
+        guide = client.get("/docs/section/nested/page/").context["page"]["breadcrumbs"]
+        handbook = client.get("/manuals/admin/backups/").context["page"]["breadcrumbs"]
+
+        assert [c["href"] for c in guide if "href" in c] == ["/docs/", "/docs/section/"]
+        assert [c["href"] for c in handbook if "href" in c] == ["/manuals/admin/"]
+
+    def test_each_apps_tab_names_its_own_app(
+        self, client, db, handbook_app, docs_app
+    ) -> None:
+        tabs = {}
+        for address in ("/docs/", "/manuals/admin/"):
+            body = client.get(address).content.decode()
+            tabs[address] = unescape(
+                re.search(r"<title>(.*?)</title>", body, re.S).group(1)
+            )
+
+        assert str(docs_app.name) in tabs["/docs/"]
+        assert str(handbook_app.name) not in tabs["/docs/"]
+        assert str(handbook_app.name) in tabs["/manuals/admin/"]
+        assert str(docs_app.name) not in tabs["/manuals/admin/"]

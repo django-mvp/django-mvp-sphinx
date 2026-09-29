@@ -222,8 +222,23 @@
       "tasks": [
         {
           "id": "T009",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestMenuEntry",
+              "tests/test_views.py::TestNamingAnApp",
+              "tests/test_views.py::TestTwoAppsSideBySide"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k \"Naming or SideBySide\" -q: 5 passed on first run (behaviour already delivered by T003/T004; no red step, locked by mutation probes)",
+              "uv run pytest tests/test_views.py tests/test_mounted.py -q: 57 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "code": [
+              "tests/urls.py:12"
+            ]
+          }
         }
       ]
     }

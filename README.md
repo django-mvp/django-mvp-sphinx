@@ -94,6 +94,40 @@ inside the application shell. The tab title carries the page's title and the
 app's `name` (Documentation unless you change it), and the breadcrumbs lead back
 through the page's parents to the front page.
 
+### Naming the documentation
+
+The app's `name` is what the tab title, the first breadcrumb and the menu entry
+call the documentation. Give it your own when "Documentation" isn't right:
+
+```python
+docs = DocumentationApp(
+    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    name=_("Administrator's handbook"),
+)
+```
+
+### Several documentation apps
+
+Each build is one `DocumentationApp` with its own `namespace` (`docs` unless you
+say otherwise), mounted at its own prefix, which may have several segments. Each
+app serves only its own build and names only itself in its tabs and breadcrumbs.
+
+```python
+handbook = DocumentationApp(
+    build_dir=BASE_DIR / "handbook" / "_build" / "json",
+    name=_("Administrator's handbook"),
+    namespace="handbook",
+)
+
+urlpatterns = [
+    mount("docs/", docs),
+    mount("manuals/admin/", handbook),
+]
+```
+
+Add `handbook.menu_item()` to your menu beside `docs.menu_item()` to give each
+its own entry.
+
 A `PageView` renders each page, and it finds the page's data through a
 `DocsBuild`, which only ever looks inside `build_dir`. To change how a page is
 drawn, subclass `PageView` and pass it to your app as `view_class`.
