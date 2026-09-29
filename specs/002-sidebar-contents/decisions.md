@@ -86,3 +86,79 @@ project's own menu is not part of the contents.
 
 **Why**: #6 was filed separately for them, and its dependency is on #4, not on this feature. The
 host menu entry is how a reader enters the docs, not how they move within them.
+
+## Decisions made while planning
+
+## D1. The navigation file's name lives beside the build lookups, not in the extension
+
+**Decided**: `DocsBuild.NAVIGATION_FILE` holds `navigation.json`; the extension imports it from
+`mvp_sphinx.docs_build`, and the menu reads the file through `DocsBuild.navigation()`.
+
+**Why**: the prototype's menu imported the file name from the extension module, which imports
+Sphinx at the top, so drawing the menu imported Sphinx (FR-017). `docs_build` imports neither
+Sphinx nor Django, so both sides can share it.
+
+**Revisit if**: the extension grows enough that it needs a package of its own.
+
+## D2. Only the JSON build gets a navigation file
+
+**Decided**: the extension writes on `build-finished` only when the builder is `json`.
+
+**Why**: the addresses it records are the JSON builder's, and the JSON build is the only one a
+documentation app reads. A host that also builds HTML with the same `conf.py` gets no stray file.
+
+**Revisit if**: the package ever serves another builder's output.
+
+## D3. A bad navigation file is validated once, and entries pointing off the app are dropped
+
+**Decided**: `DocsBuild.navigation()` checks the file's shape and returns `None` for any file it
+cannot use, and drops an entry whose address is not a plain relative address ending in `/`.
+
+**Why**: the menu is processed on every host page (research R4), so an exception there breaks the
+whole site (FR-018). One shape check keeps broad `except` clauses out of the menu. The address check
+costs one line with `is_canonical`, which already exists, and keeps a hand-edited file from making a
+sidebar link that leaves the documentation app.
+
+**Revisit if**: the file format gains fields.
+
+## D4. The menu rebuilds when the file, the build directory or the mount prefix changes
+
+**Decided**: `DocumentationMenu.refresh()` compares a stamp of build directory, front page
+address and the file's `(st_mtime_ns, st_size, st_ino)`, and rebuilds only when it differs,
+assigning the finished list in one statement.
+
+**Why**: a read and parse on every host page is the cost the specification's decision "Rebuilds
+show on the next request" steers away from. Nanosecond mtime, size and inode together catch a
+replacement even inside one second, and the extension's atomic replace changes the inode.
+
+**Revisit if**: a host reports a filesystem where none of the three changes on replacement.
+
+## D5. The front page and a page's own entry inside its group are both labelled "Overview"
+
+**Decided**: kept from the prototype the owner approved.
+
+**Why**: django-flex-menus keeps links and groups apart, and the django-mvp demo's Components group
+opens on an "Overview" entry. The spec leaves the label to the plan.
+
+**Revisit if**: the owner asks for the page's own title there.
+
+## D6. A page listed twice is marked at both places
+
+**Decided**: both entries for the page being read are marked current.
+
+**Why**: the spec keeps both entries (edge case "A page listed by two toctrees") and FR-013 marks
+"the page being read". SC-002's "exactly one" is read for pages listed once, which is every page in
+its fixture; marking one of two identical links would be arbitrary.
+
+**Revisit if**: the owner prefers only the first listing marked.
+
+## D7. Captions below the root document are ignored
+
+**Decided**: a toctree caption on a page other than the root does not make a group; that page's
+toctrees are flattened into its own group.
+
+**Why**: FR-002 makes groups from the root document's captioned toctrees only, and a page with
+pages of its own already opens as a group (FR-005). Nesting a second kind of group inside it would
+need a shape the sidebar does not have.
+
+**Revisit if**: a real docs set needs sub-captions in the sidebar.

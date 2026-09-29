@@ -1,0 +1,123 @@
+{
+  "feature": "002-sidebar-contents",
+  "branch": "002-sidebar-contents",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PLAN",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:27:37Z",
+      "note": "specification merged to main in PR #15, merge commit b2875b0725cca8b9eb21fa19787728de811d940a; epic #5, stories #25, #27, #28"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-29T23:44:31Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 7 tasks"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "merged specification pull request #15 (merge commit b2875b0725cca8b9eb21fa19787728de811d940a)",
+      "at": "2026-09-29T22:27:37Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": null,
+      "at": null
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 25,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T002",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T003",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T004",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P1",
+      "issue": 27,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T005",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P2",
+      "issue": 28,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T006",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T007",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 0,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 0,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 0,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": null,
+    "draft": true
+  },
+  "escalations": []
+}
