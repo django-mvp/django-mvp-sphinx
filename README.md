@@ -94,6 +94,10 @@ inside the application shell. The tab title carries the page's title and the
 app's `name` (Documentation unless you change it), and the breadcrumbs lead back
 through the page's parents to the front page.
 
+A `PageView` renders each page, and it finds the page's data through a
+`DocsBuild`, which only ever looks inside `build_dir`. To change how a page is
+drawn, subclass `PageView` and pass it to your app as `view_class`.
+
 `build_dir` is read on every request. Rebuild the docs and reload the page to see
 the change, with no restart. It doesn't have to exist when the site starts, so a
 project that hasn't built its docs yet still boots.

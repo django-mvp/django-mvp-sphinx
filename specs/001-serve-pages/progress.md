@@ -58,3 +58,8 @@ Did: README Usage section (sphinx-build -b json, DocumentationApp, build_dir, mo
 Verified: red first (the sidebar had no /docs/ link), then green; the demo guide builds with an empty warnings file; pre-commit clean.
 Next: full verify, then the completion report.
 Watch: the .po header is makemessages' default (placeholders); the CHANGELOG still carries the scaffold line 'not yet doing anything'.
+
+## Addendum · Implementer US1 · T006
+
+Did: the docs step of the verify run named `DocsBuild` and `PageView` as public names no page quotes as code, so the README's Usage section now quotes both and the `view_class` hook.
+Verified: re-ran the full verify after this change (result in the completion report).
