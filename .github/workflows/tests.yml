@@ -1,0 +1,26 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mvp_sphinx/**'
+      - 'tests/**'
+      - 'demo/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/tests.yml'
+  # No paths filter on pull_request: these checks are required by the branch
+  # ruleset, and a path-filtered required check never reports on an
+  # out-of-scope pull request, which blocks the merge.
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  call-tests:
+    uses: django-mvp/shared/.github/workflows/tests.yml@v0.6.0
+    with:
+      coverage-package: mvp_sphinx
+    secrets: inherit
