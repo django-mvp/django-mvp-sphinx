@@ -65,6 +65,17 @@
         "DR-007 low: fixture-shape and menu-current tests dropped \u2014 plan edit",
         "DR-008 low: front_page URL name, page_data context key \u2014 plan edit"
       ]
+    },
+    "review": {
+      "approved_by": "review-panel",
+      "at": "2026-09-29T23:31:45Z",
+      "self_resolved": [
+        "COR-001 high: genindex/search pages 500 on missing title \u2014 fixed, test first (D21)",
+        "SEC-001 medium: absolute-path addresses reached the build (disk-path oracle, root-mount open redirect) \u2014 fixed, test first (D21)",
+        "COR-002 low: index/, a/index/, a// served pages at second addresses \u2014 fixed, test first (D21)",
+        "note: text/plain downloads without charset \u2014 accepted",
+        "note: inline SVG/HTML from trusted build \u2014 accepted under D11"
+      ]
     }
   },
   "stories": [

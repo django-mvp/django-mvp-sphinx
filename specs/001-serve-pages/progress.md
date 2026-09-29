@@ -89,3 +89,8 @@ Watch: the fixture that points `handbook` at its build lives in tests/test_views
 
 Did: all four stories done; one cleanup commit (file lookups also confined to the build when a file folder is a link; one handbook fixture; changelog). No migrations. ADR 0001 graduated from D2/D3/D16; every decision verdicted. Roadmap R1 marked delivered and rewritten to its delivered form.
 Next: review.
+
+## 2026-09-29T23:31:45Z · S6 review
+
+Did: one reviewer, correctness/spec/docs and security lenses; request_changes with 1 high, 1 medium, 1 low. All three fixed test first in one cycle (D21) and each remedy checked against the reviewer's reproduction on the running server.
+Next: walkthrough and ready for review.
