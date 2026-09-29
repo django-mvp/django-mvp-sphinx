@@ -68,8 +68,17 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv add --group dev \"sphinx>=8.1\"",
+              "uv run pytest (throwaway probe of guide_build and handbook_build): 1 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "exit_code": 0,
+            "criteria": []
+          }
         },
         {
           "id": "T002",
