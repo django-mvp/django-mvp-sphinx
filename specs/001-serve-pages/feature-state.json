@@ -1,0 +1,143 @@
+{
+  "feature": "001-serve-pages",
+  "branch": "001-serve-pages",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PLAN",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:25:46Z",
+      "note": "specification merged to main in PR #17, merge commit 4a9abee1be99fb55cda983edaa9a9d20f1e15ffd; epic #4, stories #19-#22"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-29T22:57:33Z",
+      "note": "plan.md, research.md, tasks.md: 4 stories, 9 tasks"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "forge-aeo-reviewer (for Sam, overnight delegation 2026-09-30; merged by django-mvp-bot)",
+      "at": "2026-09-29T22:25:46Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": null,
+      "at": null
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 19,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T002",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T003",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T004",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T005",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T006",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 20,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T007",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P2",
+      "issue": 21,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T008",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US4",
+      "priority": "P3",
+      "issue": 22,
+      "worktree": "/home/sam/projects/django-mvp/django-mvp-sphinx",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T009",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 0,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 0,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 0,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": null,
+    "draft": true
+  },
+  "escalations": []
+}

@@ -139,3 +139,50 @@ other page. Nothing makes them work as an index or a search.
 
 **Why:** Search is #10. A working general index hasn't been asked for, and it would need its own
 feature request.
+
+## Decisions made while planning
+
+## D13. The page body sits in the shell's `prose` styles
+
+**Chosen:** The body is wrapped in an `<article>` carrying the `prose` class django-mvp's
+stylesheet already emits. No stylesheet of this package's own, and no styling of Sphinx-specific
+markup.
+
+**Why:** Without it the shell's CSS reset leaves headings, lists and paragraphs indistinguishable,
+and the walkthrough would judge an unreadable page. `prose` is the host's own typography, so
+Article XIII holds. Admonitions, code blocks and tables are #7's (D10).
+
+## D14. A slashless address redirects only when the slashed one is a page
+
+**Chosen:** The trailing-slash redirect fires only when the slashed address has a page behind it.
+A slashless address with nothing behind it is not found straight away.
+
+**Why:** That is how Django's own `APPEND_SLASH` behaves, and it keeps FR-010 true for
+slashless typos: redirecting first would answer an unknown address with a 301 and then a 404.
+
+## D15. Every documentation app has its own namespace
+
+**Chosen:** `DocumentationApp` has a `namespace` attribute, `docs` by default. A host mounting a
+second app gives it a different one. The app's empty sidebar menu is named from it.
+
+**Why:** Two mounts under one instance namespace make `reverse()` pick one of them for both (Django
+warns with `urls.W005`), and django-flex-menus registers every `Menu` by a global name. Deriving
+both from one attribute the host already sets for the second app keeps FR-016 to one keyword.
+
+## D16. Page lookups are confined to the build like file lookups are
+
+**Chosen:** The page lookup resolves its candidate `.fjson` and refuses anything outside the
+build directory, the same check the file lookup makes against its folder.
+
+**Why:** The prototype's upstream view joined the address onto the build directory unchecked, so
+`../` could read any `.fjson` file on the disk. Only `.fjson` files were reachable and they are
+rendered, not returned, but nothing about a page address should reach outside the build.
+
+## D17. Tests and the demo build real docs with Sphinx
+
+**Chosen:** Sphinx is added to the development dependency group. The suite builds its fixture docs
+with it once per session, and the demo's guide is built with it. The package never imports it.
+
+**Why:** A hand-written `.fjson` fixture would drift from what Sphinx writes. Article VII's
+"tooling from the shared bundle" rule is about shared development tools; Sphinx here is test input
+specific to this package. FR-013 is covered by serving with Sphinx blocked from import.
