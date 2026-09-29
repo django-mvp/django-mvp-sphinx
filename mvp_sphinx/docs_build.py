@@ -89,7 +89,9 @@ class DocsBuild:
         try:
             boundary = (self.root / within).resolve()
             target = (self.root / relative).resolve()
-            inside = target.is_relative_to(self.root) and target.is_relative_to(boundary)
+            inside = target.is_relative_to(self.root) and target.is_relative_to(
+                boundary
+            )
             if inside and target.is_file():
                 return target
         except (ValueError, OSError):

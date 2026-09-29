@@ -84,3 +84,8 @@ Did: tests/urls.py mounts a second DocumentationApp (`handbook`, name "Administr
 Verified: `uv run pytest tests/test_views.py tests/test_mounted.py -q`: 57 passed; pre-commit clean. These tests passed on first run because T003/T004 already read name and namespace from the app per request, so there was no red step; mutation probes instead: hard-coding the `docs:front_page` reverse fails the side-by-side breadcrumb test, hard-coding "Documentation" as the front-page crumb fails a test only after I added the named front-page breadcrumb test.
 Next: full verify, then reports.
 Watch: the fixture that points `handbook` at its build lives in tests/test_views.py and is repeated inline in test_mounted.py, because conftest.py is outside this task's file list.
+
+## 2026-09-29T23:24:25Z · S5 converge
+
+Did: all four stories done; one cleanup commit (file lookups also confined to the build when a file folder is a link; one handbook fixture; changelog). No migrations. ADR 0001 graduated from D2/D3/D16; every decision verdicted. Roadmap R1 marked delivered and rewritten to its delivered form.
+Next: review.

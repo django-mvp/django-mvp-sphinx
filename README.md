@@ -100,6 +100,8 @@ The app's `name` is what the tab title, the first breadcrumb and the menu entry
 call the documentation. Give it your own when "Documentation" isn't right:
 
 ```python
+from django.utils.translation import gettext_lazy as _
+
 docs = DocumentationApp(
     build_dir=BASE_DIR / "docs" / "_build" / "json",
     name=_("Administrator's handbook"),

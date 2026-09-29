@@ -29,26 +29,18 @@ Everything needed to reach a minimum usable release.
 
 ### R1 — Sphinx pages served in the application shell
 
-*feature · advances G1, G3*
+*delivered in [#4](https://github.com/django-mvp/django-mvp-sphinx/issues/4) · advances G1, G3*
 
-A host project mounts a documentation app pointed at its docs build, and every
-page of that build is served as a page of the site: inside the application
-shell, in the site's theme, under the app's name. Everything else on this
-roadmap is built on it, so it comes first.
+A host project mounts a `DocumentationApp` at a prefix of its choosing, points it
+at its `sphinx-build -b json` output, and every page of that build is a page of the
+site: inside the application shell, named in the browser tab, with breadcrumbs
+back to the front page. The images and downloads pages link to are served, and
+nothing else in the build is. Addresses without a trailing slash redirect,
+unknown ones get the site's own 404, a missing build leaves the rest of the site
+working, and serving never needs Sphinx installed. A project can name each app
+and mount several side by side.
 
-**Deliverables:**
-
-- A documentation app the host project mounts at a URL prefix of its choosing,
-  pointed at a docs build
-- Every page served inside the host's shell, with the page and app names in
-  the browser tab and breadcrumbs back to the front page
-- The images and downloads a page links to are served with it
-- An address without its trailing slash redirects to the page, and an address
-  with no page behind it gets the site's ordinary 404
-- Serving works with Sphinx not installed
-
-Advances G1 and G3. Out of scope: the contents in the sidebar, styling of
-Sphinx's markup, search, and limiting who can read the docs.
+Advances G1 and G3.
 
 ### R2 — The contents in the app sidebar
 
