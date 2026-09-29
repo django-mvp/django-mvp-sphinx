@@ -5,7 +5,12 @@ from html import unescape
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
-from django.http import FileResponse, Http404, HttpRequest
+from django.http import (
+    FileResponse,
+    Http404,
+    HttpRequest,
+    HttpResponsePermanentRedirect,
+)
 from django.http.response import HttpResponseBase
 from django.urls import reverse
 from django.utils.html import strip_tags
@@ -36,7 +41,11 @@ class PageView(PageMixin, TemplateView):
     def get(  # type: ignore[override]
         self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
-        """Serve the image or download, or render the page, at the requested address.
+        """Serve the file or page at the address, or redirect to its slashed form.
+
+        An address without its trailing slash redirects permanently, query
+        string kept, when the slashed address has a page; otherwise it is not
+        found and the host's own 404 answers.
 
         Args:
             request: The request being served.
@@ -44,10 +53,11 @@ class PageView(PageMixin, TemplateView):
             **kwargs: URL arguments; ``path`` is the address below the app's prefix.
 
         Returns:
-            The file, or the rendered page.
+            The file, the rendered page, or a permanent redirect.
 
         Raises:
             Http404: The docs build has no file or page at that address.
+            json.JSONDecodeError: A page's file is not valid JSON, a server error.
         """
         build = DocsBuild(self.app.build_dir)
         path = kwargs.get("path", "")
@@ -60,6 +70,10 @@ class PageView(PageMixin, TemplateView):
             )
         page = build.page(path)
         if page is None:
+            if path and not path.endswith("/") and build.page(f"{path}/") is not None:
+                return HttpResponsePermanentRedirect(
+                    request.get_full_path(force_append_slash=True)
+                )
             raise Http404
         self.page_data = page
         return self.render_to_response(self.get_context_data(page_data=page))

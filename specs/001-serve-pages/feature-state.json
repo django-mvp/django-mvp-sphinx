@@ -191,8 +191,24 @@
       "tasks": [
         {
           "id": "T008",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestAddresses",
+              "tests/test_views.py::TestMissingBuild",
+              "tests/test_views.py::TestBrokenPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k \"TestAddresses or TestMissingBuild or TestBrokenPage\" -q (red: 1 failed, 11 passed; the redirect answered 404 not 301)",
+              "uv run pytest tests/test_views.py -q: 45 passed",
+              "uv run pre-commit run --all-files: all hooks passed"
+            ],
+            "code": [
+              "mvp_sphinx/views.py:36",
+              "mvp_sphinx/views.py:73"
+            ]
+          }
         }
       ]
     },

@@ -7,6 +7,7 @@ import sys
 from urllib.parse import urljoin
 
 import pytest
+from django.urls import reverse
 
 pytestmark = pytest.mark.usefixtures("docs_app")
 
@@ -241,3 +242,84 @@ class TestFiles:
         assert image.status_code == 200
         assert image["Content-Type"] == "image/png"
         assert client.get("/docs/page/").status_code == 200
+
+
+class TestAddresses:
+    def test_a_page_address_without_its_slash_redirects_permanently(
+        self, client, db
+    ) -> None:
+        response = client.get("/docs/section/nested/page?x=1")
+
+        assert response.status_code == 301
+        assert response["Location"] == "/docs/section/nested/page/?x=1"
+
+    def test_the_prefix_without_its_slash_redirects_with_its_query(
+        self, client, db
+    ) -> None:
+        response = client.get("/docs?x=1")
+
+        assert response.status_code == 301
+        assert response["Location"] == "/docs/?x=1"
+
+    def test_a_slashless_address_with_no_page_is_not_found(self, client, db) -> None:
+        assert client.get("/docs/nowhere").status_code == 404
+
+    def test_an_image_address_is_never_redirected(self, client, db) -> None:
+        assert client.get("/docs/_images/pixel.png").status_code == 200
+
+    def test_an_unknown_address_gets_the_hosts_not_found_page(self, client, db) -> None:
+        inside = client.get("/docs/nowhere/")
+        outside = client.get("/nowhere-at-all/")
+
+        assert inside.status_code == outside.status_code == 404
+        assert [t.name for t in inside.templates] == [t.name for t in outside.templates]
+        assert "404.html" in [t.name for t in inside.templates]
+
+
+class TestMissingBuild:
+    @pytest.fixture
+    def missing(self, docs_app, tmp_path, monkeypatch):
+        build = tmp_path / "not-built-yet"
+        monkeypatch.setattr(docs_app, "build_dir", build)
+        return build
+
+    def test_the_rest_of_the_site_still_answers(self, client, db, missing) -> None:
+        assert client.get(reverse("overview")).status_code == 200
+
+    @pytest.mark.parametrize(
+        "address", ["/docs/", "/docs/page/", "/docs/_images/pixel.png"]
+    )
+    def test_documentation_addresses_are_not_found(
+        self, client, db, missing, address
+    ) -> None:
+        assert client.get(address).status_code == 404
+
+    def test_a_build_created_afterwards_is_served_by_the_next_request(
+        self, client, db, missing, guide_build
+    ) -> None:
+        assert client.get("/docs/").status_code == 404
+
+        shutil.copytree(guide_build, missing)
+
+        assert client.get("/docs/").status_code == 200
+
+
+class TestBrokenPage:
+    @pytest.fixture
+    def broken(self, docs_app, guide_build, tmp_path, monkeypatch):
+        build = tmp_path / "broken"
+        shutil.copytree(guide_build, build)
+        (build / "page.fjson").write_text("{not json")
+        monkeypatch.setattr(docs_app, "build_dir", build)
+        return build
+
+    def test_a_page_file_that_is_not_json_raises(self, client, db, broken) -> None:
+        with pytest.raises(json.JSONDecodeError):
+            client.get("/docs/page/")
+
+    def test_a_page_file_that_is_not_json_is_a_server_error(
+        self, client, db, broken
+    ) -> None:
+        client.raise_request_exception = False
+
+        assert client.get("/docs/page/").status_code == 500

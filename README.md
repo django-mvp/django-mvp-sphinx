@@ -106,7 +106,16 @@ out of those two folders answers 404.
 
 `build_dir` is read on every request. Rebuild the docs and reload the page to see
 the change, with no restart. It doesn't have to exist when the site starts, so a
-project that hasn't built its docs yet still boots.
+project that hasn't built its docs yet still boots. Until the build exists every
+address under the prefix answers 404, the rest of the site is unaffected, and the
+first request after the build appears is served.
+
+Addresses behave like the rest of your site. A page address without its trailing
+slash redirects permanently to the slashed address, query string kept, and an
+address with no page answers your own 404 page. The bare prefix (`/docs`) is
+redirected by Django's `CommonMiddleware` (`APPEND_SLASH`), as for any other
+mount. A page file that is not valid JSON is a broken build and raises, so it is
+a server error rather than a 404.
 
 ## Quickstart
 
