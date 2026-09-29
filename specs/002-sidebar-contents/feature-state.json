@@ -2,7 +2,7 @@
   "feature": "002-sidebar-contents",
   "branch": "002-sidebar-contents",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PLAN",
+  "state": "DESIGN_REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -13,6 +13,11 @@
       "state": "PLAN",
       "at": "2026-09-29T23:44:31Z",
       "note": "plan.md, research.md, tasks.md: 3 stories, 7 tasks"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-29T23:45:22Z",
+      "note": "one design reviewer, three lenses, one round"
     }
   ],
   "gates": {
@@ -111,12 +116,12 @@
       "max": 120
     },
     "design_review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     }
   },
   "pr": {
-    "number": null,
+    "number": 47,
     "draft": true
   },
   "escalations": []
