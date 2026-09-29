@@ -1,0 +1,113 @@
+{
+  "feature": "006-reader-access",
+  "branch": "006-reader-access",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PLAN",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:38:11Z",
+      "note": "specification merged to main in PR #23, merge commit 1003b825a530bc833948a5705e7b5408dc9ce995; epic #9, stories #39-#41"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-29T23:46:47Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 5 tasks; no runtime code (D10)"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "PR #23 merged (merge commit 1003b825a530bc833948a5705e7b5408dc9ce995)",
+      "at": "2026-09-29T22:38:11Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": null,
+      "at": null
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 39,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-006",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T002",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 40,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-006",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T003",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P3",
+      "issue": 41,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-006",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T004",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T005",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 0,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 0,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 0,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": null,
+    "draft": true
+  },
+  "escalations": []
+}

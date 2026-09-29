@@ -113,3 +113,46 @@ theirs.
 
 **Why:** Each has its own feature request. Stating the boundary here keeps the rule complete
 without taking on their scope.
+
+## D10. The reader rule is django-mvp's `check`, with no setting of our own
+
+**Ambiguous:** FR-003 asks for signed-in only as an option chosen "without writing a rule of its
+own". The package could add its own setting (`readers="signed-in"`), its own ready-made function,
+or use what is already there.
+
+**Chosen:** `DocumentationApp(check=...)`, the `check` every django-mvp mounted app already has
+(research R1). Signed-in only is `check=user_is_authenticated` from `flex_menu.checks`, which also
+supplies group and permission rules (R2). The package adds no setting, wrapper, alias or function.
+
+**Why:** `check` already does everything the spec asks, in the same way as every other mounted app
+in the host project. A second setting for the same rule would give the app two answers to one
+question. A function of our own would duplicate one that django-flex-menus, already a dependency,
+ships and documents.
+
+**Revisit if:** a rule needs something `check` cannot express, such as the documentation app itself
+(`has_permission` is the override point for that).
+
+## D11. `/docs` without its slash is the host's redirect, not the app's
+
+**Ambiguous:** The edge cases say an address without its trailing slash is refused, not
+redirected. The prefix itself without its slash (`/docs`) never reaches the documentation app.
+
+**Chosen:** Leave it to the host's `CommonMiddleware`, which redirects it to `/docs/` for every
+reader before any documentation app runs (research R5). The slashed address is then refused as
+usual. Every address the app answers, slashless page addresses included, is refused before
+anything else happens.
+
+**Why:** The redirect is the same for every reader and whatever the build holds, so it says nothing
+about which pages exist, which is what FR-007 protects. Catching it would mean the package adding
+a URL pattern outside its own mount.
+
+## D12. The demo gets a staff-only guide
+
+**Chosen:** A second documentation app in the demo, *Staff guide* at `/staff-guide/`, readable by
+staff only (`check=user_is_staff`). The demo's `/docs/` stays open to everyone.
+
+**Why:** Every refusal state then shows up with the standard sign-in accounts. Anonymous is asked to
+sign in, the regular user gets the forbidden page and no menu entry, and staff and the superuser
+read it. Keeping `/docs/` open leaves the existing tests and the README's quickstart meaning what
+they meant. A staff rule shows more states than signed-in only, and the tests cover signed-in only
+on their own.
