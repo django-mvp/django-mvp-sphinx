@@ -106,3 +106,23 @@ the markup would turn every visual adjustment into a contract.
 **Revisit if**: a host project asks to place the list itself.
 
 **ADR:** pending S5
+
+## D6. Design review: approved, five low findings applied as plan edits
+
+**Decided**: the one-round design review approved with no critical or high finding. All five low
+findings removed work and were applied: ARCH-001, the title is sliced from the fragment by offset
+(as `BodyRewriter` does) instead of re-emitted tag by tag; ARCH-002, one emptiness guard for "On
+this page", in `page.html`; ARCH-003, `get_neighbour` treats only a missing or `null` key as absent,
+with no shape validation; SPEC-001, only `settings.rst` changes in the demo guide, since FS-004's
+content tour already has nested sections and an inline-code heading; ARCH-004, the hidden-toctree
+and orphan cases run on the existing `contents` source. Notes swept: the stale FS-004 wording in
+T002, the demo reading order now including Content tour, and a README sentence about incremental
+Sphinx builds.
+
+**Why**: each remedy was checked against its stated evidence (`mvp_sphinx/page_body.py`
+`position()`/`splice()` with `convert_charrefs=False`; `demo/docs/content-tour.rst`;
+`tests/sphinx/contents/hidden-page.rst`, `orphan.rst`; `sphinx/builders/html/__init__.py:572-590`).
+
+**Revisit if**: n/a — a record.
+
+**ADR:** none — a record of the review, not a decision

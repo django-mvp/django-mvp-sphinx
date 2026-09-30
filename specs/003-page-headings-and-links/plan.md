@@ -74,11 +74,13 @@ headings, each `{"title": SafeString, "anchor": str, "children": [...]}`.
   An empty or missing fragment, a fragment holding only the title, and a title with an empty
   nested list all give `[]`.
 - The parser keeps a stack of open lists. `<ul>` opens a list, `<li>` opens an entry in the
-  current list, `<a>` starts recording the entry's title, `</a>` stops it, `</li>` and `</ul>`
-  close. While recording, start tags are kept verbatim (`get_starttag_text()`), end tags as
-  `</tag>`, and text is re-escaped (`html.escape(data, quote=False)`, the parser having unescaped
-  it), so the title is the heading's markup as the build rendered it. The anchor is the `<a>`'s
-  `href` as written (`#<id>`).
+  current list, `</li>` and `</ul>` close. The title is **sliced from the fragment, never
+  re-emitted**: the parser runs with `convert_charrefs=False` and records the offset just after
+  an entry's `<a …>` start tag and the offset of its `</a>`, computed from `getpos()` the way
+  `BodyRewriter.position()` does, and the title is `toc[start:end]`, the build's own bytes
+  (design review ARCH-001). Sphinx's title filter removes references, so a title holds no nested
+  `<a>` (`sphinx/environment/collectors/toctree.py`). The anchor is the `<a>`'s `href` as written
+  (`#<id>`). No shared base class with `BodyRewriter` (Article III: one caller each).
 - Title markup is wrapped in `mark_safe` with a one-line trust comment and `# noqa: S308`, the
   pattern the view uses for the body: the build is the host's own output (spec Assumptions).
 - Names are plain: no leading underscores. Module and class docstrings per
@@ -95,10 +97,13 @@ of `display_toc` that can disagree with it (a title holding an empty list, R2).
 beside `get_breadcrumbs`:
 
 - `headings`: `get_headings()` → `PageHeadings.from_toc(self.page_data.get("toc") or "")`.
-- `previous_page`, `next_page`: `get_neighbour(key)` for `"prev"` and `"next"` → `None` when the
-  page data has no such key or it is not a mapping with a string `link` and `title`, otherwise
-  `{"title": mark_safe(title), "href": urljoin(self.request.path, link)}` (research R3). Sphinx's
-  general index and search pages carry neither key and get neither link.
+- `previous_page`, `next_page`: `get_neighbour(key)` for `"prev"` and `"next"` → `None` when
+  `page_data.get(key)` is falsy (no key, or Sphinx's `null`), otherwise
+  `{"title": mark_safe(title), "href": urljoin(self.request.path, link)}` (research R3). No shape
+  validation: Sphinx only ever writes `null` or a `{link, title}` mapping
+  (`sphinx/builders/html/__init__.py:572-590`), and `get_breadcrumbs` trusts `parents` the same
+  way (design review ARCH-003). Sphinx's general index and search pages carry neither key and get
+  neither link.
 
 Nothing is read beyond the page JSON `get()` already loaded, so FR-010 and FR-011 hold with no code
 of their own. `get()` is not touched: it passes the rewritten `body` that FS-004 added.
@@ -109,7 +114,8 @@ subclass whose classmethod is the entry point.
 
 Annotated per the code-documentation standard (`@description`, `@prop`), like `example.html`.
 
-- `on_this_page.html` — prop `headings`. Renders nothing when `headings` is empty. Otherwise a
+- `on_this_page.html` — prop `headings`, never empty: `page.html`'s `{% if headings %}` around the
+  `<aside>` is the one guard (design review ARCH-002). A
   `<nav>` named by a visible heading through `aria-labelledby` (FR-005: a navigation region with a
   name of its own; the sidebar's list is named by the app's name, so the two differ), holding
   `<c-mvp_sphinx.heading_list :headings="headings" />`.
@@ -144,8 +150,9 @@ unchanged, and the `styles` block that links `content.css` stays as it is.
   as `reading_build`, with a `reading_app` fixture pointing the demo's app at it (the
   `contents_app` pattern). Pages: a front page with an intro, a section holding a visible toctree,
   and a second section with a sub-section; `long` (sections nested three deep, and a heading holding
-  inline code); `single` (exactly one section); `plain` (no section); `hidden-page` (listed only by
-  a hidden toctree); `orphan` (`:orphan:`, with sections). At least four pages in reading order.
+  inline code); `single` (exactly one section); `plain` (no section). Four pages in reading order.
+  The hidden-toctree and orphan cases use the existing `contents` source (`hidden-page.rst`,
+  `orphan.rst`) through `contents_app` (design review ARCH-004).
   Its `conf.py` loads `mvp_sphinx.navigation` so the pages carry contents like the demo's.
 - `tests/test_headings.py` (mirrors `mvp_sphinx/headings.py`), `TestPageHeadings`: plain fragments
   and the real build's `toc` values.
@@ -156,11 +163,11 @@ unchanged, and the `styles` block that links `content.css` stays as it is.
 
 ### Demo
 
-`demo/docs/getting-started.rst` gains sections nested two deep and one heading holding inline code;
-`demo/docs/settings.rst` gains one section; `about.rst` stays without, so the walkthrough reaches
-every state: nested list, single-entry list, no list, first page (no previous), last page (no
-next), a page whose previous page is the front page. The demo's reading order is the front page,
-Getting started, Tutorials, Your first page, Menus, Settings, About.
+`demo/docs/settings.rst` gains one section, the single-entry state. Everything else the walkthrough
+needs is already in the demo guide (design review SPEC-001): `content-tour.rst` (FS-004) has
+sections nested two deep and a heading holding inline code; `about.rst` has none; the front page is
+the first page and Getting started's previous page; About is the last. The demo's reading order is
+the front page, Getting started, Tutorials, Your first page, Content tour, Menus, Settings, About.
 
 ## Story order
 
@@ -180,7 +187,7 @@ mvp_sphinx/
 ├── templates/cotton/mvp_sphinx/heading_list.html # new
 ├── templates/cotton/mvp_sphinx/page_links.html   # new
 └── locale/en/LC_MESSAGES/django.po
-demo/docs/getting-started.rst, settings.rst       # sections for the walkthrough
+demo/docs/settings.rst                            # one section for the walkthrough
 tests/
 ├── sphinx/reading/                               # new source
 ├── conftest.py                                   # reading_build, reading_app

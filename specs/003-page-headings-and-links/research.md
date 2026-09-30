@@ -63,7 +63,8 @@ title and the others are headings below it.
 `folder/` for `folder/index`, and `name/` otherwise. `link` is that address made relative to the
 current page's own address. Probed on the demo build: from `about/`, prev is `../settings/`; from
 `getting-started/`, prev is `../` (the front page); from the front page, next is
-`getting-started/`; from `tutorials/first-page/`, next is `../../menus/`.
+`getting-started/`; from `tutorials/first-page/`, next was `../../menus/` (before FS-004 put
+Content tour after it; now `../../content-tour/`).
 
 **Consequence**: `urljoin(request.path, link)` resolves every link under the app's own prefix, the
 same way the FS-001 breadcrumbs already resolve `parents[*].link` (`mvp_sphinx/views.py`,

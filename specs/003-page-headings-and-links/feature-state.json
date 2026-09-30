@@ -33,6 +33,17 @@
     "merge": {
       "approved_by": null,
       "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel",
+      "at": "2026-09-30T00:40:38Z",
+      "self_resolved": [
+        "ARCH-001 low: title sliced from the toc fragment by offset, not re-emitted \u2014 plan edit",
+        "ARCH-002 low: single {% if headings %} guard in page.html \u2014 plan edit",
+        "ARCH-003 low: get_neighbour treats only missing/null as absent, no shape check \u2014 plan edit",
+        "SPEC-001 low: demo edit narrowed to settings.rst (content tour covers the rest) \u2014 plan/tasks edit",
+        "ARCH-004 low: hidden-page and orphan cases on the existing contents source \u2014 plan/tasks edit"
+      ]
     }
   },
   "stories": [

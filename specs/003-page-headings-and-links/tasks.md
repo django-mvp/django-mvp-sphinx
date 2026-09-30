@@ -37,7 +37,8 @@ entry's anchor is the `#id` of its heading in that page's `body` (FR-002); the i
 title keeps its `<code>` markup (edge case); `single` gives one entry; `plain` gives `[]` (FR-004);
 no entry anywhere is the page's own title. On plain fragments: `""` gives `[]`; a title holding an
 empty `<ul>` gives `[]` (research R2); two outer entries give the first one's children followed by
-the second; text with `&amp;`/`&lt;` stays escaped in the title. The title is a `SafeString`.
+the second. The title is a `SafeString` equal to the markup between the `<a …>` and `</a>` of the
+fragment (plan: sliced, not re-emitted).
 
 ### T002 — "On this page" on the served page
 
@@ -47,8 +48,8 @@ the second; text with `&amp;`/`&lt;` stays escaped in the title. The title is a 
 `tests/test_views.py`, `mvp_sphinx/locale/en/LC_MESSAGES/django.po`
 
 Plan, *The view* (`get_context_data`, `get_headings`), *The components* (the first two), *The
-page*; research R4, R5. `reading_app` fixture. Do not touch `PageView.get()` or the `<article>`
-line (plan: FS-004 changes both). Tests (`TestOnThisPage`, through `client` on the reading build):
+page*; research R4, R5. `reading_app` fixture. Do not edit `PageView.get()` or the `<article>`
+element's content: FS-004 landed both; wrapping the article in the first column is expected. Tests (`TestOnThisPage`, through `client` on the reading build):
 a page with sections carries a `nav` whose `aria-labelledby` names an element inside the page, and
 its links are exactly that page's section anchors in page order (scenario 1); a sub-section's link
 sits in a list nested inside its parent's `li` (scenario 2); every link's `href` is `#` + an `id`
@@ -62,11 +63,10 @@ annotated per `docs/contributing/standards/code-documentation.md`. `{% trans %}`
 
 ### T003 — Demo guide, README and CHANGELOG for the list
 
-**Files**: `demo/docs/getting-started.rst`, `demo/docs/settings.rst`, `README.md`, `CHANGELOG.md`
+**Files**: `demo/docs/settings.rst`, `README.md`, `CHANGELOG.md`
 
-Plan, *Demo*. Getting started gains sections nested two deep, one heading holding inline code;
-Settings gains one section; About stays without. Existing demo text and the image/download lines
-stay. README: under Usage, a short subsection saying pages list their own headings beside them on
+Plan, *Demo*. Settings gains one section; nothing else in the demo guide changes (the content
+tour already has nested sections and an inline-code heading). README: under Usage, a short subsection saying pages list their own headings beside them on
 wide screens, taken from the build with nothing to configure. CHANGELOG Unreleased, Added: one
 entry written for someone deciding whether to upgrade. Humanize README text (public markdown).
 `tests/test_demo.py` is unchanged unless a demo test breaks (then stop and report: it is not this
@@ -94,11 +94,15 @@ the page after the front page, the previous link leads to the app's own address,
 starting
 at the front page and following only next links visits every page the reading build lists, each
 once, and ends on a page with no next link, and following previous links from there returns the same
-way (SC-002); the hidden-toctree page is in that walk (edge case); `orphan` has neither link and
-answers 200 (scenario 6); the handbook app mounted at `manuals/admin/` links under its own prefix
-(scenario 5; `handbook_app` fixture, its source already has several pages or gains one); Sphinx's
+way (SC-002); on `contents_app`, `hidden-page/` has both links and its neighbours link to it (edge
+case) and `orphan/` has neither link and answers 200 (scenario 6); the handbook app mounted at
+`manuals/admin/` links under its own prefix (scenario 5; `handbook_app` fixture; its two pages are
+enough, do not edit that source); Sphinx's
 general index page (`genindex/`) is served with neither link; with Sphinx blocked in
-`sys.modules` the links are still drawn (FR-011). README: one paragraph beside T003's. CHANGELOG
+`sys.modules` the links are still drawn (FR-011). README: one paragraph beside T003's, including
+one sentence that an incremental Sphinx build only rewrites changed pages and the pages whose
+toctrees changed, so a page's previous and next links follow a newly inserted neighbour once that
+page is rebuilt (a full rebuild, `-E`, if in doubt). CHANGELOG
 entry. `{% trans %}` labels; `makemessages -l en`.
 
 ---

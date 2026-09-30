@@ -12,3 +12,12 @@ installed), plan.md, tasks.md: 3 stories, 5 tasks. Decisions D1–D5 appended.
 Analyze: FR-001–FR-011 and SC-001–SC-004 each map to at least one task; every edge case in the spec
 has a fixture page or a test in T001, T002 or T004. No CRITICAL findings.
 Next: design review.
+
+## 2026-09-30T00:40:38Z · S3R design review
+
+Did: rebased onto origin/main after FS-004 merged (f38982b); plan revised for its `BodyRewriter`
+and article markup; verify green on 6f86d91. One reviewer, three lenses: approve, 0 critical/high,
+5 low (ARCH-001 slice titles by offset; ARCH-002 one emptiness guard; ARCH-003 no neighbour shape
+check; SPEC-001 demo edit narrowed to settings.rst; ARCH-004 hidden/orphan cases on the contents
+source). All applied and checked against their evidence (D6). Receipts green.
+Next: plan notice to the orchestrating session, then US1.
