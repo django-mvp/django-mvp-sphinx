@@ -2,7 +2,7 @@
   "feature": "004-theme-styled-content",
   "branch": "004-theme-styled-content",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-09-29T23:55:53Z",
       "note": "US1..US5 sequential in the feature worktree"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T00:18:03Z",
+      "note": "US1-US5 done"
     }
   ],
   "gates": {
@@ -218,7 +223,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {
