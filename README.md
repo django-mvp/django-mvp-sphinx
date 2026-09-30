@@ -162,8 +162,18 @@ project defines. The package's page template links one stylesheet,
 pages the documentation app renders load it. Sphinx's own stylesheets are never
 used.
 
+Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
+wraps each table in a scrolling region that takes keyboard focus and is named by
+the table's caption, or "Table" when it has none, so a table wider than the
+page scrolls sideways for a reader using only a keyboard and a screen reader
+announces what the region holds. Everything else in the body reaches the page
+exactly as Sphinx wrote it. `PageView` applies it and hands the result to the
+template as `body`, so a `PageView` subclass gets it too; to use it elsewhere,
+call `BodyRewriter.rewrite(markup)`.
+
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
-block so the stylesheet still reaches the page:
+block so the stylesheet still reaches the page, and render `{{ body }}` rather
+than `{{ page_data.body }}` so your override keeps the rewrite:
 
 ```django
 {% extends "mvp_sphinx/page.html" %}

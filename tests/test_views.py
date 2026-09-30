@@ -448,3 +448,20 @@ class TestContentStyling:
         response = client.get("/docs/content/")
 
         assert not [s for s in linked_stylesheets(response) if "_static" in s]
+
+
+class TestWideContent:
+    def test_every_table_of_a_page_is_in_a_focusable_named_region(
+        self, client, db
+    ) -> None:
+        response = client.get("/docs/content/")
+
+        body = response.content.decode()
+        regions = re.findall(r'<div [^>]*role="region"[^>]*>', body)
+        assert len(regions) == body.count("<table") == 3
+        assert all('tabindex="0"' in tag and "aria-label=" in tag for tag in regions)
+
+    def test_a_captioned_table_is_named_by_its_caption(self, client, db) -> None:
+        response = client.get("/docs/content/")
+
+        assert 'aria-label="Release schedule"' in response.content.decode()

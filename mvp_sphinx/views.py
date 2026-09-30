@@ -14,10 +14,12 @@ from django.http import (
 from django.http.response import HttpResponseBase
 from django.urls import reverse
 from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 from mvp.views.base import PageMixin
 
 from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.page_body import BodyRewriter
 
 if TYPE_CHECKING:
     from mvp_sphinx.mounted import DocumentationApp
@@ -76,7 +78,9 @@ class PageView(PageMixin, TemplateView):
                 )
             raise Http404
         self.page_data = page
-        return self.render_to_response(self.get_context_data(page_data=page))
+        # The body is the host's own docs build, trusted as it always was.
+        body = mark_safe(BodyRewriter.rewrite(page.get("body", "")))  # noqa: S308
+        return self.render_to_response(self.get_context_data(page_data=page, body=body))
 
     @staticmethod
     def plain_text(markup: str) -> str:

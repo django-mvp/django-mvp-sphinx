@@ -40,3 +40,29 @@ Ordinary text, then a notice of every meaning.
 .. deprecated:: 2.0
 
    Do it the other way.
+
+
+Tables
+------
+
+.. list-table:: Release schedule
+   :header-rows: 1
+
+   * - Version
+     - Date
+   * - 1.0
+     - January
+
+.. list-table::
+
+   * - Plain
+     - Table
+
+.. warning::
+
+   A table inside a warning.
+
+   .. list-table::
+
+      * - Inside
+        - Notice
