@@ -244,3 +244,17 @@ Wrapping a table with no end tag would need a guessed end offset; leaving it as 
 
 **Revisit if:** a Sphinx theme or extension puts other text after the caption text that is not the
 heading link.
+
+## D10. The holder of a heading link is the innermost open element
+
+**Decision:** `BodyRewriter` keeps a stack of open elements (offset where each one's content
+starts). A heading link is named from the text between the start of the innermost open element's
+content and the link. Void elements are never pushed, and an end tag closes the innermost element
+of its name and everything opened inside it.
+
+**Why:** Sphinx puts the link as the last child of the heading, term or caption, so "the element
+that directly holds the link" is exactly the top of the stack, and no per-tag list of headings is
+needed. Closing by name keeps the stack right for the unclosed `<li>` and `<p>` a raw directive can
+leave.
+
+**Revisit if:** Sphinx wraps the link in an element of its own.

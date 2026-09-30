@@ -83,3 +83,33 @@ Verified: `uv run sphinx-build -b json -q -W demo/docs /tmp/demo-json-us3b` exit
 colour and stays scoped); `uv run pre-commit run --all-files` passed. No test for layout.
 Next: full verify.
 Watch: the layout itself was not looked at in a browser; the demo page is the place to check it.
+
+## 2026-09-30T02:15+02:00 · Implementer US4 · T006
+
+Did: `BodyRewriter` names every `a.headerlink` (`aria-label` inserted just after `<a`): the link's
+`title`, a colon, and the text of the element holding it up to the link; the text alone when there
+is no title. The parser keeps a stack of open elements (void tags never pushed, an end tag closes
+the innermost match) to know the holder. Fixture page gains sections (one heading with inline code
+and an ampersand) and a glossary. README paragraph in *How pages look*.
+Verified: `uv run pytest tests/test_page_body.py` red first (16 failed on a missing `aria-label`,
+22 guards passed), then 38 passed; `uv run pytest tests/test_views.py::TestHeadingLinks` 5 passed
+(4 fail with the naming call removed; the fifth is an untouched-`href` guard);
+`uv run pytest tests/test_page_body.py tests/test_views.py` 103 passed. Probed by mutation: not
+popping closed elements and inserting one character late each fail a test (the second only after
+a separator assertion was added). `uv run pre-commit run --all-files` passed.
+Next: T007, the stylesheet and demo.
+Watch: a link with neither title nor text gets no label; the fixture build has to stay warning-free.
+
+## 2026-09-30T02:15+02:00 · Implementer US4 · T007
+
+Did: heading-link rules at the end of `content.css` (muted, no underline, opacity 0 with a 150ms
+transition, revealed on hover of h1-h6, dt, caption, figcaption and `.code-block-caption` and on
+the link's own `:focus-visible`, no transition under reduced motion, `[id]` gets
+`scroll-margin-top: 5rem`); `content-tour.rst` gains a *Headings* section of four long subsections,
+one with inline code. CHANGELOG line.
+Verified: `uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us4` exit 0; `uv run pytest
+tests/test_static tests/test_demo.py` 19 passed (no literal colour, all rules scoped, contrast);
+`uv run pre-commit run --all-files` passed. No test for appearance or motion.
+Next: full verify.
+Watch: the reveal, the transition and the scroll offset were not looked at in a browser; the demo
+content tour is the place to check them.
