@@ -1,28 +1,30 @@
-The demo guide
-==============
+Using the demo site
+===================
 
-This guide is the demo project's own documentation. It is built with
-``sphinx-build -b json`` and served through the documentation app, inside the
-same shell as every other page of the demo.
+Welcome. This is the user guide for the demo site you are looking at. It tells
+you how to sign in, how to find your way around, what the staff guide is and who
+can open it, and where to look things up.
 
-Start with :doc:`getting-started`, then look at the :doc:`tutorials/index`. The
-sidebar lists every page, grouped the way this page's toctrees group them, and the
-:doc:`content-tour` shows how the guide's content looks.
+You can read every page here without signing in. Signing in matters for one
+thing only: the staff guide, which is for staff accounts. If you are new, start
+with :doc:`first-visit/index`.
 
 .. toctree::
-   :caption: Using the demo
+   :caption: Using the site
    :hidden:
 
-   getting-started
-   tutorials/index
-   content-tour
+   first-visit/index
+   staff-guide
 
 .. toctree::
    :caption: Reference
    :hidden:
 
-   menus
-   settings
+   reference/accounts
+   reference/sharing-links
+   reference/notices
+   reference/glossary
+   reference/who-sees-what-when-they-sign-in-and-why-the-sidebar-differs
 
 .. toctree::
    :hidden:

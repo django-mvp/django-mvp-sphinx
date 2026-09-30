@@ -536,14 +536,40 @@ uv run pytest
 uv run pre-commit install
 ```
 
-`demo/` is a Django project on django-mvp's application shell, for looking at
-this package in a browser while working on it:
+### The demo
+
+`demo/` is a Django project on django-mvp's application shell, for looking at this
+package in a browser while you work on it. It serves a user guide of its own and a
+second guide for staff, each through a documentation app, and the guides between
+them hold every state this package draws.
+
+The guides' builds are not committed, so build them before you start the server.
+The two `sphinx-build` lines are [step 3 of the quickstart](https://github.com/django-mvp/django-mvp-sphinx#3-build-the-docs) run
+on the demo's two sources:
 
 ```bash
+uv sync
 uv run python manage.py migrate
 uv run python manage.py seed_demo
+uv run sphinx-build -b json demo/docs demo/docs/_build/json
+uv run sphinx-build -b json demo/staff_guide demo/staff_guide/_build/json
 uv run python manage.py runserver
 ```
+
+Then open <http://127.0.0.1:8000/docs/> for the user guide. Its sidebar reaches every
+page. After you edit a page under `demo/docs/`, run the first `sphinx-build` again and
+reload, with no restart. Until a build exists, every address under `/docs/` answers 404.
+
+`seed_demo` made three accounts, all with the password `password`:
+
+- `regular.user@example.com` is signed in but not staff.
+- `staff.user@example.com` is staff.
+- `super.user@example.com` is a superuser, and staff too.
+
+Only the staff and superuser accounts can open the staff guide at
+<http://127.0.0.1:8000/staff-guide/>. Everyone else is asked to sign in or is shown
+the forbidden page, and the sidebar has no entry for them. The command refuses to run
+unless `DEBUG` is on.
 
 ## License
 

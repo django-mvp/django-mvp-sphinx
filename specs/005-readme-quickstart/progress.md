@@ -134,3 +134,24 @@ state; recorded as passing at red (FS-002 T005 precedent). The rewrite is checke
 tests in T004.
 Next: T004, the guide rewrite, README demo part, AGENTS.md fixes.
 Watch: none.
+
+## 2026-09-30T11:10:00Z · Implementer US3 · T004
+
+Did: `demo/docs` rewritten as a user guide for the demo site. Front page with captioned groups
+"Using the site" and "Reference" and one uncaptioned page (About); "Your first visit" with
+"Signing in" and "Finding your way" under it; the staff guide page; reference pages for the
+accounts (wide table, a table in a list item, JSON and plain-text blocks, a download), sharing links
+(long page, nested headings, captioned code with line numbers, a long line), notices (every
+admonition kind, version notes, images, a figure), the glossary, and one page with a long title.
+`shell.png` kept; `notes.txt` replaced by `accounts.csv` as the download. `demo/staff_guide/index.rst`
+reworded where it described the package. README: Contributing gains "The demo" (uv sync, migrate,
+seed_demo, the two sphinx-build commands as quickstart step 3, runserver, what to open, the three
+accounts, absolute links). AGENTS.md: the Components example now names `<c-mvp_sphinx.page_links>`;
+the demo section says what the guide is and that TestDemoGuideStates checks it.
+Verified: `uv run sphinx-build -b json -W -q demo/docs /tmp/us3-build` exit 0;
+`uv run pytest tests/test_demo.py -q` exit 0, 26 passed; `uv run pre-commit run --all-files` passed.
+Probed: removing the `danger` admonition and the `:download:` role each turned a
+TestDemoGuideStates test red (test_each_admonition_kind_is_drawn, test_a_download_is_served);
+reverted.
+Next: full verify, report.
+Watch: CHANGELOG is not in T004's files and has no entry for the demo guide.
