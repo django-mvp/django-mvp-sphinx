@@ -104,3 +104,11 @@ feature diff: nothing to change (`position()` repeats `BodyRewriter`'s, kept per
 the design review). ADR verdicts for D2–D5: none graduate. T004's hidden-page wording corrected
 (D7). check-adrs and check-story-comments green.
 Next: S6 review.
+
+## 2026-09-30T09:57:39Z · S6 review
+
+Did: one Phase 1 reviewer (Phase 2 not triggered): approve, no findings; receipts green. README
+override paragraph now names the new context keys. Looking at the running pages at a wide width
+turned up two layout faults, fixed directly (D8): long headings now wrap in On this page, and the
+reading column is held at prose width. Verify green. Review outcome recorded on #52.
+Next: S7 walkthrough and PR ready.

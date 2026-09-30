@@ -63,6 +63,14 @@
         "SPEC-001 low: demo edit narrowed to settings.rst (content tour covers the rest) \u2014 plan/tasks edit",
         "ARCH-004 low: hidden-page and orphan cases on the existing contents source \u2014 plan/tasks edit"
       ]
+    },
+    "review": {
+      "approved_by": "review-panel",
+      "at": "2026-09-30T09:57:39Z",
+      "self_resolved": [
+        "no findings; review note acted on: README override paragraph names headings, previous_page, next_page (D8)",
+        "pre-walkthrough fixes made directly: heading titles wrap (text-wrap span), reading column held at prose width (D8)"
+      ]
     }
   },
   "stories": [
