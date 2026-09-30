@@ -253,3 +253,54 @@ class TestContentStylesheet:
             < MINIMUM_CONTRAST
         ]
         assert unreadable == []
+
+
+class TestCodeStylesheet:
+    SURFACES = ["--mvp-sphinx-code-bg", "--mvp-sphinx-code-emphasis-bg"]
+    TOKEN_GROUPS = [
+        "comment",
+        "keyword",
+        "string",
+        "number",
+        "name",
+        "inserted",
+        "deleted",
+        "error",
+    ]
+
+    @staticmethod
+    def text_roles(own: dict[str, str]) -> list[str]:
+        return [
+            name
+            for name in own
+            if name.startswith("--mvp-sphinx-code-") and not name.endswith("-bg")
+        ]
+
+    def test_every_token_group_and_the_line_numbers_have_a_colour(
+        self, stylesheet
+    ) -> None:
+        roles = self.text_roles(stylesheet.properties())
+
+        expected = [f"--mvp-sphinx-code-{group}" for group in self.TOKEN_GROUPS]
+        expected += ["--mvp-sphinx-code-text", "--mvp-sphinx-code-line-number"]
+        assert sorted(roles) == sorted(expected)
+
+    @pytest.mark.parametrize("theme", THEMES)
+    @pytest.mark.parametrize("surface", SURFACES)
+    def test_code_text_is_readable_on_the_code_background(
+        self, stylesheet, theme, surface
+    ) -> None:
+        own, colours = stylesheet.properties(), ColourMath.theme(theme)
+        background = ColourMath.resolve(f"var({surface})", own, colours)
+
+        roles = self.text_roles(own)
+        unreadable = [
+            name
+            for name in roles
+            if ColourMath.contrast(
+                ColourMath.resolve(f"var({name})", own, colours), background
+            )
+            < MINIMUM_CONTRAST
+        ]
+        assert roles
+        assert unreadable == []

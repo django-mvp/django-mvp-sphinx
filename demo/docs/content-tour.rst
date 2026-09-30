@@ -84,3 +84,53 @@ Version notes
 .. deprecated:: 2.0
 
    Do it the other way instead.
+
+Code
+----
+
+Code is highlighted in the site's colours, in each theme.
+
+.. code-block:: python
+
+   from dataclasses import dataclass
+
+
+   @dataclass
+   class Page:
+       """A page of the guide."""
+
+       title: str
+       number: int = 1
+
+       def heading(self) -> str:
+           # Build the heading text.
+           return f"{self.number}. {self.title}"
+
+.. code-block:: console
+
+   $ python manage.py collectstatic --noinput
+   $ python manage.py runserver
+
+.. code-block:: json
+
+   {"title": "Content tour", "pages": [1, 2, 3], "draft": false, "owner": null}
+
+A block with a caption, line numbers and emphasised lines:
+
+.. code-block:: python
+   :caption: settings.py
+   :linenos:
+   :emphasize-lines: 2, 4
+
+   INSTALLED_APPS = [
+       "django.contrib.staticfiles",
+       "mvp",
+       "mvp_sphinx",
+   ]
+
+Code in a language Pygments cannot highlight is plain text in the same box:
+
+.. code-block:: text
+
+   Nothing here is highlighted.
+   It reads as ordinary code text.
