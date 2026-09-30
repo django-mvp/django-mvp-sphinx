@@ -133,6 +133,11 @@ searches that one app's pages and never the rest of your site or another
 documentation app. Adding a word narrows the list. Common words such as "the" are
 ignored, as Sphinx ignores them.
 
+The page whose title holds all the words comes first, then a page with a section
+heading that holds them, then the rest, each group in order of title. Every result
+shows the page's title and, when the page's text holds one of the words, a short
+passage around it. A result found by a section heading links to that section.
+
 Nothing needs configuring. The search reads the search data Sphinx already writes
 into every JSON build (`searchindex.json`), so there is no extra Sphinx setting and
 no Sphinx where the site runs. The only extra dependency is `snowballstemmer`, the

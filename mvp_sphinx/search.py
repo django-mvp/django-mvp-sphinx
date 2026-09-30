@@ -3,6 +3,7 @@
 import json
 import re
 from functools import cached_property
+from html.parser import HTMLParser
 from typing import Any
 
 import snowballstemmer
@@ -28,6 +29,7 @@ class DocsSearch:
     LANGUAGE_DATA_FILE = "_static/language_data.js"
     CONTEXT_FILE = "globalcontext.json"
     WORD_LIMIT = 20
+    PASSAGE_LENGTH = 240
     # Sphinx 9 stems English with the english algorithm, Sphinx 8 with porter.
     ALGORITHMS: dict[str, tuple[str, ...]] = {
         "en": ("english", "porter"),
@@ -187,17 +189,22 @@ class DocsSearch:
         return {word, *(stemmer.stemWord(word) for stemmer in self.stemmers)}
 
     def results(self, query: str) -> list[dict[str, str]] | None:
-        """List the pages holding every word of ``query``.
+        """List the pages holding every word of ``query``, best match first.
+
+        A page whose title holds every word comes first, then a page with a
+        section heading that holds them all, then the rest. Within each of the
+        three, pages are ordered by title and then document name.
 
         Args:
             query: What the reader typed.
 
         Returns:
             ``None`` when the build's search data cannot be used. Otherwise one
-            mapping per matching page, ordered by title and then document name,
-            with its ``title``, its ``path`` below the documentation app's
-            prefix, and an ``anchor`` and ``passage`` that are empty. Empty
-            when the query has no words or no page holds them all.
+            mapping per matching page with its ``title``, its ``path`` below the
+            documentation app's prefix, the ``anchor`` of the section holding the
+            words (empty when the title or only the body does) and a ``passage``
+            of the page around the first of them (empty when there is none).
+            Empty when the query has no words or no page holds them all.
         """
         data = self.data()
         if data is None:
@@ -210,28 +217,129 @@ class DocsSearch:
             for key, value in mapping.items():
                 numbers = value if isinstance(value, list) else [value]
                 postings.setdefault(key.lower(), set()).update(numbers)
+        word_keys = [{key.lower() for key in self.keys(word)} for word in words]
         matches: set[int] | None = None
-        for word in words:
+        for keys in word_keys:
             found: set[int] = set()
-            for key in self.keys(word):
-                found |= postings.get(key.lower(), set())
+            for key in keys:
+                found |= postings.get(key, set())
             matches = found if matches is None else matches & found
             if not matches:
                 return []
         docnames, titles = data["docnames"], data["titles"]
-        ordered = sorted(
-            matches or (),
-            key=lambda number: (titles[number].lower(), docnames[number]),
-        )
+        sections = self.sections(data)
+        ranked = []
+        for number in matches or ():
+            anchor = ""
+            if self.holds(titles[number], word_keys):
+                tier = 0
+            else:
+                anchor = next(
+                    (
+                        anchor
+                        for heading, anchor in sections.get(number, ())
+                        if self.holds(heading, word_keys)
+                    ),
+                    "",
+                )
+                tier = 1 if anchor else 2
+            order = (tier, titles[number].lower(), docnames[number])
+            ranked.append((order, number, anchor))
         return [
             {
                 "title": titles[number],
                 "path": self.path(docnames[number]),
-                "anchor": "",
-                "passage": "",
+                "anchor": anchor,
+                "passage": self.passage(docnames[number], word_keys),
             }
-            for number in ordered
+            for number, anchor in (entry[1:] for entry in sorted(ranked))
         ]
+
+    def holds(self, text: str, word_keys: list[set[str]]) -> bool:
+        """Say whether the words of ``text`` cover every searched word.
+
+        Args:
+            text: A page title or a section heading.
+            word_keys: The lower-cased keys of each searched word.
+
+        Returns:
+            ``True`` when each searched word has one of its keys among the keys
+            of a word of ``text``.
+        """
+        held: set[str] = set()
+        for word in re.findall(r"\w+", text.lower()):
+            held |= {key.lower() for key in self.keys(word)}
+        return all(keys & held for keys in word_keys)
+
+    @staticmethod
+    def sections(data: dict[str, Any]) -> dict[int, list[tuple[str, str]]]:
+        """Return the section headings of each document, with their anchors.
+
+        Args:
+            data: The build's search data, from ``data()``.
+
+        Returns:
+            For a document number, its headings that have an anchor, each as the
+            heading's text and the anchor. An entry that is not a pair of a
+            document number below the document count and a non-empty anchor is
+            left out.
+        """
+        count = len(data["docnames"])
+        sections: dict[int, list[tuple[str, str]]] = {}
+        for heading, entries in data["alltitles"].items():
+            if not isinstance(entries, list):
+                continue
+            for entry in entries:
+                if not (isinstance(entry, list) and len(entry) == 2):
+                    continue
+                number, anchor = entry
+                if (
+                    isinstance(number, int)
+                    and not isinstance(number, bool)
+                    and 0 <= number < count
+                    and isinstance(anchor, str)
+                    and anchor
+                ):
+                    sections.setdefault(number, []).append((heading, anchor))
+        return sections
+
+    def passage(self, docname: str, word_keys: list[set[str]]) -> str:
+        """Return the text of a page around the first searched word in it.
+
+        Args:
+            docname: A document name from the search data.
+            word_keys: The lower-cased keys of each searched word.
+
+        Returns:
+            About ``PASSAGE_LENGTH`` characters of the page's text, cut at word
+            boundaries with an ellipsis at each cut end. Empty when no word of
+            the page's body matches, or when the page's file cannot be read.
+        """
+        try:
+            page = self.build.page(self.path(docname))
+        except (OSError, ValueError, RecursionError):
+            return ""
+        body = page.get("body") if isinstance(page, dict) else None
+        if not isinstance(body, str):
+            return ""
+        text = PageText.text(body)
+        searched = set().union(*word_keys)
+        for hit in re.finditer(r"\w+", text):
+            if self.keys(hit.group().lower()) & searched:
+                break
+        else:
+            return ""
+        start = max(0, hit.start() - self.PASSAGE_LENGTH // 2)
+        if start:
+            space = text.find(" ", start, hit.start())
+            start = space + 1 if space != -1 else hit.start()
+        end = min(len(text), start + self.PASSAGE_LENGTH)
+        if end < len(text):
+            space = text.rfind(" ", hit.end(), end)
+            end = space if space != -1 else hit.end()
+        head = "…" if start else ""
+        tail = "…" if end < len(text) else ""
+        return f"{head}{text[start:end]}{tail}"
 
     @staticmethod
     def path(docname: str) -> str:
@@ -251,3 +359,55 @@ class DocsSearch:
         if docname.endswith("/index"):
             return docname[: -len("index")]
         return f"{docname}/"
+
+
+class PageText(HTMLParser):
+    """Collect the text a reader sees in the body of a page.
+
+    Sphinx's permalinks, scripts and styles are left out. Character references
+    are converted, so the text is plain and a template is the one to escape it.
+    """
+
+    SKIPPED_TAGS = ("script", "style")
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.skipping = ""
+        self.depth = 0
+
+    @classmethod
+    def text(cls, markup: str) -> str:
+        """Return the text of ``markup`` with its whitespace collapsed.
+
+        Args:
+            markup: A page's ``body`` as Sphinx wrote it.
+
+        Returns:
+            The text outside permalinks, scripts and styles, in one line.
+        """
+        parser = cls()
+        parser.feed(markup)
+        parser.close()
+        return " ".join("".join(parser.parts).split())
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """Start skipping at a permalink, script or style, or go deeper in one."""
+        if self.skipping:
+            self.depth += tag == self.skipping
+        elif tag in self.SKIPPED_TAGS or (
+            tag == "a" and "headerlink" in (dict(attrs).get("class") or "").split()
+        ):
+            self.skipping, self.depth = tag, 1
+
+    def handle_endtag(self, tag: str) -> None:
+        """Stop skipping when the element being skipped closes."""
+        if self.skipping and tag == self.skipping:
+            self.depth -= 1
+            if not self.depth:
+                self.skipping = ""
+
+    def handle_data(self, data: str) -> None:
+        """Keep the text that is not inside a skipped element."""
+        if not self.skipping:
+            self.parts.append(data)

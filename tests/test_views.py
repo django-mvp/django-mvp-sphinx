@@ -931,3 +931,96 @@ class TestSearchResults:
         response = client.get("/docs/search/", {"q": word})
 
         assert result_hrefs(response) == []
+
+
+def result_items(response):
+    soup = BeautifulSoup(response.content, "html.parser")
+    section = soup.find("main").find("section", attrs={"aria-labelledby": True})
+    return section.select("ol > li") if section else []
+
+
+class TestSearchResultDetails:
+    def test_the_page_titled_with_the_word_is_listed_before_pages_that_mention_it(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert result_hrefs(response)[0] == "/docs/lanterns/"
+        assert sorted(result_hrefs(response)) == LANTERN_HREFS
+
+    def test_a_result_shows_the_pages_title_as_plain_text(
+        self, client, db, search_app
+    ) -> None:
+        (item,) = result_items(client.get("/docs/search/", {"q": "escapist"}))
+
+        assert item.find("a").get_text() == "Fish & <chips>"
+        assert item.find("chips") is None
+
+    def test_a_result_shows_a_passage_holding_the_word_without_markup_or_permalink(
+        self, client, db, search_app
+    ) -> None:
+        (item,) = result_items(client.get("/docs/search/", {"q": "quetzal"}))
+        passage = item.find("p")
+
+        assert "quetzal" in passage.get_text()
+        assert "¶" not in item.get_text()
+        assert passage.find(True) is None
+
+    def test_markup_characters_in_a_passage_come_back_escaped(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/", {"q": "escapist"})
+        (item,) = result_items(response)
+
+        assert "<em>" in item.find("p").get_text()
+        assert item.find("em") is None
+        assert "&lt;em&gt;" in response.content.decode()
+
+    def test_a_word_in_a_section_heading_leads_to_that_section(
+        self, client, db, search_app
+    ) -> None:
+        (href,) = result_hrefs(client.get("/docs/search/", {"q": "gasket"}))
+        page, _, anchor = href.partition("#")
+
+        assert page == "/docs/sections/"
+        assert anchor
+        target = BeautifulSoup(client.get(page).content, "html.parser")
+        assert target.find(id=anchor) is not None
+
+    def test_a_word_in_the_title_leads_to_the_page_itself(
+        self, client, db, search_app
+    ) -> None:
+        assert result_hrefs(client.get("/docs/search/", {"q": "marsupials"})) == [
+            "/docs/wombat/"
+        ]
+
+    def test_a_title_only_match_lists_the_page_without_a_passage(
+        self, client, db, search_app, tmp_path, monkeypatch
+    ) -> None:
+        build = tmp_path / "title-only"
+        shutil.copytree(search_app.build_dir, build)
+        page_file = build / "wombat.fjson"
+        page = json.loads(page_file.read_text())
+        page["body"] = "<p>Nothing to see.</p>"
+        page_file.write_text(json.dumps(page))
+        monkeypatch.setattr(search_app, "build_dir", build)
+
+        (item,) = result_items(client.get("/docs/search/", {"q": "marsupials"}))
+
+        assert item.find("a")["href"] == "/docs/wombat/"
+        assert item.find("p") is None
+
+    def test_a_page_whose_file_is_missing_is_listed_without_a_passage(
+        self, client, db, search_app, tmp_path, monkeypatch
+    ) -> None:
+        build = tmp_path / "missing-page"
+        shutil.copytree(search_app.build_dir, build)
+        (build / "wombat.fjson").unlink()
+        monkeypatch.setattr(search_app, "build_dir", build)
+
+        response = client.get("/docs/search/", {"q": "koala"})
+
+        assert response.status_code == 200
+        (item,) = result_items(response)
+        assert item.find("a")["href"] == "/docs/wombat/"
+        assert item.find("p") is None

@@ -46,3 +46,22 @@ django-mvp). `pre-commit run --all-files` passes.
 Next: US2 (T003) and US3 (T004) in a later dispatch.
 Watch: `results()` still returns empty `anchor` and `passage`; the template already renders a passage
 when there is one. The unavailable state exists and is reachable, but has no test yet (T004).
+
+## 2026-09-30T01:08:00Z · Implementer US2+US3 · T003
+
+Did: `DocsSearch.results()` tiers each match (title holds every word, then a section heading of
+`alltitles` with an anchor, then the rest) and sorts by tier, title, document name; new
+`holds()`, `sections()`, `passage()` and `PageText` in `mvp_sphinx/search.py`; the result's
+`anchor` and `passage` are filled. `search.html` and `SearchView.href` needed no change. Tests:
+`TestResultOrder`, `TestSectionLink`, `TestPassage`, `TestPageText` (`test_search.py`),
+`TestSearchResultDetails` (`test_views.py`). README Search section and CHANGELOG entry updated.
+Decision D22.
+Verified: `uv run pytest tests/test_search.py tests/test_views.py -q -k "Search or Passage or
+Section or PageText"` → 138 passed, 2 failed. The two failures are T001 tests that assert the
+pre-T003 behaviour (`test_a_result_has_the_page_title_and_path_and_no_section_or_passage`,
+`test_results_are_ordered_by_title_then_document_name`); not edited, see D22 and the report.
+Red step: collection failed on the missing `PageText`; then 12 of the new search tests failed on
+missing behaviour; the four view tests that depend on the new `search.py` failed against the old
+one. `uv run mypy` and `uv run pre-commit run --all-files` pass.
+Next: T004.
+Watch: the two stale US1 tests need a Forge decision before the tree is green.

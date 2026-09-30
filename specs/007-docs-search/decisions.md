@@ -263,3 +263,27 @@ and this page has none.
 
 **Revisit if:** a third view needs the form, or a host wants its own wording without overriding
 the component.
+
+## D22. Passages, titles and the two US1 tests T003 makes false (S4 US2)
+
+**Decision:** (1) A result's title is the search data's title as it is: Sphinx writes `titles`
+as plain text (`Fish & <chips>`), so it is not passed through `strip_tags`, which would cut
+`<chips>` out. The template escapes it. (2) A page's body always holds its own title in an
+`<h1>`, so a title match normally has a passage that repeats the title. "A title-only match has
+an empty passage" is tested against a copy of the build whose page body lacks the word, which is
+the case the passage code has to handle. (3) `PageText` adds no space between elements; the
+whitespace Sphinx writes between blocks separates words, and its tests use markup written the same
+way. (4) `sections()` validates each `alltitles` entry itself (a `[number, anchor]` pair, number
+inside the document count, anchor a non-empty string), as D20 left to T003, and an entry that
+fails is left out. (5) `test_a_result_has_the_page_title_and_path_and_no_section_or_passage` and
+`test_results_are_ordered_by_title_then_document_name` (T001) state the behaviour T003 replaces
+(an empty passage and plain title order). They were not edited, per the story's prohibition, and
+now fail.
+
+**Why:** (1) to keep markup characters of a real title. (2) The plan's "empty when no word of the
+body matches" is the behaviour; the fixture cannot produce it without a page whose title the body
+lacks. (3) Adding block tags to `PageText` would grow it for a case the build does not produce.
+(5) Both tests assert the placeholder from before T003; neither can pass alongside US2.1 and US2.3.
+
+**Revisit if:** a build's page body lacks whitespace between blocks, or Sphinx starts writing
+markup into `titles`.
