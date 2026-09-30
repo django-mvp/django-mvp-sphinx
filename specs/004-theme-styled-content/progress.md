@@ -37,3 +37,20 @@ muted mix fail the contrast tests, an appended `#fff` unscoped rule fails the li
 tests. `uv run sphinx-build -b json -W demo/docs demo/docs/_build/json` exit 0.
 Next: full verify.
 Watch: the theme parse takes the first `[data-theme=NAME]` rule holding `--color-base-100`.
+
+## 2026-09-30T02:20+02:00 · Implementer US2 · T003
+
+Did: code colour roles (background, text, emphasis background, line number, comment, keyword,
+string, number, name, inserted, deleted, error) added to the colour-roles rule in `content.css`;
+Pygments short classes grouped onto them; `.highlight pre`, `.hll`, `.linenos` and
+`.code-block-caption` rules. Token roles are a theme role at 40% over base-content; comment and
+line number reuse the muted colour; the emphasis background is warning at 15% over base-200.
+`TestCodeStylesheet` in `tests/test_static/test_content_css.py` measures every code text role on
+both code backgrounds in both themes. Demo: Python, console, JSON, a captioned block with line
+numbers and emphasis, and a `text` block on `content-tour.rst`. CHANGELOG line.
+Verified: `uv run pytest tests/test_static/test_content_css.py` red first (roles test failed on the
+missing roles), then 15 passed; probed by mutation (string at 95% success fails the light cases);
+`uv run sphinx-build -b json -W demo/docs /tmp/demo-json` exit 0; pre-commit passed.
+Next: full verify.
+Watch: lowest measured pair is the number colour on the emphasised background in the light theme
+(about 6.5:1). No role moved far from its hue, so no decisions.md entry.

@@ -100,8 +100,17 @@
       "tasks": [
         {
           "id": "T003",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_static/test_content_css.py (red: 1 failed on the roles test, contrast tests guarded by a non-empty assert; green: 15 passed)",
+              "mutation probe: string mix at 95% success fails both light contrast cases; restored",
+              "uv run sphinx-build -b json -W demo/docs /tmp/demo-json (exit 0)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: ['SC-005', 'FR-006', 'FR-007', 'FR-015']"
+            ]
+          }
         }
       ]
     },
