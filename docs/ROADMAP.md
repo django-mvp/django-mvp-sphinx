@@ -65,24 +65,17 @@ documentation app's own pages.
 
 ### R3 — User-guide content looks right in the host's theme
 
-*feature · advances G1, G4*
+*delivered in [#7](https://github.com/django-mvp/django-mvp-sphinx/issues/7) · advances G1, G4*
 
-What a user guide is written with renders as part of the site: every colour
-comes from the host's theme, so a theme change or dark mode needs nothing
-extra. Unstyled markup would make the pages read as foreign, which is why this
-sits in the first release even though its goal is only Expected in full.
+Every page a documentation app serves takes its content's look from the host's
+theme with nothing to configure: admonitions are told apart by meaning, code is
+highlighted in theme colours, wide tables and code scroll inside the page while
+images scale to fit, headings and glossary terms carry named links a reader can
+copy, and glossaries, keys, labels and menu paths read as the site's own. Text
+in admonitions and highlighted code meets WCAG AA in django-mvp's light and dark
+themes.
 
-**Deliverables:**
-
-- Notes, tips, warnings and the other admonitions, coloured by their meaning
-  from the theme
-- Highlighted code that follows the theme and dark mode
-- Tables that scroll inside the page rather than widening it
-- Headings with links a reader can copy, visible on hover and to the keyboard
-- Images, figures, glossaries and cross-references displayed as the rest of the
-  site displays their kind of content
-
-Advances G1 and G4. Out of scope: API reference pages and maths, which are G9.
+Advances G1 and G4.
 
 ### R4 — Adopting it is a mount and one line of config
 

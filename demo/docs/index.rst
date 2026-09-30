@@ -6,7 +6,8 @@ This guide is the demo project's own documentation. It is built with
 same shell as every other page of the demo.
 
 Start with :doc:`getting-started`, then look at the :doc:`tutorials/index`. The
-sidebar lists every page, grouped the way this page's toctrees group them.
+sidebar lists every page, grouped the way this page's toctrees group them, and the
+:doc:`content-tour` shows how the guide's content looks.
 
 .. toctree::
    :caption: Using the demo
@@ -14,6 +15,7 @@ sidebar lists every page, grouped the way this page's toctrees group them.
 
    getting-started
    tutorials/index
+   content-tour
 
 .. toctree::
    :caption: Reference
