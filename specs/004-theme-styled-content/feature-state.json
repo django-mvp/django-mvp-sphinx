@@ -167,8 +167,8 @@
           "attempts": 1,
           "evidence": {
             "commands": [
-              "uv run pytest tests/test_page_body.py (red: 16 failed on a missing aria-label; green: 38 passed)",
-              "uv run pytest tests/test_views.py::TestHeadingLinks (5 passed)",
+              "uv run pytest tests/test_page_body.py (red: 16 failed on missing aria-label; green: 38 passed)",
+              "uv run pytest tests/test_views.py::TestHeadingLinks (5 passed; 4 fail with the naming call removed)",
               "uv run pytest tests/test_page_body.py tests/test_views.py (103 passed)",
               "uv run pre-commit run --all-files (passed)",
               "exit_code: 0; criteria: ['SC-004']"
@@ -184,7 +184,7 @@
               "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us4 (exit 0)",
               "uv run pytest tests/test_static tests/test_demo.py (19 passed)",
               "uv run pre-commit run --all-files (passed)",
-              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us4-verify.json (overall passed: conformance, docs, lint, typecheck, test, build)",
+              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us4-verify.json (exit 0; overall passed: conformance, docs, lint, typecheck, test, build)",
               "exit_code: 0; criteria: []"
             ]
           }
