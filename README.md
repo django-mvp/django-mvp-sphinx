@@ -22,7 +22,28 @@ several projects, keep old versions, or manage translations.
 When two designs conflict, the one that makes the docs look like the rest of
 the site beats the one that copies a Sphinx theme.
 
-## Installation
+## Quickstart
+
+Five steps take a project from install to a documentation page in its own
+application shell, with the contents in the sidebar and a menu entry that leads
+to it. You write no template.
+
+### Before you start
+
+You need a Django project on [django-mvp](https://github.com/django-mvp/django-mvp)
+whose application shell already works. This package renders inside django-mvp's
+layout and reads its colours from the theme django-mvp supplies, so it does
+nothing useful on its own.
+
+You also need a Sphinx source directory for your user guide. The examples call
+it `docs/`. If you don't have one yet, Sphinx's own
+[`sphinx-quickstart`](https://www.sphinx-doc.org/en/master/usage/quickstart.html)
+creates it.
+
+The examples use `yourproject` and `yourapp` for your project's package and one
+of its apps. Change those names and the paths to match your own.
+
+### 1. Install
 
 ```bash
 pip install django-mvp-sphinx
@@ -38,36 +59,48 @@ INSTALLED_APPS = [
 ]
 ```
 
-This package requires [django-mvp](https://github.com/django-mvp/django-mvp).
-It renders inside django-mvp's layout and reads its colours from the theme
-django-mvp supplies, so it does nothing useful on its own.
+### 2. Add the Sphinx line
 
-## Usage
+Add the package's extension to your Sphinx project's `docs/conf.py`:
 
-Build your Sphinx documentation as JSON, point a `DocumentationApp` at the
-folder it writes to, and mount it in your URLs.
+```python
+extensions = ["mvp_sphinx.navigation"]
+```
+
+If `conf.py` already lists extensions, add this one to the list.
+
+The extension writes the contents the sidebar shows. Without it the sidebar holds
+only the front page's entry, and every page is still served.
+
+### 3. Build the docs
 
 ```bash
 sphinx-build -b json docs docs/_build/json
 ```
 
 Sphinx is needed where you run that command and nowhere else. The site that
-serves the pages reads the files the build left behind and never imports Sphinx,
-so it can stay out of your production requirements.
+serves the pages reads the files the build left behind, never imports Sphinx and
+never starts a build, so Sphinx can stay out of your production requirements.
+
+The output folder is yours to choose. A build made by a CI step, or one kept
+outside your project, works the same way once step 4 points at it. Until a build
+exists, every address under the prefix answers 404 and the rest of your site is
+unaffected.
+
+### 4. Mount the docs
 
 Create the app once, in a module of its own, and give it the build's folder as
 `build_dir`:
 
 ```python
 # yourproject/mounted.py
+from django.conf import settings
 from mvp_sphinx.mounted import DocumentationApp
 
-from yourproject.settings import BASE_DIR
-
-docs = DocumentationApp(build_dir=BASE_DIR / "docs" / "_build" / "json")
+docs = DocumentationApp(build_dir=settings.BASE_DIR / "docs" / "_build" / "json")
 ```
 
-Then mount it under whatever prefix you like, and add its entry to your menu:
+Then mount it in your URLs under whatever prefix you like:
 
 ```python
 # yourproject/urls.py
@@ -80,8 +113,13 @@ urlpatterns = [
 ]
 ```
 
+### 5. Add the menu entry
+
+Add the app's entry to your menu, in the `menus.py` of one of your installed
+apps:
+
 ```python
-# yourproject/menus.py
+# yourapp/menus.py
 from mvp.menus import AppMenu
 
 from yourproject.mounted import docs
@@ -89,20 +127,33 @@ from yourproject.mounted import docs
 AppMenu.append(docs.menu_item())
 ```
 
-Each page of the build now answers under `docs/`, drawn by your own `base.html`
-inside the application shell. The tab title carries the page's title and the
-app's `name` (Documentation unless you change it), and the breadcrumbs lead back
-through the page's parents to the front page.
+django-flex-menus imports each installed app's `menus` module when Django
+starts, which is why the file has to live in an installed app.
+
+### What you now have
+
+Each page of the build answers under `docs/`, drawn by your own `base.html`
+inside the application shell. The front page is at `/docs/`, the contents are in
+the app sidebar, and your menu has an entry that leads to the front page. The tab
+title carries the page's title and the app's `name` (Documentation unless you
+change it), and the breadcrumbs lead back through the page's parents to the front
+page.
+
+### Changing the docs
+
+Edit your Sphinx source, run the command from step 3 again, and reload the page.
+The pages, the contents and the search follow on the next request, with no
+restart.
+
+## Using it
+
+Everything below is optional. The quickstart is all a project needs to serve its
+documentation.
 
 ### The contents in the sidebar
 
-To get the contents, add one line to your Sphinx project's `conf.py`:
-
-```python
-extensions = ["mvp_sphinx.navigation"]
-```
-
-When `sphinx-build -b json` finishes, the extension writes a `navigation.json`
+When `sphinx-build -b json` finishes, the extension you added in step 2 of the
+quickstart writes a `navigation.json`
 into the build with every page your toctrees list, hidden toctrees included.
 The documentation app's `menu`, a `DocumentationMenu`, draws it as the sidebar
 menu on every page of the docs.
@@ -123,6 +174,35 @@ The extension runs inside your Sphinx build and nowhere else, so the site that
 serves the pages still doesn't need Sphinx. Without the line, or with a
 `navigation.json` that can't be read, the sidebar holds only the front page
 entry and every page is still served.
+
+### The page's own headings
+
+On a wide screen, each page lists its own headings beside it, under "On this
+page". The list is nested the way the page nests its sections, and each entry
+links to its heading. Sphinx already records that tree in the build, so there is
+nothing to configure and the site that serves the pages still doesn't need
+Sphinx.
+
+- The page's title is not listed, and neither are the headings of other pages,
+  so a front page that only holds a toctree lists nothing from the pages it
+  links to. The sidebar keeps the contents.
+- A page with no headings below its title shows no list at all.
+- Sphinx's `:tocdepth:` setting decides how deep the list goes.
+
+`PageView` reads the tree with `PageHeadings.from_toc(toc)`, which turns a
+page's `toc` value from the build into nested dicts of `title`, `anchor` and
+`children`. Call it yourself if you draw the headings in a template of your own.
+
+Rebuild the docs and the list follows on the next request.
+
+Every page also ends with links to the page before it and the page after it, in
+the order Sphinx puts the pages in, each showing the title of the page it leads
+to. The front page has no previous link, the last page has no next link, and a
+page that no toctree lists has neither. The links stay inside the documentation
+app, so a second app mounted elsewhere links under its own address. An
+incremental Sphinx build only rewrites the pages that changed and the pages
+whose toctrees changed, so a page's links follow a newly inserted neighbour once
+that page is rebuilt. Run a full rebuild (`-E`) if in doubt.
 
 ### Search
 
@@ -157,45 +237,17 @@ The search data is read on each search, so a rebuild is searchable straight away
 A build without it still serves its pages, and the results page says search is
 unavailable.
 
-### The page's own headings
-
-On a wide screen, each page lists its own headings beside it, under "On this
-page". The list is nested the way the page nests its sections, and each entry
-links to its heading. Sphinx already records that tree in the build, so there is
-nothing to configure and the site that serves the pages still doesn't need
-Sphinx.
-
-- The page's title is not listed, and neither are the headings of other pages,
-  so a front page that only holds a toctree lists nothing from the pages it
-  links to. The sidebar keeps the contents.
-- A page with no headings below its title shows no list at all.
-- Sphinx's `:tocdepth:` setting decides how deep the list goes.
-
-`PageView` reads the tree with `PageHeadings.from_toc(toc)`, which turns a
-page's `toc` value from the build into nested dicts of `title`, `anchor` and
-`children`. Call it yourself if you draw the headings in a template of your own.
-
-Rebuild the docs and the list follows on the next request.
-
-Every page also ends with links to the page before it and the page after it, in
-the order Sphinx puts the pages in, each showing the title of the page it leads
-to. The front page has no previous link, the last page has no next link, and a
-page that no toctree lists has neither. The links stay inside the documentation
-app, so a second app mounted elsewhere links under its own address. An
-incremental Sphinx build only rewrites the pages that changed and the pages
-whose toctrees changed, so a page's links follow a newly inserted neighbour once
-that page is rebuilt. Run a full rebuild (`-E`) if in doubt.
-
 ### Naming the documentation
 
 The app's `name` is what the tab title, the first breadcrumb and the menu entry
 call the documentation. Give it your own when "Documentation" isn't right:
 
 ```python
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 docs = DocumentationApp(
-    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "docs" / "_build" / "json",
     name=_("Administrator's handbook"),
 )
 ```
@@ -207,10 +259,11 @@ signed-in people, import `user_is_authenticated` from `flex_menu.checks` and pas
 it as `check`:
 
 ```python
+from django.conf import settings
 from flex_menu.checks import user_is_authenticated
 
 docs = DocumentationApp(
-    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "docs" / "_build" / "json",
     check=user_is_authenticated,
 )
 ```
@@ -227,15 +280,16 @@ checks from `flex_menu.checks`. Both are factories, so call them with their
 arguments:
 
 ```python
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from flex_menu.checks import user_has_any_permission, user_in_any_group
 
 docs = DocumentationApp(
-    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "docs" / "_build" / "json",
     check=user_in_any_group("Support"),
 )
 tickets = DocumentationApp(
-    build_dir=BASE_DIR / "tickets" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "tickets" / "_build" / "json",
     name=_("Ticket handling"),
     namespace="tickets",
     check=user_has_any_permission("support.view_ticket"),
@@ -250,7 +304,7 @@ def staff_only(request):
 
 
 handbook = DocumentationApp(
-    build_dir=BASE_DIR / "handbook" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "handbook" / "_build" / "json",
     namespace="handbook",
     check=staff_only,
 )
@@ -276,14 +330,15 @@ Two audiences are two apps. Each `DocumentationApp` has its own build, `name`,
 `namespace` and rule, and each is mounted at its own prefix:
 
 ```python
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from flex_menu.checks import user_is_staff
 
 guide = DocumentationApp(
-    build_dir=BASE_DIR / "guide" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "guide" / "_build" / "json",
 )
 staff_guide = DocumentationApp(
-    build_dir=BASE_DIR / "staff_guide" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "staff_guide" / "_build" / "json",
     name=_("Staff guide"),
     namespace="staff_guide",
     check=user_is_staff,
@@ -314,7 +369,7 @@ app serves only its own build and names only itself in its tabs and breadcrumbs.
 
 ```python
 handbook = DocumentationApp(
-    build_dir=BASE_DIR / "handbook" / "_build" / "json",
+    build_dir=settings.BASE_DIR / "handbook" / "_build" / "json",
     name=_("Administrator's handbook"),
     namespace="handbook",
 )
@@ -328,9 +383,7 @@ urlpatterns = [
 Add `handbook.menu_item()` to your menu beside `docs.menu_item()` to give each
 its own entry.
 
-A `PageView` renders each page, and it finds the page's data through a
-`DocsBuild`, which only ever looks inside `build_dir`. To change how a page is
-drawn, subclass `PageView` and pass it to your app as `view_class`.
+### Addresses and files served
 
 The images and downloads your pages link to (`_images/` and `_downloads/` in
 the build) are served at the addresses the pages already use, with the file's
@@ -351,7 +404,11 @@ redirected by Django's `CommonMiddleware` (`APPEND_SLASH`), as for any other
 mount. A page file that is not valid JSON is a broken build and raises, so it is
 a server error rather than a 404.
 
-## How pages look
+### How pages look and the page template
+
+A `PageView` renders each page, and it finds the page's data through a
+`DocsBuild`, which only ever looks inside `build_dir`. To change how a page is
+drawn, subclass `PageView` and pass it to your app as `view_class`.
 
 Pages take your site's theme with nothing to configure: the colours are
 django-mvp's own, so a page follows the light and dark themes and any theme your
@@ -391,22 +448,88 @@ caller of its own does the same:
 {% endblock styles %}
 ```
 
-## Quickstart
-
-<!--
-  The smallest complete example: what goes in the view, what goes in the
-  template, and what appears on the page. Real code that runs, not a sketch.
-  If the example needs three files, show three files.
--->
-
 ## Public surface
 
-<!--
-  Everything a host project can touch: components and their attributes,
-  settings, template tags, models, views. Being able to list it exhaustively is
-  a feature of a package this size, and the list is what makes an addition to
-  it a deliberate decision rather than a side effect.
--->
+These are the names a project can use, grouped the way a project meets them.
+
+### Installed app and Sphinx extension
+
+- `mvp_sphinx` is the Django app. Add it to `INSTALLED_APPS` after `mvp`.
+- `mvp_sphinx.navigation` is the Sphinx extension. It writes `navigation.json`
+  into a JSON build.
+
+### The documentation app
+
+- `mvp_sphinx.mounted.DocumentationApp` serves one docs build under the prefix
+  you mount it at. Its keyword options are `build_dir` (required), `name`, `icon`,
+  `namespace`, `view_class` and `check`.
+- `menu_item()`, inherited from django-mvp's `MountedApp`, returns the entry to
+  add to your own menus.
+- `menu` is the app's `DocumentationMenu`, which draws the contents as the app
+  sidebar.
+- Its URL names are `<namespace>:front_page`, `<namespace>:page` (which takes
+  `path`) and `<namespace>:search`.
+
+### Views
+
+- `mvp_sphinx.views.PageView` renders a page. Subclass it and pass the subclass as
+  `view_class` to change how a page is drawn. A subclass may override
+  `template_name`, `get_context_data()`, `get_page_title()`, `get_headings()`,
+  `get_neighbour(key)` (`key` is `"prev"` or `"next"`) and `get_breadcrumbs()`.
+- `mvp_sphinx.views.SearchView` renders the results of a search.
+
+### Building blocks
+
+For a custom view or template:
+
+- `mvp_sphinx.docs_build.DocsBuild(root)` reads a docs build and never looks
+  outside it. `page(path)` returns a page's data or `None`, `file(path)` returns
+  an image or download under `_images/` or `_downloads/` or `None`, and
+  `navigation()` returns the entries of `navigation.json` or `None`.
+- `mvp_sphinx.menus.DocumentationMenu` turns a build's navigation file into the
+  sidebar menu.
+- `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
+  page's `toc` value into nested headings.
+- `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
+  names table regions and heading links in a page body.
+- `mvp_sphinx.search.DocsSearch(build)`, given a `DocsBuild`, searches it.
+  `results(query)` lists the pages that hold every word of `query`, best match
+  first, each with its `title`, `path`, `anchor` and `passage`, or returns `None`
+  when the build has no usable search data.
+- `mvp_sphinx.search.PageText`, through `PageText.text(markup)`, gives the text a
+  reader sees in a page body, with its whitespace collapsed.
+
+### Templates a project may override
+
+- `mvp_sphinx/page.html` draws a page. It receives `body`, `headings`,
+  `previous_page`, `next_page`, `search_url` and `page_data`. It has the `title`,
+  `styles` and `content` blocks, and it holds the page's body in an element with the
+  `mvp-sphinx-content` class.
+- `mvp_sphinx/search.html` draws the results. It receives `query`, `results` and
+  `search_url`, and has the `title`, `styles` and `content` blocks. `results` is `None` when
+  the build has no search data, and otherwise a list of the pages found, each with
+  its `title`, `passage` and `href`.
+
+### Components
+
+Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
+
+- `mvp_sphinx.on_this_page` draws a page's headings. It takes `headings`.
+- `mvp_sphinx.heading_list` draws nested headings as a list. It takes `headings`.
+- `mvp_sphinx.page_links` draws the links to the previous and next page. It takes
+  `previous` and `next`.
+- `mvp_sphinx.search_form` draws the search box. It takes `action` and `query`.
+
+### Static file
+
+- `mvp_sphinx/content.css` is the stylesheet page content uses.
+
+### Settings
+
+There are none. The package reads no Django setting, and everything is configured
+on the `DocumentationApp`.
+
+Anything not listed here is internal and may change without notice.
 
 ## Contributing
 
@@ -421,14 +544,40 @@ uv run pytest
 uv run pre-commit install
 ```
 
-`demo/` is a Django project on django-mvp's application shell, for looking at
-this package in a browser while working on it:
+### The demo
+
+`demo/` is a Django project on django-mvp's application shell, for looking at this
+package in a browser while you work on it. It serves a user guide of its own and a
+second guide for staff, each through a documentation app, and the guides between
+them hold every state this package draws.
+
+The guides' builds are not committed, so build them before you start the server.
+The two `sphinx-build` lines are [step 3 of the quickstart](https://github.com/django-mvp/django-mvp-sphinx#3-build-the-docs) run
+on the demo's two sources:
 
 ```bash
+uv sync
 uv run python manage.py migrate
 uv run python manage.py seed_demo
+uv run sphinx-build -b json demo/docs demo/docs/_build/json
+uv run sphinx-build -b json demo/staff_guide demo/staff_guide/_build/json
 uv run python manage.py runserver
 ```
+
+Then open <http://127.0.0.1:8000/docs/> for the user guide. Its sidebar reaches every
+page. After you edit a page under `demo/docs/`, run the first `sphinx-build` again and
+reload, with no restart. Until a build exists, every address under `/docs/` answers 404.
+
+`seed_demo` made three accounts, all with the password `password`:
+
+- `regular.user@example.com` is signed in but not staff.
+- `staff.user@example.com` is staff.
+- `super.user@example.com` is a superuser, and staff too.
+
+Only the staff and superuser accounts can open the staff guide at
+<http://127.0.0.1:8000/staff-guide/>. Everyone else is asked to sign in or is shown
+the forbidden page, and the sidebar has no entry for them. The command refuses to run
+unless `DEBUG` is on.
 
 ## License
 

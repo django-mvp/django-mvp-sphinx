@@ -33,3 +33,167 @@ Its `demo/sphinx_docs/` directory is a small user guide for an invented inventor
 contents groups, a nested page and a long page title, and is a reasonable base for the demo's user
 guide. It was built inside django-mvp on top of django-sphinx-view. This package owns its own view
 instead, so its configuration line and mount will differ from the prototype's.
+
+## D9. No spec-against-spec re-read, and what "not shipped yet" now covers (S3)
+
+**Ambiguous:** The queue row's `delivered_since` is empty, so the pipeline skips the re-read. But
+the spec was written before #9 (who can read the docs, FS-006) and #10 (search, FS-007) were built,
+and US2's third scenario gives both as examples of features not yet shipped.
+
+**Chosen:** Both have shipped and are on main, so the README describes them, and the public surface
+lists what they added. The only feature in scope of FR-010 now is #11, the build command, which the
+README does not mention.
+
+**Why:** The spec's own clarification decides it: the list covers "what exists when this feature
+merges", and each later feature documents itself. The examples in US2.3 were true when written. The
+rule they illustrate is unchanged.
+
+**ADR:** none — a reading of this feature's spec, nothing downstream inherits it.
+
+## D10. Public means listed, and the Sphinx and Django hooks are internal (S3)
+
+**Ambiguous:** SC-003 needs an exact list, and several module-level names (`NavigationWriter`,
+`write_navigation`, `setup`, `MvpSphinxConfig`) are importable without being anything a host calls.
+
+**Chosen:** The public surface section lists what a host project mounts, passes, subclasses,
+overrides, adds to `conf.py` or may call from a view or template of its own (plan, *Public
+surface*). The extension's hooks and the app config are internal. The section ends by saying that
+anything unlisted is internal.
+
+**Why:** A host never calls those four names. Sphinx and Django do. Listing them would make internal
+plumbing part of the compatibility promise of Article XI.
+
+**ADR:** none — the list itself is the record, and it lives in the README.
+
+## D11. The quickstart's app module reads `settings.BASE_DIR` from `django.conf` (S3)
+
+**Ambiguous:** The README's example imported `BASE_DIR` from `yourproject.settings`, and the demo
+does the same.
+
+**Chosen:** The quickstart imports `from django.conf import settings` and uses
+`settings.BASE_DIR`. The demo keeps its own import.
+
+**Why:** FR-002 asks for code that runs with only names and paths changed. A project whose settings
+are split into a package (`settings/base.py`) has no `yourproject.settings.BASE_DIR` to import, but
+every project has `django.conf.settings`.
+
+**ADR:** none — an example's wording.
+
+## D12. The starter component is removed, with its test class (S3)
+
+**Ambiguous:** `mvp_sphinx/templates/cotton/mvp_sphinx/example.html` is the project template's
+placeholder component. It is a public name that exists, so SC-003 either lists it or it goes.
+
+**Chosen:** It goes, with `TestStarterComponent` and `EXAMPLE_TAG` in `tests/test_smoke.py` and the
+demo overview's section that shows it. This is a declared edit of a pre-existing test, authorised for
+T002 only. The CHANGELOG records the removal.
+
+**Why:** The test class says "Delete this class along with the starter component it covers", and the
+component says "Replace it with the first real component". Four real components now exist. Listing a
+placeholder as supported surface would be the kind of accident the public surface list exists to
+prevent. Version 0.0.1, nothing depends on it, no alias kept.
+
+**ADR:** none — removing a template placeholder, no design content.
+
+## D13. The demo guide is rewritten in the demo site's voice, and the prototype's text is not reused (S3)
+
+**Ambiguous:** The demo guide already shows every state US3 names, but its prose describes the
+package (the extension, the build). The prototype's guide describes an invented inventory site.
+
+**Chosen:** Rewrite the pages as a user guide for the demo site as it exists: signing in with the
+demo accounts, finding your way around, the staff guide, and a reference part. Every state keeps its
+place (plan, *The demo's user guide*). The prototype gives shape and tone only.
+
+**Why:** Spec decision 3: the demo guide is what a host project would write for its users, the
+package's first audience. A guide about an inventory site that isn't there would read like filler,
+and a guide about the package duplicates the README.
+
+**ADR:** none — demo content, not distributed.
+
+## D14. Two dispatches: US1 and US2 together, then US3 (S3)
+
+**Ambiguous:** The pipeline dispatches one implementer per story.
+
+**Chosen:** US1 and US2 go to one implementer, because both restructure the README and would
+conflict in parallel. US3 goes to a second implementer after both are accepted. Each story is still
+accepted on its own with `forge story-done`.
+
+**Why:** FS-007 precedent (US2 and US3 in one dispatch). It saves one cold start on a file the two
+stories share, and loses no separate acceptance.
+
+**ADR:** none — run mechanics.
+
+## D15. Design review: approved, seven findings carried into the plan (S3R)
+
+**Ambiguous:** The design reviewer approved the plan with two medium and five low findings (none
+critical or high), so nothing forces a re-plan.
+
+**Chosen:** DR-001 (step 5's file is an installed app's `menus.py`), DR-002 (groups and pages
+asserted on the processed menu tree, not on markup), DR-003 (the `render` fixture goes with the
+starter component), DR-004 (build through `build_main` with step 3's arguments, not a subprocess),
+DR-005 (no CHANGELOG *Removed* line for a component that was never released) and DR-006 (the
+templates' blocks, class and context are listed) are applied to `plan.md` and `tasks.md`. DR-007 is
+declined: it asks to narrow the list to `PageView` and `BodyRewriter.rewrite`, but the README on
+main already invites a host to call `PageHeadings.from_toc`, `BodyRewriter.rewrite` and to
+subclass `PageView`, and FS-002 and FS-007 named `DocumentationMenu`, `DocsBuild`, `SearchView`,
+`DocsSearch` and `PageText` as new public names under Article XI. Narrowing now would withdraw what
+earlier features promised. The reviewer's notes on one `BASE_DIR` idiom and the `-W` wording are
+applied too.
+
+**Why:** Each applied remedy is an edit to the plan, verified by the orchestrator against the
+finding's evidence. The declined one would change the promise of shipped features, which is not
+this feature's call.
+
+**ADR:** none — review disposition local to this feature.
+
+## D16. One word in a search test changes with the starter component's removal (S4, US2)
+
+**Ambiguous:** `TestSearchResults.test_a_word_only_in_the_hosts_pages_lists_nothing` (FS-007) picks
+the word "starter" because the demo overview carried it. D12 removes that section, so the test's
+premise check fails. Editing it is outside the D12 authorisation, and the implementer stopped
+there, as it should.
+
+**Chosen:** Forge changes the word to "demonstration". It is on the overview page and in no page
+of the search fixture, so the test asserts exactly what it asserted before. Nothing else changes.
+
+**Why:** The test's subject is "a word only on the host's pages", not that word. A one-word change
+with no design content does not justify a re-dispatch. It is recorded here as a declared edit of a
+pre-existing test.
+
+**ADR:** none — a fixture word in one test.
+
+## D17. `TestQuickstart` lives in `tests/test_mounted.py` (S4, US1)
+
+**Ambiguous:** The implementer put the quickstart test in `tests/test_quickstart.py`. The
+conformance gate flags it: the file mirrors no source module, and the testing standard puts a
+cross-cutting test in its subject's module.
+
+**Chosen:** Forge moved the class, its fixtures and helpers into `tests/test_mounted.py`, as
+`DocumentationApp` is what the quickstart sets up and mounts. The fixture and constant names gained
+a `quickstart` prefix so they do not read as the module's own. The tests themselves are unchanged.
+
+**Why:** It follows the repo's own standard, where declaring a non-mirror exception would bend it.
+Moving a test written in this story is not an edit of a pre-existing test.
+
+**ADR:** none — test placement.
+
+## D18. The review's fix cycle, done by Forge directly (S6)
+
+**Ambiguous:** The Phase 1 review approved with one medium finding and two lows. CORR-001: the
+public surface named `DocsBuild`, `DocsSearch` and `PageText` without the members a host calls, so
+the closing "anything not listed is internal" made those members internal. CORR-002: `PageView` is
+the documented extension point but no overridable member was listed. CORR-003: the templates'
+`title` block was missing. A note also flagged one demo-guide sentence ("clear of the top bar")
+that nothing had checked.
+
+**Chosen:** Forge edited the README directly. `DocsBuild(root)` with `page`, `file` and
+`navigation`; `DocsSearch(build)` with `results(query)` and the keys of each result;
+`PageText.text(markup)`; `PageView`'s overridable `template_name`, `get_context_data`,
+`get_page_title`, `get_headings`, `get_neighbour` and `get_breadcrumbs`; and the `title` block of
+both templates. Each was checked against its docstring. The guide sentence now says only what
+following the link does.
+
+**Why:** Each fix is a sentence of documentation with no design content, well inside the pipeline's
+allowance for direct work on trivial changes. A dispatch would have cost more than the edits.
+
+**ADR:** none — documentation corrections.

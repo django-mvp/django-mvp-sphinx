@@ -927,7 +927,7 @@ class TestSearchResults:
     def test_a_word_only_in_the_hosts_pages_lists_nothing(
         self, client, db, search_app
     ) -> None:
-        word = "starter"
+        word = "demonstration"
         assert word in client.get(reverse("overview")).content.decode()
 
         response = client.get("/docs/search/", {"q": word})

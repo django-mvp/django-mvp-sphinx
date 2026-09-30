@@ -52,7 +52,11 @@ from the tree. None of them raise, which is why `tests/test_demo.py` asserts
 against the rendered page rather than against the objects behind it.
 
 The demo serves its own user guide, whose source is in `demo/docs/`, through a
-documentation app mounted at `/docs/`. The build is gitignored, so build it before
+documentation app mounted at `/docs/`. It is a guide for the demo site's users (signing
+in, finding your way, the staff guide, a reference part) and not documentation of this
+package, which the README holds. Its sidebar reaches every state the package draws, and
+`TestDemoGuideStates` in `tests/test_demo.py` builds it under `-W` and checks each one, so
+a page moved or a state dropped fails there. The build is gitignored, so build it before
 opening that page and again after editing the guide:
 
 ```bash
@@ -79,8 +83,8 @@ to run unless `DEBUG` is on.
 Components live at
 `mvp_sphinx/templates/cotton/mvp_sphinx/<name>.html`.
 Cotton maps a tag's first segment onto that directory, so
-`<c-mvp_sphinx.example>` resolves to
-`cotton/mvp_sphinx/example.html`.
+`<c-mvp_sphinx.page_links>` resolves to
+`cotton/mvp_sphinx/page_links.html`.
 
 The directory name is load-bearing and fails quietly: a component Cotton cannot
 resolve renders as empty output rather than raising, so renaming the directory

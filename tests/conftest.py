@@ -3,27 +3,13 @@
 from pathlib import Path
 
 import pytest
-from django import template as dj_template
-from django.template import Context
 from django.urls import reverse
-from django_cotton.compiler_regex import CottonCompiler
 from sphinx.cmd.build import build_main
 
 from tests.factories import GroupFactory, UserFactory
 
 SPHINX_SOURCES = Path(__file__).parent / "sphinx"
-
-
-@pytest.fixture(scope="session")
-def render():
-    # No request is involved, which holds components to rendering anywhere a
-    # template does, including outside the request cycle.
-    compiler = CottonCompiler()
-
-    def render_source(source, **context):
-        return dj_template.Template(compiler.process(source)).render(Context(context))
-
-    return render_source
+DEMO_GUIDE = Path(__file__).parent.parent / "demo" / "docs"
 
 
 @pytest.fixture(scope="session")
@@ -99,6 +85,14 @@ def reading_build(sphinx_json_build):
     return sphinx_json_build("reading")
 
 
+@pytest.fixture(scope="module")
+def demo_guide_build(tmp_path_factory):
+    out = tmp_path_factory.mktemp("demo-guide-build")
+    status = build_main(["-b", "json", "-q", "-W", str(DEMO_GUIDE), str(out)])
+    assert status == 0
+    return out
+
+
 @pytest.fixture
 def docs_app(guide_build, monkeypatch):
     from demo.mounted import docs
@@ -154,4 +148,12 @@ def reading_app(reading_build, monkeypatch):
     from demo.mounted import docs
 
     monkeypatch.setattr(docs, "build_dir", reading_build)
+    return docs
+
+
+@pytest.fixture
+def demo_guide_app(demo_guide_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", demo_guide_build)
     return docs

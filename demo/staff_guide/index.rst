@@ -1,9 +1,9 @@
 The staff guide
 ===============
 
-This guide is served by a second documentation app, and only staff can read
-it. Anyone else who opens it is asked to sign in, or is shown the project's
-forbidden page.
+This is the staff guide, a second guide next to the user guide, and only staff
+can read it. Anyone else who opens it is asked to sign in, or is shown the
+site's forbidden page.
 
 Start with :doc:`accounts`.
 

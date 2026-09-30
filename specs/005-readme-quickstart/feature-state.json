@@ -1,0 +1,196 @@
+{
+  "feature": "005-readme-quickstart",
+  "branch": "005-readme-quickstart",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:32:38Z",
+      "note": "specification merged to main in PR #16, merge commit f203ced91295c9c5cc25ed610c670e377b80c586; epic #8, stories #26, #29, #32"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-30T10:09:56Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 4 tasks; analyze: every FR/SC mapped, no CRITICAL"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-30T10:10:50Z",
+      "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-30T10:17:25Z",
+      "note": "US1+US2 one dispatch, then US3"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T10:35:53Z",
+      "note": "all three stories done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T10:37:33Z",
+      "note": "Phase 1 correctness+spec+documentation; no security-sensitive surface, no new dependency, no deviation from plan"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T10:44:58Z",
+      "note": "PR #61 ready; walkthrough required (demo overview, starter component, demo guide); served from wt-sphinx-005 on 8025"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "merged specification pull request #16 (merge commit f203ced91295c9c5cc25ed610c670e377b80c586)",
+      "at": "2026-09-29T22:32:38Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": "notified",
+      "at": "2026-09-30T10:17:25Z"
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel (one reviewer, three lenses): approve",
+      "at": "2026-09-30T10:17:05Z",
+      "self_resolved": [
+        "DR-001..DR-006 applied to plan.md/tasks.md (D15)",
+        "DR-007 declined: narrowing the public list would withdraw names earlier features documented (D15)"
+      ]
+    },
+    "review": {
+      "approved_by": "phase-1 reviewer: approve",
+      "at": "2026-09-30T10:43:30Z",
+      "self_resolved": [
+        "CORR-001 (medium) fixed: DocsBuild/DocsSearch/PageText members listed (D18)",
+        "CORR-002 (low) fixed: PageView overridable members listed",
+        "CORR-003 (low) fixed: templates' title block listed"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "orchestrator agent:forge:dashboard:15456d51-453c-4956-a45a-d1ec3f4fd707 (holding the walkthrough for Sam, 2026-09-30)",
+      "at": "2026-09-30T10:49:10Z",
+      "self_resolved": [
+        "round 1: nothing asked for — every listed page 200, /docs/no-such-page/ the site's 404, /staff-guide/ sends anonymous to sign in, nested First visit group opens with Signing in marked, README quickstart five steps with no build command mentioned"
+      ]
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 26,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 3,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestQuickstart"
+            ],
+            "commands": [
+              "uv run pytest tests/test_mounted.py -k Quickstart -q (exit 0, 4 passed)",
+              "forge verify --base origin/main at e7ec597 (all steps passed)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 29,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_smoke.py::TestPackagedApp",
+              "tests/test_views.py::TestSearchResults::test_a_word_only_in_the_hosts_pages_lists_nothing"
+            ],
+            "commands": [
+              "uv run pytest tests/test_smoke.py tests/test_demo.py -q (exit 0)",
+              "forge verify --base origin/main at e7ec597: conformance, docs, lint, typecheck, test, build passed (Forge, independent)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P3",
+      "issue": 32,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_demo.py::TestDemoGuideStates"
+            ],
+            "commands": [
+              "uv run pytest tests/test_demo.py::TestDemoGuideStates -q (exit 0, 15 passed; all green against the guide as it stood before the rewrite, recorded as passing at red)"
+            ]
+          }
+        },
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_demo.py::TestDemoGuideStates",
+              "tests/test_demo.py::TestDemoGuide",
+              "tests/test_demo.py::TestDocumentationSearch"
+            ],
+            "commands": [
+              "uv run sphinx-build -b json -W -q demo/docs /tmp/us3-build (exit 0)",
+              "uv run pytest tests/test_demo.py -q (exit 0, 26 passed)",
+              "uv run pre-commit run --all-files (all hooks passed)"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 12.16,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "escalations": [],
+  "pr": {
+    "number": 61,
+    "draft": false
+  }
+}

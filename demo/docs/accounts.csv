@@ -1,0 +1,4 @@
+email,password,role
+regular.user@example.com,password,regular
+staff.user@example.com,password,staff
+super.user@example.com,password,superuser
