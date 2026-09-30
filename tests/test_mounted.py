@@ -94,13 +94,13 @@ class TestEveryoneByDefault:
 
 class TestSignedInOnly:
     def test_a_signed_in_reader_gets_what_they_got_without_a_rule(
-        self, client, user, docs_app, guide_build
+        self, client, user, docs_app, guide_build, monkeypatch
     ):
         client.force_login(user)
         addresses = ["/docs/", "/docs/page/", *asset_addresses(client, guide_build)]
         without_rule = [client.get(address) for address in addresses]
 
-        docs_app.check = user_is_authenticated
+        monkeypatch.setattr(docs_app, "check", user_is_authenticated)
         with_rule = [client.get(address) for address in addresses]
 
         assert [r.status_code for r in with_rule] == [200] * len(addresses)
