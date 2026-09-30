@@ -35,7 +35,8 @@
       "approved_by": "notified",
       "at": "2026-09-30T00:40:54Z",
       "self_resolved": [
-        "plan notice sent to the orchestrating session (Sam's 2026-09-30 overnight delegation), not Sam"
+        "plan notice sent to the orchestrating session (Sam's 2026-09-30 overnight delegation), not Sam",
+        "orchestrating session approved the plan, 2026-09-30"
       ]
     },
     "merge": {
@@ -60,7 +61,7 @@
       "priority": "P1",
       "issue": 34,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-003",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
