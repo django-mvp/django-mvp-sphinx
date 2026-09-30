@@ -13,6 +13,8 @@ from bs4 import BeautifulSoup
 from django.templatetags.static import static
 from django.urls import reverse
 
+from tests.conftest import SPHINX_SOURCES
+
 pytestmark = pytest.mark.usefixtures("docs_app")
 
 DEFAULT_NAME = "Documentation"
@@ -113,7 +115,7 @@ class TestPageView:
 
 
 class TestSphinxsOwnPages:
-    @pytest.mark.parametrize("address", ["/docs/genindex/", "/docs/search/"])
+    @pytest.mark.parametrize("address", ["/docs/genindex/"])
     def test_the_general_index_and_search_pages_are_served(
         self, client, db, docs_app, address
     ) -> None:
@@ -746,3 +748,430 @@ class TestContentsUnavailable:
 
         assert (broken, fixed) == (["/docs/"], full)
         assert {*full} == CONTENTS_PAGES
+
+
+SEARCH_PAGES = [
+    "",
+    "lanterns/",
+    "products/",
+    "sections/",
+    "metals/",
+    "coins/",
+    "spoons/",
+    "markup/",
+    "wombat/",
+    "folder/",
+    "folder/inner/",
+]
+LANTERN_HREFS = [
+    "/docs/",
+    "/docs/coins/",
+    "/docs/lanterns/",
+    "/docs/metals/",
+    "/docs/products/",
+]
+
+
+def search_form(response):
+    return BeautifulSoup(response.content, "html.parser").find("form", role="search")
+
+
+def query_field(response):
+    return search_form(response).find("input", attrs={"name": "q"})
+
+
+def result_hrefs(response) -> list[str]:
+    soup = BeautifulSoup(response.content, "html.parser")
+    section = soup.find("main").find("section", attrs={"aria-labelledby": True})
+    if section is None:
+        return []
+    assert soup.find(id=section["aria-labelledby"]) is not None
+    return [link["href"] for link in section.select("ol a[href]")]
+
+
+def submit_search(client, response, query):
+    form = search_form(response)
+    return client.get(form["action"], {form.find("input")["name"]: query})
+
+
+class TestSearchForm:
+    @pytest.mark.parametrize("path", SEARCH_PAGES)
+    def test_every_page_of_the_app_offers_a_search_of_the_app(
+        self, client, db, search_app, path
+    ) -> None:
+        form = search_form(client.get(f"/docs/{path}"))
+
+        assert form is not None
+        assert form["method"].lower() == "get"
+        assert form["action"] == reverse(f"{search_app.namespace}:search")
+        assert form.find("input", attrs={"name": "q"}) is not None
+
+    def test_the_results_page_offers_the_search_again(
+        self, client, db, search_app
+    ) -> None:
+        form = search_form(client.get("/docs/search/"))
+
+        assert form["action"] == "/docs/search/"
+
+    def test_the_search_input_has_a_label(self, client, db, search_app) -> None:
+        form = search_form(client.get("/docs/"))
+        field = form.find("input", attrs={"name": "q"})
+
+        assert form.find("label", attrs={"for": field["id"]}) is not None
+
+    def test_a_page_of_the_host_offers_no_search(self, client, db, search_app) -> None:
+        assert search_form(client.get(reverse("overview"))) is None
+
+    def test_a_second_app_offers_a_search_of_its_own(
+        self, client, db, handbook_app
+    ) -> None:
+        form = search_form(client.get("/manuals/admin/"))
+
+        assert form["action"] == "/manuals/admin/search/"
+
+
+class TestSearchResults:
+    def test_a_word_lists_the_pages_holding_it_inside_the_shell(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/"), "quetzal")
+
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "<aside" in content
+        assert "<main" in content
+        assert result_hrefs(response) == ["/docs/lanterns/"]
+
+    def test_a_word_on_several_pages_lists_each_once(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/coins/"), "lantern")
+
+        assert sorted(result_hrefs(response)) == LANTERN_HREFS
+
+    def test_every_result_leads_to_a_page_of_the_app(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/"), "lantern")
+
+        for href in result_hrefs(response):
+            assert href.startswith("/docs/")
+            assert client.get(href).status_code == 200
+
+    def test_several_words_list_only_pages_holding_all_of_them(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/"), "copper silver")
+
+        assert result_hrefs(response) == ["/docs/metals/"]
+
+    def test_the_same_address_gives_the_same_search_and_results(
+        self, client, db, search_app
+    ) -> None:
+        first = client.get("/docs/search/", {"q": "lantern"})
+        second = client.get("/docs/search/", {"q": "lantern"})
+
+        assert result_hrefs(first) == result_hrefs(second) != []
+        assert query_field(first)["value"] == query_field(second)["value"] == "lantern"
+
+    @pytest.mark.parametrize("query", ["nothingmatchesthis", "", "   ", "?!"])
+    def test_a_search_finding_nothing_says_so_and_offers_the_search(
+        self, client, db, search_app, query
+    ) -> None:
+        response = client.get("/docs/search/", {"q": query})
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == []
+        assert soup.find("main").find(attrs={"role": "status"}) is not None
+        assert query_field(response)["value"] == query
+
+    def test_a_page_with_no_query_at_all_lists_nothing(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/")
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == []
+
+    def test_the_readers_text_comes_back_escaped(self, client, db, search_app) -> None:
+        query = '<script>alert("x")</script> & "quoted"'
+
+        response = client.get("/docs/search/", {"q": query})
+        content = response.content.decode()
+
+        assert '<script>alert("x")' not in content
+        assert "&lt;script&gt;" in content
+        assert query_field(response)["value"] == query
+
+    def test_a_titles_markup_characters_come_back_escaped(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/", {"q": "escapist"})
+
+        assert "<chips>" not in response.content.decode()
+        assert result_hrefs(response) == ["/docs/markup/"]
+
+    def test_the_fronts_link_to_sphinxs_search_page_leads_to_the_apps_search(
+        self, client, db, search_app
+    ) -> None:
+        front = BeautifulSoup(client.get("/docs/").content, "html.parser")
+        links = {
+            urljoin("/docs/", link["href"])
+            for link in front.find("article").find_all("a", href=True)
+        }
+
+        assert reverse(f"{search_app.namespace}:search") in links
+        assert client.get(reverse(f"{search_app.namespace}:search")).status_code == 200
+
+    def test_a_word_only_in_the_hosts_pages_lists_nothing(
+        self, client, db, search_app
+    ) -> None:
+        word = "starter"
+        assert word in client.get(reverse("overview")).content.decode()
+
+        response = client.get("/docs/search/", {"q": word})
+
+        assert result_hrefs(response) == []
+
+
+def result_items(response):
+    soup = BeautifulSoup(response.content, "html.parser")
+    section = soup.find("main").find("section", attrs={"aria-labelledby": True})
+    return section.select("ol > li") if section else []
+
+
+class TestSearchResultDetails:
+    def test_the_page_titled_with_the_word_is_listed_before_pages_that_mention_it(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert result_hrefs(response)[0] == "/docs/lanterns/"
+        assert sorted(result_hrefs(response)) == LANTERN_HREFS
+
+    def test_a_result_shows_the_pages_title_as_plain_text(
+        self, client, db, search_app
+    ) -> None:
+        (item,) = result_items(client.get("/docs/search/", {"q": "escapist"}))
+
+        assert item.find("a").get_text() == "Fish & <chips>"
+        assert item.find("chips") is None
+
+    def test_a_result_shows_a_passage_holding_the_word_without_markup_or_permalink(
+        self, client, db, search_app
+    ) -> None:
+        (item,) = result_items(client.get("/docs/search/", {"q": "quetzal"}))
+        passage = item.find("p")
+
+        assert "quetzal" in passage.get_text()
+        assert "¶" not in item.get_text()
+        assert passage.find(True) is None
+
+    def test_markup_characters_in_a_passage_come_back_escaped(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/", {"q": "escapist"})
+        (item,) = result_items(response)
+
+        assert "<em>" in item.find("p").get_text()
+        assert item.find("em") is None
+        assert "&lt;em&gt;" in response.content.decode()
+
+    def test_a_word_in_a_section_heading_leads_to_that_section(
+        self, client, db, search_app
+    ) -> None:
+        (href,) = result_hrefs(client.get("/docs/search/", {"q": "gasket"}))
+        page, _, anchor = href.partition("#")
+
+        assert page == "/docs/sections/"
+        assert anchor
+        target = BeautifulSoup(client.get(page).content, "html.parser")
+        assert target.find(id=anchor) is not None
+
+    def test_a_word_in_the_title_leads_to_the_page_itself(
+        self, client, db, search_app
+    ) -> None:
+        assert result_hrefs(client.get("/docs/search/", {"q": "marsupials"})) == [
+            "/docs/wombat/"
+        ]
+
+    def test_a_title_only_match_lists_the_page_without_a_passage(
+        self, client, db, search_app
+    ) -> None:
+        (item,) = result_items(client.get("/docs/search/", {"q": "marsupials"}))
+
+        assert item.find("a")["href"] == "/docs/wombat/"
+        assert item.find("p") is None
+
+    def test_a_page_whose_file_is_missing_is_listed_without_a_passage(
+        self, client, db, search_app, tmp_path, monkeypatch
+    ) -> None:
+        build = tmp_path / "missing-page"
+        shutil.copytree(search_app.build_dir, build)
+        (build / "wombat.fjson").unlink()
+        monkeypatch.setattr(search_app, "build_dir", build)
+
+        response = client.get("/docs/search/", {"q": "koala"})
+
+        assert response.status_code == 200
+        (item,) = result_items(response)
+        assert item.find("a")["href"] == "/docs/wombat/"
+        assert item.find("p") is None
+
+
+def status_text(response) -> str:
+    soup = BeautifulSoup(response.content, "html.parser")
+    return soup.find("main").find(attrs={"role": "status"}).get_text(strip=True)
+
+
+class TestSearchAfterARebuild:
+    def test_a_word_added_by_a_rebuild_is_searchable_on_the_next_request(
+        self, client, db, search_app, sphinx_build, tmp_path, monkeypatch
+    ) -> None:
+        source = tmp_path / "source"
+        shutil.copytree(SPHINX_SOURCES / "search", source)
+        monkeypatch.setattr(search_app, "build_dir", sphinx_build(source))
+        assert result_hrefs(client.get("/docs/search/", {"q": "mongoose"})) == []
+
+        (source / "mongooses.rst").write_text("Newcomers\n=========\n\nA mongoose.\n")
+        index = source / "index.rst"
+        index.write_text(
+            index.read_text().replace("   lanterns\n", "   lanterns\n   mongooses\n")
+        )
+        assert sphinx_build(source) == search_app.build_dir
+
+        assert result_hrefs(client.get("/docs/search/", {"q": "mongoose"})) == [
+            "/docs/mongooses/"
+        ]
+
+
+class TestTwoApps:
+    @pytest.fixture
+    def shared_word(self, handbook_app, sphinx_build, tmp_path, monkeypatch):
+        source = tmp_path / "handbook"
+        shutil.copytree(SPHINX_SOURCES / "handbook", source)
+        page = source / "backups.rst"
+        page.write_text(page.read_text() + "\nA lantern hangs above the shelf.\n")
+        monkeypatch.setattr(handbook_app, "build_dir", sphinx_build(source))
+        return "lantern"
+
+    def test_a_word_common_to_both_lists_only_the_searched_apps_pages(
+        self, client, db, search_app, handbook_app, shared_word
+    ) -> None:
+        guide = result_hrefs(client.get("/docs/search/", {"q": shared_word}))
+        handbook = result_hrefs(
+            client.get("/manuals/admin/search/", {"q": shared_word})
+        )
+
+        assert sorted(guide) == LANTERN_HREFS
+        assert handbook == ["/manuals/admin/backups/"]
+
+    def test_each_apps_form_submits_to_its_own_search(
+        self, client, db, search_app, handbook_app, shared_word
+    ) -> None:
+        response = client.get("/manuals/admin/search/", {"q": shared_word})
+
+        assert search_form(response)["action"] == "/manuals/admin/search/"
+        assert query_field(response)["value"] == shared_word
+
+
+class TestUnavailableSearch:
+    @pytest.fixture
+    def rebuilt(self, search_app, search_build, tmp_path, monkeypatch):
+        build = tmp_path / "rebuilt"
+        shutil.copytree(search_build, build)
+        monkeypatch.setattr(search_app, "build_dir", build)
+        return build
+
+    @pytest.fixture
+    def nothing_matched(self, client, db, search_app):
+        return status_text(client.get("/docs/search/", {"q": "nothingmatchesthis"}))
+
+    @pytest.mark.parametrize("query", ["lantern", ""])
+    def test_a_build_without_search_data_says_search_is_unavailable(
+        self, client, db, rebuilt, nothing_matched, query
+    ) -> None:
+        (rebuilt / "searchindex.json").unlink()
+
+        response = client.get("/docs/search/", {"q": query})
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == []
+        assert status_text(response) != nothing_matched
+
+    @pytest.mark.parametrize("content", ["{not json", "[]", "{}", '{"docnames": 5}'])
+    def test_search_data_that_is_not_valid_says_search_is_unavailable(
+        self, client, db, rebuilt, nothing_matched, content
+    ) -> None:
+        (rebuilt / "searchindex.json").write_text(content)
+
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert response.status_code == 200
+        assert status_text(response) != nothing_matched
+
+    @pytest.mark.parametrize("path", SEARCH_PAGES)
+    def test_the_pages_are_still_served(self, client, db, rebuilt, path) -> None:
+        (rebuilt / "searchindex.json").unlink()
+
+        assert client.get(f"/docs/{path}").status_code == 200
+
+    def test_the_search_form_is_still_offered(self, client, db, rebuilt) -> None:
+        (rebuilt / "searchindex.json").unlink()
+
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert query_field(response)["value"] == "lantern"
+
+
+class TestSearchOfAMissingBuild:
+    @pytest.fixture
+    def missing(self, handbook_app, tmp_path, monkeypatch):
+        monkeypatch.setattr(handbook_app, "build_dir", tmp_path / "not-built-yet")
+
+    def test_the_search_address_answers_as_a_page_address_does(
+        self, client, db, missing
+    ) -> None:
+        page = client.get("/manuals/admin/backups/")
+        search = client.get("/manuals/admin/search/", {"q": "lantern"})
+
+        assert page.status_code == search.status_code == 404
+
+    def test_the_rest_of_the_site_still_answers(self, client, db, missing) -> None:
+        assert client.get(reverse("overview")).status_code == 200
+
+
+class TestSearchWithoutSphinx:
+    def test_a_search_gives_the_same_results_when_sphinx_cannot_be_imported(
+        self, client, db, search_app, monkeypatch
+    ) -> None:
+        expected = result_hrefs(client.get("/docs/search/", {"q": "lantern"}))
+        assert expected
+
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == expected
+
+
+class TestSearchOfAVeryLongQuery:
+    @pytest.mark.parametrize(
+        "query",
+        ["a" * 5000, "word " * 1000, "lantern " * 625],
+        ids=["one-word", "many-words", "repeated-word"],
+    )
+    def test_a_query_of_five_thousand_characters_is_answered(
+        self, client, db, search_app, query
+    ) -> None:
+        response = client.get("/docs/search/", {"q": query})
+
+        assert response.status_code == 200
+        assert query_field(response)["value"] == query

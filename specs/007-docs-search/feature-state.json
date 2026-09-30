@@ -1,0 +1,184 @@
+{
+  "feature": "007-docs-search",
+  "branch": "007-docs-search",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:40:17Z",
+      "note": "specification merged to main in PR #24, merge commit d0af90ab2d5eb86dbebbb190e630b6e4c476f6ed; epic #10, stories #42, #43, #44"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-30T00:40:41Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 4 tasks"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-30T00:41:23Z",
+      "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-30T00:47:47Z",
+      "note": "US1 first; US2+US3 one dispatch"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T01:12:10Z",
+      "note": "all three stories done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T01:14:05Z",
+      "note": "Phase 1 correctness+spec; Phase 2 security lens (new runtime dependency, new untrusted query input)"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T01:22:05Z",
+      "note": "PR #54 ready; walkthrough required (5 user-facing paths), worktree served by the orchestrator"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "merged specification pull request #24 (merge commit d0af90ab2d5eb86dbebbb190e630b6e4c476f6ed)",
+      "at": "2026-09-29T22:40:17Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": "notified",
+      "at": "2026-09-30T00:47:17Z"
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 42,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-007",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_search.py::TestDocsSearch",
+              "tests/test_search.py::TestUnavailableSearchData",
+              "tests/test_search.py::TestStopwordsFromTheBuild",
+              "tests/test_search.py::TestLanguageFromTheBuild",
+              "tests/test_search.py::TestWords"
+            ],
+            "commands": [
+              "uv run pytest tests/test_search.py -q (exit 0, 55 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
+        },
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestSearchForm",
+              "tests/test_views.py::TestSearchResults",
+              "tests/test_mounted.py::TestSearchUnderTheReaderRule",
+              "tests/test_demo.py::TestDocumentationSearch"
+            ],
+            "commands": [
+              "uv run pytest tests/test_search.py tests/test_views.py tests/test_mounted.py tests/test_demo.py -q (exit 0, 252 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 43,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-007",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_search.py::TestResultOrder",
+              "tests/test_search.py::TestSectionLink",
+              "tests/test_search.py::TestPassage",
+              "tests/test_search.py::TestPageText",
+              "tests/test_views.py::TestSearchResultDetails"
+            ],
+            "commands": [
+              "uv run pytest tests/test_search.py -q (exit 0, 97 passed, after D24)",
+              "forge verify on the feature branch (exit 0, 483 passed)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P3",
+      "issue": 44,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-007",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestSearchAfterARebuild",
+              "tests/test_views.py::TestTwoApps",
+              "tests/test_views.py::TestUnavailableSearch",
+              "tests/test_views.py::TestSearchOfAMissingBuild",
+              "tests/test_views.py::TestSearchWithoutSphinx",
+              "tests/test_views.py::TestSearchOfAVeryLongQuery"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -q -k \"TestSearchAfterARebuild or TestTwoApps or TestUnavailableSearch or TestSearchOfAMissingBuild or TestSearchWithoutSphinx or TestSearchOfAVeryLongQuery\" (exit 0, 30 passed on first run; mutation probes each failed a test, see progress.md)"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "escalations": [],
+  "pr": {
+    "number": 54,
+    "draft": false
+  }
+}

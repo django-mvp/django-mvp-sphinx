@@ -9,17 +9,20 @@ from django.http import (
     FileResponse,
     Http404,
     HttpRequest,
+    HttpResponse,
     HttpResponsePermanentRedirect,
 )
 from django.http.response import HttpResponseBase
 from django.urls import reverse
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 from mvp.views.base import PageMixin
 
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.page_body import BodyRewriter
+from mvp_sphinx.search import DocsSearch
 
 if TYPE_CHECKING:
     from mvp_sphinx.mounted import DocumentationApp
@@ -82,6 +85,12 @@ class PageView(PageMixin, TemplateView):
         body = mark_safe(BodyRewriter.rewrite(page.get("body", "")))  # noqa: S308
         return self.render_to_response(self.get_context_data(page_data=page, body=body))
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Add the address of the app's search, which every page offers."""
+        context = super().get_context_data(**kwargs)
+        context["search_url"] = reverse(f"{self.app.namespace}:search")
+        return context
+
     @staticmethod
     def plain_text(markup: str) -> str:
         """Return the text of a title Sphinx wrote as HTML.
@@ -125,3 +134,89 @@ class PageView(PageMixin, TemplateView):
             )
         crumbs.append({"text": self.get_page_title()})
         return crumbs
+
+
+class SearchView(PageMixin, TemplateView):
+    """Render the results of a search of the documentation app's own pages.
+
+    The documentation app binds itself through ``as_view(app=...)``, and every
+    search reads the docs build as it is on disk, so a rebuilt docs build is
+    searchable without a restart.
+
+    Attributes:
+        app: The documentation app this view answers for.
+    """
+
+    template_name = "mvp_sphinx/search.html"
+    app: "DocumentationApp" = None  # type: ignore[assignment]
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Render the pages holding the words of the ``q`` query parameter.
+
+        Args:
+            request: The request being served.
+            *args: Positional URL arguments, unused.
+            **kwargs: URL arguments, unused.
+
+        Returns:
+            The results page. Its ``results`` are ``None`` when the build has no
+            usable search data, so the page can say search is unavailable.
+
+        Raises:
+            Http404: The docs build does not exist, as for every page address.
+        """
+        build = DocsBuild(self.app.build_dir)
+        if not build.root.is_dir():
+            raise Http404
+        self.query = request.GET.get("q", "")
+        found = DocsSearch(build).results(self.query)
+        results = None
+        if found is not None:
+            results = [{**result, "href": self.href(result)} for result in found]
+        return self.render_to_response(
+            self.get_context_data(query=self.query, results=results)
+        )
+
+    def href(self, result: dict[str, str]) -> str:
+        """Return the address of a result's page, at its section when it has one.
+
+        Args:
+            result: A result from ``DocsSearch.results``.
+
+        Returns:
+            The page's address under the documentation app, and ``#`` with the
+            section's anchor when the result names one.
+        """
+        namespace = self.app.namespace
+        if result["path"]:
+            address = reverse(f"{namespace}:page", kwargs={"path": result["path"]})
+        else:
+            address = reverse(f"{namespace}:front_page")
+        return f"{address}#{result['anchor']}" if result["anchor"] else address
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Add the address of the app's search, which the form submits to."""
+        context = super().get_context_data(**kwargs)
+        context["search_url"] = reverse(f"{self.app.namespace}:search")
+        return context
+
+    def get_page_title(self) -> str:
+        """Return the title of the results page, naming the words searched for."""
+        if self.query.strip():
+            return _("Search: %(query)s") % {"query": self.query}
+        return _("Search")
+
+    def get_breadcrumbs(self) -> list[dict[str, Any]]:
+        """Return the trail from the app's front page to the results page.
+
+        Returns:
+            The breadcrumbs: the app's name linking to its front page, then the
+            results page itself.
+        """
+        return [
+            {
+                "text": self.app.name,
+                "href": reverse(f"{self.app.namespace}:front_page"),
+            },
+            {"text": _("Search")},
+        ]

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}
+  {{ page.title }}
+{% endblock title %}
+{% block styles %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
+{% endblock styles %}
+{% block content %}
+  <c-page>
+    <c-container>
+      <h1 class="text-2xl font-semibold pt-4">{% translate "Search" %}</h1>
+      <c-mvp_sphinx.search_form :action="search_url" :query="query" />
+      {% if results is None %}
+        <p role="status">{% translate "Search is unavailable for this documentation." %}</p>
+      {% elif results %}
+        <section aria-labelledby="search-results-heading">
+          <h2 id="search-results-heading" class="text-lg font-semibold">
+            {% blocktranslate count counter=results|length %}{{ counter }} page found{% plural %}{{ counter }} pages found{% endblocktranslate %}
+          </h2>
+          <ol class="flex flex-col gap-4 py-4">
+            {% for result in results %}
+              <li>
+                <a href="{{ result.href }}" class="link link-primary">{{ result.title }}</a>
+                {% if result.passage %}<p class="text-sm">{{ result.passage }}</p>{% endif %}
+              </li>
+            {% endfor %}
+          </ol>
+        </section>
+      {% else %}
+        <p role="status">{% translate "Nothing matched your search." %}</p>
+      {% endif %}
+    </c-container>
+  </c-page>
+{% endblock content %}

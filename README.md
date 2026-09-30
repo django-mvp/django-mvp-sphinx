@@ -124,6 +124,39 @@ serves the pages still doesn't need Sphinx. Without the line, or with a
 `navigation.json` that can't be read, the sidebar holds only the front page
 entry and every page is still served.
 
+### Search
+
+Every page of a documentation app has a search box. It lists the pages of that
+docs build that contain all the words typed, in any order and any case, and finds
+other forms of a word too, so `lanterns` finds a page that says "lantern". It
+searches that one app's pages and never the rest of your site or another
+documentation app. Adding a word narrows the list. Common words such as "the" are
+ignored, as Sphinx ignores them.
+
+The page whose title holds all the words comes first, then a page with a section
+heading that holds them, then the rest, each group in order of title. Every result
+shows the page's title and, when the page's text holds one of the words, a short
+passage around it. A result found by a section heading links to that section.
+
+Nothing needs configuring. The search reads the search data Sphinx already writes
+into every JSON build (`searchindex.json`), so there is no extra Sphinx setting and
+no Sphinx where the site runs. The only extra dependency is `snowballstemmer`, the
+stemmer Sphinx itself uses to build that data.
+
+The box is an ordinary form that sends `GET` to the app's `search/` address, for
+example `/docs/search/?q=lantern`, so it works with scripts turned off and a search
+can be bookmarked or shared. That address is where Sphinx's own search page would
+be, so a `:ref:` link to `search` in your docs lands on it. Whoever may read the
+pages may search them, under the same `check`.
+
+The `search/` address is reserved under every documentation app, so a folder of your
+docs named `search` can't have its own index page there. Name that folder something
+else.
+
+The search data is read on each search, so a rebuild is searchable straight away.
+A build without it still serves its pages, and the results page says search is
+unavailable.
+
 ### Naming the documentation
 
 The app's `name` is what the tab title, the first breadcrumb and the menu entry

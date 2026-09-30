@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 19:19-0500\n"
+"POT-Creation-Date: 2026-09-29 19:57-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,10 +26,40 @@ msgstr ""
 msgid "Overview"
 msgstr ""
 
-#: mounted.py:44
+#: mounted.py:52
 msgid "Documentation"
 msgstr ""
 
-#: page_body.py:110
+#: page_body.py:181
 msgid "Table"
+msgstr ""
+
+#: templates/cotton/mvp_sphinx/search_form.html:10
+msgid "Search this documentation"
+msgstr ""
+
+#: templates/cotton/mvp_sphinx/search_form.html:13
+#: templates/cotton/mvp_sphinx/search_form.html:19
+#: templates/mvp_sphinx/search.html:13 views.py:207 views.py:218
+msgid "Search"
+msgstr ""
+
+#: templates/mvp_sphinx/search.html:16
+msgid "Search is unavailable for this documentation."
+msgstr ""
+
+#: templates/mvp_sphinx/search.html:20
+#, python-format
+msgid "%(counter)s page found"
+msgid_plural "%(counter)s pages found"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/mvp_sphinx/search.html:32
+msgid "Nothing matched your search."
+msgstr ""
+
+#: views.py:206
+#, python-format
+msgid "Search: %(query)s"
 msgstr ""
