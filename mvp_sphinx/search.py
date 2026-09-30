@@ -117,14 +117,26 @@ class DocsSearch:
             return False
         for value in postings.values():
             numbers = value if isinstance(value, list) else [value]
-            for number in numbers:
-                if (
-                    not isinstance(number, int)
-                    or isinstance(number, bool)
-                    or not 0 <= number < count
-                ):
-                    return False
+            if not all(DocsSearch.is_document(number, count) for number in numbers):
+                return False
         return True
+
+    @staticmethod
+    def is_document(number: Any, count: int) -> bool:
+        """Say whether ``number`` is the number of a document in the build.
+
+        Args:
+            number: A parsed value from the search data.
+            count: The number of documents in the build.
+
+        Returns:
+            ``True`` for an integer, not a boolean, from 0 to below ``count``.
+        """
+        return (
+            isinstance(number, int)
+            and not isinstance(number, bool)
+            and 0 <= number < count
+        )
 
     @cached_property
     def stopwords(self) -> frozenset[str]:
@@ -294,9 +306,7 @@ class DocsSearch:
                     continue
                 number, anchor = entry
                 if (
-                    isinstance(number, int)
-                    and not isinstance(number, bool)
-                    and 0 <= number < count
+                    DocsSearch.is_document(number, count)
                     and isinstance(anchor, str)
                     and anchor
                 ):
