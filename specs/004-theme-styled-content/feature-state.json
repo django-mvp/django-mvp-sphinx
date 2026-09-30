@@ -1,0 +1,264 @@
+{
+  "feature": "004-theme-styled-content",
+  "branch": "004-theme-styled-content",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:30:58Z",
+      "note": "specification merged to main in PR #18, merge commit 6d32b789e67862d8f0579220eceb3acc16a31c04; epic #7, stories #30 #31 #33 #35 #38"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-29T23:45:47Z",
+      "note": "plan.md, research.md, tasks.md: 5 stories, 8 tasks"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-29T23:47:12Z",
+      "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-29T23:55:53Z",
+      "note": "US1..US5 sequential in the feature worktree"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T00:18:03Z",
+      "note": "US1-US5 done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T00:19:39Z",
+      "note": "one reviewer: correctness+spec lens (no security-sensitive surface; implementation followed the reviewed plan)"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T00:28:19Z",
+      "note": "PR #48 ready; walkthrough held by the orchestrator"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "specification PR #18 merged by django-mvp-bot (overnight delegation; merge commit 6d32b789)",
+      "at": "2026-09-29T22:30:58Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": "notified",
+      "at": "2026-09-29T23:55:53Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam's overnight delegation), not Sam"
+      ]
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel",
+      "at": "2026-09-29T23:55:43Z",
+      "self_resolved": [
+        "ARCH-001 medium: rewrite splices into the original string (T004 byte-for-byte inputs added) - plan edit",
+        "SPEC-001 medium: muted colour added to contrast pairs (T002) - plan edit",
+        "SPEC-002 low: glossary-term label test moved T008 -> T006 - plan edit",
+        "ARCH-002 medium: contrast helpers on one test class (T002) - plan edit"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "orchestrator agent:forge:dashboard:15456d51 (for Sam, overnight delegation 2026-09-30)",
+      "at": "2026-09-30T00:31:30Z",
+      "self_resolved": [
+        "round 1: renumber ADR 0002-style-page-content to the next free number on main (0003), update every reference — done"
+      ]
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 30,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-004",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_views.py::TestContentStyling (red: link test failed; green: 3 passed)",
+              "uv run pytest tests/test_views.py (58 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: ['SC-006']"
+            ]
+          }
+        },
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_static (red on empty stylesheet: 5 failed; green: 10 passed)",
+              "uv run sphinx-build -b json -q -W demo/docs demo/docs/_build/json (exit 0)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: ['SC-001', 'SC-002', 'SC-005']"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P1",
+      "issue": 31,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-004",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_static/test_content_css.py (red: roles test failed on missing roles; green: 15 passed)",
+              "mutation probe: string colour at 95% success failed both light-theme contrast cases; file restored",
+              "uv run sphinx-build -b json -W demo/docs /tmp/demo-json (exit 0)",
+              "uv run pre-commit run --all-files (passed)",
+              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us2-verify.json (overall passed: conformance, docs, lint, typecheck, test, build)",
+              "exit_code: 0; criteria: ['SC-005']"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P2",
+      "issue": 33,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-004",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_page_body.py (red on a pass-through stub: 12 failed, 8 guards passed; green: 20 passed)",
+              "uv run pytest tests/test_views.py::TestWideContent (red: 2 failed; green after wiring the view)",
+              "uv run pytest tests/test_page_body.py tests/test_views.py (80 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: ['SC-003']"
+            ]
+          }
+        },
+        {
+          "id": "T005",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-json-us3b (exit 0)",
+              "uv run pytest tests/test_static tests/test_demo.py (19 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us3-verify.json (overall passed: conformance, docs, lint, typecheck, test, build)",
+              "exit_code: 0; criteria: []"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US4",
+      "priority": "P2",
+      "issue": 35,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-004",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T006",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_page_body.py (red: 16 failed on missing aria-label; green: 38 passed)",
+              "uv run pytest tests/test_views.py::TestHeadingLinks (5 passed; 4 fail with the naming call removed)",
+              "uv run pytest tests/test_page_body.py tests/test_views.py (103 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: ['SC-004']"
+            ]
+          }
+        },
+        {
+          "id": "T007",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us4 (exit 0)",
+              "uv run pytest tests/test_static tests/test_demo.py (19 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us4-verify.json (exit 0; overall passed: conformance, docs, lint, typecheck, test, build)",
+              "exit_code: 0; criteria: []"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US5",
+      "priority": "P3",
+      "issue": 38,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-004",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T008",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us5b (fresh dir; exit 0)",
+              "uv run pytest tests/test_static tests/test_demo.py (19 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us5-verify.json (exit 0; overall passed: conformance, docs, lint, typecheck, test, build)",
+              "exit_code: 0; criteria: []"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "escalations": [],
+  "pr": {
+    "number": 48,
+    "draft": false
+  }
+}

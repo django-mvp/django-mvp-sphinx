@@ -29,3 +29,7 @@ msgstr ""
 #: mounted.py:44
 msgid "Documentation"
 msgstr ""
+
+#: page_body.py:110
+msgid "Table"
+msgstr ""

@@ -1,12 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}
   {{ page.title }}
 {% endblock title %}
+{% block styles %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
+{% endblock styles %}
 {% block content %}
   <c-page>
     <c-container>
-      <article class="prose py-4">
-        {{ page_data.body|safe }}
+      <article class="prose mvp-sphinx-content py-4">
+        {{ body }}
       </article>
     </c-container>
   </c-page>

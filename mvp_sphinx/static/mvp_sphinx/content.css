@@ -1,0 +1,354 @@
+/* Styles for what Sphinx writes into a page's body. Every rule sits under
+   .mvp-sphinx-content and every colour comes from the host's django-mvp theme. */
+
+/* Colour roles: the only place this file makes a colour. */
+.mvp-sphinx-content {
+  --mvp-sphinx-admonition-info: var(--color-info);
+  --mvp-sphinx-admonition-info-bg: color-mix(
+    in oklab,
+    var(--color-info) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-helpful: var(--color-success);
+  --mvp-sphinx-admonition-helpful-bg: color-mix(
+    in oklab,
+    var(--color-success) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-important: var(--color-primary);
+  --mvp-sphinx-admonition-important-bg: color-mix(
+    in oklab,
+    var(--color-primary) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-cautionary: var(--color-warning);
+  --mvp-sphinx-admonition-cautionary-bg: color-mix(
+    in oklab,
+    var(--color-warning) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-dangerous: var(--color-error);
+  --mvp-sphinx-admonition-dangerous-bg: color-mix(
+    in oklab,
+    var(--color-error) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-muted: color-mix(
+    in oklab,
+    var(--color-base-content) 70%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-code-bg: var(--color-base-200);
+  --mvp-sphinx-code-text: var(--color-base-content);
+  --mvp-sphinx-code-emphasis-bg: color-mix(
+    in oklab,
+    var(--color-warning) 15%,
+    var(--color-base-200)
+  );
+  --mvp-sphinx-code-line-number: var(--mvp-sphinx-muted);
+  --mvp-sphinx-code-comment: var(--mvp-sphinx-muted);
+  --mvp-sphinx-code-keyword: color-mix(
+    in oklab,
+    var(--color-primary) 40%,
+    var(--color-base-content)
+  );
+  --mvp-sphinx-code-string: color-mix(
+    in oklab,
+    var(--color-success) 40%,
+    var(--color-base-content)
+  );
+  --mvp-sphinx-code-number: color-mix(
+    in oklab,
+    var(--color-warning) 40%,
+    var(--color-base-content)
+  );
+  --mvp-sphinx-code-name: color-mix(
+    in oklab,
+    var(--color-info) 40%,
+    var(--color-base-content)
+  );
+  --mvp-sphinx-code-inserted: color-mix(
+    in oklab,
+    var(--color-success) 40%,
+    var(--color-base-content)
+  );
+  --mvp-sphinx-code-deleted: color-mix(
+    in oklab,
+    var(--color-error) 40%,
+    var(--color-base-content)
+  );
+  --mvp-sphinx-code-error: color-mix(
+    in oklab,
+    var(--color-error) 40%,
+    var(--color-base-content)
+  );
+}
+
+/* Admonitions and version notes. A box reads the edge and background of its
+   own meaning, so a box inside another keeps its own. Kinds with no meaning
+   here keep the informational look. */
+.mvp-sphinx-content .admonition,
+.mvp-sphinx-content .versionadded,
+.mvp-sphinx-content .versionchanged,
+.mvp-sphinx-content div.deprecated {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-info);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-info-bg);
+  margin-block: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-inline-start: 4px solid var(--mvp-sphinx-box-edge);
+  border-radius: var(--radius-box);
+  background-color: var(--mvp-sphinx-box-bg);
+  color: var(--color-base-content);
+}
+
+.mvp-sphinx-content .admonition > :first-child,
+.mvp-sphinx-content .versionadded > :first-child,
+.mvp-sphinx-content .versionchanged > :first-child,
+.mvp-sphinx-content div.deprecated > :first-child {
+  margin-top: 0;
+}
+
+.mvp-sphinx-content .admonition > :last-child,
+.mvp-sphinx-content .versionadded > :last-child,
+.mvp-sphinx-content .versionchanged > :last-child,
+.mvp-sphinx-content div.deprecated > :last-child {
+  margin-bottom: 0;
+}
+
+.mvp-sphinx-content .admonition-title {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.mvp-sphinx-content .versionmodified {
+  font-weight: 600;
+}
+
+.mvp-sphinx-content .admonition.tip,
+.mvp-sphinx-content .admonition.hint {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-helpful);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-helpful-bg);
+}
+
+.mvp-sphinx-content .admonition.important {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-important);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-important-bg);
+}
+
+.mvp-sphinx-content .admonition.warning,
+.mvp-sphinx-content .admonition.caution,
+.mvp-sphinx-content .admonition.attention,
+.mvp-sphinx-content div.deprecated {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-cautionary);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-cautionary-bg);
+}
+
+.mvp-sphinx-content .admonition.danger,
+.mvp-sphinx-content .admonition.error {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-dangerous);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-dangerous-bg);
+}
+
+/* Code. Pygments writes short token classes; each group reads one colour role.
+   Code Pygments did not highlight has no token spans and reads as plain text. */
+.mvp-sphinx-content .highlight pre {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-box);
+  background-color: var(--mvp-sphinx-code-bg);
+  color: var(--mvp-sphinx-code-text);
+}
+
+.mvp-sphinx-content .highlight .hll {
+  display: block;
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+  background-color: var(--mvp-sphinx-code-emphasis-bg);
+}
+
+.mvp-sphinx-content .highlight .linenos {
+  padding-inline-end: 1rem;
+  color: var(--mvp-sphinx-code-line-number);
+  user-select: none;
+}
+
+.mvp-sphinx-content .code-block-caption {
+  margin-bottom: 0.5rem;
+  color: var(--mvp-sphinx-muted);
+  font-size: 0.875em;
+}
+
+.mvp-sphinx-content .highlight .gh,
+.mvp-sphinx-content .highlight .gs,
+.mvp-sphinx-content .highlight .gu {
+  font-weight: 600;
+}
+
+.mvp-sphinx-content .highlight .ge {
+  font-style: italic;
+}
+
+.mvp-sphinx-content .highlight .c,
+.mvp-sphinx-content .highlight .ch,
+.mvp-sphinx-content .highlight .cm,
+.mvp-sphinx-content .highlight .cp,
+.mvp-sphinx-content .highlight .cpf,
+.mvp-sphinx-content .highlight .c1,
+.mvp-sphinx-content .highlight .cs,
+.mvp-sphinx-content .highlight .gp {
+  color: var(--mvp-sphinx-code-comment);
+}
+
+.mvp-sphinx-content .highlight .k,
+.mvp-sphinx-content .highlight .kc,
+.mvp-sphinx-content .highlight .kd,
+.mvp-sphinx-content .highlight .kn,
+.mvp-sphinx-content .highlight .kp,
+.mvp-sphinx-content .highlight .kr,
+.mvp-sphinx-content .highlight .kt,
+.mvp-sphinx-content .highlight .ow {
+  color: var(--mvp-sphinx-code-keyword);
+}
+
+.mvp-sphinx-content .highlight .s,
+.mvp-sphinx-content .highlight .sa,
+.mvp-sphinx-content .highlight .sb,
+.mvp-sphinx-content .highlight .sc,
+.mvp-sphinx-content .highlight .dl,
+.mvp-sphinx-content .highlight .sd,
+.mvp-sphinx-content .highlight .s2,
+.mvp-sphinx-content .highlight .se,
+.mvp-sphinx-content .highlight .sh,
+.mvp-sphinx-content .highlight .si,
+.mvp-sphinx-content .highlight .sx,
+.mvp-sphinx-content .highlight .sr,
+.mvp-sphinx-content .highlight .s1,
+.mvp-sphinx-content .highlight .ss {
+  color: var(--mvp-sphinx-code-string);
+}
+
+.mvp-sphinx-content .highlight .m,
+.mvp-sphinx-content .highlight .mb,
+.mvp-sphinx-content .highlight .mf,
+.mvp-sphinx-content .highlight .mh,
+.mvp-sphinx-content .highlight .mi,
+.mvp-sphinx-content .highlight .il,
+.mvp-sphinx-content .highlight .mo {
+  color: var(--mvp-sphinx-code-number);
+}
+
+.mvp-sphinx-content .highlight .na,
+.mvp-sphinx-content .highlight .nb,
+.mvp-sphinx-content .highlight .bp,
+.mvp-sphinx-content .highlight .nc,
+.mvp-sphinx-content .highlight .no,
+.mvp-sphinx-content .highlight .nd,
+.mvp-sphinx-content .highlight .ni,
+.mvp-sphinx-content .highlight .ne,
+.mvp-sphinx-content .highlight .nf,
+.mvp-sphinx-content .highlight .fm,
+.mvp-sphinx-content .highlight .nl,
+.mvp-sphinx-content .highlight .nn,
+.mvp-sphinx-content .highlight .nt,
+.mvp-sphinx-content .highlight .nv,
+.mvp-sphinx-content .highlight .vc,
+.mvp-sphinx-content .highlight .vg,
+.mvp-sphinx-content .highlight .vi,
+.mvp-sphinx-content .highlight .vm,
+.mvp-sphinx-content .highlight .py {
+  color: var(--mvp-sphinx-code-name);
+}
+
+.mvp-sphinx-content .highlight .gi {
+  color: var(--mvp-sphinx-code-inserted);
+}
+
+.mvp-sphinx-content .highlight .gd {
+  color: var(--mvp-sphinx-code-deleted);
+}
+
+.mvp-sphinx-content .highlight .err,
+.mvp-sphinx-content .highlight .gr,
+.mvp-sphinx-content .highlight .gt {
+  color: var(--mvp-sphinx-code-error);
+}
+
+/* Wide content stays inside the reading area. A table scrolls inside the
+   region the page wraps it in; code scrolls in its own box. */
+.mvp-sphinx-content .mvp-sphinx-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mvp-sphinx-content .mvp-sphinx-scroll:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.mvp-sphinx-content .mvp-sphinx-scroll > table {
+  min-width: 100%;
+}
+
+.mvp-sphinx-content pre {
+  overflow-x: auto;
+}
+
+.mvp-sphinx-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.mvp-sphinx-content figure {
+  max-width: 100%;
+}
+
+/* Heading links: shown when the reader points at the heading that holds one
+   or moves keyboard focus onto it, and clear of the sticky top bar when
+   followed. */
+.mvp-sphinx-content .headerlink {
+  margin-inline-start: 0.5rem;
+  color: var(--mvp-sphinx-muted);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
+}
+
+.mvp-sphinx-content h1:hover .headerlink,
+.mvp-sphinx-content h2:hover .headerlink,
+.mvp-sphinx-content h3:hover .headerlink,
+.mvp-sphinx-content h4:hover .headerlink,
+.mvp-sphinx-content h5:hover .headerlink,
+.mvp-sphinx-content h6:hover .headerlink,
+.mvp-sphinx-content dt:hover .headerlink,
+.mvp-sphinx-content caption:hover .headerlink,
+.mvp-sphinx-content figcaption:hover .headerlink,
+.mvp-sphinx-content .code-block-caption:hover .headerlink,
+.mvp-sphinx-content .headerlink:focus-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mvp-sphinx-content .headerlink {
+    transition: none;
+  }
+}
+
+.mvp-sphinx-content [id] {
+  scroll-margin-top: 5rem;
+}
+
+/* Glossary terms stand out from their definitions, which the host's prose
+   style already indents. Keys are left to the host's key-cap style. */
+.mvp-sphinx-content dl.glossary dt {
+  font-weight: 700;
+}
+
+.mvp-sphinx-content .guilabel {
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--color-base-300);
+  border-radius: var(--radius-field);
+  font-size: 0.9em;
+}
+
+.mvp-sphinx-content .menuselection {
+  font-weight: 600;
+}

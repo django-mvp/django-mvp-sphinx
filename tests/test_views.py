@@ -10,6 +10,7 @@ from urllib.parse import urljoin
 
 import pytest
 from bs4 import BeautifulSoup
+from django.templatetags.static import static
 from django.urls import reverse
 
 pytestmark = pytest.mark.usefixtures("docs_app")
@@ -45,6 +46,16 @@ def headings(response) -> list[str]:
     return [
         re.sub(r"<[^>]+>", "", h)
         for h in re.findall(r"<h1[^>]*>(.*?)</h1>", body, re.S)
+    ]
+
+
+def linked_stylesheets(response) -> list[str]:
+    body = response.content.decode()
+    return [
+        href
+        for tag in re.findall(r"<link\b[^>]*>", body)
+        if 'rel="stylesheet"' in tag
+        for href in re.findall(r'href="([^"]+)"', tag)
     ]
 
 
@@ -443,6 +454,100 @@ class TestTwoAppsSideBySide:
         assert str(handbook_app.name) not in tabs["/docs/"]
         assert str(handbook_app.name) in tabs["/manuals/admin/"]
         assert str(docs_app.name) not in tabs["/manuals/admin/"]
+
+
+class TestContentStyling:
+    STYLESHEET = "mvp_sphinx/content.css"
+
+    def test_a_docs_page_links_the_packages_stylesheet(self, client, db) -> None:
+        response = client.get("/docs/content/")
+
+        assert static(self.STYLESHEET) in linked_stylesheets(response)
+
+    def test_the_hosts_own_pages_do_not_link_the_stylesheet(self, client, db) -> None:
+        response = client.get(reverse("overview"))
+
+        assert static(self.STYLESHEET) not in linked_stylesheets(response)
+
+    def test_no_stylesheet_from_the_docs_build_is_linked(self, client, db) -> None:
+        response = client.get("/docs/content/")
+
+        assert not [s for s in linked_stylesheets(response) if "_static" in s]
+
+
+class TestWideContent:
+    def test_every_table_of_a_page_is_in_a_focusable_named_region(
+        self, client, db
+    ) -> None:
+        response = client.get("/docs/content/")
+
+        body = response.content.decode()
+        regions = re.findall(r'<div [^>]*role="region"[^>]*>', body)
+        assert len(regions) == body.count("<table") == 3
+        assert all('tabindex="0"' in tag and "aria-label=" in tag for tag in regions)
+
+    def test_a_captioned_table_is_named_by_its_caption(self, client, db) -> None:
+        response = client.get("/docs/content/")
+
+        assert 'aria-label="Release schedule"' in response.content.decode()
+
+
+class TestHeadingLinks:
+    HEADING_LINK = re.compile(
+        r"<(?:h[1-6]|dt)\b[^>]*>"
+        r"(?P<held>(?:(?!<h[1-6]\b|<dt\b|<a\b[^>]*headerlink).)*?)"
+        r"<a\b(?P<attributes>[^>]*\bheaderlink\b[^>]*)>",
+        re.S,
+    )
+
+    def page(self, client) -> str:
+        return client.get("/docs/content/").content.decode()
+
+    def links(self, body: str) -> list[tuple[str, dict[str, str]]]:
+        return [
+            (
+                re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", "", match["held"]))),
+                dict(re.findall(r'([\w-]+)="([^"]*)"', match["attributes"])),
+            )
+            for match in self.HEADING_LINK.finditer(body)
+        ]
+
+    def test_every_heading_link_of_a_page_is_named_by_its_headings_text(
+        self, client, db
+    ) -> None:
+        links = self.links(self.page(client))
+
+        assert len(links) >= 5
+        for text, attributes in links:
+            assert unescape(attributes["aria-label"]).endswith(text.strip())
+
+    def test_a_heading_link_leads_to_an_anchor_on_the_page(self, client, db) -> None:
+        body = self.page(client)
+
+        for link in self.links(body):
+            attributes = link[1]
+            assert attributes["href"].startswith("#")
+            assert f'id="{attributes["href"][1:]}"' in body
+
+    def test_no_two_heading_links_of_a_page_share_a_name(self, client, db) -> None:
+        names = [
+            attributes["aria-label"]
+            for text, attributes in self.links(self.page(client))
+        ]
+
+        assert len(names) == len(set(names))
+
+    def test_the_link_of_a_heading_with_code_and_an_ampersand_is_named_by_them(
+        self, client, db
+    ) -> None:
+        names = [unescape(a["aria-label"]) for _, a in self.links(self.page(client))]
+
+        assert any(name.endswith("Using run() & friends") for name in names)
+
+    def test_a_glossary_terms_link_is_named_by_the_term(self, client, db) -> None:
+        links = {a["href"]: a for _, a in self.links(self.page(client))}
+
+        assert links["#term-widget"]["aria-label"].endswith("widget")
 
 
 class TestContentsInTheSidebar:

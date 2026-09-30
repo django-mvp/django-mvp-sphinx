@@ -183,6 +183,44 @@ redirected by Django's `CommonMiddleware` (`APPEND_SLASH`), as for any other
 mount. A page file that is not valid JSON is a broken build and raises, so it is
 a server error rather than a 404.
 
+## How pages look
+
+Pages take your site's theme with nothing to configure: the colours are
+django-mvp's own, so a page follows the light and dark themes and any theme your
+project defines. The package's page template links one stylesheet,
+`mvp_sphinx/content.css`, served like the rest of your static files, and only
+pages the documentation app renders load it. Sphinx's own stylesheets are never
+used.
+
+Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
+wraps each table in a scrolling region that takes keyboard focus and is named by
+the table's caption, or "Table" when it has none, so a table wider than the
+page scrolls sideways for a reader using only a keyboard and a screen reader
+announces what the region holds. It also names each heading link (the ¶ Sphinx
+puts beside a section heading, a glossary term or a caption) with the link's own
+title and the heading's text, such as "Link to this heading: Installing", so a
+screen reader tells one link from the next. Everything else in the body reaches
+the page exactly as Sphinx wrote it. `PageView` applies it and hands the result
+to the template as `body`, so a `PageView` subclass gets it too; to use it elsewhere,
+call `BodyRewriter.rewrite(markup)`.
+
+If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
+block so the stylesheet still reaches the page, render `{{ body }}` rather than
+`{{ page_data.body }}` so your override keeps the rewrite, and keep the
+`mvp-sphinx-content` class on the element that holds it, because every rule in
+the stylesheet is scoped to that class. `BodyRewriter.rewrite` returns a plain
+string; `PageView` marks it safe because the docs build is your own, and a caller
+of its own does the same:
+
+```django
+{% extends "mvp_sphinx/page.html" %}
+{% load static %}
+{% block styles %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'yourproject/docs.css' %}">
+{% endblock styles %}
+```
+
 ## Quickstart
 
 <!--
