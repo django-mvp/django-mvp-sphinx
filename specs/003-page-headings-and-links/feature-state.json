@@ -118,7 +118,16 @@
           "id": "T004",
           "status": "done",
           "attempts": 2,
-          "evidence": "tests/test_views.py::TestPreviousAndNextPage, 12 tests; red first (9 failed, 3 pass by nature), then 12 passed"
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreviousAndNextPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py::TestPreviousAndNextPage -q  (red first: 9 failed, 3 passed by nature; then 12 passed)",
+              "uv run pre-commit run --all-files  (all hooks passed)",
+              "/home/sam/.openclaw/workspaces/forge/engineering-org/kit/forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-003 --base origin/main --json /tmp/fs003-us2-verify.json  (overall passed: conformance, docs, lint, typecheck, test, build)"
+            ]
+          }
         }
       ]
     },
@@ -134,7 +143,16 @@
           "id": "T005",
           "status": "done",
           "attempts": 1,
-          "evidence": "tests/test_views.py::TestReadingAfterARebuild, 2 tests; passed on first run as expected (the view reads the page file per request); probe: skipping the rebuild fails both"
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestReadingAfterARebuild"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py::TestReadingAfterARebuild -q  (2 passed on the first run, as the brief expected; probe: replacing the rebuild call with pass failed both)",
+              "uv run pre-commit run --all-files  (all hooks passed)",
+              "/home/sam/.openclaw/workspaces/forge/engineering-org/kit/forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-003 --base origin/main --json /tmp/fs003-us2-verify.json  (overall passed)"
+            ]
+          }
         }
       ]
     }
