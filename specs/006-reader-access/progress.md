@@ -94,3 +94,21 @@ passed. No code added in `mvp_sphinx/`.
 Next: T005 (TestSeveralApps, README).
 Watch: the `from demo.mounted import ...` line in `demo/urls.py` and `demo/menus.py` gained a
 name, so those two existing lines changed; ruff's isort would merge a second import line anyway.
+
+## 2026-09-30T00:55:00Z · Implementer US3 · T005
+
+Did: `TestSeveralApps` (docs open, `staff_guide_app` at the demo's staff rule): overview entries
+for anonymous, regular and staff readers; each reader served or refused per app (anonymous 302
+to sign in on `/staff-guide/`, regular 403 from `403.html`, staff 200, `/docs/` 200 for all);
+standing that changes on one client, by signing in (`user_is_authenticated`) and by joining a
+group (`user_in_any_group`), each checked on the next request and the next overview page. Rules
+are set with `monkeypatch.setattr`. README: two audiences as two apps. No code changed in
+`mvp_sphinx/`.
+Verified: `uv run pytest tests/test_mounted.py tests/test_demo.py -q` → 72 passed. The tests
+exercise behaviour earlier stories delivered, so there was no red step; with the staff guide's
+rule replaced by `True` in a throwaway edit (reverted), 4 of the 10 tests failed (the entry and
+refusal tests that rely on the demo's rule). The other 6 set their own rule or admit staff, so
+they hold either way. `uv run pre-commit run --all-files` passed.
+Next: full verify, report.
+Watch: `docs/` describes none of the names or behaviour this story touched, so no page there
+changed.

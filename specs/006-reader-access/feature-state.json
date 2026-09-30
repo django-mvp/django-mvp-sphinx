@@ -143,8 +143,16 @@
         },
         {
           "id": "T005",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestSeveralApps"
+            ],
+            "commands": [
+              "uv run pytest tests/test_mounted.py tests/test_demo.py -q"
+            ]
+          }
         }
       ]
     }
