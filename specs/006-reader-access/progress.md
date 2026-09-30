@@ -51,3 +51,22 @@ Did: receipts, verify and tamper-check green. Found one test assigning `check` d
 demo's module-level app, which would leak the rule into later tests. Changed it to
 `monkeypatch.setattr` (a one-line fix, so it was made here rather than re-dispatched).
 test_mounted, test_views and test_demo pass serially in that order.
+
+## 2026-09-30T00:20:00Z · Implementer US2 · T003
+
+Did: `TestOwnRule` (group rule: member served for pages, image and download; signed-in non-member
+403 from `403.html` with no fixture page text or file bytes for the matrix, including unknown,
+slashless and missing build; anonymous sent to sign in; entry absent/present on the overview page;
+the handbook's 403 lacks its escaped name while the member's page has it), `TestPermissionRule`,
+`TestRuleAdmittingNoOne` (superuser refused, no entry), `TestRuleThatRaises` (page and overview
+raise `RuntimeError`). Every rule is set with `monkeypatch.setattr`. README section extended
+(own rules, no staff bypass, raising rule, factories called with arguments, non-callable read as
+yes/no); CHANGELOG entry extended. No code changed in `mvp_sphinx/`.
+Verified: `uv run pytest tests/test_mounted.py -x -q` → 54 passed. The tests exercise behaviour
+that US1 already delivered, so there was no red step before code; instead, with each rule replaced
+by `True` in a throwaway copy of the file (not committed), 18 of the 25 new tests failed, and the
+7 that passed are the admitted cases, which hold with or without a rule.
+Lint: `uv run pre-commit run --all-files` passed.
+Next: US3 (T004).
+Watch: `docs/` describes none of the names or behaviour this story touched, so no page there
+changed.
