@@ -450,12 +450,78 @@ caller of its own does the same:
 
 ## Public surface
 
-<!--
-  Everything a host project can touch: components and their attributes,
-  settings, template tags, models, views. Being able to list it exhaustively is
-  a feature of a package this size, and the list is what makes an addition to
-  it a deliberate decision rather than a side effect.
--->
+These are the names a project can use, grouped the way a project meets them.
+
+### Installed app and Sphinx extension
+
+- `mvp_sphinx` is the Django app. Add it to `INSTALLED_APPS` after `mvp`.
+- `mvp_sphinx.navigation` is the Sphinx extension. It writes `navigation.json`
+  into a JSON build.
+
+### The documentation app
+
+- `mvp_sphinx.mounted.DocumentationApp` serves one docs build under the prefix
+  you mount it at. Its keyword options are `build_dir` (required), `name`, `icon`,
+  `namespace`, `view_class` and `check`.
+- `menu_item()`, inherited from django-mvp's `MountedApp`, returns the entry to
+  add to your own menus.
+- `menu` is the app's `DocumentationMenu`, which draws the contents as the app
+  sidebar.
+- Its URL names are `<namespace>:front_page`, `<namespace>:page` (which takes
+  `path`) and `<namespace>:search`.
+
+### Views
+
+- `mvp_sphinx.views.PageView` renders a page. Subclass it and pass the subclass as
+  `view_class` to change how a page is drawn.
+- `mvp_sphinx.views.SearchView` renders the results of a search.
+
+### Building blocks
+
+For a custom view or template:
+
+- `mvp_sphinx.docs_build.DocsBuild` reads a docs build and never looks outside it.
+- `mvp_sphinx.menus.DocumentationMenu` turns a build's navigation file into the
+  sidebar menu.
+- `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
+  page's `toc` value into nested headings.
+- `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
+  names table regions and heading links in a page body.
+- `mvp_sphinx.search.DocsSearch` lists the pages of a build that hold every word
+  searched for.
+- `mvp_sphinx.search.PageText` gives the text a reader sees in a page body.
+
+### Templates a project may override
+
+- `mvp_sphinx/page.html` draws a page. It receives `body`, `headings`,
+  `previous_page`, `next_page`, `search_url` and `page_data`. It has the `styles`
+  and `content` blocks, and it holds the page's body in an element with the
+  `mvp-sphinx-content` class.
+- `mvp_sphinx/search.html` draws the results. It receives `query`, `results` and
+  `search_url`, and has the `styles` and `content` blocks. `results` is `None` when
+  the build has no search data, and otherwise a list of the pages found, each with
+  its `title`, `passage` and `href`.
+
+### Components
+
+Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
+
+- `mvp_sphinx.on_this_page` draws a page's headings. It takes `headings`.
+- `mvp_sphinx.heading_list` draws nested headings as a list. It takes `headings`.
+- `mvp_sphinx.page_links` draws the links to the previous and next page. It takes
+  `previous` and `next`.
+- `mvp_sphinx.search_form` draws the search box. It takes `action` and `query`.
+
+### Static file
+
+- `mvp_sphinx/content.css` is the stylesheet page content uses.
+
+### Settings
+
+There are none. The package reads no Django setting, and everything is configured
+on the `DocumentationApp`.
+
+Anything not listed here is internal and may change without notice.
 
 ## Contributing
 

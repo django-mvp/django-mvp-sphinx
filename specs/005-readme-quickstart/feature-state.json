@@ -82,8 +82,18 @@
       "tasks": [
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "blocked",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_smoke.py::TestPackagedApp",
+              "tests/test_demo.py",
+              "tests/test_quickstart.py::TestQuickstart"
+            ],
+            "commands": [
+              "uv run pytest tests/test_smoke.py tests/test_demo.py tests/test_quickstart.py -q"
+            ]
+          }
         }
       ]
     },

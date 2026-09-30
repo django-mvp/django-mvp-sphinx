@@ -69,3 +69,43 @@ README before/after (every heading and fact-bearing paragraph of the README at 1
 - Contributing, License: unchanged.
 Next: T002.
 Watch: `README` claims are not tested (no test reads it); the reviewer's documentation pass is the check.
+
+## 2026-09-30T10:58:00Z · Implementer US2 · T002
+
+Did: wrote the Public surface section (replacing its template comment) and ended it with the sentence
+that anything unlisted is internal; it says there are no settings. Deleted
+`mvp_sphinx/templates/cotton/mvp_sphinx/example.html`, `TestStarterComponent` and `EXAMPLE_TAG` in
+`tests/test_smoke.py`, the `render` fixture in `tests/conftest.py` with its three now-unused imports (the
+declared D12 edit, the only pre-existing test edit), and the overview page's "The starter component"
+section. `TestPackagedApp` stays. CHANGELOG Unreleased gets one Added entry, nothing under Removed.
+Per-entry check against the source (one script run under `tests.settings` with `django.setup()`, plus reads):
+- `mvp_sphinx` installed app: `apps.is_installed("mvp_sphinx")` True.
+- `mvp_sphinx.navigation`: module imports; `NavigationWriter`, `write_navigation`, `setup` exist (Sphinx's
+  hooks, unlisted); `setup` read in navigation.py.
+- `DocumentationApp` imports; options `build_dir`, `name`, `icon`, `namespace`, `view_class`, `check` are
+  each a class attribute, and one instance built with all six keywords; `menu_item()` is on `MountedApp`
+  (MRO DocumentationApp, MountedApp) and returned a `MenuItem` for `<namespace>:front_page`; `menu` is a
+  `DocumentationMenu`.
+- URL names: `reverse("docs:front_page")` `/docs/`, `reverse("docs:page", kwargs={"path": "x/"})`
+  `/docs/x/`, `reverse("docs:search")` `/docs/search/`.
+- `PageView`, `SearchView`, `DocsBuild`, `DocumentationMenu`, `PageHeadings`, `BodyRewriter`, `DocsSearch`,
+  `PageText`: all import. `PageHeadings.from_toc` and `BodyRewriter.rewrite` are callable classmethods.
+- Templates: `get_template("mvp_sphinx/page.html")` and `"mvp_sphinx/search.html"` load. page.html blocks
+  `title`, `styles`, `content` and the `mvp-sphinx-content` class read in the file; search.html blocks
+  `title`, `styles`, `content`. Context read in `views.py`: PageView supplies `search_url`, `headings`,
+  `previous_page`, `next_page`, plus `page_data` and `body` from `get`; SearchView supplies `query`,
+  `results` (None or list, each with `title`, `path`, `anchor`, `passage`, plus `href`) and `search_url`.
+- Components: `@prop` lines read in all four templates: `on_this_page` `headings`, `heading_list`
+  `headings`, `page_links` `previous` and `next`, `search_form` `action` and `query`.
+- Static: `finders.find("mvp_sphinx/content.css")` resolves to the package file.
+- Settings: `grep "settings\." mvp_sphinx/*.py` finds none.
+Extra public name found: the `menu` attribute of `DocumentationApp` (the FS-002 README already described
+it), added to the section and raised in concerns.
+Verified: `uv run pytest tests/test_smoke.py tests/test_demo.py tests/test_quickstart.py -q` 17 passed.
+Blocked: full verify found `tests/test_views.py::TestSearchResults::test_a_word_only_in_the_hosts_pages_lists_nothing`
+red. It asserts the word `starter` appears on the overview page, which only the removed "The starter component"
+section carried. Fixing it means editing a pre-existing test beyond the D12 authorisation, so it is left
+unedited and T002 is reported blocked. The word `demonstration` (in the overview's first section, absent from
+`tests/sphinx/search/`) would keep the test's intent; Forge to triage.
+Next: report.
+Watch: AGENTS.md (Components) still names `<c-mvp_sphinx.example>` and `example.html`; outside T002's files.
