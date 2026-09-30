@@ -47,3 +47,13 @@ change by nature); then `uv run pytest tests/test_views.py::TestOnThisPage -q` 1
 pre-commit and mypy passed. Probe: forcing the guard true fails the "plain" test.
 Next: T003, demo guide section, README, CHANGELOG.
 Watch: sticky offset (`top-3`) and the column width are for the walkthrough by eye.
+
+## 2026-09-30T01:25:00Z · Implementer US1 · T003
+
+Did: `demo/docs/settings.rst` gains one section (the single-entry state); README subsection
+"The page's own headings" under Usage; CHANGELOG Unreleased, Added, one entry. No page under
+`docs/` describes a name this story touched (`docs/ROADMAP.md` is the plan, not current behaviour).
+Verified: `uv run pytest tests/test_demo.py -q` 5 passed, unchanged; the demo guide builds with
+`sphinx-build -b json -q -W` (exit 0) and the Settings page's `toc` holds one section.
+Next: full verify, then the completion report.
+Watch: US2 adds its README paragraph beside this subsection.

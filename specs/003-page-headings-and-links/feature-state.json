@@ -91,8 +91,17 @@
         },
         {
           "id": "T003",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_demo.py"
+            ],
+            "commands": [
+              "uv run pytest tests/test_demo.py -q",
+              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us1-build"
+            ]
+          }
         }
       ]
     },

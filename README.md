@@ -157,6 +157,22 @@ The search data is read on each search, so a rebuild is searchable straight away
 A build without it still serves its pages, and the results page says search is
 unavailable.
 
+### The page's own headings
+
+On a wide screen, each page lists its own headings beside it, under "On this
+page". The list is nested the way the page nests its sections, and each entry
+links to its heading. Sphinx already records that tree in the build, so there is
+nothing to configure and the site that serves the pages still doesn't need
+Sphinx.
+
+- The page's title is not listed, and neither are the headings of other pages,
+  so a front page that only holds a toctree lists nothing from the pages it
+  links to. The sidebar keeps the contents.
+- A page with no headings below its title shows no list at all.
+- Sphinx's `:tocdepth:` setting decides how deep the list goes.
+
+Rebuild the docs and the list follows on the next request.
+
 ### Naming the documentation
 
 The app's `name` is what the tab title, the first breadcrumb and the menu entry
