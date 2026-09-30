@@ -94,6 +94,36 @@ inside the application shell. The tab title carries the page's title and the
 app's `name` (Documentation unless you change it), and the breadcrumbs lead back
 through the page's parents to the front page.
 
+### The contents in the sidebar
+
+To get the contents, add one line to your Sphinx project's `conf.py`:
+
+```python
+extensions = ["mvp_sphinx.navigation"]
+```
+
+When `sphinx-build -b json` finishes, the extension writes a `navigation.json`
+into the build with every page your toctrees list, hidden toctrees included.
+The documentation app's `menu`, a `DocumentationMenu`, draws it as the sidebar
+menu on every page of the docs.
+
+- Each captioned toctree on your front page becomes a group named by its
+  caption. An uncaptioned toctree puts its pages at the top level.
+- A page with pages of its own opens as a group, and its first entry is the
+  page itself.
+- The front page has its own entry at the top.
+- A page no toctree lists stays out of the sidebar.
+
+Only the JSON builder gets a file, and a build that failed writes nothing.
+
+Rebuild the docs and the sidebar shows the change on the next request, with no
+restart.
+
+The extension runs inside your Sphinx build and nowhere else, so the site that
+serves the pages still doesn't need Sphinx. Without the line, or with a
+`navigation.json` that can't be read, the sidebar holds only the front page
+entry and every page is still served.
+
 ### Naming the documentation
 
 The app's `name` is what the tab title, the first breadcrumb and the menu entry

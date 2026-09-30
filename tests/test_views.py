@@ -1,6 +1,7 @@
 """PageView renders a page of the docs build inside the application shell."""
 
 import json
+import os
 import re
 import shutil
 import sys
@@ -8,12 +9,29 @@ from html import unescape
 from urllib.parse import urljoin
 
 import pytest
+from bs4 import BeautifulSoup
 from django.urls import reverse
 
 pytestmark = pytest.mark.usefixtures("docs_app")
 
 DEFAULT_NAME = "Documentation"
 FRONT_PAGE_TEXT = "Welcome to the guide"
+CONTENTS_PAGES = {
+    f"/docs/{address}"
+    for address in (
+        "",
+        "install/",
+        "explicit/",
+        "chain/one/",
+        "chain/two/",
+        "chain/three/",
+        "markup/",
+        "shared/",
+        "standalone/",
+        "reference/api/",
+        "hidden-page/",
+    )
+}
 TITLE_TEXT = {
     "": "front page",
     "page/": "Top-level page",
@@ -28,6 +46,13 @@ def headings(response) -> list[str]:
         re.sub(r"<[^>]+>", "", h)
         for h in re.findall(r"<h1[^>]*>(.*?)</h1>", body, re.S)
     ]
+
+
+def contents_links(response, app) -> list[str]:
+    """Return the addresses the app's contents links to, as the page draws it."""
+    soup = BeautifulSoup(response.content, "html.parser")
+    contents = soup.find("ul", attrs={"aria-label": str(app.name)})
+    return [link["href"] for link in contents.find_all("a")]
 
 
 class TestPageView:
@@ -418,3 +443,201 @@ class TestTwoAppsSideBySide:
         assert str(handbook_app.name) not in tabs["/docs/"]
         assert str(handbook_app.name) in tabs["/manuals/admin/"]
         assert str(docs_app.name) not in tabs["/manuals/admin/"]
+
+
+class TestContentsInTheSidebar:
+    def test_every_link_answers_and_together_they_reach_every_listed_page(
+        self, client, db, contents_app
+    ) -> None:
+        links = contents_links(client.get("/docs/"), contents_app)
+
+        assert {*links} == CONTENTS_PAGES
+        for link in links:
+            assert client.get(link).status_code == 200
+
+    @pytest.mark.parametrize("address", ["", "chain/three/", "reference/api/"])
+    def test_any_page_draws_the_whole_contents(
+        self, client, db, contents_app, address
+    ) -> None:
+        links = contents_links(client.get(f"/docs/{address}"), contents_app)
+
+        assert {*links} == CONTENTS_PAGES
+
+    def test_a_title_with_markup_characters_is_escaped(
+        self, client, db, contents_app
+    ) -> None:
+        soup = BeautifulSoup(client.get("/docs/").content, "html.parser")
+        contents = soup.find("ul", attrs={"aria-label": str(contents_app.name)})
+
+        link = contents.find("a", href="/docs/markup/")
+
+        assert link.get_text(strip=True) == "Fish <b>& chips</b>"
+        assert link.find("b") is None
+
+    def test_a_second_app_draws_its_own_contents_under_its_own_prefix(
+        self, client, db, handbook_app, docs_app
+    ) -> None:
+        links = contents_links(client.get("/manuals/admin/backups/"), handbook_app)
+
+        assert {*links} == {"/manuals/admin/", "/manuals/admin/backups/"}
+
+    def test_a_page_of_one_app_draws_none_of_the_others_entries(
+        self, client, db, handbook_app, docs_app
+    ) -> None:
+        sidebar = BeautifulSoup(client.get("/docs/page/").content, "html.parser").find(
+            "aside"
+        )
+
+        hrefs = [link["href"] for link in sidebar.find_all("a", href=True)]
+
+        assert "/docs/page/" in hrefs
+        assert not [href for href in hrefs if href.startswith("/manuals/admin/")]
+
+    def test_the_contents_is_drawn_when_sphinx_cannot_be_imported(
+        self, client, db, contents_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        links = contents_links(client.get("/docs/chain/two/"), contents_app)
+
+        assert {*links} == CONTENTS_PAGES
+
+
+class TestRebuiltContents:
+    @pytest.fixture
+    def rebuilt(self, contents_app, contents_build, tmp_path, monkeypatch):
+        build = tmp_path / "rebuilt"
+        shutil.copytree(contents_build, build)
+        monkeypatch.setattr(contents_app, "build_dir", build)
+        return build
+
+    @staticmethod
+    def rewrite(build, edit) -> None:
+        target = build / "navigation.json"
+        data = json.loads(target.read_text())
+        edit(data["groups"])
+        target.write_text(json.dumps(data))
+
+    def test_a_page_added_by_a_rebuild_is_in_the_sidebar_on_the_next_request(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        assert "/docs/added/" not in contents_links(client.get("/docs/"), contents_app)
+
+        self.rewrite(
+            rebuilt,
+            lambda groups: groups[1]["entries"].append(
+                {"title": "Added", "url": "added/", "children": []}
+            ),
+        )
+
+        assert "/docs/added/" in contents_links(client.get("/docs/"), contents_app)
+
+    def test_a_page_removed_by_a_rebuild_is_gone_on_the_next_request(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        assert "/docs/standalone/" in contents_links(client.get("/docs/"), contents_app)
+
+        self.rewrite(rebuilt, lambda groups: groups[1]["entries"].clear())
+
+        assert "/docs/standalone/" not in contents_links(
+            client.get("/docs/"), contents_app
+        )
+
+
+class TestContentsUnavailable:
+    @pytest.fixture
+    def rebuilt(self, contents_app, contents_build, tmp_path, monkeypatch):
+        build = tmp_path / "rebuilt"
+        shutil.copytree(contents_build, build)
+        monkeypatch.setattr(contents_app, "build_dir", build)
+        return build
+
+    def test_a_build_without_a_navigation_file_serves_its_pages_with_the_front_page_only(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        (rebuilt / "navigation.json").unlink()
+
+        response = client.get("/docs/chain/two/")
+
+        assert response.status_code == 200
+        assert contents_links(response, contents_app) == ["/docs/"]
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "{not json",
+            "[]",
+            '{"groups": "x"}',
+            '{"groups": [{"caption": 1, "entries": []}]}',
+            '{"groups": [{"caption": "", "entries": [{"title": "T"}]}]}',
+        ],
+    )
+    def test_a_navigation_file_that_cannot_be_used_gives_the_front_page_only(
+        self, client, db, contents_app, rebuilt, content
+    ) -> None:
+        (rebuilt / "navigation.json").write_text(content)
+
+        response = client.get("/docs/chain/two/")
+
+        assert response.status_code == 200
+        assert contents_links(response, contents_app) == ["/docs/"]
+
+    @pytest.mark.skipif(os.geteuid() == 0, reason="root reads any file")
+    def test_an_unreadable_navigation_file_gives_the_front_page_only(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        (rebuilt / "navigation.json").chmod(0o000)
+
+        response = client.get("/docs/chain/two/")
+
+        assert response.status_code == 200
+        assert contents_links(response, contents_app) == ["/docs/"]
+
+    def test_a_missing_build_leaves_the_hosts_own_pages_and_menu_drawn(
+        self, client, db, contents_app, tmp_path, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(contents_app, "build_dir", tmp_path / "not-built-yet")
+
+        response = client.get(reverse("overview"))
+
+        sidebar = BeautifulSoup(response.content, "html.parser").find("aside")
+        assert response.status_code == 200
+        assert {link["href"] for link in sidebar.find_all("a", href=True)} >= {
+            reverse("overview"),
+            "/docs/",
+        }
+
+    @pytest.mark.skipif(os.geteuid() == 0, reason="root reads any file")
+    def test_an_unreadable_navigation_file_leaves_the_hosts_own_pages_and_menu_drawn(
+        self, client, db, rebuilt
+    ) -> None:
+        (rebuilt / "navigation.json").chmod(0o000)
+
+        response = client.get(reverse("overview"))
+
+        sidebar = BeautifulSoup(response.content, "html.parser").find("aside")
+        assert response.status_code == 200
+        assert reverse("overview") in {
+            link["href"] for link in sidebar.find_all("a", href=True)
+        }
+
+    def test_a_file_broken_mid_run_gives_the_front_page_only_until_it_is_fixed(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        target = rebuilt / "navigation.json"
+        good = target.read_text()
+        full = contents_links(client.get("/docs/"), contents_app)
+
+        target.write_text("garbage that is not json")
+        broken = contents_links(client.get("/docs/"), contents_app)
+
+        target.write_text(good)
+        fixed = contents_links(client.get("/docs/"), contents_app)
+
+        assert (broken, fixed) == (["/docs/"], full)
+        assert {*full} == CONTENTS_PAGES

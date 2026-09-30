@@ -1,6 +1,7 @@
 """DocsBuild finds pages in a docs build and refuses addresses outside it."""
 
 import json
+import os
 import shutil
 
 import pytest
@@ -11,6 +12,10 @@ from mvp_sphinx.docs_build import DocsBuild
 @pytest.fixture
 def build(guide_build) -> DocsBuild:
     return DocsBuild(guide_build)
+
+
+def entry(**overrides) -> dict:
+    return {"title": "Page", "url": "page/", "children": []} | overrides
 
 
 class TestPage:
@@ -172,3 +177,99 @@ class TestFile:
         self, build, address
     ) -> None:
         assert build.file(address) is None
+
+
+class TestNavigation:
+    @pytest.fixture
+    def written(self, tmp_path):
+        def write(content: str | bytes):
+            data = content.encode() if isinstance(content, str) else content
+            (tmp_path / DocsBuild.NAVIGATION_FILE).write_bytes(data)
+            return DocsBuild(tmp_path)
+
+        return write
+
+    def test_the_contents_builds_file_gives_its_groups(self, contents_build) -> None:
+        groups = DocsBuild(contents_build).navigation()
+
+        assert [group["caption"] for group in groups] == [
+            "Getting started",
+            "",
+            "Reference",
+            "",
+        ]
+
+    def test_no_file_gives_none(self, tmp_path) -> None:
+        assert DocsBuild(tmp_path).navigation() is None
+
+    def test_a_file_that_is_not_json_gives_none(self, written) -> None:
+        assert written("{not json").navigation() is None
+
+    def test_a_file_of_invalid_utf8_gives_none(self, written) -> None:
+        assert written(b"\xff\xfe\x00").navigation() is None
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            [],
+            {"groups": {}},
+            {"groups": [{"caption": "", "entries": [{"title": "T", "url": ""}]}]},
+            {"groups": [{"caption": "Only"}]},
+            {"groups": [{"entries": []}]},
+            {"groups": [{"caption": "", "entries": [entry(children="none")]}]},
+            {"groups": [{"caption": "", "entries": [entry(title=3)]}]},
+            {"groups": [{"caption": "", "entries": [entry(url=None)]}]},
+            {
+                "groups": [
+                    {"caption": "", "entries": [entry(children=[entry(title=3)])]}
+                ]
+            },
+        ],
+        ids=[
+            "top-level-list",
+            "groups-not-a-list",
+            "entry-without-children",
+            "group-without-entries",
+            "group-without-caption",
+            "children-not-a-list",
+            "non-string-title",
+            "non-string-url",
+            "bad-grandchild",
+        ],
+    )
+    def test_valid_json_of_the_wrong_shape_gives_none(self, written, content) -> None:
+        assert written(json.dumps(content)).navigation() is None
+
+    def test_a_file_that_is_a_symlink_out_of_the_build_gives_none(
+        self, tmp_path
+    ) -> None:
+        build = tmp_path / "build"
+        build.mkdir()
+        outside = tmp_path / "outside.json"
+        outside.write_text('{"groups": []}')
+        (build / DocsBuild.NAVIGATION_FILE).symlink_to(outside)
+
+        assert DocsBuild(build).navigation() is None
+
+
+class TestNavigationStamp:
+    def test_a_present_file_has_a_stamp(self, contents_build) -> None:
+        assert DocsBuild(contents_build).navigation_stamp() is not None
+
+    def test_no_file_has_no_stamp(self, tmp_path) -> None:
+        assert DocsBuild(tmp_path).navigation_stamp() is None
+
+    def test_replacing_the_file_changes_the_stamp(self, tmp_path) -> None:
+        build = DocsBuild(tmp_path)
+        target = tmp_path / DocsBuild.NAVIGATION_FILE
+        target.write_text('{"groups": []}')
+        staging = tmp_path / "staging"
+        staging.write_text('{"groups": []}')
+        # Same size and time, so only the file's identity can tell them apart.
+        os.utime(target, ns=(10**18, 10**18))
+        os.utime(staging, ns=(10**18, 10**18))
+        before = build.navigation_stamp()
+
+        staging.replace(target)
+
+        assert build.navigation_stamp() != before

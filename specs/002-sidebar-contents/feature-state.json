@@ -1,0 +1,252 @@
+{
+  "feature": "002-sidebar-contents",
+  "branch": "002-sidebar-contents",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:27:37Z",
+      "note": "specification merged to main in PR #15, merge commit b2875b0725cca8b9eb21fa19787728de811d940a; epic #5, stories #25, #27, #28"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-29T23:44:31Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 7 tasks"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-29T23:45:22Z",
+      "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-29T23:52:48Z",
+      "note": "US1 -> US2 -> US3 sequential in wt-sphinx-002"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T00:12:30Z",
+      "note": "US1-US3 done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T00:14:13Z",
+      "note": "one reviewer, correctness+spec+docs lens"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T00:21:12Z",
+      "note": "review recorded; PR ready; walkthrough on devserver:8025 for the orchestrating session"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "merged specification pull request #15 (merge commit b2875b0725cca8b9eb21fa19787728de811d940a)",
+      "at": "2026-09-29T22:27:37Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": "notified",
+      "at": "2026-09-29T23:52:48Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam's overnight delegation), not Sam",
+        "orchestrating session approved the plan and its three open decisions (D5-D7), 2026-09-30"
+      ]
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel",
+      "at": "2026-09-29T23:52:38Z",
+      "self_resolved": [
+        "ARCH-001 high: non-atomic children swap — per-menu lock across refresh and processing (D4) — plan edit",
+        "SPEC-001 high: planned menu-active class assertion — removed; marking tested on the processed tree — tasks edit",
+        "ARCH-002 medium: mkstemp 0600 risk — fixed sibling navigation.json.tmp via write_text, then os.replace — plan edit",
+        "ARCH-003 medium: loose functions — NavigationWriter class, DocsBuild staticmethod shape check — plan edit",
+        "SEC-001 low: entry-address filter removed (D3)",
+        "SPEC-002 low: atomic-write test removed",
+        "SPEC-003 low: sections renamed groups (CONTEXT.md)",
+        "ARCH-004 low: reads catch (OSError, ValueError); invalid UTF-8 case added"
+      ]
+    },
+    "review": {
+      "approved_by": "review-panel",
+      "at": "2026-09-30T00:20:06Z",
+      "self_resolved": [
+        "TEST-001 medium: underscore unpacking targets in tests — fixed (D11)",
+        "TEST-002 low: failed-build no-write untested — test added (D11)",
+        "TEST-003 low: read-count tests patch DocsBuild.navigation — kept, stated in D11",
+        "DOC-001 low: multi-line hook docstring — cut to one line (D11)"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "forge FS-002 session, pre-check of the running pages on devserver:8025 (front page, captioned groups, nested tutorials page, host overview); the orchestrating session (Sam's 2026-09-30 overnight delegate) holds the walkthrough gate",
+      "at": "2026-09-30T00:21:12Z",
+      "self_resolved": [
+        "nothing asked yet — pages prepared at http://devserver:8025/docs/ for the orchestrator's look"
+      ]
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 25,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_navigation.py::TestNavigationFile",
+              "tests/test_navigation.py::TestNavigationWriter"
+            ],
+            "commands": [
+              "uv run pytest tests/test_navigation.py tests/test_docs_build.py -q (exit 0, 53 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
+        },
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_docs_build.py::TestNavigation",
+              "tests/test_docs_build.py::TestNavigationStamp"
+            ],
+            "commands": [
+              "uv run pytest tests/test_docs_build.py -q (exit 0, 57 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
+        },
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_menus.py::TestDocumentationMenu",
+              "tests/test_menus.py::TestServingSideImports",
+              "tests/test_views.py::TestContentsInTheSidebar"
+            ],
+            "commands": [
+              "uv run pytest tests/test_menus.py tests/test_mounted.py tests/test_views.py tests/test_navigation.py tests/test_docs_build.py -q (exit 0, 149 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
+        },
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_demo.py::TestDemoGuide"
+            ],
+            "commands": [
+              "uv run pytest tests/test_demo.py tests/test_menus.py tests/test_mounted.py -q (exit 0, 21 passed)",
+              "uv run pre-commit run --all-files (exit 0)",
+              "uv run sphinx-build -E -b json -q -w /tmp/demo.warn demo/docs /tmp/demo-out (exit 0, no warnings)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P1",
+      "issue": 27,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T005",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_menus.py::TestCurrentPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_menus.py::TestCurrentPage -q (exit 0, 8 passed)",
+              "exit code 0"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P2",
+      "issue": 28,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T006",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_menus.py::TestRefresh",
+              "tests/test_views.py::TestRebuiltContents"
+            ],
+            "commands": [
+              "uv run pytest tests/test_menus.py tests/test_views.py -q (exit 0, 90 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
+        },
+        {
+          "id": "T007",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestContentsUnavailable"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py tests/test_menus.py -q (exit 0, 100 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": 47,
+    "draft": false
+  },
+  "escalations": []
+}
