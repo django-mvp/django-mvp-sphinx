@@ -6,14 +6,15 @@
 {% block styles %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
+  <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
 {% endblock styles %}
 {% block content %}
   <c-page>
     <c-container>
       <div class="xl:flex gap-10">
-        <div class="min-w-0 w-full max-w-prose">
+        <div class="min-w-0 w-full max-w-prose xl:max-w-none xl:flex-1">
           <c-mvp_sphinx.search_form :action="search_url" />
-          <article class="prose mvp-sphinx-content py-4">
+          <article class="prose xl:max-w-none mvp-sphinx-content py-4">
             {{ body }}
           </article>
           <c-mvp_sphinx.page_links :previous="previous_page" :next="next_page" />

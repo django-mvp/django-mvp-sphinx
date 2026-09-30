@@ -19,10 +19,12 @@ if TYPE_CHECKING:
 class DocumentationMenu(Menu):
     """The contents of one documentation app, read from its navigation file.
 
-    The menu starts with the front page, then holds each captioned group of the
-    contents as a group and each uncaptioned entry at the top level. A page with
-    pages of its own opens as a collapsible group whose first entry is the page
-    itself. Without a usable navigation file it holds the front page alone.
+    The menu starts with the front page, under its own title, then holds each
+    captioned group of the contents as a group and each uncaptioned entry at the
+    top level. A page with pages of its own opens as a collapsible group whose
+    first entry is the page itself. Without a usable navigation file it holds
+    the front page alone, and without a title in the file that entry reads
+    "Overview".
 
     The menu is rebuilt only when the navigation file, the build directory or the
     app's front page address has changed since the last request.
@@ -53,11 +55,12 @@ class DocumentationMenu(Menu):
         if stamp == self.stamp:
             return
         groups = docs_build.navigation() or []
+        front_page_label = docs_build.front_page_title() or _("Overview")
         items = [
             MenuItem(
                 name="front-page",
                 url=prefix,
-                extra_context={"label": _("Overview")},
+                extra_context={"label": front_page_label},
             )
         ]
         for number, group in enumerate(groups):

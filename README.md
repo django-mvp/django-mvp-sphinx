@@ -162,7 +162,9 @@ menu on every page of the docs.
   caption. An uncaptioned toctree puts its pages at the top level.
 - A page with pages of its own opens as a group, and its first entry is the
   page itself.
-- The front page has its own entry at the top.
+- The front page has its own entry at the top, under its own title. A
+  `navigation.json` written before the extension recorded that title labels it
+  "Overview".
 - A page no toctree lists stays out of the sidebar.
 
 Only the JSON builder gets a file, and a build that failed writes nothing.
@@ -178,10 +180,11 @@ entry and every page is still served.
 ### The page's own headings
 
 On a wide screen, each page lists its own headings beside it, under "On this
-page". The list is nested the way the page nests its sections, and each entry
-links to its heading. Sphinx already records that tree in the build, so there is
-nothing to configure and the site that serves the pages still doesn't need
-Sphinx.
+page", and the page's text widens into the room beside the list. The list is
+nested the way the page nests its sections, each entry links to its heading, and
+it stays in view below the top bar as the page scrolls. Sphinx already records
+that tree in the build, so there is nothing to configure and the site that
+serves the pages still doesn't need Sphinx.
 
 - The page's title is not listed, and neither are the headings of other pages,
   so a front page that only holds a toctree lists nothing from the pages it
@@ -412,10 +415,22 @@ drawn, subclass `PageView` and pass it to your app as `view_class`.
 
 Pages take your site's theme with nothing to configure: the colours are
 django-mvp's own, so a page follows the light and dark themes and any theme your
-project defines. The package's page template links one stylesheet,
-`mvp_sphinx/content.css`, served like the rest of your static files, and only
-pages the documentation app renders load it. Sphinx's own stylesheets are never
-used.
+project defines. The package's page template links two stylesheets, served
+like the rest of your static files, and only pages the documentation app renders
+load them: `mvp_sphinx/content.css` styles what Sphinx writes into the page, and
+`mvp_sphinx/page.css` places the "On this page" list beside it. Sphinx's own
+stylesheets are never used.
+
+A heading you follow a link to lands 5rem below the top of the window, and the
+"On this page" list sticks at the same distance, so both clear django-mvp's
+top bar. django-mvp doesn't publish the bar's height, so if yours is taller,
+with a tray or a second row, set the distance in your own stylesheet:
+
+```css
+:root {
+  --mvp-sphinx-header-clearance: 7rem;
+}
+```
 
 Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
 wraps each table in a scrolling region that takes keyboard focus and is named by
@@ -430,10 +445,10 @@ to the template as `body`, so a `PageView` subclass gets it too; to use it elsew
 call `BodyRewriter.rewrite(markup)`.
 
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
-block so the stylesheet still reaches the page, render `{{ body }}` rather than
+block so both stylesheets still reach the page, render `{{ body }}` rather than
 `{{ page_data.body }}` so your override keeps the rewrite, and keep the
 `mvp-sphinx-content` class on the element that holds it, because every rule in
-the stylesheet is scoped to that class. An override of the `content` block also
+`content.css` is scoped to that class. An override of the `content` block also
 takes over drawing "On this page" and the previous and next links, which the page
 gets as `headings`, `previous_page` and `next_page`. `BodyRewriter.rewrite` returns
 a plain string; `PageView` marks it safe because the docs build is your own, and a
@@ -485,7 +500,9 @@ For a custom view or template:
 - `mvp_sphinx.docs_build.DocsBuild(root)` reads a docs build and never looks
   outside it. `page(path)` returns a page's data or `None`, `file(path)` returns
   an image or download under `_images/` or `_downloads/` or `None`, and
-  `navigation()` returns the entries of `navigation.json` or `None`.
+  `navigation()` returns the entries of `navigation.json` or `None`,
+  `front_page_title()` returns the root document's title it records or `None`,
+  and `navigation_file()` returns the whole file or `None`.
 - `mvp_sphinx.menus.DocumentationMenu` turns a build's navigation file into the
   sidebar menu.
 - `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
@@ -520,9 +537,11 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
   `previous` and `next`.
 - `mvp_sphinx.search_form` draws the search box. It takes `action` and `query`.
 
-### Static file
+### Static files
 
-- `mvp_sphinx/content.css` is the stylesheet page content uses.
+- `mvp_sphinx/content.css` is the stylesheet page content uses, and
+  `mvp_sphinx/page.css` the one that places "On this page" and sets
+  `--mvp-sphinx-header-clearance`.
 
 ### Settings
 

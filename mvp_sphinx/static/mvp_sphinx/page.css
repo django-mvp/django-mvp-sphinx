@@ -1,0 +1,13 @@
+/* Styles for the parts of a docs page outside .mvp-sphinx-content. */
+
+/* Clearance below the shell's sticky top bar, whose height django-mvp does not
+   publish. :where() gives it no weight, so a host's own :root rule wins. */
+:where(:root) {
+  --mvp-sphinx-header-clearance: 5rem;
+}
+
+/* Set here because the shell's stylesheet emits no utility for this offset. */
+.mvp-sphinx-on-this-page {
+  top: var(--mvp-sphinx-header-clearance);
+  max-height: calc(100vh - var(--mvp-sphinx-header-clearance) - 1rem);
+}

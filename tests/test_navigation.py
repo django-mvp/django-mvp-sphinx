@@ -22,6 +22,9 @@ def entry(entries: list[dict], title: str) -> dict:
 
 
 class TestNavigationFile:
+    def test_the_file_carries_the_root_documents_title(self, navigation) -> None:
+        assert navigation["title"] == "Contents front page"
+
     def test_there_is_one_group_per_root_toctree_in_document_order(
         self, navigation
     ) -> None:
@@ -116,7 +119,8 @@ class TestNavigationFile:
         out = sphinx_build(source)
 
         assert json.loads((out / DocsBuild.NAVIGATION_FILE).read_text()) == {
-            "groups": []
+            "title": "Alone",
+            "groups": [],
         }
 
     def test_a_build_with_another_builder_writes_no_navigation_file(

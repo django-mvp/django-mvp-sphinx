@@ -460,6 +460,7 @@ class TestTwoAppsSideBySide:
 
 class TestContentStyling:
     STYLESHEET = "mvp_sphinx/content.css"
+    PAGE_STYLESHEET = "mvp_sphinx/page.css"
 
     def test_a_docs_page_links_the_packages_stylesheet(self, client, db) -> None:
         response = client.get("/docs/content/")
@@ -475,6 +476,19 @@ class TestContentStyling:
         response = client.get("/docs/content/")
 
         assert not [s for s in linked_stylesheets(response) if "_static" in s]
+
+    @pytest.mark.parametrize("address", ["/docs/content/", "/docs/search/?q=a"])
+    def test_docs_pages_link_the_page_stylesheet(self, client, db, address) -> None:
+        response = client.get(address)
+
+        assert static(self.PAGE_STYLESHEET) in linked_stylesheets(response)
+
+    def test_the_hosts_own_pages_do_not_link_the_page_stylesheet(
+        self, client, db
+    ) -> None:
+        response = client.get(reverse("overview"))
+
+        assert static(self.PAGE_STYLESHEET) not in linked_stylesheets(response)
 
 
 class TestWideContent:

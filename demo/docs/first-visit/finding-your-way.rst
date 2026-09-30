@@ -9,7 +9,8 @@ The sidebar
 
 The sidebar on the left lists the pages of the site: the overview, this guide and,
 for staff, the staff guide. Inside this guide it also lists every page, in the
-order they are meant to be read. Captions such as *Using the site* and *Reference*
+order they are meant to be read, starting with the guide's front page under its
+own title. Captions such as *Using the site* and *Reference*
 group them. A page with pages of its own, like :doc:`index`, opens as a group: its
 first entry is the page itself, and the pages below it follow.
 

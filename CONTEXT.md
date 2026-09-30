@@ -68,8 +68,8 @@ _Avoid_: toc, table of contents, local contents.
 
 **Navigation file**:
 `navigation.json`, which this package's Sphinx extension writes into the docs
-build. It holds the whole contents, because Sphinx's per-page data only opens
-the branch of the page being built.
+build. It holds the whole contents and the front page's title, because
+Sphinx's per-page data only opens the branch of the page being built.
 _Avoid_: manifest, index.
 
 **Search data**:

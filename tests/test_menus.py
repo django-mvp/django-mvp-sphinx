@@ -59,6 +59,13 @@ class TestDocumentationMenu:
 
         assert first.url == "/docs/"
 
+    def test_the_front_page_entry_is_labelled_with_the_root_documents_title(
+        self, processed, contents_build
+    ) -> None:
+        first = processed().visible_children[0]
+
+        assert label(first) == DocsBuild(contents_build).front_page_title()
+
     def test_groups_and_uncaptioned_entries_follow_in_the_files_order(
         self, processed
     ) -> None:

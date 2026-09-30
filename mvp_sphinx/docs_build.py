@@ -78,18 +78,17 @@ class DocsBuild:
             return None
         return self.contained_file(path, within=folder)
 
-    def navigation(self) -> list[dict[str, Any]] | None:
-        """Return the contents the navigation file holds, or ``None``.
+    def navigation_file(self) -> dict[str, Any] | None:
+        """Return what the navigation file holds, or ``None``.
 
         The file is the one the Sphinx extension writes. It is read every time,
         and whatever is wrong with it (absent, unreadable, not JSON, not valid
-        UTF-8, not the expected shape) gives ``None`` rather than an error, so
-        a broken build never stops a page from being served.
+        UTF-8, not a JSON object) gives ``None`` rather than an error, so a
+        broken build never stops a page from being served. ``navigation()`` and
+        ``front_page_title()`` check the parts they read.
 
         Returns:
-            The file's ``groups``: each a mapping with a string ``caption`` and
-            a list of ``entries``, whose entries carry a string ``title``, a
-            string ``url`` and a list of ``children`` of the same shape.
+            The file's JSON object, unchecked beyond being one.
         """
         target = self.contained_file(self.NAVIGATION_FILE)
         if target is None:
@@ -98,7 +97,21 @@ class DocsBuild:
             data = json.loads(target.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             return None
-        groups = data.get("groups") if isinstance(data, dict) else None
+        return data if isinstance(data, dict) else None
+
+    def navigation(self) -> list[dict[str, Any]] | None:
+        """Return the contents the navigation file holds, or ``None``.
+
+        Anything wrong with the file, including contents of the wrong shape,
+        gives ``None``.
+
+        Returns:
+            The file's ``groups``: each a mapping with a string ``caption`` and
+            a list of ``entries``, whose entries carry a string ``title``, a
+            string ``url`` and a list of ``children`` of the same shape.
+        """
+        data = self.navigation_file()
+        groups = data.get("groups") if data is not None else None
         if isinstance(groups, list) and all(
             isinstance(group, dict)
             and isinstance(group.get("caption"), str)
@@ -107,6 +120,18 @@ class DocsBuild:
         ):
             return groups
         return None
+
+    def front_page_title(self) -> str | None:
+        """Return the front page's title as the navigation file holds it.
+
+        Returns:
+            The root document's title as plain text, or ``None`` when the file
+            is unusable or holds no title, as one written before the extension
+            recorded it does not.
+        """
+        data = self.navigation_file()
+        title = data.get("title") if data is not None else None
+        return title if isinstance(title, str) else None
 
     def navigation_stamp(self) -> tuple[int, int, int] | None:
         """Return a value that changes when the navigation file is replaced.

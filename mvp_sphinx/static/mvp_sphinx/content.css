@@ -333,7 +333,7 @@
 }
 
 .mvp-sphinx-content [id] {
-  scroll-margin-top: 5rem;
+  scroll-margin-top: var(--mvp-sphinx-header-clearance);
 }
 
 /* Glossary terms stand out from their definitions, which the host's prose

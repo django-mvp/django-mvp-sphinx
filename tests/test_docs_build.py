@@ -252,6 +252,26 @@ class TestNavigation:
         assert DocsBuild(build).navigation() is None
 
 
+class TestFrontPageTitle:
+    def test_the_contents_builds_file_gives_the_root_documents_title(
+        self, contents_build
+    ) -> None:
+        assert DocsBuild(contents_build).front_page_title() == "Contents front page"
+
+    def test_no_file_gives_none(self, tmp_path) -> None:
+        assert DocsBuild(tmp_path).front_page_title() is None
+
+    @pytest.mark.parametrize(
+        "content",
+        ["{not json", "[]", '{"groups": []}', '{"title": 3, "groups": []}'],
+        ids=["not-json", "top-level-list", "no-title", "non-string-title"],
+    )
+    def test_a_file_without_a_usable_title_gives_none(self, tmp_path, content) -> None:
+        (tmp_path / DocsBuild.NAVIGATION_FILE).write_text(content)
+
+        assert DocsBuild(tmp_path).front_page_title() is None
+
+
 class TestNavigationStamp:
     def test_a_present_file_has_a_stamp(self, contents_build) -> None:
         assert DocsBuild(contents_build).navigation_stamp() is not None
