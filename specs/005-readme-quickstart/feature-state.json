@@ -168,7 +168,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 0,
+      "used": 12.16,
       "max": 120
     },
     "design_review_cycles": {
@@ -179,6 +179,6 @@
   "escalations": [],
   "pr": {
     "number": 61,
-    "draft": true
+    "draft": false
   }
 }
