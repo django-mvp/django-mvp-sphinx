@@ -51,13 +51,38 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_search.py::TestDocsSearch",
+              "tests/test_search.py::TestUnavailableSearchData",
+              "tests/test_search.py::TestStopwordsFromTheBuild",
+              "tests/test_search.py::TestLanguageFromTheBuild",
+              "tests/test_search.py::TestWords"
+            ],
+            "commands": [
+              "uv run pytest tests/test_search.py -q (exit 0, 55 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
         },
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestSearchForm",
+              "tests/test_views.py::TestSearchResults",
+              "tests/test_mounted.py::TestSearchUnderTheReaderRule",
+              "tests/test_demo.py::TestDocumentationSearch"
+            ],
+            "commands": [
+              "uv run pytest tests/test_search.py tests/test_views.py tests/test_mounted.py tests/test_demo.py -q (exit 0, 252 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
         }
       ]
     },
