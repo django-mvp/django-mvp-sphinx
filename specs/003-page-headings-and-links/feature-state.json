@@ -2,7 +2,7 @@
   "feature": "003-page-headings-and-links",
   "branch": "003-page-headings-and-links",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-09-30T09:58:09Z",
       "note": "review recorded; PR ready; walkthrough on devserver:8025 for the orchestrating session"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-09-30T10:02:27Z",
+      "note": "PR #52 merged; approved by forge-aeo-reviewer"
     }
   ],
   "gates": {
@@ -55,18 +60,18 @@
       ]
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-09-30T10:02:23Z"
     },
     "design_review": {
       "approved_by": "design-panel",
       "at": "2026-09-30T00:40:38Z",
       "self_resolved": [
-        "ARCH-001 low: title sliced from the toc fragment by offset, not re-emitted — plan edit",
-        "ARCH-002 low: single {% if headings %} guard in page.html — plan edit",
-        "ARCH-003 low: get_neighbour treats only missing/null as absent, no shape check — plan edit",
-        "SPEC-001 low: demo edit narrowed to settings.rst (content tour covers the rest) — plan/tasks edit",
-        "ARCH-004 low: hidden-page and orphan cases on the existing contents source — plan/tasks edit"
+        "ARCH-001 low: title sliced from the toc fragment by offset, not re-emitted \u2014 plan edit",
+        "ARCH-002 low: single {% if headings %} guard in page.html \u2014 plan edit",
+        "ARCH-003 low: get_neighbour treats only missing/null as absent, no shape check \u2014 plan edit",
+        "SPEC-001 low: demo edit narrowed to settings.rst (content tour covers the rest) \u2014 plan/tasks edit",
+        "ARCH-004 low: hidden-page and orphan cases on the existing contents source \u2014 plan/tasks edit"
       ]
     },
     "review": {
@@ -81,7 +86,7 @@
       "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's 2026-09-30 overnight delegate), on devserver:8025",
       "at": "2026-09-30T10:00:37Z",
       "self_resolved": [
-        "round 1: nothing asked for — walkthrough passed as built; layout choices accepted"
+        "round 1: nothing asked for \u2014 walkthrough passed as built; layout choices accepted"
       ]
     }
   },
@@ -197,7 +202,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 0,
+      "used": 9.69,
       "max": 120
     },
     "design_review_cycles": {
