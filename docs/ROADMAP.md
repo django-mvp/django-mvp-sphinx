@@ -44,7 +44,7 @@ Advances G1 and G3.
 
 ### R2 — The contents in the app sidebar
 
-*feature · advances G2, G1*
+*delivered in [#5](https://github.com/django-mvp/django-mvp-sphinx/issues/5) and [#6](https://github.com/django-mvp/django-mvp-sphinx/issues/6) · advances G2, G1*
 
 On every documentation page the app sidebar shows the whole contents, so a
 reader can reach any page and can always see where they are. It needs R1's
@@ -114,7 +114,7 @@ audiences are two apps, each with its own rule.
 
 ### R6 — Search the docs
 
-*feature · advances G6*
+*delivered in [#10](https://github.com/django-mvp/django-mvp-sphinx/issues/10) · advances G6*
 
 A reader can search the documentation's pages from within the documentation
 app. Searching the host project's own content is out of scope.
