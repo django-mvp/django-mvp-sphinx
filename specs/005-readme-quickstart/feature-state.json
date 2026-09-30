@@ -2,7 +2,7 @@
   "feature": "005-readme-quickstart",
   "branch": "005-readme-quickstart",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-09-30T10:37:33Z",
       "note": "Phase 1 correctness+spec+documentation; no security-sensitive surface, no new dependency, no deviation from plan"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T10:44:58Z",
+      "note": "PR #61 ready; walkthrough required (demo overview, starter component, demo guide); served from wt-sphinx-005 on 8025"
     }
   ],
   "gates": {
