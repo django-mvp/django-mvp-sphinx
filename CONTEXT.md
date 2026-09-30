@@ -72,6 +72,20 @@ build. It holds the whole contents, because Sphinx's per-page data only opens
 the branch of the page being built.
 _Avoid_: manifest, index.
 
+**Search data**:
+The record of which words each page holds, which Sphinx writes into the docs build
+as `searchindex.json`, with the stopword list in `_static/language_data.js`. The
+search reads it on every search and nothing else.
+_Avoid_: index (Sphinx's general index, `genindex`, is a different thing), search
+index, database.
+
+**Results page**:
+The page at `search/` under a documentation app that shows a search and the pages
+it found, inside the app shell. Its address carries the words, so the same address
+shows the same search again.
+_Avoid_: search page (Sphinx's own search page is the one this replaces), search
+results view.
+
 ## Terms deliberately not used
 
 **Theme**, for anything this package ships. The host project's django-mvp theme

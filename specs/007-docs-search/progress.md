@@ -26,3 +26,23 @@ no `titleterms` → 10; digits kept → 2; no word cut → 1; no ordering → 1.
 Next: T002, the view, URL, form and results page.
 Watch: `results()` returns `anchor=""` and `passage=""` until T003; `data()` keeps `alltitles` only as
 a dict, and T003 has to check the shape of its entries itself.
+
+## 2026-09-30T01:55:00Z · Implementer US1 · T002
+
+Did: `SearchView` in `views.py`; `PageView.get_context_data` adds `search_url`; `search/` pattern in
+`DocumentationApp.urls` ahead of the catch-all; `search_form.html` component; `search.html` results
+page (results, no-match and unavailable states); one line in `page.html`; `search_app` fixture;
+`TestSearchForm`, `TestSearchResults` (`test_views.py`), `TestSearchUnderTheReaderRule`
+(`test_mounted.py`), `TestDocumentationSearch` (`test_demo.py`); `/docs/search/` removed from
+`TestSphinxsOwnPages` (declared edit); message catalogue refreshed with `makemessages -l en`;
+README Search subsection, CHANGELOG entry, CONTEXT.md "Search data" and "Results page". Decision D21.
+Verified: `uv run pytest tests/test_search.py tests/test_views.py tests/test_mounted.py
+tests/test_demo.py -q` → 252 passed. Red step: 26 of the new view tests failed before the view and
+templates existed. Mutation probes (each restored): form removed from pages → 18 failed; `search/`
+route removed → 33; query unescaped → 1; result title unescaped → 1; form method post → 11; no
+`role="status"` → 4; field renamed → 21; result href wrong → 5. Not probed: the reader rule (the
+mount wraps every pattern, and I found no seam to route the view around it without editing
+django-mvp). `pre-commit run --all-files` passes.
+Next: US2 (T003) and US3 (T004) in a later dispatch.
+Watch: `results()` still returns empty `anchor` and `passage`; the template already renders a passage
+when there is one. The unavailable state exists and is reachable, but has no test yet (T004).

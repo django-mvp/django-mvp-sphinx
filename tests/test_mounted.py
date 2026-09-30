@@ -513,3 +513,70 @@ class TestSeveralApps:
         user.groups.add(group)
 
         assert 'href="/staff-guide/"' in self.entries(client)
+
+
+class TestSearchUnderTheReaderRule:
+    SEARCH_ADDRESSES = ["/docs/search/", "/docs/search/?q=lantern"]
+
+    @pytest.fixture
+    def member(self, group):
+        member = UserFactory()
+        member.groups.add(group)
+        return member
+
+    @pytest.mark.parametrize("address", SEARCH_ADDRESSES)
+    def test_an_anonymous_reader_is_turned_away_as_from_a_page(
+        self, client, db, search_app, monkeypatch, address
+    ):
+        monkeypatch.setattr(search_app, "check", user_is_authenticated)
+
+        response = client.get(address)
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address(address)
+        assert response.content == b""
+
+    @pytest.mark.parametrize("address", SEARCH_ADDRESSES)
+    def test_a_signed_in_reader_gets_the_results_page(
+        self, client, user, search_app, monkeypatch, address
+    ):
+        monkeypatch.setattr(search_app, "check", user_is_authenticated)
+        client.force_login(user)
+
+        response = client.get(address)
+
+        assert response.status_code == 200
+
+    @pytest.mark.parametrize("address", SEARCH_ADDRESSES)
+    def test_an_anonymous_reader_is_turned_away_by_a_group_rule_too(
+        self, client, db, search_app, group, monkeypatch, address
+    ):
+        monkeypatch.setattr(search_app, "check", user_in_any_group(group.name))
+
+        response = client.get(address)
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address(address)
+
+    def test_a_member_gets_the_results(
+        self, client, search_app, group, member, monkeypatch
+    ):
+        monkeypatch.setattr(search_app, "check", user_in_any_group(group.name))
+        client.force_login(member)
+
+        response = client.get("/docs/search/", {"q": "quetzal"})
+
+        assert response.status_code == 200
+        assert "Lanterns and lamps" in response.content.decode()
+
+    @pytest.mark.parametrize("address", SEARCH_ADDRESSES)
+    def test_a_signed_in_non_member_is_forbidden_with_no_result_text(
+        self, client, user, search_app, group, monkeypatch, address
+    ):
+        monkeypatch.setattr(search_app, "check", user_in_any_group(group.name))
+        client.force_login(user)
+
+        response = client.get(address)
+
+        assert is_forbidden(response)
+        assert "Lanterns and lamps" not in response.content.decode()

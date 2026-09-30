@@ -1,0 +1,21 @@
+{# @description The search of a documentation app: a form that submits the words with GET to the results page, so it works without scripts and every search has an address. #}
+{# @prop action:text | description:"The address of the results page the form submits to." #}
+{# @prop query:text | description:"The words to show in the field. Empty when nothing was searched for." #}
+{% load i18n %}
+<c-vars action query="" />
+
+<form role="search"
+      method="get"
+      action="{{ action }}"
+      aria-label="{% translate "Search this documentation" %}"
+      {{ attrs }}>
+  <div class="join w-full max-w-md py-4">
+    <label for="mvp-sphinx-search-query" class="sr-only">{% translate "Search" %}</label>
+    <input type="search"
+           id="mvp-sphinx-search-query"
+           name="q"
+           value="{{ query }}"
+           class="input input-sm join-item w-full" />
+    <button type="submit" class="btn btn-sm join-item">{% translate "Search" %}</button>
+  </div>
+</form>

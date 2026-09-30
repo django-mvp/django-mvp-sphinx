@@ -103,6 +103,14 @@ def docs_app(guide_build, monkeypatch):
 
 
 @pytest.fixture
+def search_app(search_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", search_build)
+    return docs
+
+
+@pytest.fixture
 def contents_app(contents_build, monkeypatch):
     from demo.mounted import docs
 

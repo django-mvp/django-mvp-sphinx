@@ -113,7 +113,7 @@ class TestPageView:
 
 
 class TestSphinxsOwnPages:
-    @pytest.mark.parametrize("address", ["/docs/genindex/", "/docs/search/"])
+    @pytest.mark.parametrize("address", ["/docs/genindex/"])
     def test_the_general_index_and_search_pages_are_served(
         self, client, db, docs_app, address
     ) -> None:
@@ -746,3 +746,188 @@ class TestContentsUnavailable:
 
         assert (broken, fixed) == (["/docs/"], full)
         assert {*full} == CONTENTS_PAGES
+
+
+SEARCH_PAGES = [
+    "",
+    "lanterns/",
+    "products/",
+    "sections/",
+    "metals/",
+    "coins/",
+    "spoons/",
+    "markup/",
+    "wombat/",
+    "folder/",
+    "folder/inner/",
+]
+LANTERN_HREFS = [
+    "/docs/",
+    "/docs/coins/",
+    "/docs/lanterns/",
+    "/docs/metals/",
+    "/docs/products/",
+]
+
+
+def search_form(response):
+    return BeautifulSoup(response.content, "html.parser").find("form", role="search")
+
+
+def query_field(response):
+    return search_form(response).find("input", attrs={"name": "q"})
+
+
+def result_hrefs(response) -> list[str]:
+    soup = BeautifulSoup(response.content, "html.parser")
+    section = soup.find("main").find("section", attrs={"aria-labelledby": True})
+    if section is None:
+        return []
+    assert soup.find(id=section["aria-labelledby"]) is not None
+    return [link["href"] for link in section.select("ol a[href]")]
+
+
+def submit_search(client, response, query):
+    form = search_form(response)
+    return client.get(form["action"], {form.find("input")["name"]: query})
+
+
+class TestSearchForm:
+    @pytest.mark.parametrize("path", SEARCH_PAGES)
+    def test_every_page_of_the_app_offers_a_search_of_the_app(
+        self, client, db, search_app, path
+    ) -> None:
+        form = search_form(client.get(f"/docs/{path}"))
+
+        assert form is not None
+        assert form["method"].lower() == "get"
+        assert form["action"] == reverse(f"{search_app.namespace}:search")
+        assert form.find("input", attrs={"name": "q"}) is not None
+
+    def test_the_results_page_offers_the_search_again(
+        self, client, db, search_app
+    ) -> None:
+        form = search_form(client.get("/docs/search/"))
+
+        assert form["action"] == "/docs/search/"
+
+    def test_the_search_input_has_a_label(self, client, db, search_app) -> None:
+        form = search_form(client.get("/docs/"))
+        field = form.find("input", attrs={"name": "q"})
+
+        assert form.find("label", attrs={"for": field["id"]}) is not None
+
+    def test_a_page_of_the_host_offers_no_search(self, client, db, search_app) -> None:
+        assert search_form(client.get(reverse("overview"))) is None
+
+    def test_a_second_app_offers_a_search_of_its_own(
+        self, client, db, handbook_app
+    ) -> None:
+        form = search_form(client.get("/manuals/admin/"))
+
+        assert form["action"] == "/manuals/admin/search/"
+
+
+class TestSearchResults:
+    def test_a_word_lists_the_pages_holding_it_inside_the_shell(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/"), "quetzal")
+
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "<aside" in content
+        assert "<main" in content
+        assert result_hrefs(response) == ["/docs/lanterns/"]
+
+    def test_a_word_on_several_pages_lists_each_once(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/coins/"), "lantern")
+
+        assert sorted(result_hrefs(response)) == LANTERN_HREFS
+
+    def test_every_result_leads_to_a_page_of_the_app(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/"), "lantern")
+
+        for href in result_hrefs(response):
+            assert href.startswith("/docs/")
+            assert client.get(href).status_code == 200
+
+    def test_several_words_list_only_pages_holding_all_of_them(
+        self, client, db, search_app
+    ) -> None:
+        response = submit_search(client, client.get("/docs/"), "copper silver")
+
+        assert result_hrefs(response) == ["/docs/metals/"]
+
+    def test_the_same_address_gives_the_same_search_and_results(
+        self, client, db, search_app
+    ) -> None:
+        first = client.get("/docs/search/", {"q": "lantern"})
+        second = client.get("/docs/search/", {"q": "lantern"})
+
+        assert result_hrefs(first) == result_hrefs(second) != []
+        assert query_field(first)["value"] == query_field(second)["value"] == "lantern"
+
+    @pytest.mark.parametrize("query", ["nothingmatchesthis", "", "   ", "?!"])
+    def test_a_search_finding_nothing_says_so_and_offers_the_search(
+        self, client, db, search_app, query
+    ) -> None:
+        response = client.get("/docs/search/", {"q": query})
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == []
+        assert soup.find("main").find(attrs={"role": "status"}) is not None
+        assert query_field(response)["value"] == query
+
+    def test_a_page_with_no_query_at_all_lists_nothing(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/")
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == []
+
+    def test_the_readers_text_comes_back_escaped(self, client, db, search_app) -> None:
+        query = '<script>alert("x")</script> & "quoted"'
+
+        response = client.get("/docs/search/", {"q": query})
+        content = response.content.decode()
+
+        assert '<script>alert("x")' not in content
+        assert "&lt;script&gt;" in content
+        assert query_field(response)["value"] == query
+
+    def test_a_titles_markup_characters_come_back_escaped(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/search/", {"q": "escapist"})
+
+        assert "<chips>" not in response.content.decode()
+        assert result_hrefs(response) == ["/docs/markup/"]
+
+    def test_the_fronts_link_to_sphinxs_search_page_leads_to_the_apps_search(
+        self, client, db, search_app
+    ) -> None:
+        front = BeautifulSoup(client.get("/docs/").content, "html.parser")
+        links = {
+            urljoin("/docs/", link["href"])
+            for link in front.find("article").find_all("a", href=True)
+        }
+
+        assert reverse(f"{search_app.namespace}:search") in links
+        assert client.get(reverse(f"{search_app.namespace}:search")).status_code == 200
+
+    def test_a_word_only_in_the_hosts_pages_lists_nothing(
+        self, client, db, search_app
+    ) -> None:
+        word = "starter"
+        assert word in client.get(reverse("overview")).content.decode()
+
+        response = client.get("/docs/search/", {"q": word})
+
+        assert result_hrefs(response) == []

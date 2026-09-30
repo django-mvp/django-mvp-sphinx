@@ -249,3 +249,17 @@ so each is read once per search without a cache surviving into the next (D17).
 
 **Revisit if:** a host keeps a `DocsSearch` instance across requests (it would then serve a
 stale stopword list after a rebuild).
+
+## D21. The form has no `label` prop, and both views hand it the search address (S4 US1)
+
+**Decision:** `search_form.html` takes `action` and `query` only. Its accessible name and its
+field's label are fixed translatable strings inside the component. `PageView` and `SearchView`
+each add `search_url` to their context, and the two templates pass it in.
+
+**Why:** No caller varies the label, and a prop nobody sets is surface a host would have to keep
+working. Two three-line `get_context_data` overrides stay smaller than a mixin for two callers
+(Article III). The results page also gets an `h1`, because a Sphinx page's `h1` comes from its body
+and this page has none.
+
+**Revisit if:** a third view needs the form, or a host wants its own wording without overriding
+the component.

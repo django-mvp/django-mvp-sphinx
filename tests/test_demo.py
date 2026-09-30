@@ -3,8 +3,10 @@
 # Everything in the demo fails quietly: an unresolvable component renders empty
 # and a menu entry whose URL will not resolve is dropped from the tree.
 
+from bs4 import BeautifulSoup
 from django.urls import reverse
 
+from demo.mounted import docs
 from demo.settings import BASE_DIR
 from mvp_sphinx.docs_build import DocsBuild
 from tests.factories import UserFactory
@@ -29,6 +31,19 @@ class TestDocumentationEntry:
         sidebar = overview_page.split('aria-label="Main navigation"', 1)[1]
         sidebar = sidebar.split("</ul>", 1)[0]
         assert 'href="/docs/"' in sidebar
+
+
+class TestDocumentationSearch:
+    def test_the_front_page_offers_the_search(
+        self, client, db, sphinx_build, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(docs, "build_dir", sphinx_build(BASE_DIR / "demo" / "docs"))
+
+        form = BeautifulSoup(client.get("/docs/").content, "html.parser").find(
+            "form", role="search"
+        )
+
+        assert form["action"] == reverse("docs:search")
 
 
 class TestStaffGuideEntry:

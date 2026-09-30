@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from mvp.mounted import MountedApp
 
 from mvp_sphinx.menus import DocumentationMenu
-from mvp_sphinx.views import PageView
+from mvp_sphinx.views import PageView, SearchView
 
 
 class DocumentationApp(MountedApp):
@@ -66,6 +66,7 @@ class DocumentationApp(MountedApp):
         self.urls = (
             [
                 path("", view, name="front_page"),
+                path("search/", SearchView.as_view(app=self), name="search"),
                 path("<path:path>", view, name="page"),
             ],
             self.namespace,
