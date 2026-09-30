@@ -410,3 +410,102 @@ class TestRuleThatRaises:
 
         with pytest.raises(RuntimeError):
             client.get(reverse("overview"))
+
+
+class TestSeveralApps:
+    @pytest.fixture(autouse=True)
+    def two_apps(self, docs_app, staff_guide_app):
+        return docs_app, staff_guide_app
+
+    @pytest.fixture
+    def staff(self, db):
+        return UserFactory(is_staff=True)
+
+    def entries(self, client) -> str:
+        return sidebar(client.get(reverse("overview")).content.decode())
+
+    def test_an_anonymous_reader_is_offered_only_the_open_app(self, client, db):
+        entries = self.entries(client)
+
+        assert 'href="/docs/"' in entries
+        assert 'href="/staff-guide/"' not in entries
+
+    def test_a_regular_user_is_offered_only_the_open_app(self, client, user):
+        client.force_login(user)
+        entries = self.entries(client)
+
+        assert 'href="/docs/"' in entries
+        assert 'href="/staff-guide/"' not in entries
+
+    def test_a_staff_user_is_offered_both_apps(self, client, staff):
+        client.force_login(staff)
+        entries = self.entries(client)
+
+        assert 'href="/docs/"' in entries
+        assert 'href="/staff-guide/"' in entries
+
+    def test_an_anonymous_reader_gets_the_open_app_and_is_sent_to_sign_in(
+        self, client, db
+    ):
+        assert client.get("/docs/").status_code == 200
+
+        response = client.get("/staff-guide/")
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address("/staff-guide/")
+
+    def test_a_regular_user_gets_the_open_app_and_is_forbidden_the_other(
+        self, client, user
+    ):
+        client.force_login(user)
+
+        assert client.get("/docs/").status_code == 200
+        assert is_forbidden(client.get("/staff-guide/"))
+
+    def test_a_staff_user_gets_both_apps(self, client, staff):
+        client.force_login(staff)
+
+        assert client.get("/docs/").status_code == 200
+        assert client.get("/staff-guide/").status_code == 200
+
+    def test_signing_in_changes_the_next_response(
+        self, client, user, staff_guide_app, monkeypatch
+    ):
+        monkeypatch.setattr(staff_guide_app, "check", user_is_authenticated)
+        assert client.get("/staff-guide/").status_code == 302
+
+        client.force_login(user)
+
+        assert client.get("/staff-guide/").status_code == 200
+
+    def test_signing_in_adds_the_entry_to_the_next_overview_page(
+        self, client, user, staff_guide_app, monkeypatch
+    ):
+        monkeypatch.setattr(staff_guide_app, "check", user_is_authenticated)
+        assert 'href="/staff-guide/"' not in self.entries(client)
+
+        client.force_login(user)
+
+        assert 'href="/staff-guide/"' in self.entries(client)
+
+    def test_joining_the_group_changes_the_next_response(
+        self, client, user, group, staff_guide_app, monkeypatch
+    ):
+        monkeypatch.setattr(staff_guide_app, "check", user_in_any_group(group.name))
+        client.force_login(user)
+        assert is_forbidden(client.get("/staff-guide/"))
+
+        user.groups.add(group)
+
+        assert client.get("/staff-guide/").status_code == 200
+
+    def test_joining_the_group_adds_the_entry_to_the_next_overview_page(
+        self, client, user, group, staff_guide_app, monkeypatch
+    ):
+        monkeypatch.setattr(staff_guide_app, "check", user_in_any_group(group.name))
+        client.force_login(user)
+        assert 'href="/staff-guide/"' not in self.entries(client)
+
+        user.groups.add(group)
+
+        assert 'href="/staff-guide/"' in self.entries(client)

@@ -176,6 +176,37 @@ A `check` that is not a function is read as yes or no. `check="staff"` is a
 non-empty string, which is true, and admits everyone. Pass `user_is_staff`
 itself, or a function, to keep the docs for staff.
 
+Two audiences are two apps. Each `DocumentationApp` has its own build, `name`,
+`namespace` and rule, and each is mounted at its own prefix:
+
+```python
+from django.utils.translation import gettext_lazy as _
+from flex_menu.checks import user_is_staff
+
+guide = DocumentationApp(
+    build_dir=BASE_DIR / "guide" / "_build" / "json",
+)
+staff_guide = DocumentationApp(
+    build_dir=BASE_DIR / "staff_guide" / "_build" / "json",
+    name=_("Staff guide"),
+    namespace="staff_guide",
+    check=user_is_staff,
+)
+```
+
+```python
+from mvp.mounted import mount
+
+urlpatterns = [
+    mount("guide/", guide),
+    mount("staff-guide/", staff_guide),
+]
+```
+
+Each reader sees the entries their rules admit and is served or refused by each
+app's own rule. The rule is asked again on every request, so a reader who signs
+in or joins a group is admitted by their next request, with nothing to reset.
+
 The rule is django-mvp's `check`, described in its
 [mounted apps guide](https://github.com/django-mvp/django-mvp/blob/main/docs/mounted-apps.md#limiting-who-can-reach-an-app).
 
