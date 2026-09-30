@@ -12,7 +12,7 @@ Analyze: FR-001–FR-015 and SC-001–SC-005 each map to at least one task; ever
 spec has a test in T001–T004. No CRITICAL findings.
 Next: design review.
 
-## 2026-09-30T01:20:00Z · Implementer US1 · T001
+## 2026-09-30T00:54:14Z · Implementer US1 · T001
 
 Did: `mvp_sphinx/search.py` with `DocsSearch` (search data, stopwords from the build, stemmers by
 language, `words`, `keys`, `results`, `path`); new source `tests/sphinx/search/` (eleven pages);
@@ -27,7 +27,7 @@ Next: T002, the view, URL, form and results page.
 Watch: `results()` returns `anchor=""` and `passage=""` until T003; `data()` keeps `alltitles` only as
 a dict, and T003 has to check the shape of its entries itself.
 
-## 2026-09-30T01:55:00Z · Implementer US1 · T002
+## 2026-09-30T00:58:38Z · Implementer US1 · T002
 
 Did: `SearchView` in `views.py`; `PageView.get_context_data` adds `search_url`; `search/` pattern in
 `DocumentationApp.urls` ahead of the catch-all; `search_form.html` component; `search.html` results
@@ -80,3 +80,15 @@ unavailable drawn as no match → 6; missing-build 404 removed → 1; `import sp
 the blocked-Sphinx test only affects imports after it runs (D23).
 Next: full verify, report.
 Watch: the two T001 tests named in T003's entry still fail.
+
+## 2026-09-30T01:13:38Z · Forge · S4 acceptance and S5 converge
+
+Did: US1 accepted (receipts ok; forge verify green, 406 tests; tamper-check flagged only the declared
+TestSphinxsOwnPages edit). The docs gate asked for DocsSearch and SearchView on a docs page: ADR 0005
+written. US2+US3: T003 came back blocked on two US1 tests that pinned placeholder results; Forge
+corrected them (D24). Ledger rows for T003/T004 written from the report. Both stories accepted;
+verify green, 483 tests. S5: converge found every FR and SC with a test; cleanup folded the
+document-number check into DocsSearch.is_document; ADR verdicts written on all 24 decisions (12
+graduated to ADR 0004 or 0005). Restamped the US1 implementer's two progress headings from their
+commits' UTC author times.
+Next: S6 review.
