@@ -120,3 +120,95 @@ become tests, which should not pin appearance.
 "results page" for the page listing a search's results. Neither is in CONTEXT.md yet. The
 implementation adds both, and warns against "index" for the search data, because Sphinx's general
 index is a different thing.
+
+## D11. Stem with snowballstemmer, the stemmer Sphinx uses (S3 plan)
+
+**Ambiguous:** FR-006 asks for matching "as Sphinx's own search does", and FR-015 forbids importing
+Sphinx. The search data holds stems, so the searched words must be stemmed the same way.
+
+**Chosen:** `snowballstemmer` becomes a runtime dependency. It is pure Python with no dependencies
+of its own, and Sphinx itself depends on it, so every environment that builds the docs already has
+it (research R2).
+
+**Why:** The alternative is a copy of the Porter and snowball algorithms in this package, which
+would drift from the stemmer the build used. Article VII asks for the justification to be recorded;
+this is it.
+
+## D12. Stopwords come from the build (S3 plan)
+
+**Ambiguous:** FR-005 says words Sphinx leaves out as too common must not empty a search. The list
+lives in Sphinx, which serving may not import.
+
+**Chosen:** Read the list the build already carries, in `_static/language_data.js`. When that file
+is missing or unreadable no word is a stopword, and a search made only of stopwords then finds
+nothing, which the results page reports as no match (research R3).
+
+**Why:** The list matches the language the docs were built in with nothing configured, and it is
+the exact list the build filtered with.
+
+## D13. A word is looked up under every stem its language may have used (S3 plan)
+
+**Ambiguous:** Sphinx 8.1 stems English with the Porter algorithm, Sphinx 9 with snowball English.
+The package supports builds from both.
+
+**Chosen:** Look each word up under its lower-case form and under its stem from each algorithm the
+build's language may have used. A key that exists is a match (research R2).
+
+**Why:** No sniffing of Sphinx versions, and a host can upgrade Sphinx without its search changing
+behaviour. The two algorithms agree on almost every word, so the looser lookup adds nothing a reader
+would call a wrong match.
+
+## D14. The results page replaces Sphinx's own search page at `search/` (S3 plan)
+
+**Ambiguous:** D4 says links to Sphinx's search page lead here. The results page could live
+anywhere, with a redirect from Sphinx's page.
+
+**Chosen:** The results page is served at `search/` under the documentation app, the address Sphinx's
+JSON build gives its own search page. That page, which has no content in a JSON build, is no longer
+served.
+
+**Why:** Every link a docs author writes to the search page works with no rewrite and no redirect,
+and the results address is the one a reader of Sphinx docs would guess.
+
+## D15. SC-002 is checked on whole words (S3 plan)
+
+**Ambiguous:** SC-002 says every page Sphinx's own search lists is listed here. Sphinx's search also
+matches fragments of words, which the specification rules out (clarification 2, FR-006).
+
+**Chosen:** SC-002 is read for searches of whole words, and checked over the real search data: for
+each word key in the fixture build, searching it lists every page the data lists under it
+(research R4).
+
+**Why:** The clarification is the more specific ruling, and it came after the criterion was
+written. Read literally, SC-002 would require fragment matching that FR-006 forbids.
+
+## D16. Three tiers: page title, section heading, elsewhere (S3 plan)
+
+**Ambiguous:** FR-010 puts title matches first. It says nothing about the order of the rest, or
+about a match in a section heading.
+
+**Chosen:** Pages whose title holds every word, then pages with a section heading holding every word
+(linked to that section), then the rest. Within a tier, by title.
+
+**Why:** A heading is the next best sign that a page is about the words, as in Sphinx's own
+scoring, and a stable order by title makes the same search give the same list (US1.8).
+
+## D17. No cache of the search data (S3 plan)
+
+**Ambiguous:** The search data could be parsed once and kept until the build changes.
+
+**Chosen:** Parse it on every search.
+
+**Why:** FR-014 wants the build as it is on disk, the guides in scope give files of tens to hundreds
+of kilobytes, and a cache is a second copy to keep correct. It can be added if a real guide shows
+the cost (Article II).
+
+## D18. The search form sits above the page's text, for now (S3 plan)
+
+**Ambiguous:** D9 leaves placement to the browser review.
+
+**Chosen:** One component, placed above the article in the page template. The results page shows it
+too, holding the reader's search.
+
+**Why:** It is the smallest change to a template that FS-003 is rewriting in parallel, and it can be
+moved without touching anything else once the walkthrough settles where it belongs.
