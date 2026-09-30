@@ -107,6 +107,15 @@ def branches(items) -> list:
     return found
 
 
+def admonition_classes(pages) -> set[str]:
+    return {
+        name
+        for soup in pages.values()
+        for each in soup.select("div.admonition")
+        for name in each["class"]
+    }
+
+
 @pytest.fixture
 def guide_menu(demo_guide_app, rf):
     return demo_guide_app.menu.process(rf.get("/docs/"))
@@ -182,22 +191,12 @@ class TestDemoGuideStates:
         )
 
     def test_each_admonition_kind_is_drawn(self, guide_pages) -> None:
-        classes = {
-            name
-            for soup in guide_pages.values()
-            for each in soup.select("div.admonition")
-            for name in each["class"]
-        }
+        classes = admonition_classes(guide_pages)
 
         assert classes >= self.ADMONITION_KINDS
 
     def test_a_generic_admonition_is_drawn(self, guide_pages) -> None:
-        classes = {
-            name
-            for soup in guide_pages.values()
-            for each in soup.select("div.admonition")
-            for name in each["class"]
-        }
+        classes = admonition_classes(guide_pages)
 
         assert any(name.startswith("admonition-") for name in classes)
 
