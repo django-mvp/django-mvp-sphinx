@@ -49,23 +49,35 @@ Verified: `uv run pytest tests/test_demo.py tests/test_menus.py tests/test_mount
 Next: full verify, then the completion report. The first full verify failed its docs step on `NavigationWriter`, `setup` and `write_navigation`; the README now quotes them.
 Watch: the README's rebuild-on-next-request sentence belongs to US3 (T007) and is not written here.
 
-## 2026-09-30T00:20:00Z · Implementer US2 · T005
+## 2026-09-30T00:06:28Z · Implementer US2 · T005
 
 Did: `TestCurrentPage` in `tests/test_menus.py`, eight tests on the processed tree of the contents build: a page nested in two groups (only selected link; the three enclosing groups selected), a page with pages of its own (its "page itself" link is the selected link, its group selected), the front page, a page listed twice (both places selected), a top-level page, the `:orphan:` page (nothing selected, tree equal to the front page's), and a request with a query string. No production code changed and no rendered-HTML test was added: the shell draws the marking with a CSS class only, which the brief rules out asserting.
 Verified: `uv run pytest tests/test_menus.py::TestCurrentPage -q` → 8 passed on first run, as the task expects (flex_menu's matching does the work). Probed instead of trusting green: pointing the "page itself" link at the wrong address fails 2 tests, moving the front page entry fails 1, and appending to every entry address fails 6; `menus.py` restored after each. `uv run pre-commit run --all-files` → all hooks pass.
 Next: full verify, then the completion report.
 Watch: no test in `tests/test_views.py` was needed; nothing observable there beyond the CSS class.
 
-## 2026-09-30T00:40:00Z · Implementer US3 · T006
+## 2026-09-30T00:10:02Z · Implementer US3 · T006
 
 Did: `DocumentationMenu` now keeps a `threading.Lock` per instance, held across `refresh()` and `super().process(...)`, and a `stamp` of `(build_dir as given, front page address, DocsBuild.navigation_stamp())`; `refresh()` returns at once on the same stamp and otherwise builds the whole list and assigns `children` and the stamp together. `TestRefresh` (tests/test_menus.py: page added, page removed, file not read again while unchanged, replaced file read again, another build, same build by another path, another mount prefix) and `TestRebuiltContents` (tests/test_views.py: the same two rebuilds through `client`, one app instance).
 Verified: `uv run pytest tests/test_menus.py tests/test_views.py -q` → 90 passed; red first (the read-count test saw two reads, not one); the rebuild tests pass on the old code by design, so probed instead: dropping the build directory from the stamp fails 1 test, dropping the front page address fails 1, replacing the file stamp with `None` fails 3 in test_menus and both `TestRebuiltContents` tests; `menus.py` restored after each. `uv run pre-commit run --all-files` → all hooks pass. The lock has no test, as the plan says.
 Next: T007.
 Watch: the same-build-by-another-path test uses a symlink, since a copy of the build has a different inode and would rebuild through the file stamp alone.
 
-## 2026-09-30T00:50:00Z · Implementer US3 · T007
+## 2026-09-30T00:10:54Z · Implementer US3 · T007
 
 Did: `TestContentsUnavailable` in tests/test_views.py through `client`: no navigation file, five unusable files (invalid JSON, a list, `groups` not a list, a non-string caption, an entry with no url) each serve the page with only the front page entry; an unreadable file (`chmod 000`, skipped as root) does too; the overview page answers 200 and still draws the host's own menu and the docs entry with a missing build and with an unreadable file; a file broken mid-run gives the front page only and the full contents again once fixed. README: one sentence that a rebuilt docs build shows on the next request with no restart. No change to `menus.py` was needed: the tests passed on first run, as the task allows.
 Verified: `uv run pytest tests/test_views.py tests/test_menus.py -q` → 100 passed; probed: catching only `ValueError` in `DocsBuild.navigation()` fails the two unreadable-file tests, and dropping the `or []` in `refresh()` fails all 10; both restored. `uv run pre-commit run --all-files` → all hooks pass.
 Next: full verify, then the completion report.
 Watch: the unreadable-file tests skip when the suite runs as root; they ran here as a normal user.
+
+## 2026-09-30T00:13:55Z · S5 converge
+
+Did: all three stories accepted with independent verify and tamper-check. Rebased on origin/main
+(c1ae4f8). Cleanup: README paragraph naming the extension's internals removed, and
+mvp_sphinx/navigation.py exempted from the docs gate in pyproject.toml, since its only public surface
+is the module name the README quotes. ADR 0002 graduated from the spec's "whole tree from the build"
+rationale plus D1, D3 and D4; every decision carries a verdict. Three US2/US3 progress stamps
+corrected from local time to UTC (taken from their commits). No migrations.
+Verified: forge verify, all six steps; tamper-check flags only the planned root skips (D10);
+story-comment gate green.
+Next: S6 review.
