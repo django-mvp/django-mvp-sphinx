@@ -104,11 +104,12 @@
           "attempts": 1,
           "evidence": {
             "commands": [
-              "uv run pytest tests/test_static/test_content_css.py (red: 1 failed on the roles test, contrast tests guarded by a non-empty assert; green: 15 passed)",
-              "mutation probe: string mix at 95% success fails both light contrast cases; restored",
+              "uv run pytest tests/test_static/test_content_css.py (red: roles test failed on missing roles; green: 15 passed)",
+              "mutation probe: string colour at 95% success failed both light-theme contrast cases; file restored",
               "uv run sphinx-build -b json -W demo/docs /tmp/demo-json (exit 0)",
               "uv run pre-commit run --all-files (passed)",
-              "exit_code: 0; criteria: ['SC-005', 'FR-006', 'FR-007', 'FR-015']"
+              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us2-verify.json (overall passed: conformance, docs, lint, typecheck, test, build)",
+              "exit_code: 0; criteria: ['SC-005']"
             ]
           }
         }
