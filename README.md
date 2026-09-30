@@ -376,9 +376,11 @@ If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
 block so the stylesheet still reaches the page, render `{{ body }}` rather than
 `{{ page_data.body }}` so your override keeps the rewrite, and keep the
 `mvp-sphinx-content` class on the element that holds it, because every rule in
-the stylesheet is scoped to that class. `BodyRewriter.rewrite` returns a plain
-string; `PageView` marks it safe because the docs build is your own, and a caller
-of its own does the same:
+the stylesheet is scoped to that class. An override of the `content` block also
+takes over drawing "On this page" and the previous and next links, which the page
+gets as `headings`, `previous_page` and `next_page`. `BodyRewriter.rewrite` returns
+a plain string; `PageView` marks it safe because the docs build is your own, and a
+caller of its own does the same:
 
 ```django
 {% extends "mvp_sphinx/page.html" %}

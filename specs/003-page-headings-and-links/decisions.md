@@ -143,3 +143,21 @@ the links, which is what the edge case is about.
 then assert both links.
 
 **ADR:** none — a test-scope choice
+
+## D8. Review approved; three small fixes made directly before the walkthrough
+
+**Decided**: the S6 review approved with no findings. Forge made three edits itself rather than
+dispatching them. In `heading_list.html` each title sits in a `<span class="text-wrap">`: daisyUI's
+menu lays a link's children out as grid columns and sets `white-space: nowrap` on nested lists, so
+a long title or one holding `<code>` scrolled sideways instead of wrapping. The page's first
+column is `w-full max-w-prose` instead of `flex-1`, so "On this page" sits beside the text rather
+than at the far edge, and the page foot is the same width on every page. The README's override
+paragraph now names `headings`, `previous_page` and `next_page` (review note).
+
+**Why**: found by looking at the running pages at a wide width before handing them over. Each is a
+line with no design content, and every class is in django-mvp's shipped stylesheet. Layout is judged
+by eye (spec Assumptions), so no test covers it.
+
+**Revisit if**: the walkthrough asks for a different placement.
+
+**ADR:** none — template adjustments local to this feature

@@ -5,7 +5,7 @@
 <ul {{ attrs }}>
   {% for heading in headings %}
     <li>
-      <a href="{{ heading.anchor }}">{{ heading.title }}</a>
+      <a href="{{ heading.anchor }}"><span class="text-wrap">{{ heading.title }}</span></a>
       {% if heading.children %}<c-mvp_sphinx.heading_list :headings="heading.children" />{% endif %}
     </li>
   {% endfor %}
