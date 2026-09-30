@@ -54,7 +54,7 @@
       "priority": "P1",
       "issue": 26,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -78,7 +78,7 @@
       "priority": "P2",
       "issue": 29,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -93,8 +93,7 @@
             "commands": [
               "uv run pytest tests/test_smoke.py tests/test_demo.py -q (exit 0)",
               "forge verify --base origin/main at e7ec597: conformance, docs, lint, typecheck, test, build passed (Forge, independent)"
-            ],
-            "note": "Blocked at the implementer on one pre-existing test's premise word; resolved by Forge as declared edit D16."
+            ]
           }
         }
       ]

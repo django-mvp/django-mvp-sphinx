@@ -109,3 +109,15 @@ unedited and T002 is reported blocked. The word `demonstration` (in the overview
 `tests/sphinx/search/`) would keep the test's intent; Forge to triage.
 Next: report.
 Watch: AGENTS.md (Components) still names `<c-mvp_sphinx.example>` and `example.html`; outside T002's files.
+
+## 2026-09-30T10:27:37Z · Forge · US1 and US2 accepted
+
+Did: receipts green (check-receipts --brief). T002 came back blocked on one FS-007 test whose premise
+word lived in the removed starter section; Forge changed the word (D16). Conformance flagged
+tests/test_quickstart.py as mirroring no module; Forge moved TestQuickstart into tests/test_mounted.py
+(D17). README read against the source: quickstart steps, public surface entries (component @props,
+view context, template blocks) match.
+Verified: forge verify --base origin/main at e7ec597, all six steps passed. tamper-check flags only
+the declared edits (conftest.py render fixture, test_smoke.py starter class, test_views.py one word).
+story-done US1 (#26), US2 (#29).
+Next: US3 dispatch. Carry: AGENTS.md Components section still names the starter component.
