@@ -65,12 +65,28 @@
         {
           "id": "T001",
           "status": "done",
-          "attempts": 1
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_views.py::TestContentStyling (red: link test failed; green: 3 passed)",
+              "uv run pytest tests/test_views.py (58 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: ['SC-006']"
+            ]
+          }
         },
         {
           "id": "T002",
           "status": "done",
-          "attempts": 1
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run pytest tests/test_static (red on empty stylesheet: 5 failed; green: 10 passed)",
+              "uv run sphinx-build -b json -q -W demo/docs demo/docs/_build/json (exit 0)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: ['SC-001', 'SC-002', 'SC-005']"
+            ]
+          }
         }
       ]
     },
