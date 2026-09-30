@@ -125,7 +125,7 @@
       "priority": "P3",
       "issue": 41,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-006",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
