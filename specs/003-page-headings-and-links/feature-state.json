@@ -65,8 +65,16 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_headings.py::TestPageHeadings"
+            ],
+            "commands": [
+              "uv run pytest tests/test_headings.py -q"
+            ]
+          }
         },
         {
           "id": "T002",

@@ -21,3 +21,14 @@ and article markup; verify green on 6f86d91. One reviewer, three lenses: approve
 check; SPEC-001 demo edit narrowed to settings.rst; ARCH-004 hidden/orphan cases on the contents
 source). All applied and checked against their evidence (D6). Receipts green.
 Next: plan notice to the orchestrating session, then US1.
+
+## 2026-09-30T00:58:00Z · Implementer US1 · T001
+
+Did: `mvp_sphinx/headings.py` `PageHeadings` (HTMLParser, `convert_charrefs=False`, titles sliced
+by offset as `BodyRewriter` computes positions). New source `tests/sphinx/reading/` (index, long,
+single, plain; builds with no warnings) and the `reading_build` session fixture.
+Verified: red first (`ModuleNotFoundError: mvp_sphinx.headings`), then
+`uv run pytest tests/test_headings.py -q` 16 passed; `uv run pre-commit run --all-files` and
+`uv run mypy` passed.
+Next: T002, the view, page and components.
+Watch: `reading_app` is added in T002.
