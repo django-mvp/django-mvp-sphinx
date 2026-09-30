@@ -9,6 +9,8 @@ from django.urls import reverse
 from django_cotton.compiler_regex import CottonCompiler
 from sphinx.cmd.build import build_main
 
+from tests.factories import GroupFactory, UserFactory
+
 SPHINX_SOURCES = Path(__file__).parent / "sphinx"
 
 
@@ -22,6 +24,15 @@ def render():
         return dj_template.Template(compiler.process(source)).render(Context(context))
 
     return render_source
+
+
+@pytest.fixture(scope="session")
+def sidebar():
+    # The shell's main navigation, where the host's menu entries are drawn.
+    def region(page):
+        return page.split('aria-label="Main navigation"', 1)[1].split("</ul>", 1)[0]
+
+    return region
 
 
 @pytest.fixture
@@ -100,3 +111,21 @@ def handbook_app(handbook_build, monkeypatch):
 
     monkeypatch.setattr(handbook, "build_dir", handbook_build)
     return handbook
+
+
+@pytest.fixture
+def staff_guide_app(handbook_build, monkeypatch):
+    from demo.mounted import staff_guide
+
+    monkeypatch.setattr(staff_guide, "build_dir", handbook_build)
+    return staff_guide
+
+
+@pytest.fixture
+def user(db):
+    return UserFactory()
+
+
+@pytest.fixture
+def group(db):
+    return GroupFactory()

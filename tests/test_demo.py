@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from demo.settings import BASE_DIR
 from mvp_sphinx.docs_build import DocsBuild
+from tests.factories import UserFactory
 
 
 class TestOverviewPage:
@@ -30,8 +31,43 @@ class TestDocumentationEntry:
         assert 'href="/docs/"' in sidebar
 
 
+class TestStaffGuideEntry:
+    def test_the_entry_is_absent_for_an_anonymous_reader(
+        self, sidebar, overview_page: str
+    ) -> None:
+        assert 'href="/staff-guide/"' not in sidebar(overview_page)
+
+    def test_the_entry_is_absent_for_a_regular_user(
+        self, sidebar, client, user
+    ) -> None:
+        client.force_login(user)
+        page = client.get(reverse("overview")).content.decode()
+
+        assert 'href="/staff-guide/"' not in sidebar(page)
+
+    def test_the_entry_is_present_for_a_staff_user(self, sidebar, client, db) -> None:
+        client.force_login(UserFactory(is_staff=True))
+        page = client.get(reverse("overview")).content.decode()
+
+        assert 'href="/staff-guide/"' in sidebar(page)
+
+    def test_a_staff_user_gets_the_front_page(
+        self, client, db, staff_guide_app
+    ) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        assert client.get("/staff-guide/").status_code == 200
+
+
 class TestDemoGuide:
     def test_building_the_guide_writes_the_navigation_file(self, sphinx_build) -> None:
         out = sphinx_build(BASE_DIR / "demo" / "docs")
+
+        assert (out / DocsBuild.NAVIGATION_FILE).is_file()
+
+    def test_building_the_staff_guide_writes_the_navigation_file(
+        self, sphinx_build
+    ) -> None:
+        out = sphinx_build(BASE_DIR / "demo" / "staff_guide")
 
         assert (out / DocsBuild.NAVIGATION_FILE).is_file()

@@ -31,6 +31,8 @@ permission or anything else is expressed as the host's own rule.
 and still leave the others needing code, so the general rule covers groups. The default keeps a
 documentation app mounted before this feature readable exactly as it was.
 
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+
 ## D2. Sign-in for visitors, forbidden for signed-in people
 
 **Ambiguous:** The issue says excluded people see neither the pages nor the menu entry. It doesn't
@@ -46,6 +48,8 @@ way. A shared link to the docs then works for anyone who can sign in, rather tha
 entry already hides them from people browsing, and "not found" would break every shared link for
 readers who only need to sign in.
 
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+
 ## D3. One rule per documentation app, not per page
 
 **Ambiguous:** Whether individual pages can have their own readers.
@@ -58,6 +62,8 @@ that serves one docs build, and a project with two audiences usually writes two 
 rules would need a way to mark pages in the Sphinx source and would leave the contents showing
 pages a reader can't open.
 
+**ADR:** none — already a standing rule, CONSTITUTION.md Article XII (one build per documentation app)
+
 ## D4. Files follow the rule too
 
 **Ambiguous:** The issue speaks of pages and the menu entry.
@@ -67,6 +73,8 @@ pages a reader can't open.
 
 **Why:** Screenshots and downloads are part of the documentation. A limited guide whose files can
 still be fetched by address isn't limited.
+
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
 
 ## D5. A refusal never reveals what exists
 
@@ -80,6 +88,8 @@ from #4 applies only to readers the rule admits.
 **Why:** Different answers would let anyone list the pages of a limited guide by guessing
 addresses.
 
+**ADR:** none — follows from the rule being asked before the view (ADR 0004); a requirement, not a separate choice
+
 ## D6. Asked on every request
 
 **Ambiguous:** When a change in who someone is takes effect.
@@ -89,6 +99,8 @@ addresses.
 **Why:** A person who signs in, or is added to a group, expects the docs straight away. Remembering
 an earlier answer would also keep showing the docs to someone just removed from the group.
 
+**ADR:** none — a property of django-mvp's check, covered by ADR 0004's revisit condition
+
 ## D7. No bypass for staff or superusers
 
 **Chosen:** The rule alone decides. A host that wants staff to read limited docs writes that into
@@ -96,6 +108,8 @@ its rule (Assumptions).
 
 **Why:** A hidden exception makes the rule say one thing and do another. It is one line in the
 host's own rule when wanted.
+
+**ADR:** none — local to this feature; stated in the README and pinned by a test
 
 ## D8. A failing rule is a server error
 
@@ -105,6 +119,8 @@ host's own rule when wanted.
 **Why:** Failing open would publish limited docs whenever the rule broke. Failing as "forbidden"
 would hide a bug in the host project from its error reporting.
 
+**ADR:** none — a requirement (FR-012), pinned by a test
+
 ## D9. Search and contents stay with their own features
 
 **Chosen:** This feature requires only that an excluded reader never reaches the contents (#5) or
@@ -113,3 +129,98 @@ theirs.
 
 **Why:** Each has its own feature request. Stating the boundary here keeps the rule complete
 without taking on their scope.
+
+**ADR:** none — a scope boundary between features, recorded in the spec
+
+## D10. The reader rule is django-mvp's `check`, with no setting of our own
+
+**Ambiguous:** FR-003 asks for signed-in only as an option chosen "without writing a rule of its
+own". The package could add its own setting (`readers="signed-in"`), its own ready-made function,
+or use what is already there.
+
+**Chosen:** `DocumentationApp(check=...)`, the `check` every django-mvp mounted app already has
+(research R1). Signed-in only is `check=user_is_authenticated` from `flex_menu.checks`, which also
+supplies group and permission rules (R2). The package adds no setting, wrapper, alias or function.
+
+**Why:** `check` already does everything the spec asks, in the same way as every other mounted app
+in the host project. A second setting for the same rule would give the app two answers to one
+question. A function of our own would duplicate one that django-flex-menus, already a dependency,
+ships and documents.
+
+**Revisit if:** a rule needs something `check` cannot express, such as the documentation app itself
+(`has_permission` is the override point for that).
+
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+
+## D11. `/docs` without its slash is the host's redirect, not the app's
+
+**Ambiguous:** The edge cases say an address without its trailing slash is refused, not
+redirected. The prefix itself without its slash (`/docs`) never reaches the documentation app.
+
+**Chosen:** Leave it to the host's `CommonMiddleware`, which redirects it to `/docs/` for every
+reader before any documentation app runs (research R5). The slashed address is then refused as
+usual. Every address the app answers, slashless page addresses included, is refused before
+anything else happens.
+
+**Why:** The redirect is the same for every reader and whatever the build holds, so it says nothing
+about which pages exist, which is what FR-007 protects. Catching it would mean the package adding
+a URL pattern outside its own mount.
+
+**ADR:** none — host middleware outside the package; nothing downstream inherits it
+
+## D12. The demo gets a staff-only guide
+
+**Chosen:** A second documentation app in the demo, *Staff guide* at `/staff-guide/`, readable by
+staff only (`check=user_is_staff`). The demo's `/docs/` stays open to everyone.
+
+**Why:** Every refusal state then shows up with the standard sign-in accounts. Anonymous is asked to
+sign in, the regular user gets the forbidden page and no menu entry, and staff and the superuser
+read it. Keeping `/docs/` open leaves the existing tests and the README's quickstart meaning what
+they meant. A staff rule shows more states than signed-in only, and the tests cover signed-in only
+on their own.
+
+**ADR:** none — the demo is never distributed; local to this feature
+
+## D13. A rule that raises breaks every page that draws its menu entry
+
+**Ambiguous:** FR-011 keeps each rule's effect off the host project's other pages. FR-012 makes an
+error in the rule a server error. The menu entry asks the same rule on every host page, so a rule
+that raises cannot satisfy both.
+
+**Chosen:** FR-012 wins. A raising rule is a server error wherever it is asked: on the
+documentation app's pages and on every host page that draws its menu entry, the sign-in page
+included. The tests pin both, and the README says so.
+
+**Why:** Either way the failure is loud, which D8 asks for. Keeping host pages working would mean
+catching the rule's error in the menu entry and hiding the entry, which hides a bug in the host
+project and is new code no requirement asks for. The design review raised it (SPC-004).
+
+**ADR:** none — a consequence of FR-012, documented in the README; revisit through the spec
+
+## D14. The demo's sign-in page is django-mvp's
+
+**Chosen:** The demo routes `accounts/login/` to django-mvp's `SignInView`, named `account_login`
+because its template posts there. It sits before `django.contrib.auth.urls`, which still serves
+sign-out.
+
+**Why:** Nothing in the demo provides the `registration/login.html` that
+`django.contrib.auth.urls` renders, so a visitor sent to sign in would get an error page instead of
+the sign-in form, and SC-005 could not be seen in the demo. The template carries `next` through,
+so the visitor comes back to the page they asked for.
+
+**ADR:** none — demo wiring only, never distributed
+
+## D15. The code review's test findings are fixed here, directly
+
+**Chosen:** The review approved with no critical or high finding. Its four test findings, and one
+README note, were fixed on this branch by the orchestrator rather than carried as comments. The
+403 no-trace test now reads the shell's `mounted_app` instead of searching for the name, since
+the error template never draws the name. The sign-in test carries `next` from the sign-in page
+itself. The `sidebar` helper moved to a `conftest.py` fixture. The user factory uses
+`factory.django.Password`. The README's two-app example names both apps.
+
+**Why:** Each is a few lines, test-only or wording, with no design content, so dispatching a new
+builder would cost more than the change. The 403 test was shown able to fail by running it
+against a copy of the shell lookup that keeps a refused app.
+
+**ADR:** none — test and wording fixes local to this feature

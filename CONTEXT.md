@@ -30,6 +30,13 @@ contents in the app sidebar. A host project serving two docs builds mounts two
 of them.
 _Avoid_: docs site, docs server.
 
+**Reader rule**:
+The documentation app's `check`: who may read it. There is one per documentation
+app, and it is asked on every request. It covers every address under the app and
+the app's menu entry.
+_Avoid_: permission (a Django permission is one thing a rule can test), access
+control.
+
 **Page**:
 One document of the docs build, served at its own URL under the documentation
 app.

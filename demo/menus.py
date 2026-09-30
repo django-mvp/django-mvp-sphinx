@@ -5,7 +5,7 @@
 from flex_menu import MenuItem
 from mvp.menus import AppMenu
 
-from demo.mounted import docs
+from demo.mounted import docs, staff_guide
 
 AppMenu.extend(
     [
@@ -15,5 +15,6 @@ AppMenu.extend(
             extra_context={"label": "Overview", "icon": "overview"},
         ),
         docs.menu_item(),
+        staff_guide.menu_item(),
     ]
 )

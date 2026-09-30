@@ -102,11 +102,15 @@ Everything a complete, dependable release is expected to have.
 
 ### R5 — The project decides who can read the docs
 
-*resolve · advances G5*
+*delivered in [#9](https://github.com/django-mvp/django-mvp-sphinx/issues/9) · advances G5*
 
-A host project can keep its docs public, limit them to signed-in people, or
-apply its own rule, and people it excludes see neither the pages nor the menu
-entry.
+Each `DocumentationApp` takes a `check`: open to everyone by default,
+`user_is_authenticated` for signed-in people only, or a rule of the project's
+own, such as a group or a permission. A reader it excludes sees no menu entry
+and gets no page, image or download from any address under the app. An
+anonymous visitor is sent to sign in and back, a signed-in one gets the site's
+403 page, and the answer is the same whatever is behind the address. Two
+audiences are two apps, each with its own rule.
 
 ### R6 — Search the docs
 

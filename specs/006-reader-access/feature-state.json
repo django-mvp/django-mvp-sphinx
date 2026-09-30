@@ -1,0 +1,216 @@
+{
+  "feature": "006-reader-access",
+  "branch": "006-reader-access",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:38:11Z",
+      "note": "specification merged to main in PR #23, merge commit 1003b825a530bc833948a5705e7b5408dc9ce995; epic #9, stories #39-#41"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-29T23:46:47Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 5 tasks; no runtime code (D10)"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-29T23:47:36Z",
+      "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-29T23:56:47Z",
+      "note": "US1..US3 sequential in the feature worktree"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T00:10:14Z",
+      "note": "US1-US3 done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T00:12:38Z",
+      "note": "one reviewer, correctness+spec and security lenses"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T00:30:01Z",
+      "note": "walkthrough pre-checked by rendered HTML; PR ready for the merge gate"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "PR #23 merged (merge commit 1003b825a530bc833948a5705e7b5408dc9ce995)",
+      "at": "2026-09-29T22:38:11Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": "notified",
+      "at": "2026-09-29T23:56:21Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam asleep; overnight delegation), not Sam"
+      ]
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel (request_changes, remedied in plan)",
+      "at": "2026-09-29T23:56:21Z",
+      "self_resolved": [
+        "SPC-001 high: host-page entry assertions moved to the demo apps (docs, staff_guide); demo task T004 now precedes the two-apps task T005",
+        "SPC-002 medium: 403 no-trace check uses the escaped name, paired with an admitted request",
+        "SPC-003 medium: demo sign-in routed to django-mvp SignInView (D14), in T002",
+        "SPC-004 medium: raising rule also errors on host pages; pinned in T003, README, D13",
+        "SEC-001 low: README warns that factories must be called and that non-callables are read as yes/no",
+        "ARC-001 low: README calls signed-in only one import and one keyword; D10 stands"
+      ]
+    },
+    "review": {
+      "approved_by": "code-reviewer (approve)",
+      "at": "2026-09-30T00:29:16Z",
+      "self_resolved": [
+        "TST-001 medium: 403 no-trace test now reads mounted_app/mounted_menu; mutation-proven to fail",
+        "TST-002 low: sign-in round trip takes next from the sign-in page",
+        "TST-003 low: sidebar helper moved to a conftest fixture",
+        "TST-004 low: UserFactory uses factory.django.Password",
+        "notes: README two-app example names both apps; rule may run several times per request"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "build session, rendered-HTML walkthrough through the test client with the standard accounts (port 8025 held by FS-002; the orchestrating session serves the worktree for its own look)",
+      "at": "2026-09-30T00:30:01Z",
+      "self_resolved": [
+        "no dev server this run (orchestrator) \u2014 every state probed as anonymous, regular, staff and super: /staff-guide/ entry and pages, unknown page, /docs/, sign-in page with next"
+      ]
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 39,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-006",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestEveryoneByDefault"
+            ],
+            "commands": [
+              "uv run pytest tests/test_mounted.py -x -q"
+            ]
+          }
+        },
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestEveryoneByDefault",
+              "tests/test_mounted.py::TestSignedInOnly",
+              "tests/test_mounted.py::TestRefusal"
+            ],
+            "commands": [
+              "uv run pytest tests/test_mounted.py -q"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 40,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-006",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestOwnRule",
+              "tests/test_mounted.py::TestPermissionRule",
+              "tests/test_mounted.py::TestRuleAdmittingNoOne",
+              "tests/test_mounted.py::TestRuleThatRaises"
+            ],
+            "commands": [
+              "uv run pytest tests/test_mounted.py -q"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P3",
+      "issue": 41,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-006",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_demo.py::TestStaffGuideEntry"
+            ],
+            "commands": [
+              "uv run pytest tests/test_demo.py -q"
+            ]
+          }
+        },
+        {
+          "id": "T005",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_mounted.py::TestSeveralApps"
+            ],
+            "commands": [
+              "uv run pytest tests/test_mounted.py tests/test_demo.py -q"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": 49,
+    "draft": false
+  },
+  "escalations": []
+}

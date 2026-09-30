@@ -138,6 +138,112 @@ docs = DocumentationApp(
 )
 ```
 
+### Choosing who can read it
+
+The documentation is open to everyone unless you say otherwise. To keep it for
+signed-in people, import `user_is_authenticated` from `flex_menu.checks` and pass
+it as `check`:
+
+```python
+from flex_menu.checks import user_is_authenticated
+
+docs = DocumentationApp(
+    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    check=user_is_authenticated,
+)
+```
+
+That is one import and one keyword. A reader the rule excludes gets no menu
+entry and no page. An anonymous visitor is sent to your sign-in page and comes
+back to the address they asked for once signed in. The rule covers every address
+under the prefix, including the images and downloads your pages link to, and it
+answers the same way whatever is behind the address, so a reader cannot tell
+which pages exist.
+
+To keep it for a group or for holders of a permission, use the other two
+checks from `flex_menu.checks`. Both are factories, so call them with their
+arguments:
+
+```python
+from django.utils.translation import gettext_lazy as _
+from flex_menu.checks import user_has_any_permission, user_in_any_group
+
+docs = DocumentationApp(
+    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    check=user_in_any_group("Support"),
+)
+tickets = DocumentationApp(
+    build_dir=BASE_DIR / "tickets" / "_build" / "json",
+    name=_("Ticket handling"),
+    namespace="tickets",
+    check=user_has_any_permission("support.view_ticket"),
+)
+```
+
+Any function of the request works too:
+
+```python
+def staff_only(request):
+    return request.user.is_staff
+
+
+handbook = DocumentationApp(
+    build_dir=BASE_DIR / "handbook" / "_build" / "json",
+    namespace="handbook",
+    check=staff_only,
+)
+```
+
+A signed-in reader the rule excludes gets your project's 403 page, which says
+nothing about the documentation, and no menu entry. The rule alone decides.
+Staff and superusers have no way in unless it admits them, and `check=False`
+admits no one.
+
+The rule is asked on every request, and often more than once in one, since the
+menu entry asks it as well as the page. Keep it quick and free of side effects.
+If it raises, the request is a server
+error: a page is never served on a guess. The menu entry asks the rule too, so
+the error also shows on every page that draws the entry, the sign-in page
+included. Write a rule that returns an answer.
+
+A `check` that is not a function is read as yes or no. `check="staff"` is a
+non-empty string, which is true, and admits everyone. To keep the docs for
+staff, pass `user_is_staff` from `flex_menu.checks`, or a function of your own.
+
+Two audiences are two apps. Each `DocumentationApp` has its own build, `name`,
+`namespace` and rule, and each is mounted at its own prefix:
+
+```python
+from django.utils.translation import gettext_lazy as _
+from flex_menu.checks import user_is_staff
+
+guide = DocumentationApp(
+    build_dir=BASE_DIR / "guide" / "_build" / "json",
+)
+staff_guide = DocumentationApp(
+    build_dir=BASE_DIR / "staff_guide" / "_build" / "json",
+    name=_("Staff guide"),
+    namespace="staff_guide",
+    check=user_is_staff,
+)
+```
+
+```python
+from mvp.mounted import mount
+
+urlpatterns = [
+    mount("guide/", guide),
+    mount("staff-guide/", staff_guide),
+]
+```
+
+Each reader sees the entries their rules admit and is served or refused by each
+app's own rule. The rule is asked again on every request, so a reader who signs
+in or joins a group is admitted by their next request, with nothing to reset.
+
+The rule is django-mvp's `check`, described in its
+[mounted apps guide](https://github.com/django-mvp/django-mvp/blob/main/docs/mounted-apps.md#limiting-who-can-reach-an-app).
+
 ### Several documentation apps
 
 Each build is one `DocumentationApp` with its own `namespace` (`docs` unless you

@@ -30,6 +30,14 @@ class DocumentationApp(MountedApp):
         icon: The icon name for the host's menu entry.
         namespace: The URL namespace, ``docs`` unless a host mounts several.
         view_class: The view that renders a page.
+        check: Who may read the documentation: ``True`` for everyone (the
+            default), ``False`` for no one, or a function of the request, such
+            as ``user_is_authenticated`` from ``flex_menu.checks`` for signed-in
+            people only. The rule covers every address under the app, images and
+            downloads included, and its menu entry. It is asked on every request.
+            An anonymous reader it excludes is sent to sign in and back, and a
+            signed-in one gets the project's 403 page. An error it raises is a
+            server error.
 
     Raises:
         ImproperlyConfigured: ``build_dir`` was not given.
