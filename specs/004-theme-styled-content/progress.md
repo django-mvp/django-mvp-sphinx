@@ -128,3 +128,11 @@ Verified: `uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us5b` exit 0 (f
 Next: full verify.
 Watch: the bold terms, the label chip and the key caps in running text were not looked at in a
 browser; the content tour is the place to check them, including in the dark theme.
+
+## 2026-09-30 · S5 converge
+
+Did: all five stories done and accepted on independent verify and tamper-check. Main had not
+moved. Cleanup: one condition in BodyRewriter computed once; changelog tightened to what changes
+for an adopter; README override example loads `static`. ADR 0002 graduated from D1, D2 and D5;
+every decision verdicted. No migrations. R3 marked delivered and rewritten to its delivered form.
+Next: review.
