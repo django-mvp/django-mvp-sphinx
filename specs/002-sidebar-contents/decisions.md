@@ -100,6 +100,8 @@ Sphinx nor Django, so both sides can share it.
 
 **Revisit if**: the extension grows enough that it needs a package of its own.
 
+**ADR:** docs/adr/0002-draw-the-contents-from-a-navigation-file-the-build-writes.md
+
 ## D2. Only the JSON build gets a navigation file
 
 **Decided**: the extension writes on `build-finished` only when the builder is `json`.
@@ -108,6 +110,8 @@ Sphinx nor Django, so both sides can share it.
 documentation app reads. A host that also builds HTML with the same `conf.py` gets no stray file.
 
 **Revisit if**: the package ever serves another builder's output.
+
+**ADR:** none — a detail of the extension, stated in its module docstring
 
 ## D3. A bad navigation file is validated once
 
@@ -121,6 +125,8 @@ the file sits in the same trust domain as the pages the view already renders, an
 out hand edits to the build, so that guard was removed.
 
 **Revisit if**: the file format gains fields.
+
+**ADR:** docs/adr/0002-draw-the-contents-from-a-navigation-file-the-build-writes.md
 
 ## D4. The menu rebuilds when the file, the build directory or the mount prefix changes
 
@@ -138,6 +144,8 @@ The first plan relied on one assignment being atomic; the design review (ARCH-00
 **Revisit if**: a host reports a filesystem where none of the three changes on replacement, or the
 lock shows up in profiles.
 
+**ADR:** docs/adr/0002-draw-the-contents-from-a-navigation-file-the-build-writes.md
+
 ## D5. The front page and a page's own entry inside its group are both labelled "Overview"
 
 **Decided**: kept from the prototype the owner approved.
@@ -146,6 +154,8 @@ lock shows up in profiles.
 opens on an "Overview" entry. The spec leaves the label to the plan.
 
 **Revisit if**: the owner asks for the page's own title there.
+
+**ADR:** none — a label choice local to the menu, revisitable at any time
 
 ## D6. A page listed twice is marked at both places
 
@@ -157,6 +167,8 @@ its fixture; marking one of two identical links would be arbitrary.
 
 **Revisit if**: the owner prefers only the first listing marked.
 
+**ADR:** none — a consequence of the menu's path matching, local to this feature
+
 ## D7. Captions below the root document are ignored
 
 **Decided**: a toctree caption on a page other than the root does not make a group; that page's
@@ -167,6 +179,8 @@ pages of its own already opens as a group (FR-005). Nesting a second kind of gro
 need a shape the sidebar does not have.
 
 **Revisit if**: a real docs set needs sub-captions in the sidebar.
+
+**ADR:** none — local to how this feature shapes the tree
 
 ## D8. Design review outcome
 
@@ -183,6 +197,8 @@ finding's stated evidence by the orchestrator.
 
 **Revisit if**: n/a — a record.
 
+**ADR:** none — a record of the design review, not a decision
+
 ## D9. Sphinx cannot build a toctree cycle, so the guard is tested on a stand-in
 
 **Decided**: the `tests/sphinx/contents/` source has no toctree pointing back up the tree, and
@@ -197,3 +213,18 @@ warning, so the keyword would be unused.
 
 **Revisit if**: a Sphinx release lets a cycle through to `build-finished`; then the fixture can carry
 the back-pointing toctree.
+
+**ADR:** none — a test-fixture constraint local to this feature
+
+## D10. The unreadable-file tests skip when the suite runs as root
+
+**Decided**: the two T007 tests that make `navigation.json` unreadable with `chmod 000` carry
+`skipif(os.geteuid() == 0)`. `forge tamper-check` flags them as added skips, and they were checked
+against tasks.md T007, which planned exactly this condition.
+
+**Why**: root reads a file whatever its mode, so the test cannot set up its own precondition
+there. CI and development run as ordinary users, where the tests run and pass.
+
+**Revisit if**: CI moves to a container that runs as root, which would silently skip them.
+
+**ADR:** none — a test environment detail local to this feature

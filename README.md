@@ -114,10 +114,7 @@ menu on every page of the docs.
 - The front page has its own entry at the top.
 - A page no toctree lists stays out of the sidebar.
 
-The extension's `setup` hook connects `write_navigation` to Sphinx's
-`build-finished` event, and that hands the finished build to a
-`NavigationWriter`, which walks the toctrees and writes the file. Only the JSON
-builder gets a file, and a build that failed writes nothing.
+Only the JSON builder gets a file, and a build that failed writes nothing.
 
 Rebuild the docs and the sidebar shows the change on the next request, with no
 restart.

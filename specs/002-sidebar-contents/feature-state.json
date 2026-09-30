@@ -2,7 +2,7 @@
   "feature": "002-sidebar-contents",
   "branch": "002-sidebar-contents",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-09-29T23:52:48Z",
       "note": "US1 -> US2 -> US3 sequential in wt-sphinx-002"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T00:12:30Z",
+      "note": "US1-US3 done"
     }
   ],
   "gates": {
@@ -159,7 +164,7 @@
       "priority": "P2",
       "issue": 28,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -196,7 +201,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {
