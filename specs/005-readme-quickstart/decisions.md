@@ -145,3 +145,19 @@ finding's evidence. The declined one would change the promise of shipped feature
 this feature's call.
 
 **ADR:** none — review disposition local to this feature.
+
+## D16. One word in a search test changes with the starter component's removal (S4, US2)
+
+**Ambiguous:** `TestSearchResults.test_a_word_only_in_the_hosts_pages_lists_nothing` (FS-007) picks
+the word "starter" because the demo overview carried it. D12 removes that section, so the test's
+premise check fails. Editing it is outside the D12 authorisation, and the implementer stopped
+there, as it should.
+
+**Chosen:** Forge changes the word to "demonstration". It is on the overview page and in no page
+of the search fixture, so the test asserts exactly what it asserted before. Nothing else changes.
+
+**Why:** The test's subject is "a word only on the host's pages", not that word. A one-word change
+with no design content does not justify a re-dispatch. It is recorded here as a declared edit of a
+pre-existing test.
+
+**ADR:** none — a fixture word in one test.
