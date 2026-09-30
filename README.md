@@ -173,8 +173,8 @@ the error also shows on every page that draws the entry, the sign-in page
 included. Write a rule that returns an answer.
 
 A `check` that is not a function is read as yes or no. `check="staff"` is a
-non-empty string, which is true, and admits everyone. Pass `user_is_staff`
-itself, or a function, to keep the docs for staff.
+non-empty string, which is true, and admits everyone. To keep the docs for
+staff, pass `user_is_staff` from `flex_menu.checks`, or a function of your own.
 
 Two audiences are two apps. Each `DocumentationApp` has its own build, `name`,
 `namespace` and rule, and each is mounted at its own prefix:

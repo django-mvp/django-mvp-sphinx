@@ -31,6 +31,8 @@ permission or anything else is expressed as the host's own rule.
 and still leave the others needing code, so the general rule covers groups. The default keeps a
 documentation app mounted before this feature readable exactly as it was.
 
+**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+
 ## D2. Sign-in for visitors, forbidden for signed-in people
 
 **Ambiguous:** The issue says excluded people see neither the pages nor the menu entry. It doesn't
@@ -46,6 +48,8 @@ way. A shared link to the docs then works for anyone who can sign in, rather tha
 entry already hides them from people browsing, and "not found" would break every shared link for
 readers who only need to sign in.
 
+**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+
 ## D3. One rule per documentation app, not per page
 
 **Ambiguous:** Whether individual pages can have their own readers.
@@ -58,6 +62,8 @@ that serves one docs build, and a project with two audiences usually writes two 
 rules would need a way to mark pages in the Sphinx source and would leave the contents showing
 pages a reader can't open.
 
+**ADR:** none — already a standing rule, CONSTITUTION.md Article XII (one build per documentation app)
+
 ## D4. Files follow the rule too
 
 **Ambiguous:** The issue speaks of pages and the menu entry.
@@ -67,6 +73,8 @@ pages a reader can't open.
 
 **Why:** Screenshots and downloads are part of the documentation. A limited guide whose files can
 still be fetched by address isn't limited.
+
+**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
 
 ## D5. A refusal never reveals what exists
 
@@ -80,6 +88,8 @@ from #4 applies only to readers the rule admits.
 **Why:** Different answers would let anyone list the pages of a limited guide by guessing
 addresses.
 
+**ADR:** none — follows from the rule being asked before the view (ADR 0002); a requirement, not a separate choice
+
 ## D6. Asked on every request
 
 **Ambiguous:** When a change in who someone is takes effect.
@@ -89,6 +99,8 @@ addresses.
 **Why:** A person who signs in, or is added to a group, expects the docs straight away. Remembering
 an earlier answer would also keep showing the docs to someone just removed from the group.
 
+**ADR:** none — a property of django-mvp's check, covered by ADR 0002's revisit condition
+
 ## D7. No bypass for staff or superusers
 
 **Chosen:** The rule alone decides. A host that wants staff to read limited docs writes that into
@@ -96,6 +108,8 @@ its rule (Assumptions).
 
 **Why:** A hidden exception makes the rule say one thing and do another. It is one line in the
 host's own rule when wanted.
+
+**ADR:** none — local to this feature; stated in the README and pinned by a test
 
 ## D8. A failing rule is a server error
 
@@ -105,6 +119,8 @@ host's own rule when wanted.
 **Why:** Failing open would publish limited docs whenever the rule broke. Failing as "forbidden"
 would hide a bug in the host project from its error reporting.
 
+**ADR:** none — a requirement (FR-012), pinned by a test
+
 ## D9. Search and contents stay with their own features
 
 **Chosen:** This feature requires only that an excluded reader never reaches the contents (#5) or
@@ -113,6 +129,8 @@ theirs.
 
 **Why:** Each has its own feature request. Stating the boundary here keeps the rule complete
 without taking on their scope.
+
+**ADR:** none — a scope boundary between features, recorded in the spec
 
 ## D10. The reader rule is django-mvp's `check`, with no setting of our own
 
@@ -132,6 +150,8 @@ ships and documents.
 **Revisit if:** a rule needs something `check` cannot express, such as the documentation app itself
 (`has_permission` is the override point for that).
 
+**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+
 ## D11. `/docs` without its slash is the host's redirect, not the app's
 
 **Ambiguous:** The edge cases say an address without its trailing slash is refused, not
@@ -146,6 +166,8 @@ anything else happens.
 about which pages exist, which is what FR-007 protects. Catching it would mean the package adding
 a URL pattern outside its own mount.
 
+**ADR:** none — host middleware outside the package; nothing downstream inherits it
+
 ## D12. The demo gets a staff-only guide
 
 **Chosen:** A second documentation app in the demo, *Staff guide* at `/staff-guide/`, readable by
@@ -156,6 +178,8 @@ sign in, the regular user gets the forbidden page and no menu entry, and staff a
 read it. Keeping `/docs/` open leaves the existing tests and the README's quickstart meaning what
 they meant. A staff rule shows more states than signed-in only, and the tests cover signed-in only
 on their own.
+
+**ADR:** none — the demo is never distributed; local to this feature
 
 ## D13. A rule that raises breaks every page that draws its menu entry
 
@@ -171,6 +195,8 @@ included. The tests pin both, and the README says so.
 catching the rule's error in the menu entry and hiding the entry, which hides a bug in the host
 project and is new code no requirement asks for. The design review raised it (SPC-004).
 
+**ADR:** none — a consequence of FR-012, documented in the README; revisit through the spec
+
 ## D14. The demo's sign-in page is django-mvp's
 
 **Chosen:** The demo routes `accounts/login/` to django-mvp's `SignInView`, named `account_login`
@@ -181,3 +207,5 @@ sign-out.
 `django.contrib.auth.urls` renders, so a visitor sent to sign in would get an error page instead of
 the sign-in form, and SC-005 could not be seen in the demo. The template carries `next` through,
 so the visitor comes back to the page they asked for.
+
+**ADR:** none — demo wiring only, never distributed

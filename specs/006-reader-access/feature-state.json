@@ -2,7 +2,7 @@
   "feature": "006-reader-access",
   "branch": "006-reader-access",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-09-29T23:56:47Z",
       "note": "US1..US3 sequential in the feature worktree"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T00:10:14Z",
+      "note": "US1-US3 done"
     }
   ],
   "gates": {
@@ -159,7 +164,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {

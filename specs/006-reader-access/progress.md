@@ -112,3 +112,13 @@ they hold either way. `uv run pre-commit run --all-files` passed.
 Next: full verify, report.
 Watch: `docs/` describes none of the names or behaviour this story touched, so no page there
 changed.
+
+## 2026-09-30T00:11:32Z · S5 converge
+
+Did: converge against spec. Every FR-001..FR-012 has a test through the mounted app
+(TestEveryoneByDefault, TestSignedInOnly, TestRefusal, TestOwnRule, TestSeveralApps,
+TestStaffGuideEntry), and SC-001..SC-005 are reported by the story evidence. Every edge case is
+in the refusal matrix or TestOwnRule. No gaps, so no new tasks (cycle 1 of 2). No migrations.
+Cleanup: README names where `user_is_staff` comes from; demo/mounted.py docstring covers both
+apps. ADR 0002 graduated from D10 (with D1, D2, D4); every decision carries a verdict. Roadmap R5
+marked delivered and rewritten to its delivered form.
