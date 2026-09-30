@@ -17,6 +17,7 @@ class DocsBuild:
     """
 
     FILE_FOLDERS = ("_images", "_downloads")
+    NAVIGATION_FILE = "navigation.json"
 
     def __init__(self, root: str | Path) -> None:
         self.root = Path(root).resolve()
@@ -76,6 +77,71 @@ class DocsBuild:
         if folder not in self.FILE_FOLDERS or not self.is_canonical(path):
             return None
         return self.contained_file(path, within=folder)
+
+    def navigation(self) -> list[dict[str, Any]] | None:
+        """Return the contents the navigation file holds, or ``None``.
+
+        The file is the one the Sphinx extension writes. It is read every time,
+        and whatever is wrong with it (absent, unreadable, not JSON, not valid
+        UTF-8, not the expected shape) gives ``None`` rather than an error, so
+        a broken build never stops a page from being served.
+
+        Returns:
+            The file's ``groups``: each a mapping with a string ``caption`` and
+            a list of ``entries``, whose entries carry a string ``title``, a
+            string ``url`` and a list of ``children`` of the same shape.
+        """
+        target = self.contained_file(self.NAVIGATION_FILE)
+        if target is None:
+            return None
+        try:
+            data = json.loads(target.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        groups = data.get("groups") if isinstance(data, dict) else None
+        if isinstance(groups, list) and all(
+            isinstance(group, dict)
+            and isinstance(group.get("caption"), str)
+            and self.valid_entries(group.get("entries"))
+            for group in groups
+        ):
+            return groups
+        return None
+
+    def navigation_stamp(self) -> tuple[int, int, int] | None:
+        """Return a value that changes when the navigation file is replaced.
+
+        Returns:
+            The file's modification time, size and inode, or ``None`` when
+            there is no readable file.
+        """
+        target = self.contained_file(self.NAVIGATION_FILE)
+        if target is None:
+            return None
+        try:
+            info = target.stat()
+        except OSError:
+            return None
+        return (info.st_mtime_ns, info.st_size, info.st_ino)
+
+    @staticmethod
+    def valid_entries(entries: Any) -> bool:
+        """Say whether ``entries`` is a list of well-formed navigation entries.
+
+        Args:
+            entries: A parsed ``entries`` or ``children`` value.
+
+        Returns:
+            ``True`` when every item is a mapping with a string ``title``, a
+            string ``url`` and ``children`` that are valid entries too.
+        """
+        return isinstance(entries, list) and all(
+            isinstance(entry, dict)
+            and isinstance(entry.get("title"), str)
+            and isinstance(entry.get("url"), str)
+            and DocsBuild.valid_entries(entry.get("children"))
+            for entry in entries
+        )
 
     @staticmethod
     def is_canonical(relative: str) -> bool:

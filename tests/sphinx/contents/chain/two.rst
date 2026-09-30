@@ -1,0 +1,6 @@
+Chain two
+=========
+
+.. toctree::
+
+   three

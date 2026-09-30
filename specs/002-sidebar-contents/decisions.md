@@ -86,3 +86,162 @@ project's own menu is not part of the contents.
 
 **Why**: #6 was filed separately for them, and its dependency is on #4, not on this feature. The
 host menu entry is how a reader enters the docs, not how they move within them.
+
+## Decisions made while planning
+
+## D1. The navigation file's name lives beside the build lookups, not in the extension
+
+**Decided**: `DocsBuild.NAVIGATION_FILE` holds `navigation.json`; the extension imports it from
+`mvp_sphinx.docs_build`, and the menu reads the file through `DocsBuild.navigation()`.
+
+**Why**: the prototype's menu imported the file name from the extension module, which imports
+Sphinx at the top, so drawing the menu imported Sphinx (FR-017). `docs_build` imports neither
+Sphinx nor Django, so both sides can share it.
+
+**Revisit if**: the extension grows enough that it needs a package of its own.
+
+**ADR:** docs/adr/0002-draw-the-contents-from-a-navigation-file-the-build-writes.md
+
+## D2. Only the JSON build gets a navigation file
+
+**Decided**: the extension writes on `build-finished` only when the builder is `json`.
+
+**Why**: the addresses it records are the JSON builder's, and the JSON build is the only one a
+documentation app reads. A host that also builds HTML with the same `conf.py` gets no stray file.
+
+**Revisit if**: the package ever serves another builder's output.
+
+**ADR:** none — a detail of the extension, stated in its module docstring
+
+## D3. A bad navigation file is validated once
+
+**Decided**: `DocsBuild.navigation()` catches `(OSError, ValueError)`, checks the file's shape, and
+returns `None` for any file it cannot use. Entry addresses are not filtered.
+
+**Why**: the menu is processed on every host page (research R4), so an exception there breaks the
+whole site (FR-018). One shape check keeps broad `except` clauses out of the menu. The plan first
+also dropped entries whose address was not a plain relative one; the design review (SEC-001) showed
+the file sits in the same trust domain as the pages the view already renders, and the spec rules
+out hand edits to the build, so that guard was removed.
+
+**Revisit if**: the file format gains fields.
+
+**ADR:** docs/adr/0002-draw-the-contents-from-a-navigation-file-the-build-writes.md
+
+## D4. The menu rebuilds when the file, the build directory or the mount prefix changes
+
+**Decided**: `DocumentationMenu.refresh()` compares a stamp of build directory, front page
+address and the file's `(st_mtime_ns, st_size, st_ino)`, and rebuilds only when it differs. A
+per-menu lock is held across the refresh and the processing that reads `children`.
+
+**Why**: a read and parse on every host page is the cost the specification's decision "Rebuilds
+show on the next request" steers away from. Nanosecond mtime, size and inode together catch a
+replacement even inside one second, and the extension's atomic replace changes the inode.
+
+The first plan relied on one assignment being atomic; the design review (ARCH-001) showed anytree's
+`children` setter is not, and a probe produced duplicated trees. The lock replaced that claim.
+
+**Revisit if**: a host reports a filesystem where none of the three changes on replacement, or the
+lock shows up in profiles.
+
+**ADR:** docs/adr/0002-draw-the-contents-from-a-navigation-file-the-build-writes.md
+
+## D5. The front page and a page's own entry inside its group are both labelled "Overview"
+
+**Decided**: kept from the prototype the owner approved.
+
+**Why**: django-flex-menus keeps links and groups apart, and the django-mvp demo's Components group
+opens on an "Overview" entry. The spec leaves the label to the plan.
+
+**Revisit if**: the owner asks for the page's own title there.
+
+**ADR:** none — a label choice local to the menu, revisitable at any time
+
+## D6. A page listed twice is marked at both places
+
+**Decided**: both entries for the page being read are marked current.
+
+**Why**: the spec keeps both entries (edge case "A page listed by two toctrees") and FR-013 marks
+"the page being read". SC-002's "exactly one" is read for pages listed once, which is every page in
+its fixture; marking one of two identical links would be arbitrary.
+
+**Revisit if**: the owner prefers only the first listing marked.
+
+**ADR:** none — a consequence of the menu's path matching, local to this feature
+
+## D7. Captions below the root document are ignored
+
+**Decided**: a toctree caption on a page other than the root does not make a group; that page's
+toctrees are flattened into its own group.
+
+**Why**: FR-002 makes groups from the root document's captioned toctrees only, and a page with
+pages of its own already opens as a group (FR-005). Nesting a second kind of group inside it would
+need a shape the sidebar does not have.
+
+**Revisit if**: a real docs set needs sub-captions in the sidebar.
+
+**ADR:** none — local to how this feature shapes the tree
+
+## D8. Design review outcome
+
+**Decided**: every finding applied as a plan edit, one round, no re-review. ARCH-001 (high): the
+menu holds a lock across refresh and processing (D4). SPEC-001 (high): no test asserts the shell's
+`menu-active` class; marking is tested on the processed tree. ARCH-002: the extension writes
+`navigation.json.tmp` with `write_text`, then `os.replace`. ARCH-003: the walk is a
+`NavigationWriter` class, the shape check a `DocsBuild` staticmethod. SEC-001: entry addresses are
+not filtered (D3). SPEC-002: no test of the atomic write. SPEC-003: the file's key and the vocabulary
+are `groups`, not `sections` (CONTEXT.md). ARCH-004: reads catch `(OSError, ValueError)`.
+
+**Why**: each remedy was the smallest edit the finding named, and each was checked against the
+finding's stated evidence by the orchestrator.
+
+**Revisit if**: n/a — a record.
+
+**ADR:** none — a record of the design review, not a decision
+
+## D9. Sphinx cannot build a toctree cycle, so the guard is tested on a stand-in
+
+**Decided**: the `tests/sphinx/contents/` source has no toctree pointing back up the tree, and
+`sphinx_json_build` gains no keyword to allow warnings. The extension keeps skipping an entry that is
+already on the path from the root, and that skip is tested on a stand-in environment built from real
+docutils nodes.
+
+**Why**: Sphinx 9.1's `_traverse_toctree` stops the whole build with a recursion error on any cycle
+of two or more pages, before `build-finished`, and a page listing itself is dropped by the directive.
+No real build reaches the extension with a cycle, and the remaining fixture entries build without a
+warning, so the keyword would be unused.
+
+**Revisit if**: a Sphinx release lets a cycle through to `build-finished`; then the fixture can carry
+the back-pointing toctree.
+
+**ADR:** none — a test-fixture constraint local to this feature
+
+## D10. The unreadable-file tests skip when the suite runs as root
+
+**Decided**: the two T007 tests that make `navigation.json` unreadable with `chmod 000` carry
+`skipif(os.geteuid() == 0)`. `forge tamper-check` flags them as added skips, and they were checked
+against tasks.md T007, which planned exactly this condition.
+
+**Why**: root reads a file whatever its mode, so the test cannot set up its own precondition
+there. CI and development run as ordinary users, where the tests run and pass.
+
+**Revisit if**: CI moves to a container that runs as root, which would silently skip them.
+
+**ADR:** none — a test environment detail local to this feature
+
+## D11. Review findings below the fix bar, fixed directly
+
+**Decided**: the S6 review approved with no critical or high finding. The orchestrator fixed four
+small items directly rather than dispatching: TEST-001 (two `_hidden`/`_uncaptioned` unpacking
+targets in tests broke the owner's no-leading-underscore rule, now indexing), TEST-002 (a failed
+build writing no file is now tested on a stand-in), DOC-001 (the `process` override's docstring cut
+to one line, the lock's reason a one-line comment pointing at ADR 0002), and the catalogue's stale
+line references. TEST-003 (the read-count tests patch `DocsBuild.navigation`) is left as it is: it
+is the one outcome that shows the file is not re-read, which is the point of the stamp.
+
+**Why**: each was a line or two, with no design content, so a dispatch would cost more than the
+change.
+
+**Revisit if**: n/a — a record.
+
+**ADR:** none — a record of the review, not a decision

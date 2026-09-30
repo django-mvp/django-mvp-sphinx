@@ -7,8 +7,9 @@ and serving its pages through a documentation app: the pages render in the host'
 shell and theme, and the contents become the app sidebar's menu. Serving never
 imports Sphinx. The only Sphinx code is the extension that writes the
 navigation file during the build. `CONSTITUTION.md` Article XII lists what stays
-out of scope. Only page serving is built so far, and the contents menu and the
-Sphinx extension are not.
+out of scope. The contents menu is built: the extension in
+`mvp_sphinx/navigation.py` writes the navigation file during the build, and
+`DocumentationMenu` in `mvp_sphinx/menus.py` draws it as the app sidebar's menu.
 
 ## Stack and commands
 

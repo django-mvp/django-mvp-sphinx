@@ -143,3 +143,14 @@ ignore_missing_model_attributes = "True"
 
 [tool.deptry]
 extend_exclude = ["tests/", "demo/", "docs/"]
+
+[tool.deptry.per_rule_ignores]
+# mvp_sphinx.navigation only ever runs inside the host's own Sphinx build, so
+# Sphinx is never a runtime dependency of this package (Article XII).
+DEP004 = ["sphinx"]
+
+[tool.forge.docs]
+# The extension's functions and class are Sphinx's to call, not a host's. Its
+# one public surface is the module name a host lists in conf.py, which the
+# README quotes.
+exempt-paths = ["mvp_sphinx/navigation.py"]
