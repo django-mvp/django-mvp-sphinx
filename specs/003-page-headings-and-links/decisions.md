@@ -68,7 +68,7 @@ must sit on the lists; and a page whose title holds an empty list (the demo's fr
 **Revisit if**: Sphinx changes the shape of `toc`, or a Sphinx release adds the title-less tree to
 the page context.
 
-**ADR:** pending S5
+**ADR:** none — how this feature reads one key of the page JSON; nothing else in the package inherits it
 
 ## D3. Previous and next links resolved against the request path
 
@@ -81,7 +81,7 @@ routed to, so the result stays under whatever prefix the app is mounted at with 
 
 **Revisit if**: pages are ever served at an address other than the JSON builder's own.
 
-**ADR:** pending S5
+**ADR:** none — follows the breadcrumbs' existing precedent (ADR 0001 covers reading the build per request)
 
 ## D4. Layout from the shell's emitted utilities only
 
@@ -93,7 +93,7 @@ routed to, so the result stays under whatever prefix the app is mounted at with 
 **Revisit if**: layout needs something the shell does not emit. FS-004's `content.css` is scoped
 to the page body (`.mvp-sphinx-content`) and is the place a page-level rule would go.
 
-**ADR:** pending S5
+**ADR:** none — the rule that an unemitted class silently does nothing is already recorded in AGENTS.md; this applies it
 
 ## D5. The new components are parts of the page, not a published API
 
@@ -105,7 +105,7 @@ the markup would turn every visual adjustment into a contract.
 
 **Revisit if**: a host project asks to place the list itself.
 
-**ADR:** pending S5
+**ADR:** none — local to this feature's three components; revisit only if a host asks to place them
 
 ## D6. Design review: approved, five low findings applied as plan edits
 

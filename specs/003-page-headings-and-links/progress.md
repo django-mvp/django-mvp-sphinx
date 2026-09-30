@@ -93,3 +93,14 @@ as tasks.md expected (the view reads the page file on every request), so there w
 Probe: replacing the rebuild call with `pass` fails both tests, so they depend on the rebuild.
 Next: full verify, then the completion report.
 Watch: no source under `tests/sphinx/reading/` was edited.
+
+## 2026-09-30T09:51:31Z · S5 converge
+
+Did: US1 accepted and the branch rebased onto origin/main with FS-006 and FS-007 (conflicts kept
+both sides; two `PageView.get_context_data` methods from the auto-merge merged into one); US2 and
+US3 accepted (ledger evidence converted to the schema's object form). Converge: every FR-001–FR-011
+and SC-001–SC-004 has a test; no gaps, no new tasks. No migrations. craft-simplify pass over the
+feature diff: nothing to change (`position()` repeats `BodyRewriter`'s, kept per Article III and
+the design review). ADR verdicts for D2–D5: none graduate. T004's hidden-page wording corrected
+(D7). check-adrs and check-story-comments green.
+Next: S6 review.

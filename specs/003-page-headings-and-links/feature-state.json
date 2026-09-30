@@ -2,7 +2,7 @@
   "feature": "003-page-headings-and-links",
   "branch": "003-page-headings-and-links",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-09-30T00:40:54Z",
       "note": "plan notice sent; US1 dispatch"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T09:50:52Z",
+      "note": "all three stories done"
     }
   ],
   "gates": {
@@ -111,7 +116,7 @@
       "priority": "P2",
       "issue": 36,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-003",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -136,7 +141,7 @@
       "priority": "P3",
       "issue": 37,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-003",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -159,7 +164,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {

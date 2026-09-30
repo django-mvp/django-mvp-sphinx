@@ -94,8 +94,8 @@ the page after the front page, the previous link leads to the app's own address,
 starting
 at the front page and following only next links visits every page the reading build lists, each
 once, and ends on a page with no next link, and following previous links from there returns the same
-way (SC-002); on `contents_app`, `hidden-page/` has both links and its neighbours link to it (edge
-case) and `orphan/` has neither link and answers 200 (scenario 6); the handbook app mounted at
+way (SC-002); on `contents_app`, `hidden-page/` is in reading order: it has its previous link and its
+neighbour links to it (edge case; it is the last page there, D7) and `orphan/` has neither link and answers 200 (scenario 6); the handbook app mounted at
 `manuals/admin/` links under its own prefix (scenario 5; `handbook_app` fixture; its two pages are
 enough, do not edit that source); Sphinx's
 general index page (`genindex/`) is served with neither link; with Sphinx blocked in
