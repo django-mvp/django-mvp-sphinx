@@ -2,7 +2,7 @@
   "feature": "007-docs-search",
   "branch": "007-docs-search",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-09-30T01:22:05Z",
       "note": "PR #54 ready; walkthrough required (5 user-facing paths), worktree served by the orchestrator"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-09-30T01:25:43Z",
+      "note": "PR #54 merged; approved by forge-aeo-reviewer"
     }
   ],
   "gates": {
@@ -51,8 +56,15 @@
       "at": "2026-09-30T00:47:17Z"
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-09-30T01:25:39Z"
+    },
+    "walkthrough": {
+      "approved_by": "orchestrator agent:forge:dashboard:15456d51-453c-4956-a45a-d1ec3f4fd707 (holding the walkthrough for Sam, 2026-09-30)",
+      "at": "2026-09-30T01:26:11Z",
+      "self_resolved": [
+        "round 1: nothing asked for \u2014 title-first order, section deep links, empty and no-match states, escaped markup query and the GET form on pages checked; search-box placement above the page text accepted as it is"
+      ]
     }
   },
   "stories": [
@@ -168,7 +180,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 0,
+      "used": 20.41,
       "max": 120
     },
     "design_review_cycles": {
