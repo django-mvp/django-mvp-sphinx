@@ -2,7 +2,7 @@
   "feature": "002-sidebar-contents",
   "branch": "002-sidebar-contents",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-09-30T00:14:13Z",
       "note": "one reviewer, correctness+spec+docs lens"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T00:21:12Z",
+      "note": "review recorded; PR ready; walkthrough on devserver:8025 for the orchestrating session"
     }
   ],
   "gates": {
@@ -57,10 +62,10 @@
       "approved_by": "design-panel",
       "at": "2026-09-29T23:52:38Z",
       "self_resolved": [
-        "ARCH-001 high: non-atomic children swap \u2014 per-menu lock across refresh and processing (D4) \u2014 plan edit",
-        "SPEC-001 high: planned menu-active class assertion \u2014 removed; marking tested on the processed tree \u2014 tasks edit",
-        "ARCH-002 medium: mkstemp 0600 risk \u2014 fixed sibling navigation.json.tmp via write_text, then os.replace \u2014 plan edit",
-        "ARCH-003 medium: loose functions \u2014 NavigationWriter class, DocsBuild staticmethod shape check \u2014 plan edit",
+        "ARCH-001 high: non-atomic children swap — per-menu lock across refresh and processing (D4) — plan edit",
+        "SPEC-001 high: planned menu-active class assertion — removed; marking tested on the processed tree — tasks edit",
+        "ARCH-002 medium: mkstemp 0600 risk — fixed sibling navigation.json.tmp via write_text, then os.replace — plan edit",
+        "ARCH-003 medium: loose functions — NavigationWriter class, DocsBuild staticmethod shape check — plan edit",
         "SEC-001 low: entry-address filter removed (D3)",
         "SPEC-002 low: atomic-write test removed",
         "SPEC-003 low: sections renamed groups (CONTEXT.md)",
@@ -71,10 +76,17 @@
       "approved_by": "review-panel",
       "at": "2026-09-30T00:20:06Z",
       "self_resolved": [
-        "TEST-001 medium: underscore unpacking targets in tests \u2014 fixed (D11)",
-        "TEST-002 low: failed-build no-write untested \u2014 test added (D11)",
-        "TEST-003 low: read-count tests patch DocsBuild.navigation \u2014 kept, stated in D11",
-        "DOC-001 low: multi-line hook docstring \u2014 cut to one line (D11)"
+        "TEST-001 medium: underscore unpacking targets in tests — fixed (D11)",
+        "TEST-002 low: failed-build no-write untested — test added (D11)",
+        "TEST-003 low: read-count tests patch DocsBuild.navigation — kept, stated in D11",
+        "DOC-001 low: multi-line hook docstring — cut to one line (D11)"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "forge FS-002 session, pre-check of the running pages on devserver:8025 (front page, captioned groups, nested tutorials page, host overview); the orchestrating session (Sam's 2026-09-30 overnight delegate) holds the walkthrough gate",
+      "at": "2026-09-30T00:21:12Z",
+      "self_resolved": [
+        "nothing asked yet — pages prepared at http://devserver:8025/docs/ for the orchestrator's look"
       ]
     }
   },
@@ -234,7 +246,7 @@
   },
   "pr": {
     "number": 47,
-    "draft": true
+    "draft": false
   },
   "escalations": []
 }

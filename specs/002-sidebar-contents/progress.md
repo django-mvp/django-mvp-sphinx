@@ -81,3 +81,10 @@ corrected from local time to UTC (taken from their commits). No migrations.
 Verified: forge verify, all six steps; tamper-check flags only the planned root skips (D10);
 story-comment gate green.
 Next: S6 review.
+
+## 2026-09-30T00:21:12Z · S6 review, S7 PR ready
+
+Did: one reviewer, approve, low risk; TEST-001/TEST-002/DOC-001 fixed directly, TEST-003 kept (D11);
+review outcome posted to PR #47. PR description rewritten with the Closes block (epic #5, stories
+#25, #27, #28), marked ready. Dev server on 8025 from this worktree, demo guide built, accounts seeded.
+Next: CI green, then the walkthrough and merge-gate message to the orchestrating session.
