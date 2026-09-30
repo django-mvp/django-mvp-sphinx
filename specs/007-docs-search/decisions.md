@@ -231,3 +231,21 @@ stays: retiring it is outside this feature.
 
 **Why:** Each edit either removes work or is one line of design, and each was checkable from the
 finding's own text.
+
+## D20. Fixture and test choices where the plan's words did not fit the data (S4 US1)
+
+**Decision:** Three departures from the wording in tasks.md T001, none from what it protects.
+(1) The capitalised-key test uses "Others" in `metals.rst`, not "Doing": "doing" is itself in
+the English stopword list, so a reader's "doing" is dropped from the query and can never reach
+the key `Doing`. "Others" is stored as `Others` (its stem `other` is a stopword) and "others"
+is not a stopword, so it exercises the case-fold merge. (2) The missing-`language_data.js` test
+searches "and product list" (finds nothing without the file, finds `products/` with it) rather
+than a lone stopword: with case-folding, "the" alone would find pages holding the capitalised
+key `The`, so a lone stopword does not show whether the file was read. (3) `stopwords` and
+`stemmers` are `cached_property` on `DocsSearch`, not methods: one instance serves one search,
+so each is read once per search without a cache surviving into the next (D17).
+
+**Why:** Each keeps the behaviour the task names testable against the real build.
+
+**Revisit if:** a host keeps a `DocsSearch` instance across requests (it would then serve a
+stale stopword list after a rebuild).

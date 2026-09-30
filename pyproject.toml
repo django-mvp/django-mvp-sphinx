@@ -15,7 +15,12 @@ requires-python = ">=3.12,<4.0"
 # builds on its MountedApp and its markup sits inside its layout primitives.
 # Without it, whatever this renders arrives on an unstyled page. django-flex-menus
 # is imported directly, for each documentation app's own menu.
-dependencies = ["django>=5.2", "django-flex-menus>=0.4.5", "django-mvp>=0.25.0"]
+dependencies = [
+    "django>=5.2",
+    "django-flex-menus>=0.4.5",
+    "django-mvp>=0.25.0",
+    "snowballstemmer>=2.2",
+]
 keywords = ["django", "django-mvp", "cotton"]
 classifiers = [
     "Development Status :: 3 - Alpha",

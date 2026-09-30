@@ -633,6 +633,7 @@ dependencies = [
     { name = "django" },
     { name = "django-flex-menus" },
     { name = "django-mvp" },
+    { name = "snowballstemmer" },
 ]
 
 [package.dev-dependencies]
@@ -646,6 +647,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2" },
     { name = "django-flex-menus", specifier = ">=0.4.5" },
     { name = "django-mvp", specifier = ">=0.25.0" },
+    { name = "snowballstemmer", specifier = ">=2.2" },
 ]
 
 [package.metadata.requires-dev]

@@ -89,6 +89,11 @@ def contents_build(sphinx_json_build):
     return sphinx_json_build("contents")
 
 
+@pytest.fixture(scope="session")
+def search_build(sphinx_json_build):
+    return sphinx_json_build("search")
+
+
 @pytest.fixture
 def docs_app(guide_build, monkeypatch):
     from demo.mounted import docs
