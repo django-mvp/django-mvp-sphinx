@@ -79,7 +79,7 @@ Advances G1 and G4.
 
 ### R4 — Adopting it is a mount and one line of config
 
-*resolve · advances G3*
+*delivered in [#8](https://github.com/django-mvp/django-mvp-sphinx/issues/8) · advances G3*
 
 A project new to the package gets from install to a working documentation page
 by following the README alone. It comes last in this release because it
