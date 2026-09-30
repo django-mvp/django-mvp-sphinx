@@ -112,3 +112,10 @@ override paragraph now names the new context keys. Looking at the running pages 
 turned up two layout faults, fixed directly (D8): long headings now wrap in On this page, and the
 reading column is held at prose width. Verify green. Review outcome recorded on #52.
 Next: S7 walkthrough and PR ready.
+
+## 2026-09-30T10:00:44Z · S7 walkthrough
+
+Did: PR #52 marked ready with the contract body and the Closes block (#6, #34, #36, #37); CI green.
+The orchestrating session (Sam's overnight delegate) walked the pages on devserver:8025, round 1:
+nothing asked for, layout accepted. Walkthrough recorded with it as approver.
+Next: merge gate (the orchestrating session merges), then S8.
