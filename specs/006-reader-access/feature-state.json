@@ -2,7 +2,7 @@
   "feature": "006-reader-access",
   "branch": "006-reader-access",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-09-30T00:30:01Z",
       "note": "walkthrough pre-checked by rendered HTML; PR ready for the merge gate"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-09-30T00:40:42Z",
+      "note": "PR #49 merged; approved by forge-aeo-reviewer"
     }
   ],
   "gates": {
@@ -54,8 +59,8 @@
       ]
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-09-30T00:40:38Z"
     },
     "design_review": {
       "approved_by": "design-panel (request_changes, remedied in plan)",
@@ -81,10 +86,10 @@
       ]
     },
     "walkthrough": {
-      "approved_by": "build session, rendered-HTML walkthrough through the test client with the standard accounts (port 8025 held by FS-002; the orchestrating session serves the worktree for its own look)",
-      "at": "2026-09-30T00:30:01Z",
+      "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's overnight delegate), served the worktree locally, round 1",
+      "at": "2026-09-30T00:41:15Z",
       "self_resolved": [
-        "no dev server this run (orchestrator) \u2014 every state probed as anonymous, regular, staff and super: /staff-guide/ entry and pages, unknown page, /docs/, sign-in page with next"
+        "round 1: nothing asked for \u2014 every state checked as anonymous, regular, staff and super; passed"
       ]
     }
   },
@@ -200,7 +205,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 0,
+      "used": 11.54,
       "max": 120
     },
     "design_review_cycles": {
