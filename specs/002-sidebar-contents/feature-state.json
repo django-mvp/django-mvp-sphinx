@@ -164,13 +164,32 @@
       "tasks": [
         {
           "id": "T006",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_menus.py::TestRefresh",
+              "tests/test_views.py::TestRebuiltContents"
+            ],
+            "commands": [
+              "uv run pytest tests/test_menus.py tests/test_views.py -q (exit 0, 90 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
         },
         {
           "id": "T007",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestContentsUnavailable"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py tests/test_menus.py -q (exit 0, 100 passed)",
+              "uv run pre-commit run --all-files (exit 0)"
+            ]
+          }
         }
       ]
     }
