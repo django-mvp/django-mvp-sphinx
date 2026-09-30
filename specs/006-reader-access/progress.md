@@ -70,3 +70,10 @@ Lint: `uv run pre-commit run --all-files` passed.
 Next: US3 (T004).
 Watch: `docs/` describes none of the names or behaviour this story touched, so no page there
 changed.
+
+## 2026-09-30T00:06:00Z · Orchestrator · US2 acceptance
+
+Did: receipts, verify green. tamper-check against the story base flagged the widened
+`flex_menu.checks` import in tests/test_mounted.py, a line US1 added. No assertion changed, and
+it is clean against origin/main. To sweep at S5: the README's "Pass `user_is_staff` itself"
+should say where it is imported from.
