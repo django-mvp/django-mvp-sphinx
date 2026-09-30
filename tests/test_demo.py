@@ -5,6 +5,9 @@
 
 from django.urls import reverse
 
+from demo.settings import BASE_DIR
+from mvp_sphinx.docs_build import DocsBuild
+
 
 class TestOverviewPage:
     def test_it_responds(self, client, db) -> None:
@@ -25,3 +28,10 @@ class TestDocumentationEntry:
         sidebar = overview_page.split('aria-label="Main navigation"', 1)[1]
         sidebar = sidebar.split("</ul>", 1)[0]
         assert 'href="/docs/"' in sidebar
+
+
+class TestDemoGuide:
+    def test_building_the_guide_writes_the_navigation_file(self, sphinx_build) -> None:
+        out = sphinx_build(BASE_DIR / "demo" / "docs")
+
+        assert (out / DocsBuild.NAVIGATION_FILE).is_file()

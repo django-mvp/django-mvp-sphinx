@@ -35,9 +35,16 @@ Verified: `uv run pytest tests/test_docs_build.py -q` → 57 passed; red first (
 Next: T003, `DocumentationMenu` and the sidebar tests.
 Watch: `navigation()` finds the file through `contained_file`, so a symlink pointing out of the build reads as absent (tested).
 
-## 2026-09-30T00:10:00Z · Implementer US1 · T003
+## 2026-09-30T00:01:00Z · Implementer US1 · T003
 
 Did: `mvp_sphinx/menus.py` (`DocumentationMenu`: `process`, `refresh`, `entry_item`), `DocumentationApp` builds it in place of the empty `Menu`; the guide and handbook sources load the extension; `contents_app` fixture; `TestDocumentationMenu`, `TestServingSideImports` (tests/test_menus.py) and `TestContentsInTheSidebar` (tests/test_views.py). US1 rebuilds the items on every `process()`, with no stamp and no lock (US3).
 Verified: `uv run pytest tests/test_menus.py tests/test_mounted.py tests/test_views.py tests/test_navigation.py tests/test_docs_build.py -q` → 149 passed; red first (menu had no label; the handbook test failed until the source loaded the extension); mutations of the address prefix, the label safety, the group class, the uncaptioned entries and the children assignment each fail tests, and adding `import sphinx` to `docs_build.py` fails the subprocess test; `uv run pre-commit run --all-files` → all hooks pass.
 Next: T004, README, CHANGELOG, AGENTS.md, demo guide, catalogue, `test_demo`.
 Watch: the sidebar tests find the contents list by its `aria-label`, which is the app's name; `TestServingSideImports` uses a subprocess because `sys.modules` blocking cannot show that modules already loaded do not import Sphinx.
+
+## 2026-09-30T00:02:00Z · Implementer US1 · T004
+
+Did: README section "The contents in the sidebar" (the one `conf.py` line, what the sidebar holds, Sphinx still not needed at runtime, what happens without the line); CHANGELOG Unreleased entry; AGENTS.md sentence replaced; demo guide loads the extension and `index.rst` has two captioned toctrees and an uncaptioned one, with three short pages added and the tutorials page and its nested page kept; catalogue refreshed with `django-admin makemessages -l en` (adds "Overview"); `TestDemoGuide` in `tests/test_demo.py`. README text written to the humanizer skill's rules. No page under `docs/` describes a name this story touched (ROADMAP R2 is the plan, not current behaviour).
+Verified: `uv run pytest tests/test_demo.py tests/test_menus.py tests/test_mounted.py -q` → 21 passed; the test failed before `conf.py` loaded the extension; `uv run sphinx-build -E -b json -q -w /tmp/demo.warn demo/docs /tmp/demo-out` → exit 0, empty warnings file; `uv run pre-commit run --all-files` → all hooks pass.
+Next: full verify, then the completion report. The first full verify failed its docs step on `NavigationWriter`, `setup` and `write_navigation`; the README now quotes them.
+Watch: the README's rebuild-on-next-request sentence belongs to US3 (T007) and is not written here.

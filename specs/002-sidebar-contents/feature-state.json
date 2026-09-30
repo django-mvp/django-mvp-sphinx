@@ -114,8 +114,18 @@
         },
         {
           "id": "T004",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_demo.py::TestDemoGuide"
+            ],
+            "commands": [
+              "uv run pytest tests/test_demo.py tests/test_menus.py tests/test_mounted.py -q (exit 0, 21 passed)",
+              "uv run pre-commit run --all-files (exit 0)",
+              "uv run sphinx-build -E -b json -q -w /tmp/demo.warn demo/docs /tmp/demo-out (exit 0, no warnings)"
+            ]
+          }
         }
       ]
     },
