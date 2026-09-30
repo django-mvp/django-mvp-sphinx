@@ -78,8 +78,16 @@
         },
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestOnThisPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py::TestOnThisPage -q"
+            ]
+          }
         },
         {
           "id": "T003",

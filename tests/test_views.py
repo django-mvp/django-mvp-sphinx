@@ -1175,3 +1175,117 @@ class TestSearchOfAVeryLongQuery:
 
         assert response.status_code == 200
         assert query_field(response)["value"] == query
+
+
+class TestOnThisPage:
+    @staticmethod
+    def soup(client, address: str) -> BeautifulSoup:
+        return BeautifulSoup(client.get(f"/docs/{address}").content, "html.parser")
+
+    @staticmethod
+    def on_this_page(soup: BeautifulSoup):
+        return soup.find("nav", attrs={"aria-labelledby": True})
+
+    def test_a_page_with_sections_lists_them_in_a_named_navigation_region(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "")
+
+        nav = self.on_this_page(soup)
+
+        assert soup.find(id=nav["aria-labelledby"]).get_text(strip=True)
+        assert [link["href"] for link in nav.find_all("a")] == [
+            "#first-part",
+            "#second-part",
+            "#a-sub-section",
+        ]
+
+    def test_a_sub_section_is_listed_inside_its_parents_entry(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, ""))
+
+        entry = nav.find("a", href="#a-sub-section").find_parent("li")
+        parent = entry.find_parent("li")
+
+        assert entry.find_parent("ul").parent is parent
+        assert parent.find("a")["href"] == "#second-part"
+
+    @pytest.mark.parametrize("address", ["", "long/", "single/"])
+    def test_every_link_leads_to_a_heading_in_the_pages_article(
+        self, client, db, reading_app, address
+    ) -> None:
+        soup = self.soup(client, address)
+        article = soup.find("article")
+
+        links = self.on_this_page(soup).find_all("a")
+
+        assert links
+        for link in links:
+            assert link["href"].startswith("#")
+            assert article.find(id=link["href"][1:]) is not None
+
+    @pytest.mark.parametrize("address", ["", "long/", "single/"])
+    def test_no_link_leads_to_the_pages_own_title(
+        self, client, db, reading_app, address
+    ) -> None:
+        links = self.on_this_page(self.soup(client, address)).find_all("a")
+
+        assert "#" not in [link["href"] for link in links]
+
+    def test_a_page_with_no_section_has_no_such_region(
+        self, client, db, reading_app
+    ) -> None:
+        assert self.on_this_page(self.soup(client, "plain/")) is None
+
+    def test_the_front_page_lists_none_of_the_headings_of_the_pages_it_lists(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, ""))
+
+        hrefs = {link["href"] for link in nav.find_all("a")}
+
+        assert hrefs.isdisjoint(
+            {"#level-one", "#the-code-heading", "#the-only-section"}
+        )
+
+    def test_the_regions_name_differs_from_the_contents_name(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "")
+        nav = self.on_this_page(soup)
+
+        name = soup.find(id=nav["aria-labelledby"]).get_text(strip=True)
+
+        assert name != str(reading_app.name)
+        assert soup.find("ul", attrs={"aria-label": str(reading_app.name)})
+
+    def test_a_page_with_one_section_lists_one_link(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, "single/"))
+
+        assert [link["href"] for link in nav.find_all("a")] == ["#the-only-section"]
+
+    def test_a_heading_with_inline_code_keeps_its_markup(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, "long/"))
+
+        link = nav.find("a", href="#the-code-heading")
+
+        assert link.find("code") is not None
+
+    def test_the_list_is_drawn_when_sphinx_cannot_be_imported(
+        self, client, db, reading_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        nav = self.on_this_page(self.soup(client, "long/"))
+
+        assert nav.find("a", href="#level-three") is not None

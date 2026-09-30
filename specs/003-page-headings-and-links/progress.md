@@ -32,3 +32,18 @@ Verified: red first (`ModuleNotFoundError: mvp_sphinx.headings`), then
 `uv run mypy` passed.
 Next: T002, the view, page and components.
 Watch: `reading_app` is added in T002.
+
+## 2026-09-30T01:10:00Z · Implementer US1 · T002
+
+Did: `PageView.get_context_data` and `get_headings`; `page.html` wraps the article in the first
+column and draws the second column (`<aside>`) inside the one `{% if headings %}` guard;
+components `on_this_page.html` (named `nav`, outer list carries `menu menu-sm`) and
+`heading_list.html` (recursive); `reading_app` fixture; `TestOnThisPage`; `On this page` msgid
+added with `makemessages -l en` (it also refreshed the `page_body.py` line reference and the
+creation date). Every layout class was checked in the packaged stylesheet.
+Verified: red first (13 of 14 failed: no `nav` on the page; the "plain" test passes before the
+change by nature); then `uv run pytest tests/test_views.py::TestOnThisPage -q` 14 passed;
+`uv run pytest tests/test_views.py tests/test_headings.py tests/test_demo.py -q` 120 passed;
+pre-commit and mypy passed. Probe: forcing the guard true fails the "plain" test.
+Next: T003, demo guide section, README, CHANGELOG.
+Watch: sticky offset (`top-3`) and the column width are for the walkthrough by eye.

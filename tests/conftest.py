@@ -147,3 +147,11 @@ def user(db):
 @pytest.fixture
 def group(db):
     return GroupFactory()
+
+
+@pytest.fixture
+def reading_app(reading_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", reading_build)
+    return docs

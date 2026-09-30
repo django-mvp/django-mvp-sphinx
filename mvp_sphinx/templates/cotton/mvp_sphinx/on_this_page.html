@@ -1,0 +1,12 @@
+{% load i18n %}
+{# @description The current page's own headings, as a named navigation region. #}
+{# @prop headings:list | description:"Headings from PageHeadings; never empty, the page draws nothing otherwise." #}
+<c-vars headings />
+
+<nav aria-labelledby="mvp-sphinx-on-this-page"
+     class="sticky self-start top-3 max-h-[calc(100vh-8.6rem)] overflow-y-auto">
+  <h2 id="mvp-sphinx-on-this-page" class="px-3 text-sm font-medium opacity-70">
+    {% trans "On this page" %}
+  </h2>
+  <c-mvp_sphinx.heading_list :headings="headings" class="menu menu-sm w-full" />
+</nav>

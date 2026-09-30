@@ -1,0 +1,12 @@
+{# @description A list of headings, each linking to its anchor, with sub-headings nested in their parent's item. #}
+{# @prop headings:list | description:"Dicts with title (safe markup), anchor (#id) and children (the same, nested)." #}
+<c-vars headings />
+
+<ul {{ attrs }}>
+  {% for heading in headings %}
+    <li>
+      <a href="{{ heading.anchor }}">{{ heading.title }}</a>
+      {% if heading.children %}<c-mvp_sphinx.heading_list :headings="heading.children" />{% endif %}
+    </li>
+  {% endfor %}
+</ul>
