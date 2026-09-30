@@ -139,9 +139,12 @@ class BodyRewriter(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         """Note where a table and its caption begin, and name a heading link."""
-        classes = (dict(attrs).get("class") or "").split()
-        if tag == "a" and "headerlink" in classes:
-            self.name_heading_link(dict(attrs).get("title"))
+        attributes = dict(attrs)
+        heading_link = (
+            tag == "a" and "headerlink" in (attributes.get("class") or "").split()
+        )
+        if heading_link:
+            self.name_heading_link(attributes.get("title"))
         if tag not in self.VOID_TAGS:
             content = self.position() + len(self.get_starttag_text())
             self.open_elements.append((tag, content))
@@ -156,8 +159,7 @@ class BodyRewriter(HTMLParser):
             elif (
                 self.caption_start is not None
                 and self.caption_end is None
-                and tag == "a"
-                and "headerlink" in classes
+                and heading_link
             ):
                 self.caption_end = self.position()
 
