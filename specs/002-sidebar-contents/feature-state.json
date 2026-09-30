@@ -66,6 +66,16 @@
         "SPEC-003 low: sections renamed groups (CONTEXT.md)",
         "ARCH-004 low: reads catch (OSError, ValueError); invalid UTF-8 case added"
       ]
+    },
+    "review": {
+      "approved_by": "review-panel",
+      "at": "2026-09-30T00:20:06Z",
+      "self_resolved": [
+        "TEST-001 medium: underscore unpacking targets in tests \u2014 fixed (D11)",
+        "TEST-002 low: failed-build no-write untested \u2014 test added (D11)",
+        "TEST-003 low: read-count tests patch DocsBuild.navigation \u2014 kept, stated in D11",
+        "DOC-001 low: multi-line hook docstring \u2014 cut to one line (D11)"
+      ]
     }
   },
   "stories": [
