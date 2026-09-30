@@ -92,3 +92,16 @@ document-number check into DocsSearch.is_document; ADR verdicts written on all 2
 graduated to ADR 0004 or 0005). Restamped the US1 implementer's two progress headings from their
 commits' UTC author times.
 Next: S6 review.
+
+## 2026-09-30T01:23:34Z · Forge · S6 review and S7 ready
+
+Did: two reviewers (correctness+spec+docs; security, for the new dependency and the query input),
+receipts ok. Correctness: request changes, REV-001 high (passages re-stemmed every word) and REV-002
+medium (passage opened with the page title), both fixed test-first by Forge with two lows (D25).
+Security: approve, SEC-001 low accepted and named in ADR 0005. Review outcome recorded on #54.
+forge verify green, 484 tests. PR body rewritten with the Closes block (#10, #42, #43, #44), PR
+marked ready, all nine CI checks green, story-comment gate green.
+Walkthrough: required (5 user-facing paths). Demo guides built in this worktree, accounts seeded,
+the staff guide's searchindex.json moved out (/tmp/fs007-staff-searchindex.json) so its search
+shows the unavailable state; rebuild the staff guide to restore it.
+Next: walkthrough by the orchestrator, then its record, then the merge gate.
