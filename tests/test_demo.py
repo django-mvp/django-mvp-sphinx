@@ -5,6 +5,8 @@
 
 from django.urls import reverse
 
+from demo.settings import BASE_DIR
+from mvp_sphinx.docs_build import DocsBuild
 from tests.factories import UserFactory
 
 
@@ -55,3 +57,17 @@ class TestStaffGuideEntry:
         client.force_login(UserFactory(is_staff=True))
 
         assert client.get("/staff-guide/").status_code == 200
+
+
+class TestDemoGuide:
+    def test_building_the_guide_writes_the_navigation_file(self, sphinx_build) -> None:
+        out = sphinx_build(BASE_DIR / "demo" / "docs")
+
+        assert (out / DocsBuild.NAVIGATION_FILE).is_file()
+
+    def test_building_the_staff_guide_writes_the_navigation_file(
+        self, sphinx_build
+    ) -> None:
+        out = sphinx_build(BASE_DIR / "demo" / "staff_guide")
+
+        assert (out / DocsBuild.NAVIGATION_FILE).is_file()

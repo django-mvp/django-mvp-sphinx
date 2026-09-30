@@ -5,9 +5,9 @@ from typing import Any
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
-from flex_menu import Menu
 from mvp.mounted import MountedApp
 
+from mvp_sphinx.menus import DocumentationMenu
 from mvp_sphinx.views import PageView
 
 
@@ -72,4 +72,4 @@ class DocumentationApp(MountedApp):
         )
         self.landing = f"{self.namespace}:front_page"
         # The shell processes every app's menu on host pages no mount serves.
-        self.menu = Menu(f"mvp_sphinx-{self.namespace}")
+        self.menu = DocumentationMenu(f"mvp_sphinx-{self.namespace}", app=self)

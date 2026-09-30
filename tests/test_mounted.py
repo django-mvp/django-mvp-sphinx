@@ -351,8 +351,10 @@ class TestOwnRule:
         refused = client.get("/manuals/admin/backups/")
 
         assert admitted.context["mounted_app"] == handbook_app
+        assert admitted.context["mounted_menu"] == handbook_app.menu
         assert is_forbidden(refused)
         assert not refused.context["mounted_app"]
+        assert not refused.context["mounted_menu"]
 
 
 class TestPermissionRule:
