@@ -2,7 +2,7 @@
   "feature": "002-sidebar-contents",
   "branch": "002-sidebar-contents",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-09-30T00:21:12Z",
       "note": "review recorded; PR ready; walkthrough on devserver:8025 for the orchestrating session"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-09-30T00:22:46Z",
+      "note": "PR #47 merged; approved by forge-aeo-reviewer"
     }
   ],
   "gates": {
@@ -55,17 +60,17 @@
       ]
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "forge-aeo-reviewer",
+      "at": "2026-09-30T00:22:42Z"
     },
     "design_review": {
       "approved_by": "design-panel",
       "at": "2026-09-29T23:52:38Z",
       "self_resolved": [
-        "ARCH-001 high: non-atomic children swap — per-menu lock across refresh and processing (D4) — plan edit",
-        "SPEC-001 high: planned menu-active class assertion — removed; marking tested on the processed tree — tasks edit",
-        "ARCH-002 medium: mkstemp 0600 risk — fixed sibling navigation.json.tmp via write_text, then os.replace — plan edit",
-        "ARCH-003 medium: loose functions — NavigationWriter class, DocsBuild staticmethod shape check — plan edit",
+        "ARCH-001 high: non-atomic children swap \u2014 per-menu lock across refresh and processing (D4) \u2014 plan edit",
+        "SPEC-001 high: planned menu-active class assertion \u2014 removed; marking tested on the processed tree \u2014 tasks edit",
+        "ARCH-002 medium: mkstemp 0600 risk \u2014 fixed sibling navigation.json.tmp via write_text, then os.replace \u2014 plan edit",
+        "ARCH-003 medium: loose functions \u2014 NavigationWriter class, DocsBuild staticmethod shape check \u2014 plan edit",
         "SEC-001 low: entry-address filter removed (D3)",
         "SPEC-002 low: atomic-write test removed",
         "SPEC-003 low: sections renamed groups (CONTEXT.md)",
@@ -76,17 +81,17 @@
       "approved_by": "review-panel",
       "at": "2026-09-30T00:20:06Z",
       "self_resolved": [
-        "TEST-001 medium: underscore unpacking targets in tests — fixed (D11)",
-        "TEST-002 low: failed-build no-write untested — test added (D11)",
-        "TEST-003 low: read-count tests patch DocsBuild.navigation — kept, stated in D11",
-        "DOC-001 low: multi-line hook docstring — cut to one line (D11)"
+        "TEST-001 medium: underscore unpacking targets in tests \u2014 fixed (D11)",
+        "TEST-002 low: failed-build no-write untested \u2014 test added (D11)",
+        "TEST-003 low: read-count tests patch DocsBuild.navigation \u2014 kept, stated in D11",
+        "DOC-001 low: multi-line hook docstring \u2014 cut to one line (D11)"
       ]
     },
     "walkthrough": {
-      "approved_by": "forge FS-002 session, pre-check of the running pages on devserver:8025 (front page, captioned groups, nested tutorials page, host overview); the orchestrating session (Sam's 2026-09-30 overnight delegate) holds the walkthrough gate",
-      "at": "2026-09-30T00:21:12Z",
+      "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's 2026-09-30 overnight delegate), on devserver:8025",
+      "at": "2026-09-30T00:23:17Z",
       "self_resolved": [
-        "nothing asked yet — pages prepared at http://devserver:8025/docs/ for the orchestrator's look"
+        "nothing \u2014 walkthrough passed as built"
       ]
     }
   },
@@ -236,7 +241,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 0,
+      "used": 14.65,
       "max": 120
     },
     "design_review_cycles": {
