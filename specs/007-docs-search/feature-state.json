@@ -2,7 +2,7 @@
   "feature": "007-docs-search",
   "branch": "007-docs-search",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-09-30T00:47:47Z",
       "note": "US1 first; US2+US3 one dispatch"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T01:12:10Z",
+      "note": "all three stories done"
     }
   ],
   "gates": {
@@ -91,7 +96,7 @@
       "priority": "P2",
       "issue": 43,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-007",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -119,7 +124,7 @@
       "priority": "P3",
       "issue": 44,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-007",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -145,7 +150,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {
