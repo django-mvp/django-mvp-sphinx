@@ -17,7 +17,7 @@ DR-001–DR-006 applied to plan.md and tasks.md, DR-007 declined (D15). Analyze 
 tasks: prerequisites green. stage-exit S3R green. Plan notice sent to the orchestrator.
 Next: US1+US2 dispatch.
 
-## 2026-09-30T10:45:00Z · Implementer US1 · T001
+## 2026-09-30T10:22:55Z · Implementer US1 · T001
 
 Did: `tests/test_quickstart.py::TestQuickstart` (4 tests) with `tests/sphinx/quickstart/` (conf.py
 holding only `project` and the step-2 line, an index with one captioned toctree of two pages) and
@@ -70,7 +70,7 @@ README before/after (every heading and fact-bearing paragraph of the README at 1
 Next: T002.
 Watch: `README` claims are not tested (no test reads it); the reviewer's documentation pass is the check.
 
-## 2026-09-30T10:58:00Z · Implementer US2 · T002
+## 2026-09-30T10:24:18Z · Implementer US2 · T002
 
 Did: wrote the Public surface section (replacing its template comment) and ended it with the sentence
 that anything unlisted is internal; it says there are no settings. Deleted
@@ -122,7 +122,7 @@ the declared edits (conftest.py render fixture, test_smoke.py starter class, tes
 story-done US1 (#26), US2 (#29).
 Next: US3 dispatch. Carry: AGENTS.md Components section still names the starter component.
 
-## 2026-09-30T10:45:00Z · Implementer US3 · T003
+## 2026-09-30T10:30:57Z · Implementer US3 · T003
 
 Did: `TestDemoGuideStates` in `tests/test_demo.py` and the `demo_guide_build` / `demo_guide_app`
 fixtures in `tests/conftest.py`. The build is module-scoped, `-W`, into a temporary folder, and
@@ -135,7 +135,7 @@ tests in T004.
 Next: T004, the guide rewrite, README demo part, AGENTS.md fixes.
 Watch: none.
 
-## 2026-09-30T11:10:00Z · Implementer US3 · T004
+## 2026-09-30T10:34:23Z · Implementer US3 · T004
 
 Did: `demo/docs` rewritten as a user guide for the demo site. Front page with captioned groups
 "Using the site" and "Reference" and one uncaptioned page (About); "Your first visit" with
