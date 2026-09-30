@@ -27,8 +27,11 @@
       "self_resolved": []
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "notified",
+      "at": "2026-09-30T00:40:54Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam's 2026-09-30 overnight delegation), not Sam"
+      ]
     },
     "merge": {
       "approved_by": null,
