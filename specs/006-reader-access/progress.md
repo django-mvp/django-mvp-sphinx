@@ -77,3 +77,20 @@ Did: receipts, verify green. tamper-check against the story base flagged the wid
 `flex_menu.checks` import in tests/test_mounted.py, a line US1 added. No assertion changed, and
 it is clean against origin/main. To sweep at S5: the README's "Pass `user_is_staff` itself"
 should say where it is imported from.
+
+## 2026-09-30T00:40:00Z · Implementer US3 · T004
+
+Did: `demo/staff_guide/` (conf, front page, one page on the accounts), `staff_guide` app in
+`demo/mounted.py` (`check=user_is_staff`, name wrapped in `_()`), mount at `staff-guide/`, entry
+appended after the docs entry, `demo/staff_guide/_build/` gitignored, AGENTS.md build command and
+the account to sign in with. `staff_guide_app` fixture in `tests/conftest.py`;
+`TestStaffGuideEntry` (entry absent for anonymous and regular user, present for staff, staff
+gets 200 on `/staff-guide/`).
+Verified: red first (`uv run pytest tests/test_demo.py -x -q`: the staff entry was missing from the
+sidebar; the two absent-entry tests pass without the change, since no entry exists yet). Then
+`uv run pytest tests/test_demo.py -q` → 8 passed. `uv run sphinx-build -b json -W demo/staff_guide
+demo/staff_guide/_build/json` → build succeeded, no warnings. `uv run pre-commit run --all-files`
+passed. No code added in `mvp_sphinx/`.
+Next: T005 (TestSeveralApps, README).
+Watch: the `from demo.mounted import ...` line in `demo/urls.py` and `demo/menus.py` gained a
+name, so those two existing lines changed; ruff's isort would merge a second import line anyway.
