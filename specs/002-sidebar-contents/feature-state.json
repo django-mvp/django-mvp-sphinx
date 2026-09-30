@@ -135,7 +135,7 @@
       "priority": "P1",
       "issue": 27,
       "worktree": "/home/sam/projects/django-mvp/wt-sphinx-002",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -147,9 +147,9 @@
               "tests/test_menus.py::TestCurrentPage"
             ],
             "commands": [
-              "uv run pytest tests/test_menus.py::TestCurrentPage -q (exit 0, 8 passed)"
-            ],
-            "exit_code": 0
+              "uv run pytest tests/test_menus.py::TestCurrentPage -q (exit 0, 8 passed)",
+              "exit code 0"
+            ]
           }
         }
       ]
