@@ -21,9 +21,32 @@ class BodyRewriter(HTMLParser):
     with no pointer. The region's name is the table's caption, or the word
     "Table" when it has none.
 
+    Every heading link (``a.headerlink``, which Sphinx puts on section headings,
+    glossary terms and captions) is named for a screen reader: its ``title``, a
+    colon and the text of the element that holds it, so each link on a page has
+    a name of its own. A link with no ``title`` is named by the text alone.
+
     Args:
         markup: The body to read.
     """
+
+    VOID_TAGS = frozenset(
+        [
+            "area",
+            "base",
+            "br",
+            "col",
+            "embed",
+            "hr",
+            "img",
+            "input",
+            "link",
+            "meta",
+            "source",
+            "track",
+            "wbr",
+        ]
+    )
 
     def __init__(self, markup: str) -> None:
         super().__init__(convert_charrefs=False)
@@ -32,6 +55,7 @@ class BodyRewriter(HTMLParser):
         for line in markup.split("\n")[:-1]:
             self.line_starts.append(self.line_starts[-1] + len(line) + 1)
         self.insertions: list[tuple[int, str]] = []
+        self.open_elements: list[tuple[str, int]] = []
         self.table_depth = 0
         self.table_start = 0
         self.caption_start: int | None = None
@@ -39,7 +63,7 @@ class BodyRewriter(HTMLParser):
 
     @classmethod
     def rewrite(cls, markup: str) -> str:
-        """Return the body with its tables wrapped in named, focusable regions.
+        """Return the body with its tables and heading links named.
 
         Args:
             markup: A page body as Sphinx wrote it.
@@ -82,11 +106,45 @@ class BodyRewriter(HTMLParser):
         """
         if self.caption_start is None or self.caption_end is None:
             return ""
-        text = unescape(strip_tags(self.markup[self.caption_start : self.caption_end]))
+        return self.text_between(self.caption_start, self.caption_end)
+
+    def text_between(self, start: int, end: int) -> str:
+        """Return the text of part of the markup as a reader would see it.
+
+        Args:
+            start: The offset the part begins at.
+            end: The offset the part ends at.
+
+        Returns:
+            The part with tags removed, entities decoded and whitespace
+            collapsed.
+        """
+        text = unescape(strip_tags(self.markup[start:end]))
         return re.sub(r"\s+", " ", text).strip()
 
+    def name_heading_link(self, title: str | None) -> None:
+        """Record an ``aria-label`` for the heading link starting here.
+
+        Args:
+            title: The link's ``title`` attribute, if it has one.
+        """
+        start = self.position()
+        holder_start = self.open_elements[-1][1] if self.open_elements else start
+        text = self.text_between(holder_start, start)
+        label = ": ".join(part for part in (title, text) if part)
+        if label:
+            self.insertions.append(
+                (start + len("<a"), format_html(' aria-label="{}"', label))
+            )
+
     def handle_starttag(self, tag, attrs):
-        """Note where a table and its caption begin and end."""
+        """Note where a table and its caption begin, and name a heading link."""
+        classes = (dict(attrs).get("class") or "").split()
+        if tag == "a" and "headerlink" in classes:
+            self.name_heading_link(dict(attrs).get("title"))
+        if tag not in self.VOID_TAGS:
+            content = self.position() + len(self.get_starttag_text())
+            self.open_elements.append((tag, content))
         if tag == "table":
             if self.table_depth == 0:
                 self.table_start = self.position()
@@ -95,13 +153,20 @@ class BodyRewriter(HTMLParser):
         elif self.table_depth == 1:
             if tag == "caption" and self.caption_start is None:
                 self.caption_start = self.position() + len(self.get_starttag_text())
-            elif self.caption_start is not None and self.caption_end is None:
-                classes = (dict(attrs).get("class") or "").split()
-                if tag == "a" and "headerlink" in classes:
-                    self.caption_end = self.position()
+            elif (
+                self.caption_start is not None
+                and self.caption_end is None
+                and tag == "a"
+                and "headerlink" in classes
+            ):
+                self.caption_end = self.position()
 
     def handle_endtag(self, tag):
         """Wrap the outermost table once its end tag is read."""
+        for index in range(len(self.open_elements) - 1, -1, -1):
+            if self.open_elements[index][0] == tag:
+                del self.open_elements[index:]
+                break
         if tag == "caption" and self.table_depth == 1 and self.caption_end is None:
             self.caption_end = self.position()
         elif tag == "table" and self.table_depth:

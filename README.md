@@ -166,8 +166,11 @@ Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
 wraps each table in a scrolling region that takes keyboard focus and is named by
 the table's caption, or "Table" when it has none, so a table wider than the
 page scrolls sideways for a reader using only a keyboard and a screen reader
-announces what the region holds. Everything else in the body reaches the page
-exactly as Sphinx wrote it. `PageView` applies it and hands the result to the
+announces what the region holds. It also names each heading link (the ¶ Sphinx
+puts beside a section heading, a glossary term or a caption) with the link's own
+title and the heading's text, such as "Link to this heading: Installing", so a
+screen reader tells one link from the next. Everything else in the body reaches
+the page exactly as Sphinx wrote it. `PageView` applies it and hands the result to the
 template as `body`, so a `PageView` subclass gets it too; to use it elsewhere,
 call `BodyRewriter.rewrite(markup)`.
 

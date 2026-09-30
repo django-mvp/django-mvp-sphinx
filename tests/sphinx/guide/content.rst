@@ -66,3 +66,25 @@ Tables
 
       * - Inside
         - Notice
+
+
+Sections
+--------
+
+Getting ready
+~~~~~~~~~~~~~
+
+Nothing to do yet.
+
+Using ``run()`` & friends
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Call it twice.
+
+Glossary
+--------
+
+.. glossary::
+
+   widget
+      A small, named thing.

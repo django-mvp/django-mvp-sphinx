@@ -36,6 +36,32 @@ class Regions(HTMLParser):
             self.tables_in_region[-1] += 1
 
 
+class HeadingLinks(HTMLParser):
+    """Collect the attributes of each heading link, in document order."""
+
+    def __init__(self, markup: str) -> None:
+        super().__init__()
+        self.links: list[dict[str, str | None]] = []
+        self.feed(markup)
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if tag == "a" and "headerlink" in (attributes.get("class") or "").split():
+            self.links.append(attributes)
+
+
+def heading_links(markup: str) -> list[dict[str, str | None]]:
+    return HeadingLinks(markup).links
+
+
+def heading(text: str, title: str | None = "Link to this heading", tag="h2") -> str:
+    attribute = "" if title is None else f' title="{title}"'
+    return (
+        f'<{tag} id="anchor">{text}'
+        f'<a class="headerlink" href="#anchor"{attribute}>\u00b6</a></{tag}>'
+    )
+
+
 def regions(markup: str) -> list[dict[str, str | None]]:
     return Regions(markup).regions
 
@@ -161,4 +187,104 @@ class TestBodyRewriter:
         ],
     )
     def test_markup_without_a_table_comes_back_byte_for_byte(self, markup) -> None:
+        assert BodyRewriter.rewrite(markup) == markup
+
+
+class TestBodyRewriterHeadingLinks:
+    def test_a_heading_link_is_named_by_its_title_and_the_headings_text(self) -> None:
+        result = BodyRewriter.rewrite(heading("Installing"))
+
+        assert heading_links(result)[0]["aria-label"] == (
+            "Link to this heading: Installing"
+        )
+
+    def test_a_heading_link_keeps_its_address_and_the_rest_of_the_heading(self) -> None:
+        original = heading("Installing")
+
+        result = BodyRewriter.rewrite(original)
+
+        link = heading_links(result)[0]
+        assert re.search(r'\s+aria-label="[^"]*"\s+\S', result)
+        assert link["href"] == "#anchor"
+        assert link["title"] == "Link to this heading"
+        assert result.replace(' aria-label="Link to this heading: Installing"', "") == (
+            original
+        )
+
+    @pytest.mark.parametrize("tag", ["h1", "h2", "h3", "h4", "h5", "h6"])
+    def test_a_link_in_a_heading_of_any_level_is_named(self, tag) -> None:
+        result = BodyRewriter.rewrite(heading("Installing", tag=tag))
+
+        assert heading_links(result)[0]["aria-label"].endswith("Installing")
+
+    def test_a_heading_holding_inline_code_is_named_with_the_codes_text(self) -> None:
+        text = (
+            'Using <code class="docutils literal"><span class="pre">run()</span></code>'
+        )
+
+        result = BodyRewriter.rewrite(heading(text))
+
+        assert heading_links(result)[0]["aria-label"].endswith("Using run()")
+
+    def test_a_heading_holding_a_link_is_named_with_the_links_text(self) -> None:
+        text = '<a class="reference external" href="https://x.test">The site</a> setup'
+
+        result = BodyRewriter.rewrite(heading(text))
+
+        assert heading_links(result)[0]["aria-label"].endswith("The site setup")
+
+    def test_a_link_with_no_title_is_named_by_the_text_alone(self) -> None:
+        result = BodyRewriter.rewrite(heading("Installing", title=None))
+
+        assert heading_links(result)[0]["aria-label"] == "Installing"
+
+    def test_heading_text_with_an_ampersand_is_unescaped_then_escaped_once(
+        self,
+    ) -> None:
+        result = BodyRewriter.rewrite(heading("Q&amp;A <em>&quot;now&quot;</em>"))
+
+        assert 'aria-label="Link to this heading: Q&amp;A &quot;now&quot;"' in result
+        assert heading_links(result)[0]["aria-label"].endswith('Q&A "now"')
+
+    def test_whitespace_in_the_heading_is_collapsed(self) -> None:
+        result = BodyRewriter.rewrite(heading("  Two\n   lines  "))
+
+        assert heading_links(result)[0]["aria-label"].endswith(": Two lines")
+
+    def test_a_glossary_terms_link_is_named_by_its_title_and_the_term(self) -> None:
+        markup = (
+            '<dl class="glossary simple"><dt id="term-widget">widget'
+            '<a class="headerlink" href="#term-widget" title="Link to this term">'
+            "\u00b6</a></dt><dd><p>A thing.</p></dd></dl>"
+        )
+
+        result = BodyRewriter.rewrite(markup)
+
+        assert heading_links(result)[0]["aria-label"] == "Link to this term: widget"
+
+    def test_a_tables_caption_link_is_named_by_its_title_and_the_caption(self) -> None:
+        result = BodyRewriter.rewrite(CAPTIONED.format(text="Release schedule"))
+
+        assert heading_links(result)[0]["aria-label"] == (
+            "Link to this table: Release schedule"
+        )
+
+    def test_each_of_two_headings_is_named_by_its_own_text(self) -> None:
+        result = BodyRewriter.rewrite(heading("First") + heading("Second"))
+
+        labels = [link["aria-label"] for link in heading_links(result)]
+        assert [label.split(": ")[1] for label in labels] == ["First", "Second"]
+
+    def test_a_heading_after_unclosed_and_void_elements_is_named_by_its_own_text(
+        self,
+    ) -> None:
+        markup = "<ul><li>item<br><p>para<img src=x></ul>" + heading("Installing")
+
+        result = BodyRewriter.rewrite(markup)
+
+        assert heading_links(result)[0]["aria-label"].endswith(": Installing")
+
+    def test_a_link_that_is_not_a_heading_link_is_left_alone(self) -> None:
+        markup = '<h2>Title <a href="#x" title="Elsewhere">here</a></h2>'
+
         assert BodyRewriter.rewrite(markup) == markup

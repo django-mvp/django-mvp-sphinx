@@ -465,3 +465,58 @@ class TestWideContent:
         response = client.get("/docs/content/")
 
         assert 'aria-label="Release schedule"' in response.content.decode()
+
+
+class TestHeadingLinks:
+    HEADING_LINK = re.compile(
+        r"<(?:h[1-6]|dt)\b[^>]*>(?P<held>(?:(?!<h[1-6]\b|<dt\b|<a\b[^>]*headerlink).)*?)"
+        r"<a\b(?P<attributes>[^>]*\bheaderlink\b[^>]*)>",
+        re.S,
+    )
+
+    def page(self, client) -> str:
+        return client.get("/docs/content/").content.decode()
+
+    def links(self, body: str) -> list[tuple[str, dict[str, str]]]:
+        return [
+            (
+                re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", "", match["held"]))),
+                dict(re.findall(r'([\w-]+)="([^"]*)"', match["attributes"])),
+            )
+            for match in self.HEADING_LINK.finditer(body)
+        ]
+
+    def test_every_heading_link_of_a_page_is_named_by_its_headings_text(
+        self, client, db
+    ) -> None:
+        links = self.links(self.page(client))
+
+        assert len(links) >= 5
+        for text, attributes in links:
+            assert unescape(attributes["aria-label"]).endswith(text.strip())
+
+    def test_a_heading_link_leads_to_an_anchor_on_the_page(self, client, db) -> None:
+        body = self.page(client)
+
+        for _text, attributes in self.links(body):
+            assert attributes["href"].startswith("#")
+            assert f'id="{attributes["href"][1:]}"' in body
+
+    def test_no_two_heading_links_of_a_page_share_a_name(self, client, db) -> None:
+        names = [
+            attributes["aria-label"] for _, attributes in self.links(self.page(client))
+        ]
+
+        assert len(names) == len(set(names))
+
+    def test_the_link_of_a_heading_with_code_and_an_ampersand_is_named_by_them(
+        self, client, db
+    ) -> None:
+        names = [unescape(a["aria-label"]) for _, a in self.links(self.page(client))]
+
+        assert any(name.endswith("Using run() & friends") for name in names)
+
+    def test_a_glossary_terms_link_is_named_by_the_term(self, client, db) -> None:
+        links = {a["href"]: a for _, a in self.links(self.page(client))}
+
+        assert links["#term-widget"]["aria-label"].endswith("widget")
