@@ -25,6 +25,8 @@ pages, and results never include the host project's content or another documenta
 (CONSTITUTION.md Article XII). A site-wide search box would be the host project's search, which
 the maintainer ruled out of scope.
 
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
+
 ## D2. All words must match, in any form and any case
 
 **Ambiguous:** How several words combine, and how loose a match is.
@@ -37,6 +39,8 @@ search data never empty a search on their own. Fragments of words don't match (F
 in the build is written for exactly that behaviour. Matching it means SC-002 can be checked
 against Sphinx's own HTML search of the same docs.
 
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
+
 ## D3. A results page with its own address, working without JavaScript
 
 **Ambiguous:** Whether results appear as a page or as a live list while typing.
@@ -46,6 +50,8 @@ against Sphinx's own HTML search of the same docs.
 
 **Why:** It is the smallest thing that meets the issue. It works whatever the reader's browser
 does, and a results page can be bookmarked or shared like any other page of the site. Suggestions while typing can be added on top later without changing it.
+
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
 
 ## D4. The results page sits where Sphinx's own search page would
 
@@ -57,6 +63,8 @@ search page and general index page never appear in results.
 
 **Why:** A link to "search" that a docs author writes should keep working. Sphinx's search page
 carries no content of its own in a JSON build.
+
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
 
 ## D5. Title matches first, a passage per result, section links
 
@@ -70,6 +78,8 @@ matches (FR-010, FR-011). This is User Story 2, at P2, so the P1 story stands wi
 **Why:** Sphinx's own search does the same, so readers of Sphinx documentation expect it. Without it, a word common to the
 guide returns a list the reader has to open page by page.
 
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
+
 ## D6. No search data means "unavailable", never an error
 
 **Ambiguous:** What happens when a docs build has pages but no search data.
@@ -82,6 +92,8 @@ address as it does for pages, per #4.
 a missing build. Reporting "no matches" when the search data is missing would mislead the reader
 into thinking the guide doesn't cover the subject.
 
+**ADR:** none — a behaviour of the results page, pinned by tests; nothing architectural follows from it
+
 ## D7. No new access rule
 
 **Ambiguous:** Access control is a sibling feature (#9), and #10 doesn't depend on it.
@@ -93,6 +105,8 @@ its pages (FR-012). Nothing here adds a rule.
 the same rule as the pages. Putting it under the same rule, rather than a second one, is what keeps
 them from drifting apart when #9 lands.
 
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+
 ## D8. No paging through results
 
 **Ambiguous:** Whether long result lists are split across pages.
@@ -102,6 +116,8 @@ them from drifting apart when #9 lands.
 **Why:** The package is for a project's own user guide, typically tens or a few hundred pages
 (README, Scope & philosophy). A search that matches most of them is a search to narrow, not to page
 through. Paging can be added if a real guide outgrows this.
+
+**ADR:** none — a scope limit of this feature, reversible without touching anything downstream
 
 ## D9. Where the search sits is left to the browser review
 
@@ -114,12 +130,16 @@ is looked at in a browser.
 **Why:** Placement is a judgment only a human eye settles, and the specification's requirements each
 become tests, which should not pin appearance.
 
+**ADR:** none — placement is a design call settled at the walkthrough
+
 ## D10. Vocabulary
 
 "Search data" is used for the record of words per page that Sphinx writes into the docs build, and
 "results page" for the page listing a search's results. Neither is in CONTEXT.md yet. The
 implementation adds both, and warns against "index" for the search data, because Sphinx's general
 index is a different thing.
+
+**ADR:** none — vocabulary, recorded in CONTEXT.md
 
 ## D11. Stem with snowballstemmer, the stemmer Sphinx uses (S3 plan)
 
@@ -134,6 +154,8 @@ it (research R2).
 would drift from the stemmer the build used. Article VII asks for the justification to be recorded;
 this is it.
 
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
+
 ## D12. Stopwords come from the build (S3 plan)
 
 **Ambiguous:** FR-005 says words Sphinx leaves out as too common must not empty a search. The list
@@ -145,6 +167,8 @@ nothing, which the results page reports as no match (research R3).
 
 **Why:** The list matches the language the docs were built in with nothing configured, and it is
 the exact list the build filtered with.
+
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
 
 ## D13. A word is looked up under every stem its language may have used (S3 plan)
 
@@ -158,6 +182,8 @@ build's language may have used. A key that exists is a match (research R2).
 behaviour. The two algorithms agree on almost every word, so the looser lookup adds nothing a reader
 would call a wrong match.
 
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
+
 ## D14. The results page replaces Sphinx's own search page at `search/` (S3 plan)
 
 **Ambiguous:** D4 says links to Sphinx's search page lead here. The results page could live
@@ -169,6 +195,8 @@ served.
 
 **Why:** Every link a docs author writes to the search page works with no rewrite and no redirect,
 and the results address is the one a reader of Sphinx docs would guess.
+
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
 
 ## D15. SC-002 is checked on whole words (S3 plan)
 
@@ -182,6 +210,8 @@ each word key in the fixture build, searching it lists every page the data lists
 **Why:** The clarification is the more specific ruling, and it came after the criterion was
 written. Read literally, SC-002 would require fragment matching that FR-006 forbids.
 
+**ADR:** none — how a success criterion is checked, local to this feature's tests
+
 ## D16. Three tiers: page title, section heading, elsewhere (S3 plan)
 
 **Ambiguous:** FR-010 puts title matches first. It says nothing about the order of the rest, or
@@ -193,6 +223,8 @@ about a match in a section heading.
 **Why:** A heading is the next best sign that a page is about the words, as in Sphinx's own
 scoring, and a stable order by title makes the same search give the same list (US1.8).
 
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
+
 ## D17. No cache of the search data (S3 plan)
 
 **Ambiguous:** The search data could be parsed once and kept until the build changes.
@@ -203,6 +235,8 @@ scoring, and a stable order by title makes the same search give the same list (U
 of kilobytes, and a cache is a second copy to keep correct. It can be added if a real guide shows
 the cost (Article II).
 
+**ADR:** docs/adr/0005-search-reads-the-search-data-the-build-already-holds.md
+
 ## D18. The search form sits above the page's text, for now (S3 plan)
 
 **Ambiguous:** D9 leaves placement to the browser review.
@@ -212,6 +246,8 @@ too, holding the reader's search.
 
 **Why:** It is the smallest change to a template that FS-003 is rewriting in parallel, and it can be
 moved without touching anything else once the walkthrough settles where it belongs.
+
+**ADR:** none — placement, settled at the walkthrough
 
 ## D19. Design review, one round: approve, seven findings applied to the plan (S3R)
 
@@ -232,6 +268,8 @@ stays: retiring it is outside this feature.
 **Why:** Each edit either removes work or is one line of design, and each was checkable from the
 finding's own text.
 
+**ADR:** none — the design review's record; each accepted edit is in the plan and, where architectural, in ADR 0005
+
 ## D20. Fixture and test choices where the plan's words did not fit the data (S4 US1)
 
 **Decision:** Three departures from the wording in tasks.md T001, none from what it protects.
@@ -250,6 +288,8 @@ so each is read once per search without a cache surviving into the next (D17).
 **Revisit if:** a host keeps a `DocsSearch` instance across requests (it would then serve a
 stale stopword list after a rebuild).
 
+**ADR:** none — fixture and test choices local to this feature
+
 ## D21. The form has no `label` prop, and both views hand it the search address (S4 US1)
 
 **Decision:** `search_form.html` takes `action` and `query` only. Its accessible name and its
@@ -263,6 +303,8 @@ and this page has none.
 
 **Revisit if:** a third view needs the form, or a host wants its own wording without overriding
 the component.
+
+**ADR:** none — template and view details local to this feature
 
 ## D22. Passages, titles and the two US1 tests T003 makes false (S4 US2)
 
@@ -288,6 +330,8 @@ lacks. (3) Adding block tags to `PageText` would grow it for a case the build do
 **Revisit if:** a build's page body lacks whitespace between blocks, or Sphinx starts writing
 markup into `titles`.
 
+**ADR:** none — passage details local to this feature; the passage source is in ADR 0005
+
 ## D23. T004 adds tests only, and the shared word comes from a copied handbook source (S4 US3)
 
 **Decision:** T004 passed on first run against the T002 code, so it changes no production file;
@@ -304,6 +348,8 @@ precedent says a first-run pass is not a failed red step, and the probes replace
 **Revisit if:** a top-level `import sphinx` in the package is a risk to watch: the blocking test
 only affects imports made after it runs, so a module-level import is caught by
 `TestServingWithoutSphinx` at collection time only if Sphinx is not already loaded.
+
+**ADR:** none — test choices local to this feature
 
 ## D24. Two US1 tests that pinned placeholder behaviour are corrected by Forge (S4, US2)
 
