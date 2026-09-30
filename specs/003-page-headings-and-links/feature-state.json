@@ -2,7 +2,7 @@
   "feature": "003-page-headings-and-links",
   "branch": "003-page-headings-and-links",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "DESIGN_REVIEW",
+  "state": "IMPLEMENT",
   "state_history": [
     {
       "state": "QUEUED",
@@ -18,6 +18,11 @@
       "state": "DESIGN_REVIEW",
       "at": "2026-09-30T00:31:44Z",
       "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-30T00:40:54Z",
+      "note": "plan notice sent; US1 dispatch"
     }
   ],
   "gates": {
