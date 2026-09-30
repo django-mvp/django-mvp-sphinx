@@ -63,3 +63,20 @@ Watch: US2 adds its README paragraph beside this subsection.
 Did: the first `forge verify` run failed its docs step (`PageHeadings` quoted on no page). README
 now quotes `PageHeadings.from_toc(toc)` in the subsection T003 added, as it does for `BodyRewriter`.
 Verified: full verify re-run, result in the completion report.
+
+## 2026-09-30T10:10:00Z · Implementer US2 · T004
+
+Did: `PageView.get_context_data` (the one) now adds `previous_page` and `next_page` from the new
+`get_neighbour(key)`; `page_links.html` component (named `nav`, `rel="prev"` / `rel="next"` cards,
+own both-empty guard, layout from classes the packaged stylesheet emits, checked one by one);
+`page.html` draws it below the article in the first column, search form untouched; README
+paragraph beside "The page's own headings"; CHANGELOG entry; catalogue refreshed with
+`makemessages -l en`. `TestPreviousAndNextPage`, 12 tests.
+Verified: red first (`uv run pytest tests/test_views.py::TestPreviousAndNextPage`: 9 failed, 3 passed
+by nature: one-page build, orphan, general index); then 12 passed. `uv run pre-commit run --all-files`
+passed (ruff, mypy, deptry).
+Next: T005, the rebuild test.
+Watch: the brief and tasks.md say `hidden-page/` has both links, but in the `contents` source it is
+the last page in reading order (hidden toctree comes last in `index.rst`), so it has a previous link
+only. The test asserts what the source gives: previous is `reference/api/`, and that page's next
+link leads to `hidden-page/`, so hidden toctrees feed the links. No source was edited.

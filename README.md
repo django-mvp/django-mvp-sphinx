@@ -177,6 +177,15 @@ page's `toc` value from the build into nested dicts of `title`, `anchor` and
 
 Rebuild the docs and the list follows on the next request.
 
+Every page also ends with links to the page before it and the page after it, in
+the order Sphinx puts the pages in, each showing the title of the page it leads
+to. The front page has no previous link, the last page has no next link, and a
+page that no toctree lists has neither. The links stay inside the documentation
+app, so a second app mounted elsewhere links under its own address. An
+incremental Sphinx build only rewrites the pages that changed and the pages
+whose toctrees changed, so a page's links follow a newly inserted neighbour once
+that page is rebuilt. Run a full rebuild (`-E`) if in doubt.
+
 ### Naming the documentation
 
 The app's `name` is what the tab title, the first breadcrumb and the menu entry

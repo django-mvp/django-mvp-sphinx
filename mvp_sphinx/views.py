@@ -87,10 +87,12 @@ class PageView(PageMixin, TemplateView):
         return self.render_to_response(self.get_context_data(page_data=page, body=body))
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add the app's search address, which every page offers, and its headings."""
+        """Add the app's search address, the page's headings and its neighbours."""
         context = super().get_context_data(**kwargs)
         context["search_url"] = reverse(f"{self.app.namespace}:search")
         context["headings"] = self.get_headings()
+        context["previous_page"] = self.get_neighbour("prev")
+        context["next_page"] = self.get_neighbour("next")
         return context
 
     @staticmethod
@@ -119,6 +121,27 @@ class PageView(PageMixin, TemplateView):
             empty when the page has none.
         """
         return PageHeadings.from_toc(self.page_data.get("toc") or "")
+
+    def get_neighbour(self, key: str) -> dict[str, Any] | None:
+        """Return the page before or after this one in reading order.
+
+        Args:
+            key: ``"prev"`` or ``"next"``, the keys Sphinx writes into a page's
+                JSON.
+
+        Returns:
+            A dict with the neighbour's ``title`` and ``href`` under the app's
+            own prefix, or ``None`` when the page has no such neighbour, as for
+            the first and last pages, an orphan and Sphinx's own pages.
+        """
+        neighbour = self.page_data.get(key)
+        if not neighbour:
+            return None
+        return {
+            # The title comes from the host's own docs build, like the body.
+            "title": mark_safe(neighbour["title"]),  # noqa: S308
+            "href": urljoin(self.request.path, neighbour["link"]),
+        }
 
     def get_breadcrumbs(self) -> list[dict[str, Any]]:
         """Return the trail from the app's front page down to this page.

@@ -16,6 +16,7 @@
           <article class="prose mvp-sphinx-content py-4">
             {{ body }}
           </article>
+          <c-mvp_sphinx.page_links :previous="previous_page" :next="next_page" />
         </div>
         {% if headings %}
           <aside class="hidden xl:block w-56 shrink-0">
