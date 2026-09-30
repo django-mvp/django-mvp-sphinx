@@ -144,6 +144,8 @@ app renders link it (FR-016). (research R3)
 **Revisit if:** django-mvp grows a way for an installed app to contribute rules to its own
 stylesheet.
 
+**ADR:** docs/adr/0002-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
+
 ## D2. Accessible names and focusable table areas come from rewriting the body in Python
 
 **Decision:** `BodyRewriter`, on the standard library's `HTMLParser`, rewrites each page body
@@ -158,6 +160,8 @@ standard library's parser avoids a new dependency.
 **Revisit if:** the package gains a Sphinx extension every host is required to load anyway
 (#5's navigation extension is optional for pages); the rewrite could then move into the build.
 
+**ADR:** docs/adr/0002-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
+
 ## D3. A heading link's name is Sphinx's own title plus the heading's text
 
 **Decision:** `aria-label="<title>: <text of the element holding the link>"`, the title being the
@@ -170,6 +174,8 @@ called a section's. The text makes each name unique on the page (FR-010).
 **Revisit if:** a Sphinx release drops the `title` attribute; the label then falls back to the
 text alone, which still meets FR-010.
 
+**ADR:** none — a naming detail inside BodyRewriter, stated in its docstring
+
 ## D4. Every table gets the scrolling region, wide or not
 
 **Decision:** The rewrite wraps every outermost table, because the server cannot know which will
@@ -180,6 +186,8 @@ is the usual pattern for WCAG 2.1.1 on scrollable tables.
 
 **Revisit if:** readers report the extra tab stops as a nuisance on table-heavy pages; a script
 that removes `tabindex` from regions that do not overflow is the known refinement.
+
+**ADR:** none — a local choice in this feature's rewrite, easy to refine without touching anything else
 
 ## D5. Every colour the stylesheet creates is a named custom property, mixed from theme colours
 
@@ -195,6 +203,8 @@ code background.
 
 **Revisit if:** django-mvp ships code-token colour roles of its own.
 
+**ADR:** docs/adr/0002-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
+
 ## D6. The body's ordinary text is left to django-mvp's `prose`
 
 **Decision:** No rules for headings, paragraphs, lists, block quotes, links or inline code.
@@ -205,6 +215,8 @@ diverge from the rest of the site.
 
 **Revisit if:** a walkthrough finds an ordinary element that reads differently from the site.
 
+**ADR:** none — a statement of what django-mvp already provides, nothing later work must abide by
+
 ## D7. The test fixture page is an orphan
 
 **Decision:** `tests/sphinx/guide/content.rst` carries `:orphan:` rather than joining a toctree.
@@ -214,6 +226,8 @@ guide. An orphan page adds no entry to the contents, and it keeps the build free
 any toctree" warning the fixture forbids.
 
 **Revisit if:** a later feature wants the page in the contents.
+
+**ADR:** none — a test-fixture detail
 
 ## D8. Design review outcome (S3R)
 
@@ -231,6 +245,8 @@ module. Notes applied: caption label without the glyph, `gettext_lazy`, `{% load
 
 **Revisit if:** the S6 reviewer finds a defect one of these remedies introduced.
 
+**ADR:** none — a record of this feature's design review
+
 ## D9. A table's label is its caption's markup up to the heading link
 
 **Decision:** `BodyRewriter` reads the caption as the markup between `<caption>` and the first
@@ -245,6 +261,8 @@ Wrapping a table with no end tag would need a guessed end offset; leaving it as 
 **Revisit if:** a Sphinx theme or extension puts other text after the caption text that is not the
 heading link.
 
+**ADR:** none — an implementation detail of BodyRewriter
+
 ## D10. The holder of a heading link is the innermost open element
 
 **Decision:** `BodyRewriter` keeps a stack of open elements (offset where each one's content
@@ -258,3 +276,5 @@ needed. Closing by name keeps the stack right for the unclosed `<li>` and `<p>` 
 leave.
 
 **Revisit if:** Sphinx wraps the link in an element of its own.
+
+**ADR:** none — an implementation detail of BodyRewriter

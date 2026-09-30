@@ -170,8 +170,8 @@ announces what the region holds. It also names each heading link (the ¶ Sphinx
 puts beside a section heading, a glossary term or a caption) with the link's own
 title and the heading's text, such as "Link to this heading: Installing", so a
 screen reader tells one link from the next. Everything else in the body reaches
-the page exactly as Sphinx wrote it. `PageView` applies it and hands the result to the
-template as `body`, so a `PageView` subclass gets it too; to use it elsewhere,
+the page exactly as Sphinx wrote it. `PageView` applies it and hands the result
+to the template as `body`, so a `PageView` subclass gets it too; to use it elsewhere,
 call `BodyRewriter.rewrite(markup)`.
 
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
@@ -180,6 +180,7 @@ than `{{ page_data.body }}` so your override keeps the rewrite:
 
 ```django
 {% extends "mvp_sphinx/page.html" %}
+{% load static %}
 {% block styles %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'yourproject/docs.css' %}">
