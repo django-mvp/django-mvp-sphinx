@@ -59,8 +59,16 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 3,
+          "evidence": {
+            "tests": [
+              "tests/test_quickstart.py::TestQuickstart"
+            ],
+            "commands": [
+              "uv run pytest tests/test_quickstart.py -q"
+            ]
+          }
         }
       ]
     },
