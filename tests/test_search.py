@@ -130,23 +130,14 @@ class TestDocsSearch:
         assert len(search.words(query)) == DocsSearch.WORD_LIMIT
         assert search.results(query) == []
 
-    def test_a_result_has_the_page_title_and_path_and_no_section_or_passage(
+    def test_a_body_match_has_the_page_title_and_path_and_no_section(
         self, search
     ) -> None:
         result = search.results("quetzal")[0]
 
-        assert result == {
-            "title": "Lanterns and lamps",
-            "path": "lanterns/",
-            "anchor": "",
-            "passage": "",
-        }
-
-    def test_results_are_ordered_by_title_then_document_name(self, search) -> None:
-        results = search.results("lantern")
-        titles = [result["title"] for result in results]
-
-        assert titles == sorted(titles, key=str.lower)
+        assert result["title"] == "Lanterns and lamps"
+        assert result["path"] == "lanterns/"
+        assert result["anchor"] == ""
 
     def test_the_front_page_is_the_empty_path_and_a_folder_page_its_folder(
         self, search

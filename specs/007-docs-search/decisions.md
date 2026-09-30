@@ -304,3 +304,20 @@ precedent says a first-run pass is not a failed red step, and the probes replace
 **Revisit if:** a top-level `import sphinx` in the package is a risk to watch: the blocking test
 only affects imports made after it runs, so a module-level import is caught by
 `TestServingWithoutSphinx` at collection time only if Sphinx is not already loaded.
+
+## D24. Two US1 tests that pinned placeholder behaviour are corrected by Forge (S4, US2)
+
+**Ambiguous:** The US1 brief had `results()` return an empty anchor and passage, in plain title
+order, until T003 added them. Two US1 tests pinned that interim behaviour, and T003 correctly made
+both false. The US2 Implementer was barred from editing tests it did not write, and reported T003
+blocked.
+
+**Chosen:** Forge edited them. `test_a_result_has_the_page_title_and_path_and_no_section_or_passage`
+becomes `test_a_body_match_has_the_page_title_and_path_and_no_section`: the passage key is no longer
+pinned, and the passage is covered by `TestPassage`. `test_results_are_ordered_by_title_then_document_name`
+is removed, because `TestResultOrder` states the ordering that replaced it.
+
+**Why:** Both tests described a stage of the build, not a requirement of the spec. The fault was in
+the US1 brief, which should not have asked for a placeholder to be tested as behaviour.
+
+**ADR:** none — a correction local to this feature's tests.
