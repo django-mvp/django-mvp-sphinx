@@ -287,3 +287,20 @@ lacks. (3) Adding block tags to `PageText` would grow it for a case the build do
 
 **Revisit if:** a build's page body lacks whitespace between blocks, or Sphinx starts writing
 markup into `titles`.
+
+## D23. T004 adds tests only, and the shared word comes from a copied handbook source (S4 US3)
+
+**Decision:** T004 passed on first run against the T002 code, so it changes no production file;
+`views.py`, `search.html`, `conftest.py` and the message catalogue are unchanged. The word common to
+both apps is made by copying `tests/sphinx/handbook/` into `tmp_path`, adding one sentence with
+"lantern" to its page, and building that; the search fixture gets no page. Because the tests could
+not be seen failing, each mechanism was mutated and a test had to fail: cached search data (7 fail),
+the view reading another app's build (2), the unavailable state drawn as no match (6), the missing-build
+404 removed (1), Sphinx imported inside `results()` (1), a long query rejected (3).
+
+**Why:** The brief bars new pages in `tests/sphinx/search/` when a copy will do. The FS-002 T005
+precedent says a first-run pass is not a failed red step, and the probes replace it as evidence.
+
+**Revisit if:** a top-level `import sphinx` in the package is a risk to watch: the blocking test
+only affects imports made after it runs, so a module-level import is caught by
+`TestServingWithoutSphinx` at collection time only if Sphinx is not already loaded.

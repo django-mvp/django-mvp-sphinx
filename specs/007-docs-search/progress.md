@@ -65,3 +65,18 @@ missing behaviour; the four view tests that depend on the new `search.py` failed
 one. `uv run mypy` and `uv run pre-commit run --all-files` pass.
 Next: T004.
 Watch: the two stale US1 tests need a Forge decision before the tree is green.
+
+## 2026-09-30T01:09:00Z · Implementer US2+US3 · T004
+
+Did: tests only, in `tests/test_views.py`: `TestSearchAfterARebuild`, `TestTwoApps`,
+`TestUnavailableSearch`, `TestSearchOfAMissingBuild`, `TestSearchWithoutSphinx`,
+`TestSearchOfAVeryLongQuery` (30 tests). No production file changed. Decision D23.
+Verified: `uv run pytest tests/test_views.py -q -k "TestSearchAfterARebuild or TestTwoApps or
+TestUnavailableSearch or TestSearchOfAMissingBuild or TestSearchWithoutSphinx or
+TestSearchOfAVeryLongQuery"` → 30 passed on first run (the FS-002 T005 precedent). Mutation probes,
+each restored: search data cached across requests → 7 failed; view reads another app's build → 2;
+unavailable drawn as no match → 6; missing-build 404 removed → 1; `import sphinx.util` inside
+`results()` → 1; long query rejected → 3. A module-level `import sphinx.util` is not caught, because
+the blocked-Sphinx test only affects imports after it runs (D23).
+Next: full verify, report.
+Watch: the two T001 tests named in T003's entry still fail.

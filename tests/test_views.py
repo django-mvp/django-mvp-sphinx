@@ -13,6 +13,8 @@ from bs4 import BeautifulSoup
 from django.templatetags.static import static
 from django.urls import reverse
 
+from tests.conftest import SPHINX_SOURCES
+
 pytestmark = pytest.mark.usefixtures("docs_app")
 
 DEFAULT_NAME = "Documentation"
@@ -1024,3 +1026,160 @@ class TestSearchResultDetails:
         (item,) = result_items(response)
         assert item.find("a")["href"] == "/docs/wombat/"
         assert item.find("p") is None
+
+
+def status_text(response) -> str:
+    soup = BeautifulSoup(response.content, "html.parser")
+    return soup.find("main").find(attrs={"role": "status"}).get_text(strip=True)
+
+
+class TestSearchAfterARebuild:
+    def test_a_word_added_by_a_rebuild_is_searchable_on_the_next_request(
+        self, client, db, search_app, sphinx_build, tmp_path, monkeypatch
+    ) -> None:
+        source = tmp_path / "source"
+        shutil.copytree(SPHINX_SOURCES / "search", source)
+        monkeypatch.setattr(search_app, "build_dir", sphinx_build(source))
+        assert result_hrefs(client.get("/docs/search/", {"q": "mongoose"})) == []
+
+        (source / "mongooses.rst").write_text("Newcomers\n=========\n\nA mongoose.\n")
+        index = source / "index.rst"
+        index.write_text(
+            index.read_text().replace("   lanterns\n", "   lanterns\n   mongooses\n")
+        )
+        assert sphinx_build(source) == search_app.build_dir
+
+        assert result_hrefs(client.get("/docs/search/", {"q": "mongoose"})) == [
+            "/docs/mongooses/"
+        ]
+
+
+class TestTwoApps:
+    @pytest.fixture
+    def shared_word(self, handbook_app, sphinx_build, tmp_path, monkeypatch):
+        source = tmp_path / "handbook"
+        shutil.copytree(SPHINX_SOURCES / "handbook", source)
+        page = source / "backups.rst"
+        page.write_text(page.read_text() + "\nA lantern hangs above the shelf.\n")
+        monkeypatch.setattr(handbook_app, "build_dir", sphinx_build(source))
+        return "lantern"
+
+    def test_a_word_common_to_both_lists_only_the_searched_apps_pages(
+        self, client, db, search_app, handbook_app, shared_word
+    ) -> None:
+        guide = result_hrefs(client.get("/docs/search/", {"q": shared_word}))
+        handbook = result_hrefs(
+            client.get("/manuals/admin/search/", {"q": shared_word})
+        )
+
+        assert sorted(guide) == LANTERN_HREFS
+        assert handbook == ["/manuals/admin/backups/"]
+
+    def test_each_apps_form_submits_to_its_own_search(
+        self, client, db, search_app, handbook_app, shared_word
+    ) -> None:
+        response = client.get("/manuals/admin/search/", {"q": shared_word})
+
+        assert search_form(response)["action"] == "/manuals/admin/search/"
+        assert query_field(response)["value"] == shared_word
+
+
+class TestUnavailableSearch:
+    @pytest.fixture
+    def rebuilt(self, search_app, search_build, tmp_path, monkeypatch):
+        build = tmp_path / "rebuilt"
+        shutil.copytree(search_build, build)
+        monkeypatch.setattr(search_app, "build_dir", build)
+        return build
+
+    @pytest.fixture
+    def nothing_matched(self, client, db, search_app):
+        return status_text(client.get("/docs/search/", {"q": "nothingmatchesthis"}))
+
+    @pytest.mark.parametrize("query", ["lantern", ""])
+    def test_a_build_without_search_data_says_search_is_unavailable(
+        self, client, db, rebuilt, nothing_matched, query
+    ) -> None:
+        (rebuilt / "searchindex.json").unlink()
+
+        response = client.get("/docs/search/", {"q": query})
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == []
+        assert status_text(response) != nothing_matched
+
+    @pytest.mark.parametrize("content", ["{not json", "[]", "{}", '{"docnames": 5}'])
+    def test_search_data_that_is_not_valid_says_search_is_unavailable(
+        self, client, db, rebuilt, nothing_matched, content
+    ) -> None:
+        (rebuilt / "searchindex.json").write_text(content)
+
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert response.status_code == 200
+        assert status_text(response) != nothing_matched
+
+    @pytest.mark.parametrize("path", SEARCH_PAGES)
+    def test_the_pages_are_still_served(self, client, db, rebuilt, path) -> None:
+        (rebuilt / "searchindex.json").unlink()
+
+        assert client.get(f"/docs/{path}").status_code == 200
+
+    def test_the_search_form_is_still_offered(self, client, db, rebuilt) -> None:
+        (rebuilt / "searchindex.json").unlink()
+
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert query_field(response)["value"] == "lantern"
+
+
+class TestSearchOfAMissingBuild:
+    @pytest.fixture
+    def missing(self, handbook_app, tmp_path, monkeypatch):
+        monkeypatch.setattr(handbook_app, "build_dir", tmp_path / "not-built-yet")
+
+    def test_the_search_address_answers_as_a_page_address_does(
+        self, client, db, missing
+    ) -> None:
+        page = client.get("/manuals/admin/backups/")
+        search = client.get("/manuals/admin/search/", {"q": "lantern"})
+
+        assert page.status_code == search.status_code == 404
+
+    def test_the_rest_of_the_site_still_answers(self, client, db, missing) -> None:
+        assert client.get(reverse("overview")).status_code == 200
+
+
+class TestSearchWithoutSphinx:
+    def test_a_search_gives_the_same_results_when_sphinx_cannot_be_imported(
+        self, client, db, search_app, monkeypatch
+    ) -> None:
+        expected = result_hrefs(client.get("/docs/search/", {"q": "lantern"}))
+        assert expected
+
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        response = client.get("/docs/search/", {"q": "lantern"})
+
+        assert response.status_code == 200
+        assert result_hrefs(response) == expected
+
+
+class TestSearchOfAVeryLongQuery:
+    @pytest.mark.parametrize(
+        "query",
+        ["a" * 5000, "word " * 1000, "lantern " * 625],
+        ids=["one-word", "many-words", "repeated-word"],
+    )
+    def test_a_query_of_five_thousand_characters_is_answered(
+        self, client, db, search_app, query
+    ) -> None:
+        response = client.get("/docs/search/", {"q": query})
+
+        assert response.status_code == 200
+        assert query_field(response)["value"] == query
