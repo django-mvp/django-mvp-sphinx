@@ -44,3 +44,10 @@ Next: US2 (T003).
 Watch: the entry assertions read the sidebar of the overview page, since the page body has no link to
 `/docs/`. The `docs/` pages describe no name or behaviour this story touched; `docs/ROADMAP.md` is a
 plan and was left alone.
+
+## 2026-09-30T00:01:39Z · Orchestrator · US1 acceptance
+
+Did: receipts, verify and tamper-check green. Found one test assigning `check` directly on the
+demo's module-level app, which would leak the rule into later tests. Changed it to
+`monkeypatch.setattr` (a one-line fix, so it was made here rather than re-dispatched).
+test_mounted, test_views and test_demo pass serially in that order.
