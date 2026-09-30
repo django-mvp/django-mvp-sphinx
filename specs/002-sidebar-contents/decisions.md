@@ -228,3 +228,20 @@ there. CI and development run as ordinary users, where the tests run and pass.
 **Revisit if**: CI moves to a container that runs as root, which would silently skip them.
 
 **ADR:** none — a test environment detail local to this feature
+
+## D11. Review findings below the fix bar, fixed directly
+
+**Decided**: the S6 review approved with no critical or high finding. The orchestrator fixed four
+small items directly rather than dispatching: TEST-001 (two `_hidden`/`_uncaptioned` unpacking
+targets in tests broke the owner's no-leading-underscore rule, now indexing), TEST-002 (a failed
+build writing no file is now tested on a stand-in), DOC-001 (the `process` override's docstring cut
+to one line, the lock's reason a one-line comment pointing at ADR 0002), and the catalogue's stale
+line references. TEST-003 (the read-count tests patch `DocsBuild.navigation`) is left as it is: it
+is the one outcome that shows the file is not re-read, which is the point of the stamp.
+
+**Why**: each was a line or two, with no design content, so a dispatch would cost more than the
+change.
+
+**Revisit if**: n/a — a record.
+
+**ADR:** none — a record of the review, not a decision

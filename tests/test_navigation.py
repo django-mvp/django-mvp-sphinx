@@ -8,7 +8,7 @@ from docutils import nodes
 from sphinx import addnodes
 
 from mvp_sphinx.docs_build import DocsBuild
-from mvp_sphinx.navigation import NavigationWriter
+from mvp_sphinx.navigation import NavigationWriter, write_navigation
 from tests.conftest import SPHINX_SOURCES
 
 
@@ -30,7 +30,7 @@ class TestNavigationFile:
         assert captions == ["Getting started", "", "Reference", ""]
 
     def test_a_group_lists_its_toctrees_pages_in_order(self, navigation) -> None:
-        started, uncaptioned, reference, _hidden = navigation["groups"]
+        started, uncaptioned, reference = navigation["groups"][:3]
 
         assert [each["title"] for each in started["entries"]] == [
             "Install",
@@ -75,7 +75,7 @@ class TestNavigationFile:
         assert len(hidden["entries"]) == 1
 
     def test_a_page_listed_twice_appears_at_both_places(self, navigation) -> None:
-        started, _uncaptioned, reference, _hidden = navigation["groups"]
+        started, reference = navigation["groups"][0], navigation["groups"][2]
 
         assert entry(started["entries"], "Shared page")["url"] == "shared/"
         assert entry(reference["entries"], "Shared page")["url"] == "shared/"
@@ -156,3 +156,10 @@ class TestNavigationWriter:
         (a,) = group["entries"]
         (b,) = a["children"]
         assert b["children"] == []
+
+    def test_a_build_that_failed_writes_no_navigation_file(self, tmp_path) -> None:
+        app = SimpleNamespace(builder=SimpleNamespace(name="json"), outdir=tmp_path)
+
+        write_navigation(app, RuntimeError("the build failed"))
+
+        assert not (tmp_path / DocsBuild.NAVIGATION_FILE).exists()

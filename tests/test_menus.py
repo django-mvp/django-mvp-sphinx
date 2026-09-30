@@ -283,7 +283,6 @@ class TestRefresh:
     def test_the_file_is_not_read_again_while_it_is_unchanged(
         self, processed, replaceable, reads
     ) -> None:
-
         first = processed()
         second = processed("/docs/chain/two/")
 

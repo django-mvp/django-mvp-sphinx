@@ -39,11 +39,8 @@ class DocumentationMenu(Menu):
         self.stamp: tuple[Any, ...] | None = None
 
     def process(self, request: "HttpRequest", **kwargs: Any) -> MenuItem:
-        """Bring the contents up to date, then process it for ``request``.
-
-        The lock is held throughout, because replacing the children is not
-        atomic and a concurrent request must not process a half-swapped tree.
-        """
+        """Bring the contents up to date, then process it for ``request``."""
+        # Replacing the children is not atomic; see docs/adr/0002.
         with self.lock:
             self.refresh()
             return super().process(request, **kwargs)

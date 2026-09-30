@@ -2,7 +2,7 @@
   "feature": "002-sidebar-contents",
   "branch": "002-sidebar-contents",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "CONVERGE",
+  "state": "REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -28,6 +28,11 @@
       "state": "CONVERGE",
       "at": "2026-09-30T00:12:30Z",
       "note": "US1-US3 done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T00:14:13Z",
+      "note": "one reviewer, correctness+spec+docs lens"
     }
   ],
   "gates": {
@@ -205,7 +210,7 @@
       "max": 2
     },
     "review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     },
     "tokens": {
