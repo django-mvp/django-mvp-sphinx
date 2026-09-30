@@ -18,7 +18,7 @@ orchestrator against the code (no handbook entry in AppMenu; no registration/log
 applied as plan/tasks edits. D13 (raising rule on host pages) and D14 (demo sign-in) appended.
 Next: plan notice, then US1.
 
-## 2026-09-30T00:10:00Z · Implementer US1 · T001
+## 2026-09-29T23:58:48Z · Implementer US1 · T001
 
 Did: `tests/factories.py` (`UserFactory`, `GroupFactory`) and the `user` and `group` fixtures in
 `tests/conftest.py`. Committed with T002's first class, `TestEveryoneByDefault`, which uses them.
@@ -28,7 +28,7 @@ Lint: `uv run pre-commit run --all-files` passed.
 Next: T002 rest (`TestSignedInOnly`, `TestRefusal`, demo sign-in route, docs).
 Watch: the download link on a page is relative, so tests join it to the page address.
 
-## 2026-09-30T00:25:00Z · Implementer US1 · T002
+## 2026-09-29T23:59:58Z · Implementer US1 · T002
 
 Did: `TestEveryoneByDefault`, `TestSignedInOnly` and `TestRefusal` in `tests/test_mounted.py`; the
 demo's `accounts/login/` route to `SignInView` (`account_login`) ahead of the
@@ -52,7 +52,7 @@ demo's module-level app, which would leak the rule into later tests. Changed it 
 `monkeypatch.setattr` (a one-line fix, so it was made here rather than re-dispatched).
 test_mounted, test_views and test_demo pass serially in that order.
 
-## 2026-09-30T00:20:00Z · Implementer US2 · T003
+## 2026-09-30T00:04:17Z · Implementer US2 · T003
 
 Did: `TestOwnRule` (group rule: member served for pages, image and download; signed-in non-member
 403 from `403.html` with no fixture page text or file bytes for the matrix, including unknown,
@@ -78,7 +78,7 @@ Did: receipts, verify green. tamper-check against the story base flagged the wid
 it is clean against origin/main. To sweep at S5: the README's "Pass `user_is_staff` itself"
 should say where it is imported from.
 
-## 2026-09-30T00:40:00Z · Implementer US3 · T004
+## 2026-09-30T00:07:38Z · Implementer US3 · T004
 
 Did: `demo/staff_guide/` (conf, front page, one page on the accounts), `staff_guide` app in
 `demo/mounted.py` (`check=user_is_staff`, name wrapped in `_()`), mount at `staff-guide/`, entry
@@ -95,7 +95,7 @@ Next: T005 (TestSeveralApps, README).
 Watch: the `from demo.mounted import ...` line in `demo/urls.py` and `demo/menus.py` gained a
 name, so those two existing lines changed; ruff's isort would merge a second import line anyway.
 
-## 2026-09-30T00:55:00Z · Implementer US3 · T005
+## 2026-09-30T00:08:39Z · Implementer US3 · T005
 
 Did: `TestSeveralApps` (docs open, `staff_guide_app` at the demo's staff rule): overview entries
 for anonymous, regular and staff readers; each reader served or refused per app (anonymous 302
