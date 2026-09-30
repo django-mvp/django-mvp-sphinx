@@ -1,16 +1,23 @@
 """DocumentationApp is a mounted app that serves one docs build."""
 
+import html
 import re
 from urllib.parse import quote, urljoin
 
 import pytest
 from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import resolve_url
 from django.urls import reverse
-from flex_menu.checks import user_is_authenticated
+from flex_menu.checks import (
+    user_has_any_permission,
+    user_in_any_group,
+    user_is_authenticated,
+)
 
 from mvp_sphinx.mounted import DocumentationApp
+from tests.factories import UserFactory
 
 
 class TestDocumentationApp:
@@ -216,3 +223,190 @@ class TestRefusal:
         assert response.status_code == 302
         assert response["Location"] == sign_in_address("/docs/page/")
         assert response.content == b""
+
+
+PAGE_TEXTS = [
+    FRONT_PAGE_TEXT,
+    "This page sits beside the front page.",
+    "The pages inside this folder.",
+    "Two folders down.",
+]
+
+
+def is_forbidden(response) -> bool:
+    return response.status_code == 403 and "403.html" in [
+        template.name for template in response.templates
+    ]
+
+
+def boom(request):
+    raise RuntimeError("boom")
+
+
+class TestOwnRule:
+    @pytest.fixture(autouse=True)
+    def group_rule(self, docs_app, group, monkeypatch):
+        monkeypatch.setattr(docs_app, "check", user_in_any_group(group.name))
+
+    @pytest.fixture
+    def member(self, group):
+        member = UserFactory()
+        member.groups.add(group)
+        return member
+
+    @pytest.fixture
+    def files(self, client, db, docs_app, guide_build, monkeypatch):
+        with monkeypatch.context() as admitted:
+            admitted.setattr(docs_app, "check", True)
+            return asset_addresses(client, guide_build)
+
+    @pytest.mark.parametrize("address", ["/docs/", "/docs/page/"])
+    def test_a_member_gets_a_page(self, client, member, address):
+        client.force_login(member)
+
+        assert client.get(address).status_code == 200
+
+    def test_a_member_gets_the_front_page_content(self, client, member):
+        client.force_login(member)
+
+        assert FRONT_PAGE_TEXT in client.get("/docs/").content.decode()
+
+    @pytest.mark.parametrize("index", [0, 1])
+    def test_a_member_gets_the_image_and_the_download(
+        self, client, member, files, index
+    ):
+        client.force_login(member)
+
+        assert client.get(files[index]).status_code == 200
+
+    @pytest.mark.parametrize(
+        "address",
+        [
+            "/docs/",
+            "/docs/page/",
+            "/docs/section/",
+            "/docs/section/nested/page/",
+            "/docs/nope/",
+            "/docs/page",
+            "/docs/nope",
+        ],
+    )
+    def test_a_signed_in_non_member_is_forbidden_with_no_page_text(
+        self, client, user, address
+    ):
+        client.force_login(user)
+
+        response = client.get(address)
+
+        assert is_forbidden(response)
+        assert not any(text in response.content.decode() for text in PAGE_TEXTS)
+
+    @pytest.mark.parametrize("index", [0, 1])
+    def test_a_signed_in_non_member_is_forbidden_with_no_file(
+        self, client, user, member, files, index
+    ):
+        client.force_login(member)
+        content = body(client.get(files[index]))
+        client.force_login(user)
+
+        response = client.get(files[index])
+
+        assert is_forbidden(response)
+        assert content not in body(response)
+
+    def test_a_signed_in_non_member_is_forbidden_when_the_build_is_missing(
+        self, client, user, docs_app, monkeypatch, tmp_path
+    ):
+        monkeypatch.setattr(docs_app, "build_dir", tmp_path / "missing")
+        client.force_login(user)
+
+        assert is_forbidden(client.get("/docs/page/"))
+
+    def test_an_anonymous_reader_is_sent_to_sign_in(self, client, db):
+        response = client.get("/docs/page/")
+
+        assert response.status_code == 302
+        assert response["Location"] == sign_in_address("/docs/page/")
+
+    def test_the_entry_is_absent_for_a_non_member(self, client, user, docs_app):
+        client.force_login(user)
+        page = client.get(reverse("overview")).content.decode()
+
+        assert f'href="{reverse(docs_app.landing)}"' not in sidebar(page)
+
+    def test_the_entry_is_present_for_a_member(self, client, member, docs_app):
+        client.force_login(member)
+        page = client.get(reverse("overview")).content.decode()
+
+        assert f'href="{reverse(docs_app.landing)}"' in sidebar(page)
+
+    def test_the_forbidden_page_does_not_name_the_app(
+        self, client, user, member, group, handbook_app, monkeypatch
+    ):
+        monkeypatch.setattr(handbook_app, "check", user_in_any_group(group.name))
+        name = html.escape(str(handbook_app.name))
+        client.force_login(member)
+        admitted = client.get("/manuals/admin/backups/")
+        client.force_login(user)
+
+        refused = client.get("/manuals/admin/backups/")
+
+        assert name in admitted.content.decode()
+        assert is_forbidden(refused)
+        assert name not in refused.content.decode()
+
+
+class TestPermissionRule:
+    @pytest.fixture(autouse=True)
+    def permission_rule(self, docs_app, monkeypatch):
+        monkeypatch.setattr(
+            docs_app, "check", user_has_any_permission("auth.view_user")
+        )
+
+    def test_a_user_granted_the_permission_gets_a_page(self, client, user):
+        user.user_permissions.add(Permission.objects.get(codename="view_user"))
+        client.force_login(user)
+
+        assert client.get("/docs/page/").status_code == 200
+
+    def test_a_user_without_the_permission_is_forbidden(self, client, user):
+        client.force_login(user)
+
+        assert is_forbidden(client.get("/docs/page/"))
+
+
+class TestRuleAdmittingNoOne:
+    @pytest.fixture(autouse=True)
+    def nobody(self, docs_app, monkeypatch):
+        monkeypatch.setattr(docs_app, "check", False)
+
+    @pytest.fixture
+    def superuser(self, db):
+        return UserFactory(is_staff=True, is_superuser=True)
+
+    def test_a_superuser_is_forbidden(self, client, superuser):
+        client.force_login(superuser)
+
+        assert is_forbidden(client.get("/docs/page/"))
+
+    def test_a_superuser_is_offered_no_entry(self, client, superuser, docs_app):
+        client.force_login(superuser)
+        page = client.get(reverse("overview")).content.decode()
+
+        assert f'href="{reverse(docs_app.landing)}"' not in sidebar(page)
+
+
+class TestRuleThatRaises:
+    def test_a_page_request_raises_the_error(self, client, db, docs_app, monkeypatch):
+        monkeypatch.setattr(docs_app, "check", boom)
+
+        with pytest.raises(RuntimeError):
+            client.get("/docs/page/")
+
+    def test_the_overview_page_raises_the_error(
+        self, client, db, docs_app, monkeypatch
+    ):
+        monkeypatch.setattr(docs_app, "check", boom)
+
+        with pytest.raises(RuntimeError):
+            client.get(reverse("overview"))

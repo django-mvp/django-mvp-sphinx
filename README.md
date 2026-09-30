@@ -130,6 +130,52 @@ under the prefix, including the images and downloads your pages link to, and it
 answers the same way whatever is behind the address, so a reader cannot tell
 which pages exist.
 
+To keep it for a group or for holders of a permission, use the other two
+checks from `flex_menu.checks`. Both are factories, so call them with their
+arguments:
+
+```python
+from flex_menu.checks import user_has_any_permission, user_in_any_group
+
+docs = DocumentationApp(
+    build_dir=BASE_DIR / "docs" / "_build" / "json",
+    check=user_in_any_group("Support"),
+)
+tickets = DocumentationApp(
+    build_dir=BASE_DIR / "tickets" / "_build" / "json",
+    namespace="tickets",
+    check=user_has_any_permission("support.view_ticket"),
+)
+```
+
+Any function of the request works too:
+
+```python
+def staff_only(request):
+    return request.user.is_staff
+
+
+handbook = DocumentationApp(
+    build_dir=BASE_DIR / "handbook" / "_build" / "json",
+    namespace="handbook",
+    check=staff_only,
+)
+```
+
+A signed-in reader the rule excludes gets your project's 403 page, which says
+nothing about the documentation, and no menu entry. The rule alone decides.
+Staff and superusers have no way in unless it admits them, and `check=False`
+admits no one.
+
+The rule is asked on every request. If it raises, the request is a server
+error: a page is never served on a guess. The menu entry asks the rule too, so
+the error also shows on every page that draws the entry, the sign-in page
+included. Write a rule that returns an answer.
+
+A `check` that is not a function is read as yes or no. `check="staff"` is a
+non-empty string, which is true, and admits everyone. Pass `user_is_staff`
+itself, or a function, to keep the docs for staff.
+
 The rule is django-mvp's `check`, described in its
 [mounted apps guide](https://github.com/django-mvp/django-mvp/blob/main/docs/mounted-apps.md#limiting-who-can-reach-an-app).
 
