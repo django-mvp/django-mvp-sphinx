@@ -122,3 +122,26 @@ accepted on its own with `forge story-done`.
 stories share, and loses no separate acceptance.
 
 **ADR:** none — run mechanics.
+
+## D15. Design review: approved, seven findings carried into the plan (S3R)
+
+**Ambiguous:** The design reviewer approved the plan with two medium and five low findings (none
+critical or high), so nothing forces a re-plan.
+
+**Chosen:** DR-001 (step 5's file is an installed app's `menus.py`), DR-002 (groups and pages
+asserted on the processed menu tree, not on markup), DR-003 (the `render` fixture goes with the
+starter component), DR-004 (build through `build_main` with step 3's arguments, not a subprocess),
+DR-005 (no CHANGELOG *Removed* line for a component that was never released) and DR-006 (the
+templates' blocks, class and context are listed) are applied to `plan.md` and `tasks.md`. DR-007 is
+declined: it asks to narrow the list to `PageView` and `BodyRewriter.rewrite`, but the README on
+main already invites a host to call `PageHeadings.from_toc`, `BodyRewriter.rewrite` and to
+subclass `PageView`, and FS-002 and FS-007 named `DocumentationMenu`, `DocsBuild`, `SearchView`,
+`DocsSearch` and `PageText` as new public names under Article XI. Narrowing now would withdraw what
+earlier features promised. The reviewer's notes on one `BASE_DIR` idiom and the `-W` wording are
+applied too.
+
+**Why:** Each applied remedy is an edit to the plan, verified by the orchestrator against the
+finding's evidence. The declined one would change the promise of shipped features, which is not
+this feature's call.
+
+**ADR:** none — review disposition local to this feature.

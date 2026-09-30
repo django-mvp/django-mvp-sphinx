@@ -44,7 +44,7 @@ public markdown). Sam's code standards for every brief: no leading-underscore na
 no compatibility aliases; no test of text content or of design preferences; Cotton components, never
 Cotton's template tags.
 
-**Scale/Scope**: README, the demo's guide sources, the demo's overview template, two test modules,
+**Scale/Scope**: README, the demo's guide sources, the demo's overview template, two test modules and `tests/conftest.py`,
 one package template and its test class removed.
 
 ## Constitution Check
@@ -54,8 +54,8 @@ one package template and its test class removed.
 | I Testing | The quickstart and the demo's states are acceptance tests through `client` on real builds. README prose is not tested (testing standard: no assertion on wording). Its accuracy is checked by the reviewer's documentation pass and by the orchestrator at each story's acceptance. |
 | II Simplicity | No new code. One starter template removed. |
 | IV Integration-first | Both new test classes drive the site as a reader does: follow links from the sidebar and the menu, never call the view directly. |
-| VI Documentation | This feature *is* Article VI's README. Links absolute (FR-014). CHANGELOG entry for the removed starter component. |
-| XI Compatibility | `mvp_sphinx.example` (the starter component) is removed. It was never documented as public and was a template placeholder whose own test said to delete it with its first real sibling. The version is 0.0.1 and nothing depends on it. CHANGELOG records the removal under Removed. No alias is kept. |
+| VI Documentation | This feature *is* Article VI's README. Links absolute (FR-014). CHANGELOG *Added* entry for the quickstart and public surface list. |
+| XI Compatibility | `mvp_sphinx.example` (the starter component) is removed. It was never documented as public and was a template placeholder whose own test said to delete it with its first real sibling. It was never released (no tag, no release), so the CHANGELOG records nothing about it (DR-005). No alias is kept. |
 | XII Scope | Unchanged: the README describes serving a build and never building one. |
 
 ## The README
@@ -84,7 +84,7 @@ Final section order (headings may be reworded; order and content may not):
         in the project's `urls.py`, at the prefix the project chooses.
      5. **Menu entry**: `AppMenu.append(docs.menu_item())` in the `menus.py` of one of the
         project's installed apps. django-flex-menus imports that module when Django starts (R2),
-        which is why it has to live in an installed app.
+        which is why it has to live in an installed app. The snippet's file label is an installed app's module (`yourapp/menus.py`), never `yourproject/menus.py` (DR-001).
    - What the reader now has: the front page at `/docs/` in the shell, the contents in the app sidebar,
      the menu entry, and no template written (FR-003).
    - *Changing the docs*: run step 3 again and reload; pages, contents and search follow with no
@@ -131,7 +131,8 @@ change. The list, read from the package on origin/main at f8d30be (research R1):
   `mvp_sphinx.search.PageText`.
 - **Templates a project may override**: `mvp_sphinx/page.html`, `mvp_sphinx/search.html`, and the
   context each receives, as the README already describes it for `page.html` (`body`, `headings`,
-  `previous_page`, `next_page`).
+  `previous_page`, `next_page`; the `styles` and `content` blocks; the `mvp-sphinx-content` class)
+  and `search.html`'s context as the view supplies it (DR-006).
 - **Components**: `mvp_sphinx.on_this_page`, `mvp_sphinx.heading_list`, `mvp_sphinx.page_links`,
   `mvp_sphinx.search_form`, each with its attributes as its own `@prop` annotations state them.
 - **Static file**: `mvp_sphinx/content.css`.
@@ -148,7 +149,7 @@ cookiecutter's placeholder. Its test class says "Delete this class along with th
 component it covers", and the demo's overview page shows it under "The starter component". Listing
 it as public surface would advertise a placeholder. Leaving it unlisted would break SC-003, since it
 is a public name that exists. So the template, `TestStarterComponent` and `EXAMPLE_TAG` in
-`tests/test_smoke.py`, and the overview page's section that uses it are removed. That is a
+`tests/test_smoke.py`, the `render` fixture in `tests/conftest.py` that only it uses (DR-003), and the overview page's section that uses it are removed. That is a
 declared edit of a pre-existing test, authorised here and recorded as D12. `TestPackagedApp` stays.
 
 ## The demo's user guide
@@ -196,13 +197,14 @@ than the site. The build stays gitignored (spec decision 4).
   "small Sphinx source directory" of US1's independent test. The existing sources are shaped for
   other features, so none is reused.
 - **`tests/test_quickstart.py`**: `TestQuickstart`. The fixture copies the source to `tmp_path`
-  and runs the build as step 3 writes it, as a subprocess (`sphinx-build -b json <src> <out>`), so
-  the command itself is exercised. It creates a `DocumentationApp` with a `namespace` of its own
+  and runs the build with step 3's arguments through `sphinx.cmd.build.build_main(["-b", "json", "-W",
+  src, out])`, as `conftest.py` does (DR-004); `-W` is added so the test build must be clean. It creates a `DocumentationApp` with a `namespace` of its own
   and mounts it in a test urlconf at a prefix that is not `docs/`, the address "they chose"
   (`override_settings(ROOT_URLCONF=...)`). The menu entry is appended to `AppMenu` and removed again
   in teardown, since `AppMenu` is global. Tests:
   - the front page answers 200 at the chosen prefix, inside the shell (US1.1);
-  - the sidebar holds the source's contents group and both pages, each link answering 200 (US1.1);
+  - the app's processed menu tree holds the source's contents group and both pages, and each of
+    their URLs answers 200 (US1.1, DR-002);
   - a host page's menu holds the app's entry, and its `href` is the front page (US1.2);
   - adding a page to the source and its toctree, then running step 3 again into the same folder,
     serves the new page and lists it in the sidebar on the next request, same process (US1.5);
@@ -216,8 +218,9 @@ than the site. The build stays gitignored (spec decision 4).
   `staff_guide_app` pattern). One test walks every page the front page's sidebar links under `/docs/`
   and collects what it finds. Each state is one assertion or one small test over that walk, and all
   of them are found by structure:
-  - ≥ 2 captioned groups and ≥ 1 collapsible branch in the sidebar (US3.2), read from the sidebar
-    markup the existing `TestDocumentationMenu` tests already rely on;
+  - ≥ 2 captioned groups and ≥ 1 collapsible branch in the sidebar (US3.2), asserted on the processed menu
+    tree (`docs.menu.process(rf.get("/docs/"))`, as `tests/test_menus.py`'s `processed` fixture
+    does); the pages to walk come from that tree's URLs (DR-002);
   - some page whose "On this page" landmark lists ≥ 3 links and a nested list (US3.2);
   - some page with a previous link and a next link (US3);
   - `div.admonition` elements carrying each of the classes `note tip hint important warning caution
@@ -231,7 +234,8 @@ than the site. The build stays gitignored (spec decision 4).
   - the demo's menu has the guide's entry, and following it gives the front page (US3.1). The
     existing `TestDocumentationEntry` covers the entry, so this only adds the follow.
   The build must finish with no warnings (`-W`), so a broken cross-reference fails the test.
-- `tests/test_smoke.py`: `TestStarterComponent` and `EXAMPLE_TAG` removed (D12).
+- `tests/test_smoke.py`: `TestStarterComponent` and `EXAMPLE_TAG` removed, and the `render` fixture
+  in `tests/conftest.py` with its now-unused imports (D12, DR-003).
 
 No test reads the README.
 
