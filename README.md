@@ -135,6 +135,7 @@ checks from `flex_menu.checks`. Both are factories, so call them with their
 arguments:
 
 ```python
+from django.utils.translation import gettext_lazy as _
 from flex_menu.checks import user_has_any_permission, user_in_any_group
 
 docs = DocumentationApp(
@@ -143,6 +144,7 @@ docs = DocumentationApp(
 )
 tickets = DocumentationApp(
     build_dir=BASE_DIR / "tickets" / "_build" / "json",
+    name=_("Ticket handling"),
     namespace="tickets",
     check=user_has_any_permission("support.view_ticket"),
 )
@@ -167,7 +169,9 @@ nothing about the documentation, and no menu entry. The rule alone decides.
 Staff and superusers have no way in unless it admits them, and `check=False`
 admits no one.
 
-The rule is asked on every request. If it raises, the request is a server
+The rule is asked on every request, and often more than once in one, since the
+menu entry asks it as well as the page. Keep it quick and free of side effects.
+If it raises, the request is a server
 error: a page is never served on a guess. The menu entry asks the rule too, so
 the error also shows on every page that draws the entry, the sign-in page
 included. Write a rule that returns an answer.

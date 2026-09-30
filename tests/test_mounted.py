@@ -1,6 +1,5 @@
 """DocumentationApp is a mounted app that serves one docs build."""
 
-import html
 import re
 from urllib.parse import quote, urljoin
 
@@ -58,10 +57,6 @@ class TestMenuEntry:
 FRONT_PAGE_TEXT = "Welcome to the guide"
 
 
-def sidebar(page: str) -> str:
-    return page.split('aria-label="Main navigation"', 1)[1].split("</ul>", 1)[0]
-
-
 def sign_in_address(address: str) -> str:
     return f"{resolve_url(settings.LOGIN_URL)}?next={quote(address, safe='/')}"
 
@@ -95,7 +90,7 @@ class TestEveryoneByDefault:
         for address in asset_addresses(client, guide_build):
             assert client.get(address).status_code == 200
 
-    def test_the_overview_page_offers_the_entry(self, overview_page, docs_app):
+    def test_the_overview_page_offers_the_entry(self, sidebar, overview_page, docs_app):
         assert f'href="{reverse(docs_app.landing)}"' in sidebar(overview_page)
 
 
@@ -130,21 +125,24 @@ class TestSignedInOnly:
     ):
         monkeypatch.setattr(docs_app, "check", user_is_authenticated)
         location = client.get("/docs/page/").url
+        response = client.get(location)
 
-        assert client.get(location).status_code == 200
+        assert response.status_code == 200
+        assert response.context["next"] == "/docs/page/"
 
     def test_signing_in_lands_on_the_requested_address_with_its_query(
         self, client, user, docs_app, monkeypatch
     ):
         monkeypatch.setattr(docs_app, "check", user_is_authenticated)
         location = client.get("/docs/page/?x=1").url
+        sign_in_page = client.get(location)
 
         response = client.post(
             reverse("account_login"),
             {
                 "username": user.username,
                 "password": "password",
-                "next": "/docs/page/?x=1",
+                "next": sign_in_page.context["next"],
             },
         )
 
@@ -154,7 +152,7 @@ class TestSignedInOnly:
         assert client.get(response["Location"]).status_code == 200
 
     def test_the_entry_is_absent_for_an_anonymous_reader(
-        self, client, db, docs_app, monkeypatch
+        self, sidebar, client, db, docs_app, monkeypatch
     ):
         monkeypatch.setattr(docs_app, "check", user_is_authenticated)
         page = client.get(reverse("overview")).content.decode()
@@ -162,7 +160,7 @@ class TestSignedInOnly:
         assert f'href="{reverse(docs_app.landing)}"' not in sidebar(page)
 
     def test_the_entry_leads_a_signed_in_reader_to_the_front_page(
-        self, client, user, docs_app, monkeypatch
+        self, sidebar, client, user, docs_app, monkeypatch
     ):
         monkeypatch.setattr(docs_app, "check", user_is_authenticated)
         client.force_login(user)
@@ -328,13 +326,15 @@ class TestOwnRule:
         assert response.status_code == 302
         assert response["Location"] == sign_in_address("/docs/page/")
 
-    def test_the_entry_is_absent_for_a_non_member(self, client, user, docs_app):
+    def test_the_entry_is_absent_for_a_non_member(
+        self, sidebar, client, user, docs_app
+    ):
         client.force_login(user)
         page = client.get(reverse("overview")).content.decode()
 
         assert f'href="{reverse(docs_app.landing)}"' not in sidebar(page)
 
-    def test_the_entry_is_present_for_a_member(self, client, member, docs_app):
+    def test_the_entry_is_present_for_a_member(self, sidebar, client, member, docs_app):
         client.force_login(member)
         page = client.get(reverse("overview")).content.decode()
 
@@ -344,16 +344,15 @@ class TestOwnRule:
         self, client, user, member, group, handbook_app, monkeypatch
     ):
         monkeypatch.setattr(handbook_app, "check", user_in_any_group(group.name))
-        name = html.escape(str(handbook_app.name))
         client.force_login(member)
         admitted = client.get("/manuals/admin/backups/")
         client.force_login(user)
 
         refused = client.get("/manuals/admin/backups/")
 
-        assert name in admitted.content.decode()
+        assert admitted.context["mounted_app"] == handbook_app
         assert is_forbidden(refused)
-        assert name not in refused.content.decode()
+        assert not refused.context["mounted_app"]
 
 
 class TestPermissionRule:
@@ -389,7 +388,9 @@ class TestRuleAdmittingNoOne:
 
         assert is_forbidden(client.get("/docs/page/"))
 
-    def test_a_superuser_is_offered_no_entry(self, client, superuser, docs_app):
+    def test_a_superuser_is_offered_no_entry(
+        self, sidebar, client, superuser, docs_app
+    ):
         client.force_login(superuser)
         page = client.get(reverse("overview")).content.decode()
 
@@ -414,7 +415,8 @@ class TestRuleThatRaises:
 
 class TestSeveralApps:
     @pytest.fixture(autouse=True)
-    def two_apps(self, docs_app, staff_guide_app):
+    def two_apps(self, docs_app, staff_guide_app, sidebar):
+        self.sidebar = sidebar
         return docs_app, staff_guide_app
 
     @pytest.fixture
@@ -422,7 +424,7 @@ class TestSeveralApps:
         return UserFactory(is_staff=True)
 
     def entries(self, client) -> str:
-        return sidebar(client.get(reverse("overview")).content.decode())
+        return self.sidebar(client.get(reverse("overview")).content.decode())
 
     def test_an_anonymous_reader_is_offered_only_the_open_app(self, client, db):
         entries = self.entries(client)

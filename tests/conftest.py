@@ -26,6 +26,15 @@ def render():
     return render_source
 
 
+@pytest.fixture(scope="session")
+def sidebar():
+    # The shell's main navigation, where the host's menu entries are drawn.
+    def region(page):
+        return page.split('aria-label="Main navigation"', 1)[1].split("</ul>", 1)[0]
+
+    return region
+
+
 @pytest.fixture
 def overview_page(client, db):
     return client.get(reverse("overview")).content.decode()

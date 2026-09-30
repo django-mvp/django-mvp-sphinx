@@ -209,3 +209,18 @@ the sign-in form, and SC-005 could not be seen in the demo. The template carries
 so the visitor comes back to the page they asked for.
 
 **ADR:** none — demo wiring only, never distributed
+
+## D15. The code review's test findings are fixed here, directly
+
+**Chosen:** The review approved with no critical or high finding. Its four test findings, and one
+README note, were fixed on this branch by the orchestrator rather than carried as comments. The
+403 no-trace test now reads the shell's `mounted_app` instead of searching for the name, since
+the error template never draws the name. The sign-in test carries `next` from the sign-in page
+itself. The `sidebar` helper moved to a `conftest.py` fixture. The user factory uses
+`factory.django.Password`. The README's two-app example names both apps.
+
+**Why:** Each is a few lines, test-only or wording, with no design content, so dispatching a new
+builder would cost more than the change. The 403 test was shown able to fail by running it
+against a copy of the shell lookup that keeps a refused app.
+
+**ADR:** none — test and wording fixes local to this feature

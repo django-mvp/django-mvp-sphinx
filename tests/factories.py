@@ -9,7 +9,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     username = factory.Sequence(lambda n: f"reader{n}")
-    password = factory.PostGenerationMethodCall("set_password", "password")
+    password = factory.django.Password("password")
 
 
 class GroupFactory(factory.django.DjangoModelFactory):
