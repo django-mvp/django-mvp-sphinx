@@ -48,3 +48,10 @@ Did: README section "The contents in the sidebar" (the one `conf.py` line, what 
 Verified: `uv run pytest tests/test_demo.py tests/test_menus.py tests/test_mounted.py -q` → 21 passed; the test failed before `conf.py` loaded the extension; `uv run sphinx-build -E -b json -q -w /tmp/demo.warn demo/docs /tmp/demo-out` → exit 0, empty warnings file; `uv run pre-commit run --all-files` → all hooks pass.
 Next: full verify, then the completion report. The first full verify failed its docs step on `NavigationWriter`, `setup` and `write_navigation`; the README now quotes them.
 Watch: the README's rebuild-on-next-request sentence belongs to US3 (T007) and is not written here.
+
+## 2026-09-30T00:20:00Z · Implementer US2 · T005
+
+Did: `TestCurrentPage` in `tests/test_menus.py`, eight tests on the processed tree of the contents build: a page nested in two groups (only selected link; the three enclosing groups selected), a page with pages of its own (its "page itself" link is the selected link, its group selected), the front page, a page listed twice (both places selected), a top-level page, the `:orphan:` page (nothing selected, tree equal to the front page's), and a request with a query string. No production code changed and no rendered-HTML test was added: the shell draws the marking with a CSS class only, which the brief rules out asserting.
+Verified: `uv run pytest tests/test_menus.py::TestCurrentPage -q` → 8 passed on first run, as the task expects (flex_menu's matching does the work). Probed instead of trusting green: pointing the "page itself" link at the wrong address fails 2 tests, moving the front page entry fails 1, and appending to every entry address fails 6; `menus.py` restored after each. `uv run pre-commit run --all-files` → all hooks pass.
+Next: full verify, then the completion report.
+Watch: no test in `tests/test_views.py` was needed; nothing observable there beyond the CSS class.
