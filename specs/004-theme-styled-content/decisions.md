@@ -230,3 +230,17 @@ module. Notes applied: caption label without the glyph, `gettext_lazy`, `{% load
 **Why:** Each remedy is a paragraph in the plan; none adds a task.
 
 **Revisit if:** the S6 reviewer finds a defect one of these remedies introduced.
+
+## D9. A table's label is its caption's markup up to the heading link
+
+**Decision:** `BodyRewriter` reads the caption as the markup between `<caption>` and the first
+`a.headerlink` (or `</caption>` when there is none), strips tags, decodes entities and collapses
+whitespace. A table whose end tag never arrives is left unwrapped.
+
+**Why:** Sphinx puts the caption text in `span.caption-text` and the pilcrow link after it, so
+cutting at the link needs no span tracking and still works for inline markup inside the caption.
+Wrapping a table with no end tag would need a guessed end offset; leaving it as written keeps the
+"nothing is invented" rule of the splice.
+
+**Revisit if:** a Sphinx theme or extension puts other text after the caption text that is not the
+heading link.

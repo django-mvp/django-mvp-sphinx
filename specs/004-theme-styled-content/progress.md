@@ -54,3 +54,32 @@ missing roles), then 15 passed; probed by mutation (string at 95% success fails 
 Next: full verify.
 Watch: lowest measured pair is the number colour on the emphasised background in the light theme
 (about 6.5:1). No role moved far from its hue, so no decisions.md entry.
+
+## 2026-09-30T02:40+02:00 · Implementer US3 · T004
+
+Did: `mvp_sphinx/page_body.py` with `BodyRewriter` (stdlib `HTMLParser`, records insertion offsets
+from `getpos()`, result is the original string with insertions spliced in); wraps each outermost
+table in a focusable named region, label from the caption or `gettext_lazy("Table")`, escaped with
+`format_html`. `PageView.get` passes the body through it and gives the template `body`;
+`page.html` renders `{{ body }}`. Fixture page gains a captioned table, a plain table and a table
+in a warning. `Table` msgid added to `django.po` with `makemessages`. README *How pages look*.
+Verified: `uv run pytest tests/test_page_body.py` red first (12 failed on a stub that returned the
+markup unchanged, 8 guards passed), then 20 passed; `uv run pytest tests/test_views.py::TestWideContent`
+red (2 failed), then `uv run pytest tests/test_page_body.py tests/test_views.py` 80 passed. Probed by
+mutation: dropping the line offset from the position and an off-by-one on the end tag each fail
+a test (the first only after the wrapper-placement assertion was added). `uv run pre-commit run
+--all-files` passed.
+Next: T005, the stylesheet rules and demo.
+Watch: `mark_safe` in `PageView.get` carries a `noqa: S308`; the body is the host's own build.
+
+## 2026-09-30T02:55+02:00 · Implementer US3 · T005
+
+Did: wide-content rules at the end of `content.css` (table region scrolls sideways with a focus
+outline from `--color-primary`, `pre` scrolls, images scale, figures stay in the reading area);
+`content-tour.rst` gains a wide table, a table in a list item, a long code line, an image and a
+figure, both images the existing `shell.png` set to 2400px wide (no new binary). CHANGELOG line.
+Verified: `uv run sphinx-build -b json -q -W demo/docs /tmp/demo-json-us3b` exit 0;
+`uv run pytest tests/test_static tests/test_demo.py` 19 passed (stylesheet still has no literal
+colour and stays scoped); `uv run pre-commit run --all-files` passed. No test for layout.
+Next: full verify.
+Watch: the layout itself was not looked at in a browser; the demo page is the place to check it.
