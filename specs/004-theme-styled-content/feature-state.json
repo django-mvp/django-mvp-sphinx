@@ -2,7 +2,7 @@
   "feature": "004-theme-styled-content",
   "branch": "004-theme-styled-content",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "CONVERGE",
+  "state": "REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -28,6 +28,11 @@
       "state": "CONVERGE",
       "at": "2026-09-30T00:18:03Z",
       "note": "US1-US5 done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T00:19:39Z",
+      "note": "one reviewer: correctness+spec lens (no security-sensitive surface; implementation followed the reviewed plan)"
     }
   ],
   "gates": {
@@ -227,7 +232,7 @@
       "max": 2
     },
     "review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     },
     "tokens": {
