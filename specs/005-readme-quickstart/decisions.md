@@ -161,3 +161,18 @@ with no design content does not justify a re-dispatch. It is recorded here as a 
 pre-existing test.
 
 **ADR:** none — a fixture word in one test.
+
+## D17. `TestQuickstart` lives in `tests/test_mounted.py` (S4, US1)
+
+**Ambiguous:** The implementer put the quickstart test in `tests/test_quickstart.py`. The
+conformance gate flags it: the file mirrors no source module, and the testing standard puts a
+cross-cutting test in its subject's module.
+
+**Chosen:** Forge moved the class, its fixtures and helpers into `tests/test_mounted.py`, as
+`DocumentationApp` is what the quickstart sets up and mounts. The fixture and constant names gained
+a `quickstart` prefix so they do not read as the module's own. The tests themselves are unchanged.
+
+**Why:** It follows the repo's own standard, where declaring a non-mirror exception would bend it.
+Moving a test written in this story is not an edit of a pre-existing test.
+
+**ADR:** none — test placement.

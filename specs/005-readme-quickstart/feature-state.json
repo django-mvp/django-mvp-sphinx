@@ -63,7 +63,7 @@
           "attempts": 3,
           "evidence": {
             "tests": [
-              "tests/test_quickstart.py::TestQuickstart"
+              "tests/test_mounted.py::TestQuickstart"
             ],
             "commands": [
               "uv run pytest tests/test_quickstart.py -q"
@@ -88,7 +88,7 @@
             "tests": [
               "tests/test_smoke.py::TestPackagedApp",
               "tests/test_demo.py",
-              "tests/test_quickstart.py::TestQuickstart"
+              "tests/test_mounted.py::TestQuickstart"
             ],
             "commands": [
               "uv run pytest tests/test_smoke.py tests/test_demo.py tests/test_quickstart.py -q"
