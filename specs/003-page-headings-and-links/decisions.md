@@ -126,3 +126,20 @@ Sphinx builds.
 **Revisit if**: n/a — a record.
 
 **ADR:** none — a record of the review, not a decision
+
+## D7. The hidden-page test asserts one link, not two
+
+**Decision**: `TestPreviousAndNextPage` tests the hidden-toctree case as "`hidden-page/` has a
+previous link to `reference/api/`, and that page's next link leads back to `hidden-page/`". It
+does not assert a next link on `hidden-page/`.
+
+**Why**: tasks.md T004 says `hidden-page/` has both links. In `tests/sphinx/contents/` its hidden
+toctree is the last one in `index.rst`, so `hidden-page` is the last page in reading order and
+Sphinx writes `next: null` for it (read from the built `hidden-page.fjson`). The source is not in
+this story's files, so it was not edited. The assertion still shows that a hidden toctree feeds
+the links, which is what the edge case is about.
+
+**Revisit if**: a later story adds a page after `hidden-page` in the contents source; the test can
+then assert both links.
+
+**ADR:** none — a test-scope choice
