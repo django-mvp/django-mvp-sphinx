@@ -130,3 +130,9 @@ verified. Merged origin/main (FS-002 sidebar contents): conflicts in CHANGELOG a
 tests/test_demo.py resolved keeping both sides. The staff guide's conf.py gained the
 navigation extension, with a build test. The 403 test also asserts no app menu. The full gate is
 green on fd63066 (250 tests). Review outcome recorded at fd63066 (0 open).
+
+## 2026-09-30T00:35:24Z · S7 bring up to date
+
+Did: merged origin/main twice more: #51 (FS-002 records) and #48 (FS-004 theme-styled content),
+both clean. FS-002 had taken ADR 0002 and FS-004 ADR 0003, so this feature's reader-rule record is
+renumbered to 0004, with every reference updated.

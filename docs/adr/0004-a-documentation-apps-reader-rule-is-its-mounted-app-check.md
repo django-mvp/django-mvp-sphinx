@@ -1,4 +1,4 @@
-# ADR 0002 — A documentation app's reader rule is its mounted app `check`
+# ADR 0004 — A documentation app's reader rule is its mounted app `check`
 
 **Status:** accepted
 

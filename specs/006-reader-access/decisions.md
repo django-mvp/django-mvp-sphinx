@@ -31,7 +31,7 @@ permission or anything else is expressed as the host's own rule.
 and still leave the others needing code, so the general rule covers groups. The default keeps a
 documentation app mounted before this feature readable exactly as it was.
 
-**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
 
 ## D2. Sign-in for visitors, forbidden for signed-in people
 
@@ -48,7 +48,7 @@ way. A shared link to the docs then works for anyone who can sign in, rather tha
 entry already hides them from people browsing, and "not found" would break every shared link for
 readers who only need to sign in.
 
-**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
 
 ## D3. One rule per documentation app, not per page
 
@@ -74,7 +74,7 @@ pages a reader can't open.
 **Why:** Screenshots and downloads are part of the documentation. A limited guide whose files can
 still be fetched by address isn't limited.
 
-**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
 
 ## D5. A refusal never reveals what exists
 
@@ -88,7 +88,7 @@ from #4 applies only to readers the rule admits.
 **Why:** Different answers would let anyone list the pages of a limited guide by guessing
 addresses.
 
-**ADR:** none — follows from the rule being asked before the view (ADR 0002); a requirement, not a separate choice
+**ADR:** none — follows from the rule being asked before the view (ADR 0004); a requirement, not a separate choice
 
 ## D6. Asked on every request
 
@@ -99,7 +99,7 @@ addresses.
 **Why:** A person who signs in, or is added to a group, expects the docs straight away. Remembering
 an earlier answer would also keep showing the docs to someone just removed from the group.
 
-**ADR:** none — a property of django-mvp's check, covered by ADR 0002's revisit condition
+**ADR:** none — a property of django-mvp's check, covered by ADR 0004's revisit condition
 
 ## D7. No bypass for staff or superusers
 
@@ -150,7 +150,7 @@ ships and documents.
 **Revisit if:** a rule needs something `check` cannot express, such as the documentation app itself
 (`has_permission` is the override point for that).
 
-**ADR:** docs/adr/0002-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
+**ADR:** docs/adr/0004-a-documentation-apps-reader-rule-is-its-mounted-app-check.md
 
 ## D11. `/docs` without its slash is the host's redirect, not the app's
 
