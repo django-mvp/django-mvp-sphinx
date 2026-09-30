@@ -90,7 +90,8 @@ routed to, so the result stays under whatever prefix the app is mounted at with 
 
 **Why**: the package compiles no Tailwind, and an unemitted class does nothing silently.
 
-**Revisit if**: the package gains its own stylesheet for layout (FS-004 adds one for page content).
+**Revisit if**: layout needs something the shell does not emit. FS-004's `content.css` is scoped
+to the page body (`.mvp-sphinx-content`) and is the place a page-level rule would go.
 
 **ADR:** pending S5
 

@@ -101,8 +101,9 @@ beside `get_breadcrumbs`:
   general index and search pages carry neither key and get neither link.
 
 Nothing is read beyond the page JSON `get()` already loaded, so FR-010 and FR-011 hold with no code
-of their own. `get()` is not touched (FS-004 changes its last line; keeping out of it keeps the
-merge clean).
+of their own. `get()` is not touched: it passes the rewritten `body` that FS-004 added.
+`PageHeadings` follows FS-004's `BodyRewriter` (`mvp_sphinx/page_body.py`): an `HTMLParser`
+subclass whose classmethod is the entry point.
 
 ### The components — `mvp_sphinx/templates/cotton/mvp_sphinx/`
 
@@ -133,8 +134,9 @@ Inside the existing `c-page` / `c-container`: at `xl`, a flex row with a gap; th
 headings, is an `<aside>` hidden below `xl` (`hidden xl:block w-56 shrink-0`) whose `nav` is sticky
 and scrolls on its own when long (`sticky self-start`, `max-h-[calc(100vh-8.6rem)]
 overflow-y-auto`). Only classes the shell's stylesheet emits (R4). Width and offset are judged by
-eye at the walkthrough, not tested (spec Assumptions). The article line itself is left as it is, so
-FS-004's change to it merges cleanly.
+eye at the walkthrough, not tested (spec Assumptions). The `<article class="prose
+mvp-sphinx-content py-4">{{ body }}</article>` element FS-004 landed is moved into the first column
+unchanged, and the `styles` block that links `content.css` stays as it is.
 
 ### Fixtures and tests
 
