@@ -140,6 +140,88 @@ class TestDocumentationMenu:
         assert type(label(item)) is str
 
 
+def selected_leaves(items) -> list[str]:
+    """Return the names of the selected links in the processed tree."""
+    found = []
+    for item in items:
+        if item.is_parent:
+            found += selected_leaves(item.visible_children)
+        elif item.selected:
+            found.append(item.name)
+    return found
+
+
+def selected_groups(items) -> set[str]:
+    """Return the names of the selected groups in the processed tree."""
+    found = set()
+    for item in items:
+        if item.is_parent:
+            if item.selected:
+                found.add(item.name)
+            found |= selected_groups(item.visible_children)
+    return found
+
+
+class TestCurrentPage:
+    def test_a_page_nested_in_two_groups_is_the_only_selected_link(
+        self, processed
+    ) -> None:
+        tree = processed("/docs/chain/three/").visible_children
+
+        assert selected_leaves(tree) == ["g0-2-0-0"]
+
+    def test_every_group_holding_the_page_is_selected_and_no_other(
+        self, processed
+    ) -> None:
+        tree = processed("/docs/chain/three/").visible_children
+
+        assert selected_groups(tree) == {"g0", "g0-2", "g0-2-0"}
+
+    def test_the_link_to_a_page_with_pages_of_its_own_is_the_selected_link(
+        self, processed
+    ) -> None:
+        tree = processed("/docs/chain/one/").visible_children
+
+        assert selected_leaves(tree) == ["g0-2-page"]
+        assert selected_groups(tree) == {"g0", "g0-2"}
+
+    def test_the_front_page_entry_is_the_only_selected_item_on_the_front_page(
+        self, processed
+    ) -> None:
+        tree = processed("/docs/").visible_children
+
+        assert selected_leaves(tree) == ["front-page"]
+        assert selected_groups(tree) == set()
+
+    def test_a_page_listed_twice_is_selected_at_both_places(self, processed) -> None:
+        tree = processed("/docs/shared/").visible_children
+
+        assert sorted(selected_leaves(tree)) == ["g0-4", "g2-1"]
+        assert selected_groups(tree) == {"g0", "g2"}
+
+    def test_a_page_at_the_top_level_is_selected_without_any_group(
+        self, processed
+    ) -> None:
+        tree = processed("/docs/standalone/").visible_children
+
+        assert selected_leaves(tree) == ["g1-0"]
+        assert selected_groups(tree) == set()
+
+    def test_a_page_no_toctree_lists_selects_nothing_and_draws_the_full_contents(
+        self, processed
+    ) -> None:
+        tree = processed("/docs/orphan/").visible_children
+
+        assert selected_leaves(tree) == []
+        assert selected_groups(tree) == set()
+        assert outline(tree) == outline(processed("/docs/").visible_children)
+
+    def test_a_request_with_a_query_selects_the_same_link(self, processed) -> None:
+        tree = processed("/docs/chain/three/?q=a#top").visible_children
+
+        assert selected_leaves(tree) == ["g0-2-0-0"]
+
+
 class TestServingSideImports:
     def test_the_documentation_app_imports_when_sphinx_cannot_be_imported(
         self,
