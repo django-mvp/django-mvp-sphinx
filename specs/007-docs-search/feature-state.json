@@ -2,7 +2,7 @@
   "feature": "007-docs-search",
   "branch": "007-docs-search",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "DESIGN_REVIEW",
+  "state": "IMPLEMENT",
   "state_history": [
     {
       "state": "QUEUED",
@@ -18,6 +18,11 @@
       "state": "DESIGN_REVIEW",
       "at": "2026-09-30T00:41:23Z",
       "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-30T00:47:47Z",
+      "note": "US1 first; US2+US3 one dispatch"
     }
   ],
   "gates": {
