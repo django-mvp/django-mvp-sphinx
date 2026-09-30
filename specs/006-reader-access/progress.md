@@ -122,3 +122,11 @@ in the refusal matrix or TestOwnRule. No gaps, so no new tasks (cycle 1 of 2). N
 Cleanup: README names where `user_is_staff` comes from; demo/mounted.py docstring covers both
 apps. ADR 0002 graduated from D10 (with D1, D2, D4); every decision carries a verdict. Roadmap R5
 marked delivered and rewritten to its delivered form.
+
+## 2026-09-30T00:29:16Z · S6 review
+
+Did: one reviewer (correctness+spec, security): approve, 1 medium + 3 low, all fixed (D15) and
+verified. Merged origin/main (FS-002 sidebar contents): conflicts in CHANGELOG and
+tests/test_demo.py resolved keeping both sides. The staff guide's conf.py gained the
+navigation extension, with a build test. The 403 test also asserts no app menu. The full gate is
+green on fd63066 (250 tests). Review outcome recorded at fd63066 (0 open).
