@@ -119,6 +119,9 @@ The extension's `setup` hook connects `write_navigation` to Sphinx's
 `NavigationWriter`, which walks the toctrees and writes the file. Only the JSON
 builder gets a file, and a build that failed writes nothing.
 
+Rebuild the docs and the sidebar shows the change on the next request, with no
+restart.
+
 The extension runs inside your Sphinx build and nowhere else, so the site that
 serves the pages still doesn't need Sphinx. Without the line, or with a
 `navigation.json` that can't be read, the sidebar holds only the front page

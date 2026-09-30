@@ -1,6 +1,7 @@
 """PageView renders a page of the docs build inside the application shell."""
 
 import json
+import os
 import re
 import shutil
 import sys
@@ -546,3 +547,97 @@ class TestRebuiltContents:
         assert "/docs/standalone/" not in contents_links(
             client.get("/docs/"), contents_app
         )
+
+
+class TestContentsUnavailable:
+    @pytest.fixture
+    def rebuilt(self, contents_app, contents_build, tmp_path, monkeypatch):
+        build = tmp_path / "rebuilt"
+        shutil.copytree(contents_build, build)
+        monkeypatch.setattr(contents_app, "build_dir", build)
+        return build
+
+    def test_a_build_without_a_navigation_file_serves_its_pages_with_the_front_page_only(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        (rebuilt / "navigation.json").unlink()
+
+        response = client.get("/docs/chain/two/")
+
+        assert response.status_code == 200
+        assert contents_links(response, contents_app) == ["/docs/"]
+
+    @pytest.mark.parametrize(
+        "content",
+        [
+            "{not json",
+            "[]",
+            '{"groups": "x"}',
+            '{"groups": [{"caption": 1, "entries": []}]}',
+            '{"groups": [{"caption": "", "entries": [{"title": "T"}]}]}',
+        ],
+    )
+    def test_a_navigation_file_that_cannot_be_used_gives_the_front_page_only(
+        self, client, db, contents_app, rebuilt, content
+    ) -> None:
+        (rebuilt / "navigation.json").write_text(content)
+
+        response = client.get("/docs/chain/two/")
+
+        assert response.status_code == 200
+        assert contents_links(response, contents_app) == ["/docs/"]
+
+    @pytest.mark.skipif(os.geteuid() == 0, reason="root reads any file")
+    def test_an_unreadable_navigation_file_gives_the_front_page_only(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        (rebuilt / "navigation.json").chmod(0o000)
+
+        response = client.get("/docs/chain/two/")
+
+        assert response.status_code == 200
+        assert contents_links(response, contents_app) == ["/docs/"]
+
+    def test_a_missing_build_leaves_the_hosts_own_pages_and_menu_drawn(
+        self, client, db, contents_app, tmp_path, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(contents_app, "build_dir", tmp_path / "not-built-yet")
+
+        response = client.get(reverse("overview"))
+
+        sidebar = BeautifulSoup(response.content, "html.parser").find("aside")
+        assert response.status_code == 200
+        assert {link["href"] for link in sidebar.find_all("a", href=True)} >= {
+            reverse("overview"),
+            "/docs/",
+        }
+
+    @pytest.mark.skipif(os.geteuid() == 0, reason="root reads any file")
+    def test_an_unreadable_navigation_file_leaves_the_hosts_own_pages_and_menu_drawn(
+        self, client, db, rebuilt
+    ) -> None:
+        (rebuilt / "navigation.json").chmod(0o000)
+
+        response = client.get(reverse("overview"))
+
+        sidebar = BeautifulSoup(response.content, "html.parser").find("aside")
+        assert response.status_code == 200
+        assert reverse("overview") in {
+            link["href"] for link in sidebar.find_all("a", href=True)
+        }
+
+    def test_a_file_broken_mid_run_gives_the_front_page_only_until_it_is_fixed(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        target = rebuilt / "navigation.json"
+        good = target.read_text()
+        full = contents_links(client.get("/docs/"), contents_app)
+
+        target.write_text("garbage that is not json")
+        broken = contents_links(client.get("/docs/"), contents_app)
+
+        target.write_text(good)
+        fixed = contents_links(client.get("/docs/"), contents_app)
+
+        assert (broken, fixed) == (["/docs/"], full)
+        assert {*full} == CONTENTS_PAGES
