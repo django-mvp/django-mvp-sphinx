@@ -1,4 +1,4 @@
-# ADR 0002 — Style page content with one scoped stylesheet built from the theme, and rewrite the body only for what CSS cannot do
+# ADR 0003 — Style page content with one scoped stylesheet built from the theme, and rewrite the body only for what CSS cannot do
 
 **Status:** accepted
 

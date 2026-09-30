@@ -66,6 +66,13 @@
         "SPEC-002 low: glossary-term label test moved T008 -> T006 - plan edit",
         "ARCH-002 medium: contrast helpers on one test class (T002) - plan edit"
       ]
+    },
+    "walkthrough": {
+      "approved_by": "orchestrator agent:forge:dashboard:15456d51 (for Sam, overnight delegation 2026-09-30)",
+      "at": "2026-09-30T00:31:30Z",
+      "self_resolved": [
+        "round 1: renumber ADR 0002-style-page-content to the next free number on main (0003), update every reference — done"
+      ]
     }
   },
   "stories": [

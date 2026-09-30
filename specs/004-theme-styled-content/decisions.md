@@ -144,7 +144,7 @@ app renders link it (FR-016). (research R3)
 **Revisit if:** django-mvp grows a way for an installed app to contribute rules to its own
 stylesheet.
 
-**ADR:** docs/adr/0002-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
+**ADR:** docs/adr/0003-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
 
 ## D2. Accessible names and focusable table areas come from rewriting the body in Python
 
@@ -160,7 +160,7 @@ standard library's parser avoids a new dependency.
 **Revisit if:** the package gains a Sphinx extension every host is required to load anyway
 (#5's navigation extension is optional for pages); the rewrite could then move into the build.
 
-**ADR:** docs/adr/0002-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
+**ADR:** docs/adr/0003-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
 
 ## D3. A heading link's name is Sphinx's own title plus the heading's text
 
@@ -203,7 +203,7 @@ code background.
 
 **Revisit if:** django-mvp ships code-token colour roles of its own.
 
-**ADR:** docs/adr/0002-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
+**ADR:** docs/adr/0003-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md
 
 ## D6. The body's ordinary text is left to django-mvp's `prose`
 
@@ -287,7 +287,7 @@ directly, since each was a line or two: CSS-001 (medium), the deprecation rules 
 `div.deprecated` so the label span inside the note no longer draws a second box; STD-001, the
 throwaway `_` and `_text` names in the new tests are named (the `gettext_lazy as _` import stays,
 as Article VIII prescribes); STD-002, two lines over 88 wrapped; TST-001, the code-roles test
-asserts the expected roles are present instead of pinning the exact set; DOC-001, ADR 0002 says
+asserts the expected roles are present instead of pinning the exact set; DOC-001, ADR 0003 (numbered 0002 at review) says
 precisely which colours are roles; DOC-002, the README says to keep the `mvp-sphinx-content`
 class in an override and that `BodyRewriter.rewrite` returns a plain string; SEC-001
 (speculative), the class docstring states the well-formed-HTML assumption.

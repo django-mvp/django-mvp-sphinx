@@ -133,7 +133,7 @@ browser; the content tour is the place to check them, including in the dark them
 
 Did: all five stories done and accepted on independent verify and tamper-check. Main had not
 moved. Cleanup: one condition in BodyRewriter computed once; changelog tightened to what changes
-for an adopter; README override example loads `static`. ADR 0002 graduated from D1, D2 and D5;
+for an adopter; README override example loads `static`. ADR 0002 (renumbered 0003 at the walkthrough) graduated from D1, D2 and D5;
 every decision verdicted. No migrations. R3 marked delivered and rewritten to its delivered form.
 Next: review.
 
@@ -144,3 +144,11 @@ view tests) resolved keeping both sides; 250 tests green. One reviewer (correctn
 security): approve, risk low, 1 medium and 6 low, all fixed directly (D11). Full verify and
 tamper-check green; review outcome recorded on the PR.
 Next: walkthrough (the orchestrator serves this worktree) and ready for review.
+
+## 2026-09-30 · S7 walkthrough round 1
+
+Did: the orchestrator served this worktree and walked it (Sam's overnight delegation): pages
+200, stylesheet on docs pages only, no literal colours, reduced motion honoured, named heading
+links, focusable labelled tables; both taste calls accepted. One request: FS-002 took ADR 0002 on
+main, so this feature's ADR is renumbered 0003 and its references updated. Walkthrough recorded.
+Next: merge gate (the orchestrator merges).
