@@ -66,7 +66,8 @@
               "tests/test_mounted.py::TestQuickstart"
             ],
             "commands": [
-              "uv run pytest tests/test_quickstart.py -q"
+              "uv run pytest tests/test_mounted.py -k Quickstart -q (exit 0, 4 passed)",
+              "forge verify --base origin/main at e7ec597 (all steps passed)"
             ]
           }
         }
@@ -82,17 +83,18 @@
       "tasks": [
         {
           "id": "T002",
-          "status": "blocked",
+          "status": "done",
           "attempts": 1,
           "evidence": {
             "tests": [
               "tests/test_smoke.py::TestPackagedApp",
-              "tests/test_demo.py",
-              "tests/test_mounted.py::TestQuickstart"
+              "tests/test_views.py::TestSearchResults::test_a_word_only_in_the_hosts_pages_lists_nothing"
             ],
             "commands": [
-              "uv run pytest tests/test_smoke.py tests/test_demo.py tests/test_quickstart.py -q"
-            ]
+              "uv run pytest tests/test_smoke.py tests/test_demo.py -q (exit 0)",
+              "forge verify --base origin/main at e7ec597: conformance, docs, lint, typecheck, test, build passed (Forge, independent)"
+            ],
+            "note": "Blocked at the implementer on one pre-existing test's premise word; resolved by Forge as declared edit D16."
           }
         }
       ]
