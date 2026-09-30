@@ -1,5 +1,6 @@
 """The contents of a docs build, as the menu its documentation app draws."""
 
+import threading
 from typing import TYPE_CHECKING, Any
 
 from django.urls import reverse
@@ -23,6 +24,9 @@ class DocumentationMenu(Menu):
     pages of its own opens as a collapsible group whose first entry is the page
     itself. Without a usable navigation file it holds the front page alone.
 
+    The menu is rebuilt only when the navigation file, the build directory or the
+    app's front page address has changed since the last request.
+
     Args:
         name: The menu's unique name.
         app: The documentation app whose docs build the menu shows.
@@ -31,16 +35,27 @@ class DocumentationMenu(Menu):
     def __init__(self, name: str, app: "DocumentationApp") -> None:
         super().__init__(name, children=[], extra_context={"label": app.name})
         self.app = app
+        self.lock = threading.Lock()
+        self.stamp: tuple[Any, ...] | None = None
 
     def process(self, request: "HttpRequest", **kwargs: Any) -> MenuItem:
-        """Bring the contents up to date, then process it for ``request``."""
-        self.refresh()
-        return super().process(request, **kwargs)
+        """Bring the contents up to date, then process it for ``request``.
+
+        The lock is held throughout, because replacing the children is not
+        atomic and a concurrent request must not process a half-swapped tree.
+        """
+        with self.lock:
+            self.refresh()
+            return super().process(request, **kwargs)
 
     def refresh(self) -> None:
-        """Rebuild the menu's items from the docs build's navigation file."""
+        """Rebuild the menu's items when the navigation file has changed."""
         prefix = reverse(self.app.landing)
-        groups = DocsBuild(self.app.build_dir).navigation() or []
+        docs_build = DocsBuild(self.app.build_dir)
+        stamp = (self.app.build_dir, prefix, docs_build.navigation_stamp())
+        if stamp == self.stamp:
+            return
+        groups = docs_build.navigation() or []
         items = [
             MenuItem(
                 name="front-page",
@@ -64,6 +79,7 @@ class DocumentationMenu(Menu):
             else:
                 items += entries
         self.children = items
+        self.stamp = stamp
 
     def entry_item(self, entry: dict[str, Any], prefix: str, name: str) -> MenuItem:
         """Return the menu item for one entry of the navigation file.

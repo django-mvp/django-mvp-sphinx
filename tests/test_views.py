@@ -505,3 +505,44 @@ class TestContentsInTheSidebar:
         links = contents_links(client.get("/docs/chain/two/"), contents_app)
 
         assert {*links} == CONTENTS_PAGES
+
+
+class TestRebuiltContents:
+    @pytest.fixture
+    def rebuilt(self, contents_app, contents_build, tmp_path, monkeypatch):
+        build = tmp_path / "rebuilt"
+        shutil.copytree(contents_build, build)
+        monkeypatch.setattr(contents_app, "build_dir", build)
+        return build
+
+    @staticmethod
+    def rewrite(build, edit) -> None:
+        target = build / "navigation.json"
+        data = json.loads(target.read_text())
+        edit(data["groups"])
+        target.write_text(json.dumps(data))
+
+    def test_a_page_added_by_a_rebuild_is_in_the_sidebar_on_the_next_request(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        assert "/docs/added/" not in contents_links(client.get("/docs/"), contents_app)
+
+        self.rewrite(
+            rebuilt,
+            lambda groups: groups[1]["entries"].append(
+                {"title": "Added", "url": "added/", "children": []}
+            ),
+        )
+
+        assert "/docs/added/" in contents_links(client.get("/docs/"), contents_app)
+
+    def test_a_page_removed_by_a_rebuild_is_gone_on_the_next_request(
+        self, client, db, contents_app, rebuilt
+    ) -> None:
+        assert "/docs/standalone/" in contents_links(client.get("/docs/"), contents_app)
+
+        self.rewrite(rebuilt, lambda groups: groups[1]["entries"].clear())
+
+        assert "/docs/standalone/" not in contents_links(
+            client.get("/docs/"), contents_app
+        )

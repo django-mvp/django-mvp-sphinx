@@ -1,6 +1,8 @@
 """DocumentationMenu turns the navigation file into the app sidebar's menu."""
 
+import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -220,6 +222,117 @@ class TestCurrentPage:
         tree = processed("/docs/chain/three/?q=a#top").visible_children
 
         assert selected_leaves(tree) == ["g0-2-0-0"]
+
+
+@pytest.fixture
+def replaceable(contents_app, contents_build, tmp_path, monkeypatch):
+    """Point the app at a copy of the contents build the test may rewrite."""
+    build = tmp_path / "rebuilt"
+    shutil.copytree(contents_build, build)
+    monkeypatch.setattr(contents_app, "build_dir", build)
+    return build
+
+
+def rewrite_contents(build, edit) -> None:
+    """Change the build's contents as a new docs build would."""
+    target = build / DocsBuild.NAVIGATION_FILE
+    data = json.loads(target.read_text())
+    edit(data["groups"])
+    target.write_text(json.dumps(data))
+
+
+class TestRefresh:
+    @pytest.fixture
+    def reads(self, monkeypatch) -> list:
+        """Record every read of a navigation file."""
+        found = []
+        read = DocsBuild.navigation
+
+        def counting(self):
+            found.append(self.root)
+            return read(self)
+
+        monkeypatch.setattr(DocsBuild, "navigation", counting)
+        return found
+
+    def test_a_page_added_by_a_rebuild_is_in_the_next_processing(
+        self, processed, replaceable
+    ) -> None:
+        before = leaves(processed().visible_children)
+
+        rewrite_contents(
+            replaceable,
+            lambda groups: groups[1]["entries"].append(
+                {"title": "Added", "url": "added/", "children": []}
+            ),
+        )
+
+        assert set(leaves(processed().visible_children)) == {*before, "/docs/added/"}
+
+    def test_a_page_removed_by_a_rebuild_is_gone_from_the_next_processing(
+        self, processed, replaceable
+    ) -> None:
+        before = leaves(processed().visible_children)
+
+        rewrite_contents(replaceable, lambda groups: groups[1]["entries"].clear())
+
+        assert leaves(processed().visible_children) == [
+            url for url in before if url != "/docs/standalone/"
+        ]
+
+    def test_the_file_is_not_read_again_while_it_is_unchanged(
+        self, processed, replaceable, reads
+    ) -> None:
+
+        first = processed()
+        second = processed("/docs/chain/two/")
+
+        assert len(reads) == 1
+        assert outline(first.visible_children) == outline(second.visible_children)
+
+    def test_a_replaced_file_is_read_again(self, processed, replaceable, reads) -> None:
+        processed()
+
+        rewrite_contents(replaceable, lambda groups: groups.pop())
+        processed()
+
+        assert len(reads) == 2
+
+    def test_pointing_the_app_at_another_build_rebuilds_the_menu(
+        self, processed, contents_app, handbook_build, monkeypatch
+    ) -> None:
+        processed()
+
+        monkeypatch.setattr(contents_app, "build_dir", handbook_build)
+
+        assert set(leaves(processed().visible_children)) == {
+            "/docs/",
+            "/docs/backups/",
+        }
+
+    def test_pointing_the_app_at_the_same_build_by_another_path_reads_it_again(
+        self, processed, contents_app, replaceable, reads, monkeypatch, tmp_path
+    ) -> None:
+        processed()
+        link = tmp_path / "linked"
+        link.symlink_to(replaceable)
+
+        monkeypatch.setattr(contents_app, "build_dir", link)
+        processed()
+
+        assert len(reads) == 2
+
+    def test_processing_under_another_mount_prefix_rebuilds_the_menu(
+        self, processed, contents_app, handbook_app, monkeypatch
+    ) -> None:
+        processed()
+
+        monkeypatch.setattr(contents_app, "landing", handbook_app.landing)
+
+        assert all(
+            url.startswith("/manuals/admin/")
+            for url in leaves(processed("/manuals/admin/").visible_children)
+        )
 
 
 class TestServingSideImports:
