@@ -494,7 +494,8 @@ class TestWideContent:
 
 class TestHeadingLinks:
     HEADING_LINK = re.compile(
-        r"<(?:h[1-6]|dt)\b[^>]*>(?P<held>(?:(?!<h[1-6]\b|<dt\b|<a\b[^>]*headerlink).)*?)"
+        r"<(?:h[1-6]|dt)\b[^>]*>"
+        r"(?P<held>(?:(?!<h[1-6]\b|<dt\b|<a\b[^>]*headerlink).)*?)"
         r"<a\b(?P<attributes>[^>]*\bheaderlink\b[^>]*)>",
         re.S,
     )
@@ -523,13 +524,15 @@ class TestHeadingLinks:
     def test_a_heading_link_leads_to_an_anchor_on_the_page(self, client, db) -> None:
         body = self.page(client)
 
-        for _text, attributes in self.links(body):
+        for link in self.links(body):
+            attributes = link[1]
             assert attributes["href"].startswith("#")
             assert f'id="{attributes["href"][1:]}"' in body
 
     def test_no_two_heading_links_of_a_page_share_a_name(self, client, db) -> None:
         names = [
-            attributes["aria-label"] for _, attributes in self.links(self.page(client))
+            attributes["aria-label"]
+            for text, attributes in self.links(self.page(client))
         ]
 
         assert len(names) == len(set(names))

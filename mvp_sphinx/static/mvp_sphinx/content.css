@@ -90,7 +90,7 @@
 .mvp-sphinx-content .admonition,
 .mvp-sphinx-content .versionadded,
 .mvp-sphinx-content .versionchanged,
-.mvp-sphinx-content .deprecated {
+.mvp-sphinx-content div.deprecated {
   --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-info);
   --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-info-bg);
   margin-block: 1.5rem;
@@ -104,14 +104,14 @@
 .mvp-sphinx-content .admonition > :first-child,
 .mvp-sphinx-content .versionadded > :first-child,
 .mvp-sphinx-content .versionchanged > :first-child,
-.mvp-sphinx-content .deprecated > :first-child {
+.mvp-sphinx-content div.deprecated > :first-child {
   margin-top: 0;
 }
 
 .mvp-sphinx-content .admonition > :last-child,
 .mvp-sphinx-content .versionadded > :last-child,
 .mvp-sphinx-content .versionchanged > :last-child,
-.mvp-sphinx-content .deprecated > :last-child {
+.mvp-sphinx-content div.deprecated > :last-child {
   margin-bottom: 0;
 }
 
@@ -138,7 +138,7 @@
 .mvp-sphinx-content .admonition.warning,
 .mvp-sphinx-content .admonition.caution,
 .mvp-sphinx-content .admonition.attention,
-.mvp-sphinx-content .deprecated {
+.mvp-sphinx-content div.deprecated {
   --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-cautionary);
   --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-cautionary-bg);
 }

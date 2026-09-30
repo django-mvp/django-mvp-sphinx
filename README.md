@@ -205,8 +205,12 @@ to the template as `body`, so a `PageView` subclass gets it too; to use it elsew
 call `BodyRewriter.rewrite(markup)`.
 
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
-block so the stylesheet still reaches the page, and render `{{ body }}` rather
-than `{{ page_data.body }}` so your override keeps the rewrite:
+block so the stylesheet still reaches the page, render `{{ body }}` rather than
+`{{ page_data.body }}` so your override keeps the rewrite, and keep the
+`mvp-sphinx-content` class on the element that holds it, because every rule in
+the stylesheet is scoped to that class. `BodyRewriter.rewrite` returns a plain
+string; `PageView` marks it safe because the docs build is your own, and a caller
+of its own does the same:
 
 ```django
 {% extends "mvp_sphinx/page.html" %}

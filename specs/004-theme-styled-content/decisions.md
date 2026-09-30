@@ -278,3 +278,20 @@ leave.
 **Revisit if:** Sphinx wraps the link in an element of its own.
 
 **ADR:** none — an implementation detail of BodyRewriter
+
+## D11. Code review outcome (S6)
+
+**Decision:** One reviewer, correctness, spec, documentation and security lenses: approve, risk
+low, no critical or high findings. Every finding was fixed in one cycle by the orchestrator
+directly, since each was a line or two: CSS-001 (medium), the deprecation rules now select
+`div.deprecated` so the label span inside the note no longer draws a second box; STD-001, the
+throwaway `_` and `_text` names in the new tests are named (the `gettext_lazy as _` import stays,
+as Article VIII prescribes); STD-002, two lines over 88 wrapped; TST-001, the code-roles test
+asserts the expected roles are present instead of pinning the exact set; DOC-001, ADR 0002 says
+precisely which colours are roles; DOC-002, the README says to keep the `mvp-sphinx-content`
+class in an override and that `BodyRewriter.rewrite` returns a plain string; SEC-001
+(speculative), the class docstring states the well-formed-HTML assumption.
+
+**Why:** Each remedy was smaller than a dispatch brief.
+
+**ADR:** none — a record of this feature's review

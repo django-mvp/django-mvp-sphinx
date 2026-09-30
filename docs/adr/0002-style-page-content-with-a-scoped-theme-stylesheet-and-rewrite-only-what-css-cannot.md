@@ -9,10 +9,10 @@ What Sphinx writes into a page body is styled by one plain-CSS file shipped in t
 block, so only pages a documentation app renders load it. Every selector in it starts with
 `.mvp-sphinx-content`, the class on the article that holds the body.
 
-The stylesheet writes no colour of its own. The rule on `.mvp-sphinx-content` at the top of the
-file declares every colour the package uses as a `--mvp-sphinx-*` custom property. Each one is a
-django-mvp theme colour (`var(--color-*)`) or a `color-mix(in oklab, …)` of two theme colours.
-Every other rule reads those properties. The tests in `tests/test_static/` hold the file to this:
+The stylesheet writes no colour of its own. Every colour it applies is a django-mvp theme colour
+(`var(--color-*)`) or a `color-mix(in oklab, …)` of two theme colours, and every colour it makes
+by mixing is declared once, in the rule on `.mvp-sphinx-content` at the top of the file, as a
+`--mvp-sphinx-*` custom property that later rules read. The tests in `tests/test_static/` hold the file to this:
 no literal colour, no unscoped selector, and every text and background pair the package creates at
 4.5:1 or better in django-mvp's default light and dark themes.
 

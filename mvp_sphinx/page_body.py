@@ -16,6 +16,10 @@ class BodyRewriter(HTMLParser):
     it reads is re-emitted, so entity references, a bare ``&``, tag case and
     whitespace come back exactly as they arrived.
 
+    It assumes well-formed HTML, which is what Sphinx writes. A table inside
+    malformed raw HTML from a ``raw`` directive may be wrapped wrongly or not at
+    all.
+
     Every outermost ``<table>`` is wrapped in a named region that takes keyboard
     focus, so a table wider than the reading area scrolls sideways for a reader
     with no pointer. The region's name is the table's caption, or the word
