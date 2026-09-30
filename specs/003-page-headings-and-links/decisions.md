@@ -38,3 +38,70 @@ branch `wip/sphinx-docs-in-sidebar` on github.com/django-mvp/django-mvp, under
 `mvp/integrations/sphinx_view/` and `mvp/templates/mvp/sphinx_view/`. Its page template already
 draws "On this page" beside the article at wide widths and the previous and next links below it.
 It depended on django-sphinx-view, which this package does not. The plan may start from it.
+
+## Implementation decisions (S3 onward)
+
+## D1. Re-read against the features delivered since the spec landed
+
+**Decided**: FS-001 (#4) and FS-002 (#5) were delivered after this spec merged. Neither contradicts
+it. FS-002's FR-014 shows sidebar titles as text; this spec shows heading and page titles "as the
+build renders them". The two rules govern different surfaces (the sidebar menu and the page's own
+navigation), and the page body beside the list is rendered as the build wrote it too, so both stand.
+
+**Why**: the lane's spec-against-spec check; no contradiction to put to the owner.
+
+**Revisit if**: a later feature puts titles from this list into the sidebar.
+
+**ADR:** none — a check, not a design choice
+
+## D2. Parse Sphinx's `toc` into a heading tree rather than inject it
+
+**Decided**: `PageHeadings`, a standard-library `HTMLParser`, reads the page's `toc` fragment into
+`{title, anchor, children}` entries without the title entry; the list is drawn by this package's
+components with daisyUI `menu` classes. Whether a page has a list is whether that tree is empty, not
+Sphinx's `display_toc`.
+
+**Why**: FR-003 excludes the title, which is the fragment's outer entry; the shell's menu classes
+must sit on the lists; and a page whose title holds an empty list (the demo's front page) makes
+`display_toc` and the drawn tree two readings of one fact (research R2).
+
+**Revisit if**: Sphinx changes the shape of `toc`, or a Sphinx release adds the title-less tree to
+the page context.
+
+**ADR:** pending S5
+
+## D3. Previous and next links resolved against the request path
+
+**Decided**: `urljoin(request.path, link)` on Sphinx's relative `prev`/`next` link, as the FS-001
+breadcrumbs do with `parents`.
+
+**Why**: Sphinx's link is relative to the page's own address, which is the address the request was
+routed to, so the result stays under whatever prefix the app is mounted at with no `reverse`
+(research R3).
+
+**Revisit if**: pages are ever served at an address other than the JSON builder's own.
+
+**ADR:** pending S5
+
+## D4. Layout from the shell's emitted utilities only
+
+**Decided**: the two-column layout uses only classes present in django-mvp's packaged stylesheet
+(research R4). The prototype's arbitrary grid template is not emitted there and is dropped.
+
+**Why**: the package compiles no Tailwind, and an unemitted class does nothing silently.
+
+**Revisit if**: the package gains its own stylesheet for layout (FS-004 adds one for page content).
+
+**ADR:** pending S5
+
+## D5. The new components are parts of the page, not a published API
+
+**Decided**: `on_this_page`, `heading_list` and `page_links` exist to draw the page. The README does
+not offer them to host templates, and their classes are not tested.
+
+**Why**: the spec makes placement and look a matter for the eye and the host's theme; publishing
+the markup would turn every visual adjustment into a contract.
+
+**Revisit if**: a host project asks to place the list itself.
+
+**ADR:** pending S5
