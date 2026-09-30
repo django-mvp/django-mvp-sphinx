@@ -27,8 +27,8 @@
       "self_resolved": []
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "notified",
+      "at": "2026-09-30T00:47:17Z"
     },
     "merge": {
       "approved_by": null,
