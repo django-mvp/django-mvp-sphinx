@@ -70,6 +70,13 @@
         "CORR-002 (low) fixed: PageView overridable members listed",
         "CORR-003 (low) fixed: templates' title block listed"
       ]
+    },
+    "walkthrough": {
+      "approved_by": "orchestrator agent:forge:dashboard:15456d51-453c-4956-a45a-d1ec3f4fd707 (holding the walkthrough for Sam, 2026-09-30)",
+      "at": "2026-09-30T10:49:10Z",
+      "self_resolved": [
+        "round 1: nothing asked for — every listed page 200, /docs/no-such-page/ the site's 404, /staff-guide/ sends anonymous to sign in, nested First visit group opens with Signing in marked, README quickstart five steps with no build command mentioned"
+      ]
     }
   },
   "stories": [
