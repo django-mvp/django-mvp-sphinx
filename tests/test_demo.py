@@ -5,6 +5,9 @@
 
 from django.urls import reverse
 
+from tests.factories import UserFactory
+from tests.test_mounted import sidebar
+
 
 class TestOverviewPage:
     def test_it_responds(self, client, db) -> None:
@@ -25,3 +28,29 @@ class TestDocumentationEntry:
         sidebar = overview_page.split('aria-label="Main navigation"', 1)[1]
         sidebar = sidebar.split("</ul>", 1)[0]
         assert 'href="/docs/"' in sidebar
+
+
+class TestStaffGuideEntry:
+    def test_the_entry_is_absent_for_an_anonymous_reader(
+        self, overview_page: str
+    ) -> None:
+        assert 'href="/staff-guide/"' not in sidebar(overview_page)
+
+    def test_the_entry_is_absent_for_a_regular_user(self, client, user) -> None:
+        client.force_login(user)
+        page = client.get(reverse("overview")).content.decode()
+
+        assert 'href="/staff-guide/"' not in sidebar(page)
+
+    def test_the_entry_is_present_for_a_staff_user(self, client, db) -> None:
+        client.force_login(UserFactory(is_staff=True))
+        page = client.get(reverse("overview")).content.decode()
+
+        assert 'href="/staff-guide/"' in sidebar(page)
+
+    def test_a_staff_user_gets_the_front_page(
+        self, client, db, staff_guide_app
+    ) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        assert client.get("/staff-guide/").status_code == 200

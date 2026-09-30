@@ -81,6 +81,14 @@ def handbook_app(handbook_build, monkeypatch):
 
 
 @pytest.fixture
+def staff_guide_app(handbook_build, monkeypatch):
+    from demo.mounted import staff_guide
+
+    monkeypatch.setattr(staff_guide, "build_dir", handbook_build)
+    return staff_guide
+
+
+@pytest.fixture
 def user(db):
     return UserFactory()
 

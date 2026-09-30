@@ -35,6 +35,7 @@ sdist/*
 docs/_rst/*
 docs/_build/*
 demo/docs/_build/
+demo/staff_guide/_build/
 cover/*
 MANIFEST
 

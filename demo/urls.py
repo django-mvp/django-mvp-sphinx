@@ -4,12 +4,13 @@ from django.urls import include, path
 from mvp.mounted import mount
 from mvp.views.account import SignInView
 
-from demo.mounted import docs
+from demo.mounted import docs, staff_guide
 from demo.views import OverviewView
 
 urlpatterns = [
     path("", OverviewView.as_view(), name="overview"),
     mount("docs/", docs),
+    mount("staff-guide/", staff_guide),
     # The shell's sign-in page, ahead of the include, which has none of its own.
     path("accounts/login/", SignInView.as_view(), name="account_login"),
     # The application shell's sign-out and account routes.

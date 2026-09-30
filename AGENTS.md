@@ -56,7 +56,11 @@ opening that page and again after editing the guide:
 
 ```bash
 uv run sphinx-build -b json demo/docs demo/docs/_build/json
+uv run sphinx-build -b json demo/staff_guide demo/staff_guide/_build/json
 ```
+
+The second build is the staff guide at `/staff-guide/`. Only staff can read it:
+sign in as `staff.user@example.com`.
 
 **Adding a page** takes four things: a view in `demo/views.py` on
 `mvp.views.MVPTemplateView`, a route in `demo/urls.py`, a template extending
