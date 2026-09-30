@@ -6,7 +6,8 @@ Name it in the host's ``conf.py``::
 
 When ``sphinx-build -b json`` finishes, the extension walks every toctree from
 the root document and writes the whole contents to ``navigation.json`` in the
-docs build. The documentation app's sidebar is drawn from that file, so serving
+docs build, with the root document's title. The documentation app's sidebar
+is drawn from that file, so serving
 never needs Sphinx. Other builders write nothing.
 
 This is the only module of the package that imports Sphinx.
@@ -103,7 +104,11 @@ class NavigationWriter:
         """Write ``navigation.json`` into the build, replacing it in one step."""
         target = self.outdir / DocsBuild.NAVIGATION_FILE
         staging = target.with_name(f"{target.name}.tmp")
-        staging.write_text(json.dumps({"groups": self.groups()}), encoding="utf-8")
+        contents = {
+            "title": self.env.titles[self.root_doc].astext(),
+            "groups": self.groups(),
+        }
+        staging.write_text(json.dumps(contents), encoding="utf-8")
         os.replace(staging, target)
 
 
