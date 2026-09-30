@@ -80,3 +80,16 @@ Watch: the brief and tasks.md say `hidden-page/` has both links, but in the `con
 the last page in reading order (hidden toctree comes last in `index.rst`), so it has a previous link
 only. The test asserts what the source gives: previous is `reference/api/`, and that page's next
 link leads to `hidden-page/`, so hidden toctrees feed the links. No source was edited.
+
+## 2026-09-30T10:25:00Z · Implementer US3 · T005
+
+Did: `TestReadingAfterARebuild`, two tests. The fixture copies `tests/sphinx/reading/` into
+`tmp_path`, builds it, points the demo app at the build, then edits the front page's source
+(a new section) and inserts a page first in its toctree, and rebuilds into the same output
+directory with the `sphinx_build` fixture. One test checks the new section's anchor in "On this
+page", the other that the next link leads to the inserted page.
+Verified: `uv run pytest tests/test_views.py::TestReadingAfterARebuild` 2 passed on the first run,
+as tasks.md expected (the view reads the page file on every request), so there was no red step.
+Probe: replacing the rebuild call with `pass` fails both tests, so they depend on the rebuild.
+Next: full verify, then the completion report.
+Watch: no source under `tests/sphinx/reading/` was edited.

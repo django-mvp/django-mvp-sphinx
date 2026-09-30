@@ -132,8 +132,9 @@
       "tasks": [
         {
           "id": "T005",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": "tests/test_views.py::TestReadingAfterARebuild, 2 tests; passed on first run as expected (the view reads the page file per request); probe: skipping the rebuild fails both"
         }
       ]
     }

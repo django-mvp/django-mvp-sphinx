@@ -1434,3 +1434,46 @@ class TestPreviousAndNextPage:
 
         assert self.link(soup, "prev") is not None
         assert self.link(soup, "next") is not None
+
+
+class TestReadingAfterARebuild:
+    @pytest.fixture
+    def rebuilt(self, docs_app, tmp_path, sphinx_build, monkeypatch):
+        source = tmp_path / "source"
+        shutil.copytree(SPHINX_SOURCES / "reading", source)
+        monkeypatch.setattr(docs_app, "build_dir", sphinx_build(source))
+
+        def rebuild() -> None:
+            index = source / "index.rst"
+            index.write_text(
+                index.read_text().replace("   long\n", "   inserted\n   long\n")
+                + "\nAdded part\n----------\n\nText of the added part.\n"
+            )
+            (source / "inserted.rst").write_text("Inserted page\n=============\n")
+            sphinx_build(source)
+
+        return rebuild
+
+    @staticmethod
+    def front_page(client) -> BeautifulSoup:
+        return BeautifulSoup(client.get("/docs/").content, "html.parser")
+
+    def test_a_section_added_by_a_rebuild_is_listed_on_the_next_request(
+        self, client, db, rebuilt
+    ) -> None:
+        assert self.front_page(client).find("a", href="#added-part") is None
+
+        rebuilt()
+
+        assert self.front_page(client).find("a", href="#added-part") is not None
+
+    def test_a_page_inserted_by_a_rebuild_is_the_next_link_on_the_next_request(
+        self, client, db, rebuilt
+    ) -> None:
+        assert self.front_page(client).find("a", rel="next")["href"] == "/docs/long/"
+
+        rebuilt()
+
+        assert self.front_page(client).find("a", rel="next")["href"] == (
+            "/docs/inserted/"
+        )
