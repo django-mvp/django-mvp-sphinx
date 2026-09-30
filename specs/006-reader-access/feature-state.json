@@ -2,7 +2,7 @@
   "feature": "006-reader-access",
   "branch": "006-reader-access",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-09-30T00:12:38Z",
       "note": "one reviewer, correctness+spec and security lenses"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T00:30:01Z",
+      "note": "walkthrough pre-checked by rendered HTML; PR ready for the merge gate"
     }
   ],
   "gates": {
@@ -73,6 +78,13 @@
         "TST-003 low: sidebar helper moved to a conftest fixture",
         "TST-004 low: UserFactory uses factory.django.Password",
         "notes: README two-app example names both apps; rule may run several times per request"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "build session, rendered-HTML walkthrough through the test client with the standard accounts (port 8025 held by FS-002; the orchestrating session serves the worktree for its own look)",
+      "at": "2026-09-30T00:30:01Z",
+      "self_resolved": [
+        "no dev server this run (orchestrator) \u2014 every state probed as anonymous, regular, staff and super: /staff-guide/ entry and pages, unknown page, /docs/, sign-in page with next"
       ]
     }
   },
@@ -198,7 +210,7 @@
   },
   "pr": {
     "number": 49,
-    "draft": true
+    "draft": false
   },
   "escalations": []
 }
