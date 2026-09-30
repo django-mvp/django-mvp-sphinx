@@ -212,3 +212,22 @@ too, holding the reader's search.
 
 **Why:** It is the smallest change to a template that FS-003 is rewriting in parallel, and it can be
 moved without touching anything else once the walkthrough settles where it belongs.
+
+## D19. Design review, one round: approve, seven findings applied to the plan (S3R)
+
+**Ambiguous:** None of the findings was critical or high, so none forced a re-plan.
+
+**Chosen:** All seven applied as plan edits, verified against each finding's evidence by the
+orchestrator. The short-word exemption from `searchtools.js` is dropped, because FR-005 asks for
+every word and Sphinx 9 indexes short words (DR-001). Sphinx's own search page leaves the
+`TestSphinxsOwnPages` parametrize, as a declared edit (DR-002). Keys are looked up case-folded,
+which finds words Sphinx kept capitalised (DR-005). There is no `search_view_class` setting: a host
+that needs another view subclasses `DocumentationApp` (DR-006). An unreadable page file gives an
+empty passage (DR-007). JavaScript off gets no test of its own, and tests get no docstrings (DR-004).
+For the reader rule, the reviewer suggested adding the search address to FS-006's parametrized
+tests (DR-003). The plan adds a new class that reuses FS-006's setup instead, so FS-006's tests stay
+unedited and the tamper check stays meaningful. `example.html`, the scaffold's starter component,
+stays: retiring it is outside this feature.
+
+**Why:** Each edit either removes work or is one line of design, and each was checkable from the
+finding's own text.

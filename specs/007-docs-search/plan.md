@@ -37,7 +37,7 @@ the build as it is on disk).
 
 **Constraints**: serving never imports Sphinx (FR-015, Article XII); results only from this app's
 build (FR-004); reader text and every title and passage escaped by the template layer (FR-008,
-Article V); no new access rule (FR-012).
+Article V); no reader rule of its own (FR-012).
 
 **Scale/Scope**: guides of tens to a few hundred pages, all results on one page (D8); several
 documentation apps per host.
@@ -46,7 +46,7 @@ documentation apps per host.
 
 | Article | How the plan meets it |
 |---|---|
-| I Testing | Test-first per task; `DocsSearch` through a real build of a purpose-made source, the results page through `client`. |
+| I Testing | Test-first per task; `DocsSearch` through a real build of a purpose-made source, the results page through `client`. JavaScript off (FR-003, US1.11) needs no test of its own: the form submits with `GET` and the results are rendered on the server, which is what every results-page test exercises. |
 | II Simplicity | One class for search, one view, one template, one component. No settings, no cache, no JavaScript. |
 | III Anti-abstraction | `DocsSearch` takes a `DocsBuild`; no base class, no backend interface. `PageText` subclasses the standard library's `HTMLParser`. |
 | IV Integration-first | Acceptance tests submit the search the way a reader does (the form's `action`, `method` and field name, then `GET` that address) and read the results list by landmark and `href`. |
@@ -56,7 +56,7 @@ documentation apps per host.
 | VIII i18n | Every visible string in the view, form and template is translatable; catalogue refreshed. |
 | IX Data model | No models. |
 | X Cohesion | Reading the search data, parsing a query, matching, ordering and cutting passages share one subject and sit on `DocsSearch`. The view's work is view methods. |
-| XI Compatibility | New names only (`mvp_sphinx.search.DocsSearch`, `mvp_sphinx.search.PageText`, `mvp_sphinx.views.SearchView`, `DocumentationApp.search_view_class`, URL name `<namespace>:search`, component `mvp_sphinx.search_form`). Nothing removed or renamed. |
+| XI Compatibility | New names only (`mvp_sphinx.search.DocsSearch`, `mvp_sphinx.search.PageText`, `mvp_sphinx.views.SearchView`, URL name `<namespace>:search`, component `mvp_sphinx.search_form`). Nothing removed or renamed. |
 | XII Scope | Reads files of one build; no Sphinx import, no build, no second build. |
 | XIII Host look | Results page extends `base.html` inside `c-page`/`c-container` like a page; the form uses daisyUI classes the shell emits; no Sphinx theme, no `searchtools.js`. |
 
@@ -96,9 +96,10 @@ No violations. Complexity tracking is empty.
   each `{"title": str, "path": str, "anchor": str, "passage": str}`:
   1. `words(query)`; none → `[]`.
   2. For each word, the documents holding any of its keys in `terms` ∪ `titleterms` (a value is an
-     int or a list). A document is a match when it holds every word; Sphinx's relaxation also
-     applies: when some words of two letters or fewer are held by no document at all, the match
-     needs only the longer words (research R3). Each document once (FR-004).
+     int or a list), with both mappings folded to lower case once per search, merging the documents
+     of keys that differ only in case (Sphinx keeps a word as written when its stem is a stopword,
+     so `Doing` is stored as `Doing`). A document is a match when it holds every word, with no
+     exemption for short words (FR-005). Each document once (FR-004).
   3. Tier each match: 0 when every word has a key among the keys of the words of `titles[doc]`;
      1 when some section heading of the document in `alltitles` (anchor not `null`) holds every
      word the same way, and the first such heading's anchor becomes the result's `anchor`
@@ -111,7 +112,8 @@ No violations. Complexity tracking is empty.
   text via `PageText`, whitespace collapsed; the first word (by `\w+` with positions) whose `keys()`
   meet any searched key; a window of about `PASSAGE_LENGTH` characters starting ~120 before it, cut
   at word boundaries, with "…" at a cut end. `""` when no word of the body matches or the page file
-  cannot be read (`DocsBuild.page(path)` is `None` or raises `ValueError`). Never raises.
+  cannot be read (`DocsBuild.page(path)` is `None` or raises `OSError` or `ValueError`). Never
+  raises.
 
 `class PageText(HTMLParser)`: the text a reader sees in a page body. Skips everything inside
 `a.headerlink`, `script` and `style`; `@classmethod text(cls, markup) -> str`. The body is the
@@ -133,8 +135,8 @@ the template to escape.
 
 ### The URL — `mvp_sphinx/mounted.py`
 
-`DocumentationApp` gains `search_view_class = SearchView` (a settable attribute like
-`view_class`), and `urls` gains `path("search/", search_view, name="search")` **before** the
+`DocumentationApp.__init__` binds `SearchView.as_view(app=self)` and `urls` gains
+`path("search/", search_view, name="search")` **before** the
 catch-all `<path:path>` pattern. Sphinx's own search page, `search.fjson`, is then no longer
 reachable as a page, and every link a docs author makes to it lands on this search (FR-009, D4).
 The mount's `check` wraps it like every other pattern (research R6; FR-012).
@@ -200,7 +202,7 @@ and one Implementer holding both avoids re-reading the same view.
 mvp_sphinx/
 ├── search.py                                      # new: DocsSearch, PageText
 ├── views.py                                       # SearchView; PageView gains the search address
-├── mounted.py                                     # search_view_class, the search/ pattern
+├── mounted.py                                     # the search/ pattern
 ├── templates/mvp_sphinx/page.html                 # one line: the form
 ├── templates/mvp_sphinx/search.html               # new
 ├── templates/cotton/mvp_sphinx/search_form.html   # new

@@ -37,7 +37,8 @@ The stemmer is `snowballstemmer`, a pure-Python package with no dependencies tha
 depends on:
 
 - Sphinx 9.x English: `snowballstemmer.stemmer("english")` (`tables` → `tabl`, `notice` → `notic`).
-- Sphinx 8.1 English: `snowballstemmer.stemmer("porter")`. The two agree on almost every word and
+- Sphinx 8.1 English: `snowballstemmer.stemmer("porter")` (read from Sphinx 8.1.3's
+  `sphinx/search/en.py`, installed into a throwaway environment with `uv run --with sphinx==8.1.3`). The two agree on almost every word and
   differ on a few endings.
 - Other languages Sphinx supports with a stemmer (`da de es fi fr hu it nl no pt ro ru sv tr`) use
   the snowball algorithm of that language's name. `ja` and `zh` use their own splitters and are
@@ -57,7 +58,9 @@ Sphinx import.
 - The query is split on anything that is not a letter, digit or underscore.
 - A word is dropped when its lower case form is a stopword, or when it is only digits.
 - The rest are stemmed; a document is a result when it holds every stem in `terms` or `titleterms`.
-  (Sphinx relaxes this for words of two letters or fewer; the plan keeps that rule, see plan.)
+  (`searchtools.js` also compares counts against words longer than two letters, a leftover from
+  when Sphinx dropped short words. Sphinx 9 indexes short words, and FR-005 asks for every word, so
+  the plan does not keep that exemption.)
 - Sphinx also matches fragments (`word.length > 2`, a substring of a key). The specification rules
   that out (FR-006, clarification 2), so this plan does not.
 

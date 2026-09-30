@@ -42,7 +42,8 @@ punctuation give `[]` (US1.7); "the product list" finds the page with "product" 
 word (`lante`) gives `[]` (FR-006); pure digits are ignored; no result's document is `genindex` or
 `search` (edge case); for every plain lower-case key of `terms` and `titleterms`, searching the key
 lists every document the data lists under it (SC-002, research R4); more than `WORD_LIMIT` words
-does not raise (edge case). On files in `tmp_path` (copy the build): no `searchindex.json`, invalid
+does not raise (edge case); a word Sphinx stored capitalised because its stem is a stopword
+(`Doing` in the fixture text) is found by its lower-case form. On files in `tmp_path` (copy the build): no `searchindex.json`, invalid
 JSON, wrong shape each give `None`; a missing `language_data.js` still answers (a stopword alone
 then finds nothing); `globalcontext.json` absent is read as English. Module and class docstrings per
 `docs/contributing/standards/code-documentation.md`.
@@ -67,11 +68,16 @@ US1.3, FR-004); the same address requested twice gives the same list (US1.8); no
 filled in (US1.6, US1.7, FR-007); a query holding `<script>`, `"` and `&` comes back escaped in the
 field and nowhere unescaped (US1.10, FR-008); the link in the fixture's front page to Sphinx's search
 page, resolved against the page's address, is the app's `search` URL (US1.12, FR-009); a word only
-in the host's overview page gives no result (US1.9, SC-003); `tests/test_mounted.py`: with the app's
-`check` set to `False` (monkeypatch, restoring it), an anonymous `GET` of the search address is
-refused exactly as a page address is (same status and redirect target) (FR-012). JavaScript off
-(US1.11, FR-003) is covered by the `GET` form and server-side results; say so in the test class
-docstring rather than writing a separate test. `tests/test_demo.py`: the demo's front page offers the
+in the host's overview page gives no result (US1.9, SC-003); in `TestSphinxsOwnPages`, remove
+`"/docs/search/"` from `test_the_general_index_and_search_pages_are_served`'s parametrize and keep
+`"/docs/genindex/"` (D14: Sphinx's search page is no longer served; this is a declared edit of a
+pre-existing test); `tests/test_mounted.py`: a new class `TestSearchUnderTheReaderRule` that reuses FS-006's
+fixtures and setup (`TestRefusal`, `TestOwnRule`: the signed-in-only rule and the group rule) and
+asserts, for `/docs/search/` and `/docs/search/?q=lantern`, that an anonymous reader is turned away
+exactly as a page address is (status, sign-in `Location`, empty body), a member gets the results
+page, and a signed-in non-member is forbidden with no result text (FR-012, the reader rule; no new
+access mechanism). Leave FS-006's own tests unedited. JavaScript off (US1.11, FR-003) needs no test of
+its own (plan, Constitution Check I); no docstrings on tests. `tests/test_demo.py`: the demo's front page offers the
 search. i18n: every string `{% trans %}`/`gettext_lazy`; `makemessages -l en`. README: under Usage,
 a short "Search" subsection (what it searches, that it needs nothing configured, that it works with
 scripts off). CHANGELOG Unreleased, Added: one entry. CONTEXT.md: "Search data" and "Results page"
@@ -97,7 +103,7 @@ searched word, carries no markup and no `¶`, and is at most about `PASSAGE_LENG
 the ellipses (US2.3); a passage for a stemmed match (`lanterns` in the page, `lantern` searched)
 still finds the word; a word in a section heading makes that result's `href` end with the section's
 anchor, which exists as an `id` in the page (US2.4); a title-only match has an empty passage or none
-rendered; a page whose file is missing gives an empty passage, not an error; titles and passages
+rendered; a page whose file is missing or unreadable gives an empty passage, not an error; titles and passages
 holding `<`, `&` render escaped (FR-008). `PageText`: skips `a.headerlink`, `script`, `style`;
 converts entities.
 
