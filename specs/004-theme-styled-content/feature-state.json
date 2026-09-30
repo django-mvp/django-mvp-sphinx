@@ -205,9 +205,10 @@
           "attempts": 1,
           "evidence": {
             "commands": [
-              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us5b (exit 0)",
+              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us5b (fresh dir; exit 0)",
               "uv run pytest tests/test_static tests/test_demo.py (19 passed)",
               "uv run pre-commit run --all-files (passed)",
+              "forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-004 --base origin/main --json /tmp/fs004-us5-verify.json (exit 0; overall passed: conformance, docs, lint, typecheck, test, build)",
               "exit_code: 0; criteria: []"
             ]
           }
