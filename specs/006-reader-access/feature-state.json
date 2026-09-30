@@ -87,9 +87,10 @@
     },
     "walkthrough": {
       "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's overnight delegate), served the worktree locally, round 1",
-      "at": "2026-09-30T00:41:15Z",
+      "at": "2026-09-30T00:40:38Z",
       "self_resolved": [
-        "round 1: nothing asked for \u2014 every state checked as anonymous, regular, staff and super; passed"
+        "round 1: nothing asked for \u2014 every state checked as anonymous, regular, staff and super; passed",
+        "stamped at the merge approval: the look happened before the merge, the record was written after it (same correction as FS-002 #51)"
       ]
     }
   },
