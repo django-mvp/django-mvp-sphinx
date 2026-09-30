@@ -113,3 +113,18 @@ tests/test_static tests/test_demo.py` 19 passed (no literal colour, all rules sc
 Next: full verify.
 Watch: the reveal, the transition and the scroll offset were not looked at in a browser; the demo
 content tour is the place to check them.
+
+## 2026-09-30T02:30+02:00 · Implementer US5 · T008
+
+Did: `content.css` gains bold glossary terms (`dl.glossary dt`), a bordered chip for `.guilabel`
+(`--color-base-300` border, `--radius-field`) and weight 600 for `.menuselection`. No rule for the
+definition indent (the host's prose style already gives `dd` 1.625em), for `kbd` (daisyUI `.kbd`
+styles it) or for cross-references (ordinary links through prose). `content-tour.rst` gains a
+*Glossaries and interface references* section: a three-term glossary, `:term:` references, a
+`:doc:` reference, `:kbd:`, `:guilabel:` and `:menuselection:`. CHANGELOG line.
+Verified: `uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us5b` exit 0 (fresh directory);
+`uv run pytest tests/test_static tests/test_demo.py` 19 passed (no literal colour, rules scoped);
+`uv run pre-commit run --all-files` passed. No test for appearance.
+Next: full verify.
+Watch: the bold terms, the label chip and the key caps in running text were not looked at in a
+browser; the content tour is the place to check them, including in the dark theme.

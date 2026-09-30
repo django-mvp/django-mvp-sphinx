@@ -201,8 +201,16 @@
       "tasks": [
         {
           "id": "T008",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "commands": [
+              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us5b (exit 0)",
+              "uv run pytest tests/test_static tests/test_demo.py (19 passed)",
+              "uv run pre-commit run --all-files (passed)",
+              "exit_code: 0; criteria: []"
+            ]
+          }
         }
       ]
     }
