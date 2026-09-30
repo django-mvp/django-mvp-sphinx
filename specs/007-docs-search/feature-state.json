@@ -2,7 +2,7 @@
   "feature": "007-docs-search",
   "branch": "007-docs-search",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-09-30T01:14:05Z",
       "note": "Phase 1 correctness+spec; Phase 2 security lens (new runtime dependency, new untrusted query input)"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T01:22:05Z",
+      "note": "PR #54 ready; walkthrough required (5 user-facing paths), worktree served by the orchestrator"
     }
   ],
   "gates": {
@@ -174,6 +179,6 @@
   "escalations": [],
   "pr": {
     "number": 54,
-    "draft": true
+    "draft": false
   }
 }
