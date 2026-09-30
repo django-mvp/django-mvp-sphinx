@@ -32,7 +32,7 @@ Linking to a heading
 
 Hover over any heading to reveal the link beside it, or tab to it with the
 keyboard. Following that link adds the heading's name to the address, after a ``#``,
-and puts the heading at the top of the page, clear of the top bar. Copy the address
+and scrolls the page to that heading. Copy the address
 after following it, and whoever opens it lands on the same section.
 
 The panel called *On this page* does the same thing from the side: every entry in

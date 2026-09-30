@@ -176,3 +176,24 @@ a `quickstart` prefix so they do not read as the module's own. The tests themsel
 Moving a test written in this story is not an edit of a pre-existing test.
 
 **ADR:** none — test placement.
+
+## D18. The review's fix cycle, done by Forge directly (S6)
+
+**Ambiguous:** The Phase 1 review approved with one medium finding and two lows. CORR-001: the
+public surface named `DocsBuild`, `DocsSearch` and `PageText` without the members a host calls, so
+the closing "anything not listed is internal" made those members internal. CORR-002: `PageView` is
+the documented extension point but no overridable member was listed. CORR-003: the templates'
+`title` block was missing. A note also flagged one demo-guide sentence ("clear of the top bar")
+that nothing had checked.
+
+**Chosen:** Forge edited the README directly. `DocsBuild(root)` with `page`, `file` and
+`navigation`; `DocsSearch(build)` with `results(query)` and the keys of each result;
+`PageText.text(markup)`; `PageView`'s overridable `template_name`, `get_context_data`,
+`get_page_title`, `get_headings`, `get_neighbour` and `get_breadcrumbs`; and the `title` block of
+both templates. Each was checked against its docstring. The guide sentence now says only what
+following the link does.
+
+**Why:** Each fix is a sentence of documentation with no design content, well inside the pipeline's
+allowance for direct work on trivial changes. A dispatch would have cost more than the edits.
+
+**ADR:** none — documentation corrections.

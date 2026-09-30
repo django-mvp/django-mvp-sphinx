@@ -473,32 +473,40 @@ These are the names a project can use, grouped the way a project meets them.
 ### Views
 
 - `mvp_sphinx.views.PageView` renders a page. Subclass it and pass the subclass as
-  `view_class` to change how a page is drawn.
+  `view_class` to change how a page is drawn. A subclass may override
+  `template_name`, `get_context_data()`, `get_page_title()`, `get_headings()`,
+  `get_neighbour(key)` (`key` is `"prev"` or `"next"`) and `get_breadcrumbs()`.
 - `mvp_sphinx.views.SearchView` renders the results of a search.
 
 ### Building blocks
 
 For a custom view or template:
 
-- `mvp_sphinx.docs_build.DocsBuild` reads a docs build and never looks outside it.
+- `mvp_sphinx.docs_build.DocsBuild(root)` reads a docs build and never looks
+  outside it. `page(path)` returns a page's data or `None`, `file(path)` returns
+  an image or download under `_images/` or `_downloads/` or `None`, and
+  `navigation()` returns the entries of `navigation.json` or `None`.
 - `mvp_sphinx.menus.DocumentationMenu` turns a build's navigation file into the
   sidebar menu.
 - `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
   page's `toc` value into nested headings.
 - `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
   names table regions and heading links in a page body.
-- `mvp_sphinx.search.DocsSearch` lists the pages of a build that hold every word
-  searched for.
-- `mvp_sphinx.search.PageText` gives the text a reader sees in a page body.
+- `mvp_sphinx.search.DocsSearch(build)`, given a `DocsBuild`, searches it.
+  `results(query)` lists the pages that hold every word of `query`, best match
+  first, each with its `title`, `path`, `anchor` and `passage`, or returns `None`
+  when the build has no usable search data.
+- `mvp_sphinx.search.PageText`, through `PageText.text(markup)`, gives the text a
+  reader sees in a page body, with its whitespace collapsed.
 
 ### Templates a project may override
 
 - `mvp_sphinx/page.html` draws a page. It receives `body`, `headings`,
-  `previous_page`, `next_page`, `search_url` and `page_data`. It has the `styles`
-  and `content` blocks, and it holds the page's body in an element with the
+  `previous_page`, `next_page`, `search_url` and `page_data`. It has the `title`,
+  `styles` and `content` blocks, and it holds the page's body in an element with the
   `mvp-sphinx-content` class.
 - `mvp_sphinx/search.html` draws the results. It receives `query`, `results` and
-  `search_url`, and has the `styles` and `content` blocks. `results` is `None` when
+  `search_url`, and has the `title`, `styles` and `content` blocks. `results` is `None` when
   the build has no search data, and otherwise a list of the pages found, each with
   its `title`, `passage` and `href`.
 
