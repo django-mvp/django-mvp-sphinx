@@ -9,6 +9,7 @@ from sphinx.cmd.build import build_main
 from tests.factories import GroupFactory, UserFactory
 
 SPHINX_SOURCES = Path(__file__).parent / "sphinx"
+DEMO_GUIDE = Path(__file__).parent.parent / "demo" / "docs"
 
 
 @pytest.fixture(scope="session")
@@ -84,6 +85,14 @@ def reading_build(sphinx_json_build):
     return sphinx_json_build("reading")
 
 
+@pytest.fixture(scope="module")
+def demo_guide_build(tmp_path_factory):
+    out = tmp_path_factory.mktemp("demo-guide-build")
+    status = build_main(["-b", "json", "-q", "-W", str(DEMO_GUIDE), str(out)])
+    assert status == 0
+    return out
+
+
 @pytest.fixture
 def docs_app(guide_build, monkeypatch):
     from demo.mounted import docs
@@ -139,4 +148,12 @@ def reading_app(reading_build, monkeypatch):
     from demo.mounted import docs
 
     monkeypatch.setattr(docs, "build_dir", reading_build)
+    return docs
+
+
+@pytest.fixture
+def demo_guide_app(demo_guide_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", demo_guide_build)
     return docs

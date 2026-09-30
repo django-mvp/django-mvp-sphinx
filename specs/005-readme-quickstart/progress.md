@@ -121,3 +121,16 @@ Verified: forge verify --base origin/main at e7ec597, all six steps passed. tamp
 the declared edits (conftest.py render fixture, test_smoke.py starter class, test_views.py one word).
 story-done US1 (#26), US2 (#29).
 Next: US3 dispatch. Carry: AGENTS.md Components section still names the starter component.
+
+## 2026-09-30T10:45:00Z · Implementer US3 · T003
+
+Did: `TestDemoGuideStates` in `tests/test_demo.py` and the `demo_guide_build` / `demo_guide_app`
+fixtures in `tests/conftest.py`. The build is module-scoped, `-W`, into a temporary folder, and
+`demo.mounted.docs` is pointed at it with `monkeypatch`. The pages walked come from the processed
+menu tree's URLs; each state is asserted by structure (no wording, no titles).
+Verified: `uv run pytest tests/test_demo.py::TestDemoGuideStates -q` exit 0, 15 passed. All 15
+pass against the guide as it stood before the rewrite, because that guide already held every
+state; recorded as passing at red (FS-002 T005 precedent). The rewrite is checked against the same
+tests in T004.
+Next: T004, the guide rewrite, README demo part, AGENTS.md fixes.
+Watch: none.
