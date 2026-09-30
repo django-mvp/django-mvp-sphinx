@@ -8,12 +8,29 @@ from html import unescape
 from urllib.parse import urljoin
 
 import pytest
+from bs4 import BeautifulSoup
 from django.urls import reverse
 
 pytestmark = pytest.mark.usefixtures("docs_app")
 
 DEFAULT_NAME = "Documentation"
 FRONT_PAGE_TEXT = "Welcome to the guide"
+CONTENTS_PAGES = {
+    f"/docs/{address}"
+    for address in (
+        "",
+        "install/",
+        "explicit/",
+        "chain/one/",
+        "chain/two/",
+        "chain/three/",
+        "markup/",
+        "shared/",
+        "standalone/",
+        "reference/api/",
+        "hidden-page/",
+    )
+}
 TITLE_TEXT = {
     "": "front page",
     "page/": "Top-level page",
@@ -28,6 +45,13 @@ def headings(response) -> list[str]:
         re.sub(r"<[^>]+>", "", h)
         for h in re.findall(r"<h1[^>]*>(.*?)</h1>", body, re.S)
     ]
+
+
+def contents_links(response, app) -> list[str]:
+    """Return the addresses the app's contents links to, as the page draws it."""
+    soup = BeautifulSoup(response.content, "html.parser")
+    contents = soup.find("ul", attrs={"aria-label": str(app.name)})
+    return [link["href"] for link in contents.find_all("a")]
 
 
 class TestPageView:
@@ -418,3 +442,66 @@ class TestTwoAppsSideBySide:
         assert str(handbook_app.name) not in tabs["/docs/"]
         assert str(handbook_app.name) in tabs["/manuals/admin/"]
         assert str(docs_app.name) not in tabs["/manuals/admin/"]
+
+
+class TestContentsInTheSidebar:
+    def test_every_link_answers_and_together_they_reach_every_listed_page(
+        self, client, db, contents_app
+    ) -> None:
+        links = contents_links(client.get("/docs/"), contents_app)
+
+        assert {*links} == CONTENTS_PAGES
+        for link in links:
+            assert client.get(link).status_code == 200
+
+    @pytest.mark.parametrize("address", ["", "chain/three/", "reference/api/"])
+    def test_any_page_draws_the_whole_contents(
+        self, client, db, contents_app, address
+    ) -> None:
+        links = contents_links(client.get(f"/docs/{address}"), contents_app)
+
+        assert {*links} == CONTENTS_PAGES
+
+    def test_a_title_with_markup_characters_is_escaped(
+        self, client, db, contents_app
+    ) -> None:
+        soup = BeautifulSoup(client.get("/docs/").content, "html.parser")
+        contents = soup.find("ul", attrs={"aria-label": str(contents_app.name)})
+
+        link = contents.find("a", href="/docs/markup/")
+
+        assert link.get_text(strip=True) == "Fish <b>& chips</b>"
+        assert link.find("b") is None
+
+    def test_a_second_app_draws_its_own_contents_under_its_own_prefix(
+        self, client, db, handbook_app, docs_app
+    ) -> None:
+        links = contents_links(client.get("/manuals/admin/backups/"), handbook_app)
+
+        assert {*links} == {"/manuals/admin/", "/manuals/admin/backups/"}
+
+    def test_a_page_of_one_app_draws_none_of_the_others_entries(
+        self, client, db, handbook_app, docs_app
+    ) -> None:
+        sidebar = BeautifulSoup(client.get("/docs/page/").content, "html.parser").find(
+            "aside"
+        )
+
+        hrefs = [link["href"] for link in sidebar.find_all("a", href=True)]
+
+        assert "/docs/page/" in hrefs
+        assert not [href for href in hrefs if href.startswith("/manuals/admin/")]
+
+    def test_the_contents_is_drawn_when_sphinx_cannot_be_imported(
+        self, client, db, contents_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        links = contents_links(client.get("/docs/chain/two/"), contents_app)
+
+        assert {*links} == CONTENTS_PAGES

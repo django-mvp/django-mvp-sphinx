@@ -34,3 +34,10 @@ Did: `DocsBuild.navigation()`, `navigation_stamp()` and the recursive `valid_ent
 Verified: `uv run pytest tests/test_docs_build.py -q` → 57 passed; red first (`navigation` did not exist); mutating the `ValueError` catch, the url check, the top-level dict check and the inode part of the stamp each fails a test (the inode one after the replacement test was made to hold size and mtime equal); `uv run pre-commit run --all-files` → all hooks pass.
 Next: T003, `DocumentationMenu` and the sidebar tests.
 Watch: `navigation()` finds the file through `contained_file`, so a symlink pointing out of the build reads as absent (tested).
+
+## 2026-09-30T00:10:00Z · Implementer US1 · T003
+
+Did: `mvp_sphinx/menus.py` (`DocumentationMenu`: `process`, `refresh`, `entry_item`), `DocumentationApp` builds it in place of the empty `Menu`; the guide and handbook sources load the extension; `contents_app` fixture; `TestDocumentationMenu`, `TestServingSideImports` (tests/test_menus.py) and `TestContentsInTheSidebar` (tests/test_views.py). US1 rebuilds the items on every `process()`, with no stamp and no lock (US3).
+Verified: `uv run pytest tests/test_menus.py tests/test_mounted.py tests/test_views.py tests/test_navigation.py tests/test_docs_build.py -q` → 149 passed; red first (menu had no label; the handbook test failed until the source loaded the extension); mutations of the address prefix, the label safety, the group class, the uncaptioned entries and the children assignment each fail tests, and adding `import sphinx` to `docs_build.py` fails the subprocess test; `uv run pre-commit run --all-files` → all hooks pass.
+Next: T004, README, CHANGELOG, AGENTS.md, demo guide, catalogue, `test_demo`.
+Watch: the sidebar tests find the contents list by its `aria-label`, which is the app's name; `TestServingSideImports` uses a subprocess because `sys.modules` blocking cannot show that modules already loaded do not import Sphinx.

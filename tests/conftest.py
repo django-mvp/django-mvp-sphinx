@@ -87,6 +87,14 @@ def docs_app(guide_build, monkeypatch):
 
 
 @pytest.fixture
+def contents_app(contents_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", contents_build)
+    return docs
+
+
+@pytest.fixture
 def handbook_app(handbook_build, monkeypatch):
     from tests.urls import handbook
 
