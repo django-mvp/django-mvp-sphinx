@@ -155,3 +155,13 @@ TestDemoGuideStates test red (test_each_admonition_kind_is_drawn, test_a_downloa
 reverted.
 Next: full verify, report.
 Watch: CHANGELOG is not in T004's files and has no entry for the demo guide.
+
+## 2026-09-30T10:36:43Z · Forge · US3 accepted, S5 converge
+
+Did: US3 receipts green, verify green at da2f2d4, tamper-check clean against 99faf6d, guide pages and
+README demo part read; story-done US3 (#32). Converge: every FR/SC maps to a done task (FR-001–007,
+014 → T001; FR-008–010 → T002; FR-011–013 → T003/T004), no gaps, no new tasks. No migrations.
+craft-simplify pass on the diff: one helper for the admonition classes both demo tests collected.
+ADR verdicts: D9–D17, none graduate (check-adrs green). Whole-feature tamper-check: only the declared
+edits (D12, DR-003, D16).
+Next: S6 review.
