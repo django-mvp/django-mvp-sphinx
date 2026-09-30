@@ -300,3 +300,38 @@
 .mvp-sphinx-content figure {
   max-width: 100%;
 }
+
+/* Heading links: shown when the reader points at the heading that holds one
+   or moves keyboard focus onto it, and clear of the sticky top bar when
+   followed. */
+.mvp-sphinx-content .headerlink {
+  margin-inline-start: 0.5rem;
+  color: var(--mvp-sphinx-muted);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
+}
+
+.mvp-sphinx-content h1:hover .headerlink,
+.mvp-sphinx-content h2:hover .headerlink,
+.mvp-sphinx-content h3:hover .headerlink,
+.mvp-sphinx-content h4:hover .headerlink,
+.mvp-sphinx-content h5:hover .headerlink,
+.mvp-sphinx-content h6:hover .headerlink,
+.mvp-sphinx-content dt:hover .headerlink,
+.mvp-sphinx-content caption:hover .headerlink,
+.mvp-sphinx-content figcaption:hover .headerlink,
+.mvp-sphinx-content .code-block-caption:hover .headerlink,
+.mvp-sphinx-content .headerlink:focus-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mvp-sphinx-content .headerlink {
+    transition: none;
+  }
+}
+
+.mvp-sphinx-content [id] {
+  scroll-margin-top: 5rem;
+}

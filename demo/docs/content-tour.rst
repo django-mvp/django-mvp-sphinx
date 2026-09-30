@@ -207,3 +207,71 @@ A figure keeps its caption with the image:
    :alt: A terminal prompt
 
    The caption stays inside the figure, under the image.
+
+
+Headings
+--------
+
+Hover over a heading to reveal the link beside it, or tab to it with the keyboard. Following the link puts the section at the top of the page, clear of the top bar.
+
+Each section below is long enough that the page has to scroll to reach the next, so following one of its links shows the heading landing below the top bar instead of behind it.
+
+Choosing a name
+~~~~~~~~~~~~~~~
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Using ``BodyRewriter`` in your own views
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Sharing a link
+~~~~~~~~~~~~~~
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Checking the result
+~~~~~~~~~~~~~~~~~~~
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
+
+Reading a page is easier when a reader can copy the address of the part they mean. Every heading on this page carries a link to itself, and a reader who wants to share the section sends that address instead of describing where to scroll. The paragraph runs long on purpose so the sections take room.
