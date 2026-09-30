@@ -2,7 +2,7 @@
   "feature": "004-theme-styled-content",
   "branch": "004-theme-styled-content",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-09-30T00:19:39Z",
       "note": "one reviewer: correctness+spec lens (no security-sensitive surface; implementation followed the reviewed plan)"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T00:28:19Z",
+      "note": "PR #48 ready; walkthrough held by the orchestrator"
     }
   ],
   "gates": {
@@ -247,6 +252,6 @@
   "escalations": [],
   "pr": {
     "number": 48,
-    "draft": true
+    "draft": false
   }
 }
