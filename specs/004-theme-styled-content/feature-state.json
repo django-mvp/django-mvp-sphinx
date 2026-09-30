@@ -130,9 +130,8 @@
           "evidence": {
             "commands": [
               "uv run pytest tests/test_page_body.py (red on a pass-through stub: 12 failed, 8 guards passed; green: 20 passed)",
-              "uv run pytest tests/test_views.py::TestWideContent (red: 2 failed; green with the view wired)",
+              "uv run pytest tests/test_views.py::TestWideContent (red: 2 failed; green after wiring the view)",
               "uv run pytest tests/test_page_body.py tests/test_views.py (80 passed)",
-              "mutation probes: dropping the line offset and an off-by-one on the end tag each fail a test; file restored",
               "uv run pre-commit run --all-files (passed)",
               "exit_code: 0; criteria: ['SC-003']"
             ]
