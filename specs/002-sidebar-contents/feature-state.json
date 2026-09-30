@@ -89,9 +89,10 @@
     },
     "walkthrough": {
       "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's 2026-09-30 overnight delegate), on devserver:8025",
-      "at": "2026-09-30T00:23:17Z",
+      "at": "2026-09-30T00:22:42Z",
       "self_resolved": [
-        "nothing \u2014 walkthrough passed as built"
+        "nothing \u2014 walkthrough passed as built",
+        "the orchestrating session reported the walkthrough passed together with the merge; the exact time of its look was not recorded, so it is stamped at the merge approval (00:22:42Z), the latest it can have been. The run's own pre-handoff check of the pages was at 00:21:12Z"
       ]
     }
   },
