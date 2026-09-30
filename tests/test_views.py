@@ -997,16 +997,8 @@ class TestSearchResultDetails:
         ]
 
     def test_a_title_only_match_lists_the_page_without_a_passage(
-        self, client, db, search_app, tmp_path, monkeypatch
+        self, client, db, search_app
     ) -> None:
-        build = tmp_path / "title-only"
-        shutil.copytree(search_app.build_dir, build)
-        page_file = build / "wombat.fjson"
-        page = json.loads(page_file.read_text())
-        page["body"] = "<p>Nothing to see.</p>"
-        page_file.write_text(json.dumps(page))
-        monkeypatch.setattr(search_app, "build_dir", build)
-
         (item,) = result_items(client.get("/docs/search/", {"q": "marsupials"}))
 
         assert item.find("a")["href"] == "/docs/wombat/"

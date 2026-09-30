@@ -52,6 +52,9 @@ class DocsSearch:
 
     def __init__(self, build: DocsBuild) -> None:
         self.build = build
+        # Passages stem every word of each result's page, and a page's
+        # vocabulary repeats, so each word is stemmed once per search.
+        self.stems: dict[str, set[str]] = {}
 
     def read_json(self, name: str) -> Any:
         """Return the parsed JSON file ``name`` of the build, or ``None``.
@@ -198,7 +201,12 @@ class DocsSearch:
             The word itself and its stem from each stemmer the build's language
             may have used.
         """
-        return {word, *(stemmer.stemWord(word) for stemmer in self.stemmers)}
+        if word not in self.stems:
+            self.stems[word] = {
+                word,
+                *(stemmer.stemWord(word) for stemmer in self.stemmers),
+            }
+        return self.stems[word]
 
     def results(self, query: str) -> list[dict[str, str]] | None:
         """List the pages holding every word of ``query``, best match first.
@@ -374,11 +382,13 @@ class DocsSearch:
 class PageText(HTMLParser):
     """Collect the text a reader sees in the body of a page.
 
-    Sphinx's permalinks, scripts and styles are left out. Character references
+    The page's title (the ``h1`` Sphinx writes once, at the top of the body),
+    Sphinx's permalinks, scripts and styles are left out, so a passage never
+    just repeats the title the result already shows. Character references
     are converted, so the text is plain and a template is the one to escape it.
     """
 
-    SKIPPED_TAGS = ("script", "style")
+    SKIPPED_TAGS = ("h1", "script", "style")
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -394,7 +404,7 @@ class PageText(HTMLParser):
             markup: A page's ``body`` as Sphinx wrote it.
 
         Returns:
-            The text outside permalinks, scripts and styles, in one line.
+            The text outside the title, permalinks, scripts and styles, in one line.
         """
         parser = cls()
         parser.feed(markup)

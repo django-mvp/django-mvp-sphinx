@@ -42,7 +42,8 @@ kilobytes, which is cheap to parse per request.
 
 ## Revisit if
 
-A guide's search data grows large enough that parsing it per request shows up in response times.
-The fix then is a cache keyed on the file's modification time and size. Also revisit if a Sphinx
-release changes the shape of `searchindex.json`, or stems a language with an algorithm not listed in
-`DocsSearch.ALGORITHMS`.
+A guide's search data grows large enough that parsing it per request shows up in response times,
+or a common word lists so many pages that reading each one for its passage does. The fixes then
+are a cache keyed on the file's modification time and size, and passages built only for the
+results a page shows. Also revisit if a Sphinx release changes the shape of `searchindex.json`,
+or stems a language with an algorithm not listed in `DocsSearch.ALGORITHMS`.

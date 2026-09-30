@@ -367,3 +367,24 @@ is removed, because `TestResultOrder` states the ordering that replaced it.
 the US1 brief, which should not have asked for a placeholder to be tested as behaviour.
 
 **ADR:** none — a correction local to this feature's tests.
+
+## D25. The review's fix cycle, done by Forge directly (S6)
+
+**Ambiguous:** The review raised one verified high finding (REV-001: a passage stemmed every word of
+each result's page afresh, so a common word over a large guide cost far more than the search
+itself), one medium (REV-002: a passage opened with the page title the result already shows) and
+two lows (REV-003: `search/` is reserved under the app and the README did not say so; REV-004:
+CONTEXT.md said the search reads the search data "and nothing else"). The pipeline's route for a
+fix is a scoped dispatch.
+
+**Chosen:** Forge made the fixes directly, test-first where behaviour changed. `DocsSearch` memoises
+each word's keys for the rest of the search. `PageText` leaves out the page's `h1`, so a passage
+starts in the page's text. The title-only tests now run on the unmodified build, so they fail if
+the title comes back. README and CONTEXT.md are corrected, and ADR 0005's "Revisit if" now names the
+per-result page reads. The security lens approved with one low (SEC-001, the same per-result cost at
+sizes beyond the package's target). That is accepted as it stands, and recorded in the ADR.
+
+**Why:** Each fix is a few lines with no design content. A dispatch would have cost more than the
+fixes, and the pipeline allows direct work for trivial changes with the reason written down.
+
+**ADR:** none — the fixes are recorded in ADR 0005's revisit condition where they bear on the design.

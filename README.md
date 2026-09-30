@@ -149,6 +149,10 @@ can be bookmarked or shared. That address is where Sphinx's own search page woul
 be, so a `:ref:` link to `search` in your docs lands on it. Whoever may read the
 pages may search them, under the same `check`.
 
+The `search/` address is reserved under every documentation app, so a folder of your
+docs named `search` can't have its own index page there. Name that folder something
+else.
+
 The search data is read on each search, so a rebuild is searchable straight away.
 A build without it still serves its pages, and the results page says search is
 unavailable.

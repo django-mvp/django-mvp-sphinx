@@ -75,7 +75,7 @@ _Avoid_: manifest, index.
 **Search data**:
 The record of which words each page holds, which Sphinx writes into the docs build
 as `searchindex.json`, with the stopword list in `_static/language_data.js`. The
-search reads it on every search and nothing else.
+search reads it on every search, along with each result's page for its passage.
 _Avoid_: index (Sphinx's general index, `genindex`, is a different thing), search
 index, database.
 

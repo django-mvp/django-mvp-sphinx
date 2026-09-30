@@ -495,9 +495,8 @@ class TestPassage:
         assert passage.startswith("…")
         assert passage.endswith("quetzal")
 
-    def test_a_title_only_match_has_an_empty_passage(self, copied_build) -> None:
-        set_body(copied_build, "wombat", "<p>Nothing to see.</p>")
-        results = DocsSearch(DocsBuild(copied_build)).results("marsupials")
+    def test_a_title_only_match_has_an_empty_passage(self, search) -> None:
+        results = search.results("marsupials")
 
         assert [(result["path"], result["passage"]) for result in results] == [
             ("wombat/", "")
@@ -538,9 +537,14 @@ class TestPassage:
 
 class TestPageText:
     def test_a_permalink_is_not_text(self) -> None:
-        markup = '<h1>Title<a class="headerlink" href="#t" title="Link">¶</a></h1>'
+        markup = '<h2>Part<a class="headerlink" href="#t" title="Link">¶</a></h2>'
 
-        assert PageText.text(markup) == "Title"
+        assert PageText.text(markup) == "Part"
+
+    def test_the_page_title_is_not_text(self) -> None:
+        markup = '<h1>Title<a class="headerlink" href="#t">¶</a></h1>\n<p>Body</p>'
+
+        assert PageText.text(markup) == "Body"
 
     def test_a_link_with_other_classes_beside_headerlink_is_skipped(self) -> None:
         assert PageText.text('<a class="x headerlink">¶</a>after') == "after"
