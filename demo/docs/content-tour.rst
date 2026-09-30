@@ -134,3 +134,76 @@ Code in a language Pygments cannot highlight is plain text in the same box:
 
    Nothing here is highlighted.
    It reads as ordinary code text.
+
+Wide content
+------------
+
+Content wider than the page scrolls or scales inside it, and never pushes the
+page sideways. Try this page at the width of a phone.
+
+A table wider than a phone screen scrolls sideways inside its own area, which
+takes keyboard focus:
+
+.. list-table:: Supported environments
+   :header-rows: 1
+
+   * - Python
+     - Django
+     - Operating system
+     - Database
+     - Web server
+     - Cache
+     - Task queue
+     - Status
+   * - 3.12
+     - 5.2
+     - Ubuntu 24.04 with the distribution's own packages installed
+     - PostgreSQL 16 with the PostGIS extension enabled
+     - gunicorn behind nginx
+     - Redis 7
+     - Celery with a Redis broker
+     - Supported
+   * - 3.13
+     - 6.0
+     - Debian 13 with the distribution's own packages installed
+     - PostgreSQL 17 with the PostGIS extension enabled
+     - uvicorn behind Caddy
+     - Valkey 8
+     - Celery with an AMQP broker
+     - Supported
+
+A table inside a list item:
+
+* The first step, with its own table:
+
+  .. list-table::
+     :header-rows: 1
+
+     * - Setting
+       - Value
+       - What it does when it is set to something long enough to need room
+     * - ``DEBUG``
+       - ``False``
+       - Keeps error details from readers of the site in production and sends them to the log
+
+* The second step needs no table.
+
+A code line longer than the reading area scrolls inside its own box:
+
+.. code-block:: console
+
+   $ python manage.py collectstatic --noinput --clear --link --ignore "*.map" --ignore "*.scss" --ignore "node_modules" --verbosity 2
+
+An image wider than the reading area scales down to fit, keeping its ratio:
+
+.. image:: shell.png
+   :width: 2400px
+   :alt: A terminal prompt
+
+A figure keeps its caption with the image:
+
+.. figure:: shell.png
+   :width: 2400px
+   :alt: A terminal prompt
+
+   The caption stays inside the figure, under the image.

@@ -271,3 +271,32 @@
 .mvp-sphinx-content .highlight .gt {
   color: var(--mvp-sphinx-code-error);
 }
+
+/* Wide content stays inside the reading area. A table scrolls inside the
+   region the page wraps it in; code scrolls in its own box. */
+.mvp-sphinx-content .mvp-sphinx-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mvp-sphinx-content .mvp-sphinx-scroll:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.mvp-sphinx-content .mvp-sphinx-scroll > table {
+  min-width: 100%;
+}
+
+.mvp-sphinx-content pre {
+  overflow-x: auto;
+}
+
+.mvp-sphinx-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.mvp-sphinx-content figure {
+  max-width: 100%;
+}
