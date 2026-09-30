@@ -136,3 +136,11 @@ moved. Cleanup: one condition in BodyRewriter computed once; changelog tightened
 for an adopter; README override example loads `static`. ADR 0002 graduated from D1, D2 and D5;
 every decision verdicted. No migrations. R3 marked delivered and rewritten to its delivered form.
 Next: review.
+
+## 2026-09-30 · S6 review
+
+Did: merged origin/main (FS-002) first; four text conflicts (changelog, demo front page, .po,
+view tests) resolved keeping both sides; 250 tests green. One reviewer (correctness, spec, docs,
+security): approve, risk low, 1 medium and 6 low, all fixed directly (D11). Full verify and
+tamper-check green; review outcome recorded on the PR.
+Next: walkthrough (the orchestrator serves this worktree) and ready for review.
