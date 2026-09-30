@@ -1175,3 +1175,305 @@ class TestSearchOfAVeryLongQuery:
 
         assert response.status_code == 200
         assert query_field(response)["value"] == query
+
+
+class TestOnThisPage:
+    @staticmethod
+    def soup(client, address: str) -> BeautifulSoup:
+        return BeautifulSoup(client.get(f"/docs/{address}").content, "html.parser")
+
+    @staticmethod
+    def on_this_page(soup: BeautifulSoup):
+        return soup.find("nav", attrs={"aria-labelledby": True})
+
+    def test_a_page_with_sections_lists_them_in_a_named_navigation_region(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "")
+
+        nav = self.on_this_page(soup)
+
+        assert soup.find(id=nav["aria-labelledby"]).get_text(strip=True)
+        assert [link["href"] for link in nav.find_all("a")] == [
+            "#first-part",
+            "#second-part",
+            "#a-sub-section",
+        ]
+
+    def test_a_sub_section_is_listed_inside_its_parents_entry(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, ""))
+
+        entry = nav.find("a", href="#a-sub-section").find_parent("li")
+        parent = entry.find_parent("li")
+
+        assert entry.find_parent("ul").parent is parent
+        assert parent.find("a")["href"] == "#second-part"
+
+    @pytest.mark.parametrize("address", ["", "long/", "single/"])
+    def test_every_link_leads_to_a_heading_in_the_pages_article(
+        self, client, db, reading_app, address
+    ) -> None:
+        soup = self.soup(client, address)
+        article = soup.find("article")
+
+        links = self.on_this_page(soup).find_all("a")
+
+        assert links
+        for link in links:
+            assert link["href"].startswith("#")
+            assert article.find(id=link["href"][1:]) is not None
+
+    @pytest.mark.parametrize("address", ["", "long/", "single/"])
+    def test_no_link_leads_to_the_pages_own_title(
+        self, client, db, reading_app, address
+    ) -> None:
+        links = self.on_this_page(self.soup(client, address)).find_all("a")
+
+        assert "#" not in [link["href"] for link in links]
+
+    def test_a_page_with_no_section_has_no_such_region(
+        self, client, db, reading_app
+    ) -> None:
+        assert self.on_this_page(self.soup(client, "plain/")) is None
+
+    def test_the_front_page_lists_none_of_the_headings_of_the_pages_it_lists(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, ""))
+
+        hrefs = {link["href"] for link in nav.find_all("a")}
+
+        assert hrefs.isdisjoint(
+            {"#level-one", "#the-code-heading", "#the-only-section"}
+        )
+
+    def test_the_regions_name_differs_from_the_contents_name(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "")
+        nav = self.on_this_page(soup)
+
+        name = soup.find(id=nav["aria-labelledby"]).get_text(strip=True)
+
+        assert name != str(reading_app.name)
+        assert soup.find("ul", attrs={"aria-label": str(reading_app.name)})
+
+    def test_a_page_with_one_section_lists_one_link(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, "single/"))
+
+        assert [link["href"] for link in nav.find_all("a")] == ["#the-only-section"]
+
+    def test_a_heading_with_inline_code_keeps_its_markup(
+        self, client, db, reading_app
+    ) -> None:
+        nav = self.on_this_page(self.soup(client, "long/"))
+
+        link = nav.find("a", href="#the-code-heading")
+
+        assert link.find("code") is not None
+
+    def test_the_list_is_drawn_when_sphinx_cannot_be_imported(
+        self, client, db, reading_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        nav = self.on_this_page(self.soup(client, "long/"))
+
+        assert nav.find("a", href="#level-three") is not None
+
+
+class TestPreviousAndNextPage:
+    @staticmethod
+    def soup(client, address: str) -> BeautifulSoup:
+        return BeautifulSoup(client.get(f"/docs/{address}").content, "html.parser")
+
+    @staticmethod
+    def at(client, href: str) -> BeautifulSoup:
+        return BeautifulSoup(client.get(href).content, "html.parser")
+
+    @staticmethod
+    def link(soup: BeautifulSoup, rel: str):
+        return soup.find("a", rel=rel)
+
+    @staticmethod
+    def title_of(client, href: str) -> str:
+        return client.get(href).context["page_data"]["title"]
+
+    def test_a_middle_page_links_to_both_neighbours_in_a_named_region(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "long/")
+
+        previous = self.link(soup, "prev")
+        following = self.link(soup, "next")
+
+        assert previous["href"] == "/docs/"
+        assert following["href"] == "/docs/single/"
+        assert previous.find_parent("nav")["aria-label"]
+        assert previous.find_parent("nav") is following.find_parent("nav")
+
+    def test_each_link_holds_the_title_of_the_page_it_leads_to(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "long/")
+
+        for rel in ("prev", "next"):
+            link = self.link(soup, rel)
+            assert self.title_of(client, link["href"]) in link.get_text()
+
+    def test_the_front_page_has_a_next_link_and_no_previous_link(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "")
+
+        assert self.link(soup, "next")["href"] == "/docs/long/"
+        assert self.link(soup, "prev") is None
+
+    def test_the_last_page_has_a_previous_link_and_no_next_link(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "plain/")
+
+        assert self.link(soup, "prev")["href"] == "/docs/single/"
+        assert self.link(soup, "next") is None
+
+    def test_the_page_after_the_front_page_links_back_to_the_apps_own_address(
+        self, client, db, reading_app
+    ) -> None:
+        assert self.link(self.soup(client, "long/"), "prev")["href"] == "/docs/"
+
+    def test_a_build_of_one_page_has_neither_link(
+        self, client, db, docs_app, sphinx_build, tmp_path, monkeypatch
+    ) -> None:
+        source = tmp_path / "source"
+        source.mkdir()
+        (source / "conf.py").write_text('project = "One"\n')
+        (source / "index.rst").write_text("Only page\n=========\n\nAlone.\n")
+        monkeypatch.setattr(docs_app, "build_dir", sphinx_build(source))
+
+        soup = self.soup(client, "")
+
+        assert self.link(soup, "prev") is None
+        assert self.link(soup, "next") is None
+
+    def test_following_next_links_from_the_front_page_visits_every_listed_page(
+        self, client, db, reading_app
+    ) -> None:
+        listed = contents_links(client.get("/docs/"), reading_app)
+        visited = ["/docs/"]
+        while following := self.link(self.at(client, visited[-1]), "next"):
+            visited.append(following["href"])
+
+        assert sorted(visited) == sorted(listed)
+
+        back = [visited[-1]]
+        while previous := self.link(self.at(client, back[-1]), "prev"):
+            back.append(previous["href"])
+
+        assert back == visited[::-1]
+
+    def test_a_page_of_a_hidden_toctree_is_linked_from_its_neighbour(
+        self, client, db, contents_app
+    ) -> None:
+        previous = self.link(self.soup(client, "hidden-page/"), "prev")["href"]
+
+        assert previous == "/docs/reference/api/"
+        assert self.link(self.at(client, previous), "next")["href"] == (
+            "/docs/hidden-page/"
+        )
+
+    def test_an_orphan_page_has_neither_link(self, client, db, contents_app) -> None:
+        response = client.get("/docs/orphan/")
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        assert response.status_code == 200
+        assert self.link(soup, "prev") is None
+        assert self.link(soup, "next") is None
+
+    def test_a_second_app_links_under_its_own_prefix(
+        self, client, db, handbook_app
+    ) -> None:
+        front = BeautifulSoup(client.get("/manuals/admin/").content, "html.parser")
+        backups = BeautifulSoup(
+            client.get("/manuals/admin/backups/").content, "html.parser"
+        )
+
+        assert self.link(front, "next")["href"] == "/manuals/admin/backups/"
+        assert self.link(backups, "prev")["href"] == "/manuals/admin/"
+
+    def test_sphinxs_general_index_has_neither_link(
+        self, client, db, reading_app
+    ) -> None:
+        response = client.get("/docs/genindex/")
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        assert response.status_code == 200
+        assert self.link(soup, "prev") is None
+        assert self.link(soup, "next") is None
+
+    def test_the_links_are_drawn_when_sphinx_cannot_be_imported(
+        self, client, db, reading_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        soup = self.soup(client, "long/")
+
+        assert self.link(soup, "prev") is not None
+        assert self.link(soup, "next") is not None
+
+
+class TestReadingAfterARebuild:
+    @pytest.fixture
+    def rebuilt(self, docs_app, tmp_path, sphinx_build, monkeypatch):
+        source = tmp_path / "source"
+        shutil.copytree(SPHINX_SOURCES / "reading", source)
+        monkeypatch.setattr(docs_app, "build_dir", sphinx_build(source))
+
+        def rebuild() -> None:
+            index = source / "index.rst"
+            index.write_text(
+                index.read_text().replace("   long\n", "   inserted\n   long\n")
+                + "\nAdded part\n----------\n\nText of the added part.\n"
+            )
+            (source / "inserted.rst").write_text("Inserted page\n=============\n")
+            sphinx_build(source)
+
+        return rebuild
+
+    @staticmethod
+    def front_page(client) -> BeautifulSoup:
+        return BeautifulSoup(client.get("/docs/").content, "html.parser")
+
+    def test_a_section_added_by_a_rebuild_is_listed_on_the_next_request(
+        self, client, db, rebuilt
+    ) -> None:
+        assert self.front_page(client).find("a", href="#added-part") is None
+
+        rebuilt()
+
+        assert self.front_page(client).find("a", href="#added-part") is not None
+
+    def test_a_page_inserted_by_a_rebuild_is_the_next_link_on_the_next_request(
+        self, client, db, rebuilt
+    ) -> None:
+        assert self.front_page(client).find("a", rel="next")["href"] == "/docs/long/"
+
+        rebuilt()
+
+        assert self.front_page(client).find("a", rel="next")["href"] == (
+            "/docs/inserted/"
+        )

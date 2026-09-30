@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 19:57-0500\n"
+"POT-Creation-Date: 2026-09-30 04:47-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,13 +34,29 @@ msgstr ""
 msgid "Table"
 msgstr ""
 
+#: templates/cotton/mvp_sphinx/on_this_page.html:9
+msgid "On this page"
+msgstr ""
+
+#: templates/cotton/mvp_sphinx/page_links.html:8
+msgid "Previous and next page"
+msgstr ""
+
+#: templates/cotton/mvp_sphinx/page_links.html:14
+msgid "Previous"
+msgstr ""
+
+#: templates/cotton/mvp_sphinx/page_links.html:22
+msgid "Next"
+msgstr ""
+
 #: templates/cotton/mvp_sphinx/search_form.html:10
 msgid "Search this documentation"
 msgstr ""
 
 #: templates/cotton/mvp_sphinx/search_form.html:13
 #: templates/cotton/mvp_sphinx/search_form.html:19
-#: templates/mvp_sphinx/search.html:13 views.py:207 views.py:218
+#: templates/mvp_sphinx/search.html:13 views.py:241 views.py:255
 msgid "Search"
 msgstr ""
 
@@ -59,7 +75,7 @@ msgstr[1] ""
 msgid "Nothing matched your search."
 msgstr ""
 
-#: views.py:206
+#: views.py:240
 #, python-format
 msgid "Search: %(query)s"
 msgstr ""

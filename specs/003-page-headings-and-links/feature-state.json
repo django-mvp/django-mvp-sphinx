@@ -1,0 +1,213 @@
+{
+  "feature": "003-page-headings-and-links",
+  "branch": "003-page-headings-and-links",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PR_READY",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:29:04Z",
+      "note": "specification merged to main in PR #14, merge commit c9bde32cf1074cd4194dabe84a146ada228a3925; epic #6, stories #34, #36, #37"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-30T00:31:07Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 5 tasks"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-09-30T00:31:44Z",
+      "note": "one design reviewer, three lenses, one round"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-30T00:40:54Z",
+      "note": "plan notice sent; US1 dispatch"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-09-30T09:50:52Z",
+      "note": "all three stories done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-30T09:52:26Z",
+      "note": "phase 1 reviewer; phase 2 not triggered"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T09:58:09Z",
+      "note": "review recorded; PR ready; walkthrough on devserver:8025 for the orchestrating session"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "merged specification pull request #14 (merge commit c9bde32cf1074cd4194dabe84a146ada228a3925)",
+      "at": "2026-09-29T22:29:04Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": "notified",
+      "at": "2026-09-30T00:40:54Z",
+      "self_resolved": [
+        "plan notice sent to the orchestrating session (Sam's 2026-09-30 overnight delegation), not Sam",
+        "orchestrating session approved the plan, 2026-09-30"
+      ]
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    },
+    "design_review": {
+      "approved_by": "design-panel",
+      "at": "2026-09-30T00:40:38Z",
+      "self_resolved": [
+        "ARCH-001 low: title sliced from the toc fragment by offset, not re-emitted — plan edit",
+        "ARCH-002 low: single {% if headings %} guard in page.html — plan edit",
+        "ARCH-003 low: get_neighbour treats only missing/null as absent, no shape check — plan edit",
+        "SPEC-001 low: demo edit narrowed to settings.rst (content tour covers the rest) — plan/tasks edit",
+        "ARCH-004 low: hidden-page and orphan cases on the existing contents source — plan/tasks edit"
+      ]
+    },
+    "review": {
+      "approved_by": "review-panel",
+      "at": "2026-09-30T09:57:39Z",
+      "self_resolved": [
+        "no findings; review note acted on: README override paragraph names headings, previous_page, next_page (D8)",
+        "pre-walkthrough fixes made directly: heading titles wrap (text-wrap span), reading column held at prose width (D8)"
+      ]
+    },
+    "walkthrough": {
+      "approved_by": "orchestrating session agent:forge:dashboard:15456d51 (Sam's 2026-09-30 overnight delegate), on devserver:8025",
+      "at": "2026-09-30T10:00:37Z",
+      "self_resolved": [
+        "round 1: nothing asked for — walkthrough passed as built; layout choices accepted"
+      ]
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 34,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-003",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_headings.py::TestPageHeadings"
+            ],
+            "commands": [
+              "uv run pytest tests/test_headings.py -q"
+            ]
+          }
+        },
+        {
+          "id": "T002",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestOnThisPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py::TestOnThisPage -q"
+            ]
+          }
+        },
+        {
+          "id": "T003",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_demo.py"
+            ],
+            "commands": [
+              "uv run pytest tests/test_demo.py -q",
+              "uv run sphinx-build -b json -q -W demo/docs /tmp/demo-us1-build"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 36,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-003",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T004",
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestPreviousAndNextPage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py::TestPreviousAndNextPage -q  (red first: 9 failed, 3 passed by nature; then 12 passed)",
+              "uv run pre-commit run --all-files  (all hooks passed)",
+              "/home/sam/.openclaw/workspaces/forge/engineering-org/kit/forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-003 --base origin/main --json /tmp/fs003-us2-verify.json  (overall passed: conformance, docs, lint, typecheck, test, build)"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P3",
+      "issue": 37,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-003",
+      "status": "done",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T005",
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestReadingAfterARebuild"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py::TestReadingAfterARebuild -q  (2 passed on the first run, as the brief expected; probe: replacing the rebuild call with pass failed both)",
+              "uv run pre-commit run --all-files  (all hooks passed)",
+              "/home/sam/.openclaw/workspaces/forge/engineering-org/kit/forge verify --repo /home/sam/projects/django-mvp/wt-sphinx-003 --base origin/main --json /tmp/fs003-us2-verify.json  (overall passed)"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 1,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 1,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 1,
+      "max": 1
+    }
+  },
+  "pr": {
+    "number": 52,
+    "draft": false
+  },
+  "escalations": []
+}

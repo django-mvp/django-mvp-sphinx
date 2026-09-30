@@ -10,10 +10,20 @@
 {% block content %}
   <c-page>
     <c-container>
-      <c-mvp_sphinx.search_form :action="search_url" />
-      <article class="prose mvp-sphinx-content py-4">
-        {{ body }}
-      </article>
+      <div class="xl:flex gap-10">
+        <div class="min-w-0 w-full max-w-prose">
+          <c-mvp_sphinx.search_form :action="search_url" />
+          <article class="prose mvp-sphinx-content py-4">
+            {{ body }}
+          </article>
+          <c-mvp_sphinx.page_links :previous="previous_page" :next="next_page" />
+        </div>
+        {% if headings %}
+          <aside class="hidden xl:block w-56 shrink-0">
+            <c-mvp_sphinx.on_this_page :headings="headings" />
+          </aside>
+        {% endif %}
+      </div>
     </c-container>
   </c-page>
 {% endblock content %}

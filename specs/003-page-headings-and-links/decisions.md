@@ -38,3 +38,126 @@ branch `wip/sphinx-docs-in-sidebar` on github.com/django-mvp/django-mvp, under
 `mvp/integrations/sphinx_view/` and `mvp/templates/mvp/sphinx_view/`. Its page template already
 draws "On this page" beside the article at wide widths and the previous and next links below it.
 It depended on django-sphinx-view, which this package does not. The plan may start from it.
+
+## Implementation decisions (S3 onward)
+
+## D1. Re-read against the features delivered since the spec landed
+
+**Decided**: FS-001 (#4) and FS-002 (#5) were delivered after this spec merged. Neither contradicts
+it. FS-002's FR-014 shows sidebar titles as text; this spec shows heading and page titles "as the
+build renders them". The two rules govern different surfaces (the sidebar menu and the page's own
+navigation), and the page body beside the list is rendered as the build wrote it too, so both stand.
+
+**Why**: the lane's spec-against-spec check; no contradiction to put to the owner.
+
+**Revisit if**: a later feature puts titles from this list into the sidebar.
+
+**ADR:** none — a check, not a design choice
+
+## D2. Parse Sphinx's `toc` into a heading tree rather than inject it
+
+**Decided**: `PageHeadings`, a standard-library `HTMLParser`, reads the page's `toc` fragment into
+`{title, anchor, children}` entries without the title entry; the list is drawn by this package's
+components with daisyUI `menu` classes. Whether a page has a list is whether that tree is empty, not
+Sphinx's `display_toc`.
+
+**Why**: FR-003 excludes the title, which is the fragment's outer entry; the shell's menu classes
+must sit on the lists; and a page whose title holds an empty list (the demo's front page) makes
+`display_toc` and the drawn tree two readings of one fact (research R2).
+
+**Revisit if**: Sphinx changes the shape of `toc`, or a Sphinx release adds the title-less tree to
+the page context.
+
+**ADR:** none — how this feature reads one key of the page JSON; nothing else in the package inherits it
+
+## D3. Previous and next links resolved against the request path
+
+**Decided**: `urljoin(request.path, link)` on Sphinx's relative `prev`/`next` link, as the FS-001
+breadcrumbs do with `parents`.
+
+**Why**: Sphinx's link is relative to the page's own address, which is the address the request was
+routed to, so the result stays under whatever prefix the app is mounted at with no `reverse`
+(research R3).
+
+**Revisit if**: pages are ever served at an address other than the JSON builder's own.
+
+**ADR:** none — follows the breadcrumbs' existing precedent (ADR 0001 covers reading the build per request)
+
+## D4. Layout from the shell's emitted utilities only
+
+**Decided**: the two-column layout uses only classes present in django-mvp's packaged stylesheet
+(research R4). The prototype's arbitrary grid template is not emitted there and is dropped.
+
+**Why**: the package compiles no Tailwind, and an unemitted class does nothing silently.
+
+**Revisit if**: layout needs something the shell does not emit. FS-004's `content.css` is scoped
+to the page body (`.mvp-sphinx-content`) and is the place a page-level rule would go.
+
+**ADR:** none — the rule that an unemitted class silently does nothing is already recorded in AGENTS.md; this applies it
+
+## D5. The new components are parts of the page, not a published API
+
+**Decided**: `on_this_page`, `heading_list` and `page_links` exist to draw the page. The README does
+not offer them to host templates, and their classes are not tested.
+
+**Why**: the spec makes placement and look a matter for the eye and the host's theme; publishing
+the markup would turn every visual adjustment into a contract.
+
+**Revisit if**: a host project asks to place the list itself.
+
+**ADR:** none — local to this feature's three components; revisit only if a host asks to place them
+
+## D6. Design review: approved, five low findings applied as plan edits
+
+**Decided**: the one-round design review approved with no critical or high finding. All five low
+findings removed work and were applied: ARCH-001, the title is sliced from the fragment by offset
+(as `BodyRewriter` does) instead of re-emitted tag by tag; ARCH-002, one emptiness guard for "On
+this page", in `page.html`; ARCH-003, `get_neighbour` treats only a missing or `null` key as absent,
+with no shape validation; SPEC-001, only `settings.rst` changes in the demo guide, since FS-004's
+content tour already has nested sections and an inline-code heading; ARCH-004, the hidden-toctree
+and orphan cases run on the existing `contents` source. Notes swept: the stale FS-004 wording in
+T002, the demo reading order now including Content tour, and a README sentence about incremental
+Sphinx builds.
+
+**Why**: each remedy was checked against its stated evidence (`mvp_sphinx/page_body.py`
+`position()`/`splice()` with `convert_charrefs=False`; `demo/docs/content-tour.rst`;
+`tests/sphinx/contents/hidden-page.rst`, `orphan.rst`; `sphinx/builders/html/__init__.py:572-590`).
+
+**Revisit if**: n/a — a record.
+
+**ADR:** none — a record of the review, not a decision
+
+## D7. The hidden-page test asserts one link, not two
+
+**Decision**: `TestPreviousAndNextPage` tests the hidden-toctree case as "`hidden-page/` has a
+previous link to `reference/api/`, and that page's next link leads back to `hidden-page/`". It
+does not assert a next link on `hidden-page/`.
+
+**Why**: tasks.md T004 says `hidden-page/` has both links. In `tests/sphinx/contents/` its hidden
+toctree is the last one in `index.rst`, so `hidden-page` is the last page in reading order and
+Sphinx writes `next: null` for it (read from the built `hidden-page.fjson`). The source is not in
+this story's files, so it was not edited. The assertion still shows that a hidden toctree feeds
+the links, which is what the edge case is about.
+
+**Revisit if**: a later story adds a page after `hidden-page` in the contents source; the test can
+then assert both links.
+
+**ADR:** none — a test-scope choice
+
+## D8. Review approved; three small fixes made directly before the walkthrough
+
+**Decided**: the S6 review approved with no findings. Forge made three edits itself rather than
+dispatching them. In `heading_list.html` each title sits in a `<span class="text-wrap">`: daisyUI's
+menu lays a link's children out as grid columns and sets `white-space: nowrap` on nested lists, so
+a long title or one holding `<code>` scrolled sideways instead of wrapping. The page's first
+column is `w-full max-w-prose` instead of `flex-1`, so "On this page" sits beside the text rather
+than at the far edge, and the page foot is the same width on every page. The README's override
+paragraph now names `headings`, `previous_page` and `next_page` (review note).
+
+**Why**: found by looking at the running pages at a wide width before handing them over. Each is a
+line with no design content, and every class is in django-mvp's shipped stylesheet. Layout is judged
+by eye (spec Assumptions), so no test covers it.
+
+**Revisit if**: the walkthrough asks for a different placement.
+
+**ADR:** none — template adjustments local to this feature

@@ -157,6 +157,35 @@ The search data is read on each search, so a rebuild is searchable straight away
 A build without it still serves its pages, and the results page says search is
 unavailable.
 
+### The page's own headings
+
+On a wide screen, each page lists its own headings beside it, under "On this
+page". The list is nested the way the page nests its sections, and each entry
+links to its heading. Sphinx already records that tree in the build, so there is
+nothing to configure and the site that serves the pages still doesn't need
+Sphinx.
+
+- The page's title is not listed, and neither are the headings of other pages,
+  so a front page that only holds a toctree lists nothing from the pages it
+  links to. The sidebar keeps the contents.
+- A page with no headings below its title shows no list at all.
+- Sphinx's `:tocdepth:` setting decides how deep the list goes.
+
+`PageView` reads the tree with `PageHeadings.from_toc(toc)`, which turns a
+page's `toc` value from the build into nested dicts of `title`, `anchor` and
+`children`. Call it yourself if you draw the headings in a template of your own.
+
+Rebuild the docs and the list follows on the next request.
+
+Every page also ends with links to the page before it and the page after it, in
+the order Sphinx puts the pages in, each showing the title of the page it leads
+to. The front page has no previous link, the last page has no next link, and a
+page that no toctree lists has neither. The links stay inside the documentation
+app, so a second app mounted elsewhere links under its own address. An
+incremental Sphinx build only rewrites the pages that changed and the pages
+whose toctrees changed, so a page's links follow a newly inserted neighbour once
+that page is rebuilt. Run a full rebuild (`-E`) if in doubt.
+
 ### Naming the documentation
 
 The app's `name` is what the tab title, the first breadcrumb and the menu entry
@@ -347,9 +376,11 @@ If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
 block so the stylesheet still reaches the page, render `{{ body }}` rather than
 `{{ page_data.body }}` so your override keeps the rewrite, and keep the
 `mvp-sphinx-content` class on the element that holds it, because every rule in
-the stylesheet is scoped to that class. `BodyRewriter.rewrite` returns a plain
-string; `PageView` marks it safe because the docs build is your own, and a caller
-of its own does the same:
+the stylesheet is scoped to that class. An override of the `content` block also
+takes over drawing "On this page" and the previous and next links, which the page
+gets as `headings`, `previous_page` and `next_page`. `BodyRewriter.rewrite` returns
+a plain string; `PageView` marks it safe because the docs build is your own, and a
+caller of its own does the same:
 
 ```django
 {% extends "mvp_sphinx/page.html" %}
