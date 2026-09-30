@@ -1,5 +1,106 @@
 /* Styles for what Sphinx writes into a page's body. Every rule sits under
    .mvp-sphinx-content and every colour comes from the host's django-mvp theme. */
 
+/* Colour roles: the only place this file makes a colour. */
 .mvp-sphinx-content {
+  --mvp-sphinx-admonition-info: var(--color-info);
+  --mvp-sphinx-admonition-info-bg: color-mix(
+    in oklab,
+    var(--color-info) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-helpful: var(--color-success);
+  --mvp-sphinx-admonition-helpful-bg: color-mix(
+    in oklab,
+    var(--color-success) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-important: var(--color-primary);
+  --mvp-sphinx-admonition-important-bg: color-mix(
+    in oklab,
+    var(--color-primary) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-cautionary: var(--color-warning);
+  --mvp-sphinx-admonition-cautionary-bg: color-mix(
+    in oklab,
+    var(--color-warning) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-admonition-dangerous: var(--color-error);
+  --mvp-sphinx-admonition-dangerous-bg: color-mix(
+    in oklab,
+    var(--color-error) 12%,
+    var(--color-base-100)
+  );
+  --mvp-sphinx-muted: color-mix(
+    in oklab,
+    var(--color-base-content) 70%,
+    var(--color-base-100)
+  );
+}
+
+/* Admonitions and version notes. A box reads the edge and background of its
+   own meaning, so a box inside another keeps its own. Kinds with no meaning
+   here keep the informational look. */
+.mvp-sphinx-content .admonition,
+.mvp-sphinx-content .versionadded,
+.mvp-sphinx-content .versionchanged,
+.mvp-sphinx-content .deprecated {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-info);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-info-bg);
+  margin-block: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-inline-start: 4px solid var(--mvp-sphinx-box-edge);
+  border-radius: var(--radius-box);
+  background-color: var(--mvp-sphinx-box-bg);
+  color: var(--color-base-content);
+}
+
+.mvp-sphinx-content .admonition > :first-child,
+.mvp-sphinx-content .versionadded > :first-child,
+.mvp-sphinx-content .versionchanged > :first-child,
+.mvp-sphinx-content .deprecated > :first-child {
+  margin-top: 0;
+}
+
+.mvp-sphinx-content .admonition > :last-child,
+.mvp-sphinx-content .versionadded > :last-child,
+.mvp-sphinx-content .versionchanged > :last-child,
+.mvp-sphinx-content .deprecated > :last-child {
+  margin-bottom: 0;
+}
+
+.mvp-sphinx-content .admonition-title {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.mvp-sphinx-content .versionmodified {
+  font-weight: 600;
+}
+
+.mvp-sphinx-content .admonition.tip,
+.mvp-sphinx-content .admonition.hint {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-helpful);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-helpful-bg);
+}
+
+.mvp-sphinx-content .admonition.important {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-important);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-important-bg);
+}
+
+.mvp-sphinx-content .admonition.warning,
+.mvp-sphinx-content .admonition.caution,
+.mvp-sphinx-content .admonition.attention,
+.mvp-sphinx-content .deprecated {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-cautionary);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-cautionary-bg);
+}
+
+.mvp-sphinx-content .admonition.danger,
+.mvp-sphinx-content .admonition.error {
+  --mvp-sphinx-box-edge: var(--mvp-sphinx-admonition-dangerous);
+  --mvp-sphinx-box-bg: var(--mvp-sphinx-admonition-dangerous-bg);
 }

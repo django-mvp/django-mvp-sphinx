@@ -22,3 +22,18 @@ absence tests passed as guards), then green; `uv run pytest tests/test_views.py`
 `uv run pre-commit run --all-files` passed.
 Next: T002, admonition colours and the stylesheet tests.
 Watch: none.
+
+## 2026-09-30T00:55+02:00 · Implementer US1 · T002
+
+Did: colour roles and admonition/version-note rules in `content.css` (five meanings, muted
+colour); `tests/test_static/` with `TestContentStylesheet` (no literal colour, scoped selectors,
+contrast in the light and dark themes read from django-mvp's stylesheet; the OKLCH/color-mix/WCAG
+helpers sit on `ColourMath`, the rule reader on `Stylesheet`); `non-mirror-paths` in
+`pyproject.toml`; fixture page gains every meaning; demo `content-tour.rst` linked from the index
+and its hidden toctree; CHANGELOG line.
+Verified: tests red first on the empty stylesheet (literal-colour and four contrast tests), then
+green: `uv run pytest tests/test_static` 10 passed. Probed by mutation: 90% warning tint and a 30%
+muted mix fail the contrast tests, an appended `#fff` unscoped rule fails the literal and scope
+tests. `uv run sphinx-build -b json -W demo/docs demo/docs/_build/json` exit 0.
+Next: full verify.
+Watch: the theme parse takes the first `[data-theme=NAME]` rule holding `--color-base-100`.
