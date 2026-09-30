@@ -12,6 +12,11 @@ case, then stemmed with `snowballstemmer`, the stemmer Sphinx itself uses. Every
 build's language may have used is tried (for English, both `english` and `porter`). A page is a
 result when it holds every word.
 
+Pages whose title holds every word come first, then pages with a section heading that holds them
+(the result links to that section), then the rest, each group in title order. The search data holds
+no text, so each result's passage is cut from the page's own file: `PageText` turns the page body
+into the text a reader sees, leaving out heading links, scripts and styles.
+
 `SearchView` serves the results at `search/` under the documentation app. Sphinx gives its own
 search page that address, so a docs link to it lands on this search, and Sphinx's page, which has no
 content in a JSON build, is no longer served. The search form submits with `GET`, so every search

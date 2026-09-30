@@ -96,8 +96,21 @@
       "tasks": [
         {
           "id": "T003",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_search.py::TestResultOrder",
+              "tests/test_search.py::TestSectionLink",
+              "tests/test_search.py::TestPassage",
+              "tests/test_search.py::TestPageText",
+              "tests/test_views.py::TestSearchResultDetails"
+            ],
+            "commands": [
+              "uv run pytest tests/test_search.py -q (exit 0, 97 passed, after D24)",
+              "forge verify on the feature branch (exit 0, 483 passed)"
+            ]
+          }
         }
       ]
     },
@@ -111,8 +124,21 @@
       "tasks": [
         {
           "id": "T004",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestSearchAfterARebuild",
+              "tests/test_views.py::TestTwoApps",
+              "tests/test_views.py::TestUnavailableSearch",
+              "tests/test_views.py::TestSearchOfAMissingBuild",
+              "tests/test_views.py::TestSearchWithoutSphinx",
+              "tests/test_views.py::TestSearchOfAVeryLongQuery"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -q -k \"TestSearchAfterARebuild or TestTwoApps or TestUnavailableSearch or TestSearchOfAMissingBuild or TestSearchWithoutSphinx or TestSearchOfAVeryLongQuery\" (exit 0, 30 passed on first run; mutation probes each failed a test, see progress.md)"
+            ]
+          }
         }
       ]
     }
