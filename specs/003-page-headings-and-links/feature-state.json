@@ -2,7 +2,7 @@
   "feature": "003-page-headings-and-links",
   "branch": "003-page-headings-and-links",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-09-30T09:52:26Z",
       "note": "phase 1 reviewer; phase 2 not triggered"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-09-30T09:58:09Z",
+      "note": "review recorded; PR ready; walkthrough on devserver:8025 for the orchestrating session"
     }
   ],
   "gates": {
@@ -195,7 +200,7 @@
   },
   "pr": {
     "number": 52,
-    "draft": true
+    "draft": false
   },
   "escalations": []
 }
