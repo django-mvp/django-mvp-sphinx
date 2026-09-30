@@ -209,6 +209,32 @@ A figure keeps its caption with the image:
    The caption stays inside the figure, under the image.
 
 
+Glossaries and interface references
+-----------------------------------
+
+A glossary sets each term apart from its definition:
+
+.. glossary::
+
+   documentation app
+      The part of a project that serves a Sphinx build as pages of the site.
+
+   docs build
+      The JSON output of ``sphinx-build -b json``, which the documentation app
+      reads on every request.
+
+   front page
+      The page a guide opens on. It links to every other page of the guide.
+
+A term is referenced from running text like this: the :term:`documentation app`
+reads the :term:`docs build`, and readers arrive at the :term:`front page`. A
+page is referenced the same way, as in :doc:`getting-started`.
+
+Keys, labels and menu paths sit inside a line of text. Press
+:kbd:`Ctrl+K` to search, choose :guilabel:`Save changes` to keep an edit, or
+open :menuselection:`Settings --> Appearance --> Theme` to change the theme.
+
+
 Headings
 --------
 
