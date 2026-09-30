@@ -1,0 +1,104 @@
+{
+  "feature": "005-readme-quickstart",
+  "branch": "005-readme-quickstart",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PLAN",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-09-29T22:32:38Z",
+      "note": "specification merged to main in PR #16, merge commit f203ced91295c9c5cc25ed610c670e377b80c586; epic #8, stories #26, #29, #32"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-30T10:09:56Z",
+      "note": "plan.md, research.md, tasks.md: 3 stories, 4 tasks; analyze: every FR/SC mapped, no CRITICAL"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "merged specification pull request #16 (merge commit f203ced91295c9c5cc25ed610c670e377b80c586)",
+      "at": "2026-09-29T22:32:38Z",
+      "self_resolved": []
+    },
+    "plan": {
+      "approved_by": null,
+      "at": null
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 26,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P2",
+      "issue": 29,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T002",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P3",
+      "issue": 32,
+      "worktree": "/home/sam/projects/django-mvp/wt-sphinx-005",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T003",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T004",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 0,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 0,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 0,
+      "max": 1
+    }
+  },
+  "escalations": []
+}
