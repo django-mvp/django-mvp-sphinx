@@ -57,3 +57,9 @@ Verified: `uv run pytest tests/test_demo.py -q` 5 passed, unchanged; the demo gu
 `sphinx-build -b json -q -W` (exit 0) and the Settings page's `toc` holds one section.
 Next: full verify, then the completion report.
 Watch: US2 adds its README paragraph beside this subsection.
+
+## 2026-09-30T01:32:00Z · Implementer US1 · T003 (docs gate)
+
+Did: the first `forge verify` run failed its docs step (`PageHeadings` quoted on no page). README
+now quotes `PageHeadings.from_toc(toc)` in the subsection T003 added, as it does for `BodyRewriter`.
+Verified: full verify re-run, result in the completion report.

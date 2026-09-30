@@ -171,6 +171,10 @@ Sphinx.
 - A page with no headings below its title shows no list at all.
 - Sphinx's `:tocdepth:` setting decides how deep the list goes.
 
+`PageView` reads the tree with `PageHeadings.from_toc(toc)`, which turns a
+page's `toc` value from the build into nested dicts of `title`, `anchor` and
+`children`. Call it yourself if you draw the headings in a template of your own.
+
 Rebuild the docs and the list follows on the next request.
 
 ### Naming the documentation
