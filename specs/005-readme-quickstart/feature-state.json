@@ -56,6 +56,15 @@
         "DR-001..DR-006 applied to plan.md/tasks.md (D15)",
         "DR-007 declined: narrowing the public list would withdraw names earlier features documented (D15)"
       ]
+    },
+    "review": {
+      "approved_by": "phase-1 reviewer: approve",
+      "at": "2026-09-30T10:43:30Z",
+      "self_resolved": [
+        "CORR-001 (medium) fixed: DocsBuild/DocsSearch/PageText members listed (D18)",
+        "CORR-002 (low) fixed: PageView overridable members listed",
+        "CORR-003 (low) fixed: templates' title block listed"
+      ]
     }
   },
   "stories": [

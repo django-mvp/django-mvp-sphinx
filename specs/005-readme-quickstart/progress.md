@@ -165,3 +165,12 @@ craft-simplify pass on the diff: one helper for the admonition classes both demo
 ADR verdicts: D9–D17, none graduate (check-adrs green). Whole-feature tamper-check: only the declared
 edits (D12, DR-003, D16).
 Next: S6 review.
+
+## 2026-09-30T10:43:37Z · Forge · S6 review
+
+Did: one Phase 1 reviewer (Opus), receipts green. Verdict approve: CORR-001 (medium), CORR-002 and
+CORR-003 (low), all in the public surface section, all fixed directly by Forge (D18); one unverified
+demo-guide sentence reworded. Verify green on the fix commit; guide builds clean under -W.
+review-outcome recorded on PR #61 (0 open). Phase 2 not run: no security-sensitive surface, no new
+dependency, no deviation from the reviewed plan.
+Next: S7.
