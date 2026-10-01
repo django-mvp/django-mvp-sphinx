@@ -44,7 +44,7 @@ Advances G1 and G3.
 
 ### R2 — The contents in the app sidebar
 
-*delivered in [#5](https://github.com/django-mvp/django-mvp-sphinx/issues/5) and [#6](https://github.com/django-mvp/django-mvp-sphinx/issues/6) · advances G2, G1*
+*delivered in [#5](https://github.com/django-mvp/django-mvp-sphinx/issues/5), [#6](https://github.com/django-mvp/django-mvp-sphinx/issues/6) · advances G2, G1*
 
 On every documentation page the app sidebar shows the whole contents, so a
 reader can reach any page and can always see where they are. It needs R1's
@@ -125,10 +125,13 @@ Genuine wants that can land in any release once they are ready.
 
 ### R7 — Build the docs with a management command
 
-*resolve · advances G7*
+*delivered in [#11](https://github.com/django-mvp/django-mvp-sphinx/issues/11) · advances G7*
 
-A host project can build its docs from its own management commands
-instead of calling Sphinx itself. Serving still never runs a build.
+A host project builds its docs with `python manage.py build_docs`. Each
+`DocumentationApp` that names its Sphinx source as `source_dir` is built into
+its `build_dir`, all of them or only the ones named by namespace, and a failed
+build is an error. Building is a step the project runs: serving still never
+imports Sphinx or starts a build.
 
 ### R8 — Live working examples next to their source
 

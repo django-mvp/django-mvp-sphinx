@@ -25,6 +25,10 @@ class DocumentationApp(MountedApp):
     Args:
         build_dir: The directory ``sphinx-build -b json`` wrote to. It is not
             read until a page is requested, so it may not exist yet.
+        source_dir: The Sphinx source directory the build is made from, the one
+            that holds ``conf.py``. Only the ``build_docs`` management command
+            reads it, to build from it into ``build_dir``. Serving never does,
+            so leave it out when the build is made some other way.
         name: What the documentation is called, in the page title, breadcrumbs
             and the host's menu entry.
         icon: The icon name for the host's menu entry.
@@ -53,6 +57,7 @@ class DocumentationApp(MountedApp):
     icon = "document"
     namespace = "docs"
     build_dir: Any = None
+    source_dir: Any = None
     view_class = PageView
     urls: Any = []
 
