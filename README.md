@@ -15,9 +15,10 @@ where the two pull in different directions, the user guide wins.
 
 It serves a Sphinx JSON build (`sphinx-build -b json`). Serving never needs
 Sphinx installed and never starts a build: the build is a file the project
-produces before a request arrives, however it already does that. A command that
-runs the build for you may come later. It does not host documentation for
-several projects, keep old versions, or manage translations.
+produces before a request arrives, however it already does that. The package
+adds a management command that runs the build when you ask for it. It does not
+host documentation for several projects, keep old versions, or manage
+translations.
 
 When two designs conflict, the one that makes the docs look like the rest of
 the site beats the one that copies a Sphinx theme.
@@ -87,6 +88,10 @@ outside your project, works the same way once step 4 points at it. Until a build
 exists, every address under the prefix answers 404 and the rest of your site is
 unaffected.
 
+Once the docs are mounted, `python manage.py build_docs` can run this build for
+you. See
+[Building with a management command](https://github.com/django-mvp/django-mvp-sphinx#building-with-a-management-command).
+
 ### 4. Mount the docs
 
 Create the app once, in a module of its own, and give it the build's folder as
@@ -149,6 +154,48 @@ restart.
 
 Everything below is optional. The quickstart is all a project needs to serve its
 documentation.
+
+### Building with a management command
+
+To build the docs the way you run your other maintenance tasks, tell the app
+where its Sphinx source is with `source_dir`, the directory that holds `conf.py`:
+
+```python
+from django.conf import settings
+from mvp_sphinx.mounted import DocumentationApp
+
+docs = DocumentationApp(
+    build_dir=settings.BASE_DIR / "docs" / "_build" / "json",
+    source_dir=settings.BASE_DIR / "docs",
+)
+```
+
+Then build it:
+
+```bash
+python manage.py build_docs
+```
+
+That runs Sphinx's JSON build from `source_dir` into `build_dir`, as
+`sphinx-build -b json` would, so the build lands where the app already reads it. With no arguments the command builds every
+mounted documentation app that has a `source_dir`, in the order they are mounted,
+and leaves the others alone. Name one or more apps by `namespace` to build only
+those:
+
+```bash
+python manage.py build_docs handbook
+```
+
+The command stops with an error, and a non-zero exit status, when Sphinx reports
+a failed build, when a namespace belongs to no mounted documentation app, when a
+named app has no `source_dir`, and when no mounted app has one. A failed build
+stops the ones after it. `--verbosity 0` prints warnings and errors only.
+
+Sphinx has to be installed where you run the command, exactly as for
+`sphinx-build`. Nothing else changes: the site still never imports Sphinx and
+never starts a build to answer a request, so a page is only ever as new as the
+last build you ran. `source_dir` is read by this command and nothing else, and an
+app without one is served as before.
 
 ### The contents in the sidebar
 
@@ -476,14 +523,20 @@ These are the names a project can use, grouped the way a project meets them.
 ### The documentation app
 
 - `mvp_sphinx.mounted.DocumentationApp` serves one docs build under the prefix
-  you mount it at. Its keyword options are `build_dir` (required), `name`, `icon`,
-  `namespace`, `view_class` and `check`.
+  you mount it at. Its keyword options are `build_dir` (required), `source_dir`,
+  `name`, `icon`, `namespace`, `view_class` and `check`.
 - `menu_item()`, inherited from django-mvp's `MountedApp`, returns the entry to
   add to your own menus.
 - `menu` is the app's `DocumentationMenu`, which draws the contents as the app
   sidebar.
 - Its URL names are `<namespace>:front_page`, `<namespace>:page` (which takes
   `path`) and `<namespace>:search`.
+
+### Management command
+
+- `build_docs` runs the Sphinx JSON build from each documentation app's
+  `source_dir` into its `build_dir`. It takes the namespaces of the apps to
+  build, and builds every app that has a `source_dir` when given none.
 
 ### Views
 
@@ -571,20 +624,20 @@ second guide for staff, each through a documentation app, and the guides between
 them hold every state this package draws.
 
 The guides' builds are not committed, so build them before you start the server.
-The two `sphinx-build` lines are [step 3 of the quickstart](https://github.com/django-mvp/django-mvp-sphinx#3-build-the-docs) run
-on the demo's two sources:
+`build_docs` is the package's own
+[management command](https://github.com/django-mvp/django-mvp-sphinx#building-with-a-management-command),
+and it builds both of the demo's guides:
 
 ```bash
 uv sync
 uv run python manage.py migrate
 uv run python manage.py seed_demo
-uv run sphinx-build -b json demo/docs demo/docs/_build/json
-uv run sphinx-build -b json demo/staff_guide demo/staff_guide/_build/json
+uv run python manage.py build_docs
 uv run python manage.py runserver
 ```
 
 Then open <http://127.0.0.1:8000/docs/> for the user guide. Its sidebar reaches every
-page. After you edit a page under `demo/docs/`, run the first `sphinx-build` again and
+page. After you edit a page under `demo/docs/`, run `build_docs docs` and
 reload, with no restart. Until a build exists, every address under `/docs/` answers 404.
 
 `seed_demo` made three accounts, all with the password `password`:

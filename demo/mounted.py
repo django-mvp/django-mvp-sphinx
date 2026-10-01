@@ -6,9 +6,13 @@ from flex_menu.checks import user_is_staff
 from demo.settings import BASE_DIR
 from mvp_sphinx.mounted import DocumentationApp
 
-docs = DocumentationApp(build_dir=BASE_DIR / "demo" / "docs" / "_build" / "json")
+docs = DocumentationApp(
+    build_dir=BASE_DIR / "demo" / "docs" / "_build" / "json",
+    source_dir=BASE_DIR / "demo" / "docs",
+)
 staff_guide = DocumentationApp(
     build_dir=BASE_DIR / "demo" / "staff_guide" / "_build" / "json",
+    source_dir=BASE_DIR / "demo" / "staff_guide",
     name=_("Staff guide"),
     namespace="staff_guide",
     check=user_is_staff,

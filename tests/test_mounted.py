@@ -35,6 +35,9 @@ class TestDocumentationApp:
     ) -> None:
         DocumentationApp(build_dir=tmp_path / "not-built-yet")
 
+    def test_it_needs_no_source_dir(self, tmp_path) -> None:
+        assert DocumentationApp(build_dir=tmp_path).source_dir is None
+
     def test_its_landing_is_the_mount_prefix(self, docs_app) -> None:
         assert reverse(docs_app.landing) == "/docs/"
 

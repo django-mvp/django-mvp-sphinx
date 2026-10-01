@@ -6,7 +6,8 @@ The package is for reading a docs build the host project has already produced
 and serving its pages through a documentation app: the pages render in the host's
 shell and theme, and the contents become the app sidebar's menu. Serving never
 imports Sphinx. The only Sphinx code is the extension that writes the
-navigation file during the build. `CONSTITUTION.md` Article XII lists what stays
+navigation file during the build. The `build_docs` management command runs the
+build on demand, as a separate process, and imports no Sphinx either. `CONSTITUTION.md` Article XII lists what stays
 out of scope. The contents menu is built: the extension in
 `mvp_sphinx/navigation.py` writes the navigation file during the build, and
 `DocumentationMenu` in `mvp_sphinx/menus.py` draws it as the app sidebar's menu.
@@ -60,11 +61,13 @@ a page moved or a state dropped fails there. The build is gitignored, so build i
 opening that page and again after editing the guide:
 
 ```bash
-uv run sphinx-build -b json demo/docs demo/docs/_build/json
-uv run sphinx-build -b json demo/staff_guide demo/staff_guide/_build/json
+uv run python manage.py build_docs
 ```
 
-The second build is the staff guide at `/staff-guide/`. Only staff can read it:
+That is the package's own management command, in
+`mvp_sphinx/management/commands/build_docs.py`. It builds both of the demo's guides,
+because each app in `demo/mounted.py` names its `source_dir`. `build_docs docs` builds
+one. The second guide is the staff guide at `/staff-guide/`. Only staff can read it:
 sign in as `staff.user@example.com`.
 
 **Adding a page** takes four things: a view in `demo/views.py` on
