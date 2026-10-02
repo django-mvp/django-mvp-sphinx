@@ -28,7 +28,7 @@ The reviewer confirmed by running them that a raw HTML node reaches a JSON build
 on the prototype's docutils import.
 Next: build US1.
 
-## 2026-10-02T16:12:00Z · Implementer US1 · T001
+## 2026-10-02T16:10:19Z · Implementer US1 · T001
 
 Did: wrote `tests/sphinx/examples/` (conf with the one extension line; pages `single`, `two`,
 `several`, `missing`, `plain` and an index; sources beside them) and the `examples_build` and
@@ -56,7 +56,7 @@ Django-HTML lexer warns on a bare `&` and the fixture build must be warning-free
 checks that the file's `<`, `&` and a template tag read back as written. The T001 commit does not
 carry this entry; it was written afterwards and lands with T002's commit.
 
-## 2026-10-02T16:25:00Z · Implementer US1 · T002
+## 2026-10-02T16:15:01Z · Implementer US1 · T002
 
 Did: wrote `tests/test_examples.py` (`TestParts`, 14 tests), `TestLiveExamples` in
 `tests/test_views.py` (9 tests, on `examples_app`) and `TestExamplePage` in `tests/test_demo.py`
@@ -87,7 +87,7 @@ Watch: the Sphinx-blocked test cannot catch a top-level Sphinx import in `mvp_sp
 because the module is already imported when the test blocks Sphinx; it catches a lazy one. The same
 holds for the existing tests of that pattern.
 
-## 2026-10-02T16:45:00Z · Implementer US1 · T003
+## 2026-10-02T16:16:23Z · Implementer US1 · T003
 
 Did: README "Live examples" section under "Using it" (what one is; the marker with address,
 `:title:` and one source file; writing the example's page on `mvp_sphinx/example.html` with a short
