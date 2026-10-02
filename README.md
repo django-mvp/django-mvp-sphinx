@@ -468,6 +468,14 @@ load them: `mvp_sphinx/content.css` styles what Sphinx writes into the page, and
 `mvp_sphinx/page.css` places the "On this page" list beside it. Sphinx's own
 stylesheets are never used.
 
+Reference entries, the documented functions, classes and other objects that
+`autodoc` writes and that you write by hand with directives such as
+`.. py:function::`, are styled from the same theme with nothing to configure.
+Each signature sits in a bar in the code colours, its description hangs from a
+rule beneath it, and entries inside other entries read as inside them. This
+holds for any language Sphinx documents, and it makes no difference whether an
+entry was generated or typed.
+
 A heading you follow a link to lands 5rem below the top of the window, and the
 "On this page" list sticks at the same distance, so both clear django-mvp's
 top bar. django-mvp doesn't publish the bar's height, so if yours is taller,

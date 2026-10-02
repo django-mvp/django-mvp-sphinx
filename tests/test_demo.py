@@ -7,6 +7,7 @@ from urllib.parse import urldefrag, urljoin
 
 import pytest
 from bs4 import BeautifulSoup
+from django.templatetags.static import static
 from django.urls import reverse
 from mvp.menus import MenuCollapse, MenuGroup
 
@@ -136,6 +137,15 @@ def guide_pages(guide_responses):
     }
 
 
+@pytest.fixture
+def link_helpers(guide_pages):
+    return guide_pages["/docs/reference/link-helpers/"]
+
+
+def description(page, entry_id):
+    return page.select_one(f'dt.sig-object[id="{entry_id}"]').find_next_sibling("dd")
+
+
 class TestDemoGuideStates:
     ADMONITION_KINDS = {
         "note",
@@ -260,3 +270,40 @@ class TestDemoGuideStates:
         response = client.get(entry["href"])
 
         assert response.resolver_match.view_name == "docs:front_page"
+
+    def test_a_function_entry_holds_a_field_list(self, link_helpers) -> None:
+        entry = description(link_helpers, "demo.links.page_address")
+
+        assert entry.select_one("dl.field-list > dt")
+
+    def test_a_class_entry_holds_entries_of_its_own(self, link_helpers) -> None:
+        entry = description(link_helpers, "demo.links.SharedLink")
+
+        assert entry.select("dl > dt.sig-object[id]")
+
+    def test_a_class_nested_in_a_class_holds_an_entry(self, link_helpers) -> None:
+        outer = description(link_helpers, "demo.links.SharedLink")
+        inner = description(link_helpers, "demo.links.SharedLink.Reader")
+
+        assert inner in outer.descendants
+        assert inner.select_one("dl > dt.sig-object[id]")
+
+    def test_an_entry_can_have_an_empty_description(self, link_helpers) -> None:
+        entry = description(link_helpers, "demo.links.strip_heading")
+
+        assert not entry.get_text(strip=True)
+
+    def test_an_entry_holds_a_deprecation(self, link_helpers) -> None:
+        entry = description(link_helpers, "demo.links.old_address")
+
+        assert entry.select_one("div.deprecated")
+
+    def test_the_page_links_the_packages_stylesheet_and_none_from_the_build(
+        self, link_helpers
+    ) -> None:
+        sheets = [
+            link["href"] for link in link_helpers.select('link[rel="stylesheet"]')
+        ]
+
+        assert static("mvp_sphinx/content.css") in sheets
+        assert not [each for each in sheets if "_static" in each]

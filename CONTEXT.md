@@ -66,6 +66,19 @@ The headings of the current page, listed beside it on wide screens. Only the
 current page's headings appear here, never other pages.
 _Avoid_: toc, table of contents, local contents.
 
+**Reference entry**:
+One documented object as Sphinx writes it into a page: a signature, a
+description, optional field groups such as parameters and return values, and
+optionally other entries nested inside it. The package styles every entry the
+same way, whatever its language and however it was written.
+_Avoid_: definition (Sphinx's word for the link on an entry, and for any
+definition list), API doc, autodoc entry (an entry may be written by hand).
+
+**Signature**:
+The line of a reference entry that names the object and shows how it is called
+or declared.
+_Avoid_: header, prototype, title.
+
 **Navigation file**:
 `navigation.json`, which this package's Sphinx extension writes into the docs
 build. It holds the whole contents and the front page's title, because
