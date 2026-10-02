@@ -309,3 +309,28 @@ outside what the feature promises (spec, Assumptions).
 **Revisit if:** image-rendered maths becomes something the package supports on purpose.
 
 **ADR:** none — local to this feature, and outside what it promises
+
+## D22. What the code review changed
+
+**Decision:** The review approved the change with six findings, none blocking. Four were fixed,
+two recorded:
+
+- MathJax scanned everything outside the page content for notation, the host project's shell
+  included, while the settings file and the README said it did not. The settings now give it the
+  maths elements alone to look in (`startup.elements`). Fixed, with a test tied to the build.
+- The README now says the script's address follows the newest 4.x release and carries no
+  integrity check, and is exact about content security policies and image-rendered maths.
+- A heading link in a non-`dt` element carrying `sig-object` took the name of the entry before
+  it. Fixed, with a test.
+- Two tests that could not fail by accident: one rewritten against the build, one removed.
+- Malformed hand-written markup (an unclosed or self-closed `div.math`) can be wrapped wrongly.
+  Not fixed: the class already says so for tables, and its docstring now says so for equations.
+- A page with no maths of its own shows raw notation in its previous or next link when the
+  neighbouring page's title holds maths. Not fixed: cosmetic, and no page in scope has it.
+
+**Why:** The first was worth fixing at any severity: text a reader controls in a host project's
+shell would have been read as TeX on maths pages.
+
+**Revisit if:** a guide titles a page with maths.
+
+**ADR:** none — corrections within this feature.

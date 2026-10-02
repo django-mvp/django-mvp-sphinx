@@ -535,19 +535,24 @@ MathJax cannot read, such as an unknown command, is shown in the theme's
 error colour and not in MathJax's red.
 
 Only a page that holds maths loads the library, together with the small settings
-file `mvp_sphinx/maths.js` that tells it to typeset only what Sphinx marked as
-maths. Every other page loads neither. It works for a docs build made with
+file `mvp_sphinx/maths.js` that tells it to look only inside what Sphinx marked
+as maths, so nothing else on the page, your own shell included, is read as
+notation. Every other page loads neither. It works for a docs build made with
 Sphinx's default settings (`html_math_renderer` left alone, so notation reaches
 the page as `\(...\)` and `\[...\]`). A build that renders maths as images shows
-the images, and the library has nothing to do.
+the images. The library is still loaded on those pages and finds nothing to
+typeset.
 
 If the reader's network has no outside access, or your site sends a content
 security policy that does not allow `cdn.jsdelivr.net`, the library does not load.
+(A policy has to allow that origin for scripts and fonts, and allow inline
+styles, for typeset maths to show.)
 The reader then sees the notation as written, in the code font, and the rest of
 the page is unaffected.
 
 The script runs in your own pages, with the reader's session, signed-in readers
-included. If your project does not accept a third-party script, or needs the
+included. The address follows MathJax's newest 4.x release and is loaded without
+an integrity check, so what runs can change without a release of this package. If your project does not accept a third-party script, or needs the
 library from another source, override `mvp_sphinx/page.html` and write your own
 `extra_js` block, which is where the two script tags are.
 

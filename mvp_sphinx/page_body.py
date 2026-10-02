@@ -35,9 +35,9 @@ class BodyRewriter(HTMLParser):
     it reads is re-emitted, so entity references, a bare ``&``, tag case and
     whitespace come back exactly as they arrived.
 
-    It assumes well-formed HTML, which is what Sphinx writes. A table inside
-    malformed raw HTML from a ``raw`` directive may be wrapped wrongly or not at
-    all.
+    It assumes well-formed HTML, which is what Sphinx writes. A table or an
+    equation inside malformed raw HTML from a ``raw`` directive may be wrapped
+    wrongly or not at all.
 
     It also notes whether the body holds maths: a start tag whose class list
     includes ``math``, which is how Sphinx marks both inline and displayed
@@ -267,8 +267,11 @@ class BodyRewriter(HTMLParser):
         """
         start = self.position()
         holder_start = self.open_elements[-1][1] if self.open_elements else start
-        holder = self.open_elements[-1][2] if self.open_elements else []
-        entry_name = self.entry_name() if "sig-object" in holder else ""
+        tag, holder = "", []
+        if self.open_elements:
+            tag, holder = self.open_elements[-1][0], self.open_elements[-1][2]
+        is_entry = tag == "dt" and "sig-object" in holder
+        entry_name = self.entry_name() if is_entry else ""
         text = entry_name or self.text_between(holder_start, start)
         label = ": ".join(part for part in (title, text) if part)
         if label:

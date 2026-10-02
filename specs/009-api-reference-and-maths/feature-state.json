@@ -1,251 +1,263 @@
 {
-  "feature": "009-api-reference-and-maths",
-  "branch": "009-api-reference-and-maths",
-  "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
-  "state_history": [
-    {
-      "state": "QUEUED",
-      "at": "2026-10-02T08:31:45Z",
-      "note": "specification approved by Sam in the session at commit 8b0e8461e602d50fa11b43cb9b89a1fca4cf8d79, on pull request #66; epic #13, stories #68, #71, #73, #74, #75"
-    },
-    {
-      "state": "PLAN",
-      "at": "2026-10-02T09:16:13Z",
-      "note": "plan.md, research.md, tasks.md: 5 stories, 7 tasks; continues the approved prototype on pull request #66"
-    },
-    {
-      "state": "DESIGN_REVIEW",
-      "at": "2026-10-02T09:16:33Z",
-      "note": "one reviewer, three lenses, on plan.md, tasks.md and research.md at 706504c"
-    },
-    {
-      "state": "IMPLEMENT",
-      "at": "2026-10-02T09:23:38Z",
-      "note": "plan gate open; design review approved, seven corrections applied"
-    },
-    {
-      "state": "CONVERGE",
-      "at": "2026-10-02T10:00:42Z",
-      "note": "all five stories done and verified at 01938b8"
-    },
-    {
-      "state": "REVIEW",
-      "at": "2026-10-02T10:03:21Z",
-      "note": "converged green; browser check recorded"
-    }
-  ],
-  "gates": {
-    "spec": {
-      "approved_by": "Sam",
-      "at": "2026-10-02T08:31:45Z",
-      "self_resolved": [
-        "approved in the session at commit 8b0e8461e602d50fa11b43cb9b89a1fca4cf8d79 (forge spec-gate, pull request #66)"
-      ]
-    },
-    "sketch": {
-      "approved_by": "Sam",
-      "at": "2026-10-02T08:56:39Z",
-      "self_resolved": [
-        "at commit 09994ec8af3ef0f5afb41a6f417dc7c012c89ed3",
-        "A vertical scrollbar appeared on every maths block \u2014 equations now scroll sideways only, and only when wider than the page",
-        "Whether maths typesetting may come from a CDN \u2014 accepted for now and recorded as decision D6"
-      ]
-    },
-    "plan": {
-      "approved_by": "open",
-      "at": "2026-10-02T09:23:22Z"
-    },
-    "merge": {
-      "approved_by": null,
-      "at": null
-    },
-    "design_review": {
-      "approved_by": "design review, one reviewer, three lenses: approve",
-      "at": "2026-10-02T09:23:22Z",
-      "self_resolved": [
-        "DR-001 entry link takes the id only on a dotted-name boundary: applied to plan and T003",
-        "DR-002 code sample moved to the plain fixture page: applied",
-        "DR-003 region opens after the number only when it is a direct child: applied to plan and T006",
-        "DR-004 README and CHANGELOG state that the script runs in the host project's pages: applied to T005",
-        "DR-005 text outside the page content is still scanned for maths: browser check at convergence, watch item",
-        "DR-006 test for the removed switch dropped: applied to T004",
-        "DR-007 source listing back links: browser check at convergence"
-      ]
-    }
+ "feature": "009-api-reference-and-maths",
+ "branch": "009-api-reference-and-maths",
+ "repo": "django-mvp/django-mvp-sphinx",
+ "state": "REVIEW",
+ "state_history": [
+  {
+   "state": "QUEUED",
+   "at": "2026-10-02T08:31:45Z",
+   "note": "specification approved by Sam in the session at commit 8b0e8461e602d50fa11b43cb9b89a1fca4cf8d79, on pull request #66; epic #13, stories #68, #71, #73, #74, #75"
   },
-  "stories": [
-    {
-      "id": "US1",
-      "priority": "P1",
-      "issue": 68,
-      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
-      "status": "done",
-      "replans": 0,
-      "tasks": [
-        {
-          "id": "T001",
-          "status": "done",
-          "attempts": 1,
-          "evidence": {
-            "tests": [
-              "tests/test_static/test_content_css.py::TestSphinxHooks",
-              "tests/test_static/test_content_css.py::TestReferenceStylesheet"
-            ],
-            "commands": [
-              "uv run pytest tests/test_static/test_content_css.py -q"
-            ]
-          }
-        },
-        {
-          "id": "T002",
-          "status": "done",
-          "attempts": 1,
-          "evidence": {
-            "tests": [
-              "tests/test_demo.py::TestDemoGuideStates"
-            ],
-            "commands": [
-              "uv run pytest tests/test_demo.py -q -p no:warnings -k TestDemoGuideStates"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "US2",
-      "priority": "P1",
-      "issue": 71,
-      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
-      "status": "done",
-      "replans": 0,
-      "tasks": [
-        {
-          "id": "T004",
-          "status": "done",
-          "attempts": 1,
-          "evidence": {
-            "tests": [
-              "tests/test_page_body.py::TestMathsDetection",
-              "tests/test_views.py::TestMaths"
-            ],
-            "commands": [
-              "uv run pytest tests/test_page_body.py::TestMathsDetection tests/test_views.py::TestMaths -q -p no:warnings"
-            ]
-          }
-        },
-        {
-          "id": "T005",
-          "status": "done",
-          "attempts": 1,
-          "evidence": {
-            "tests": [
-              "tests/test_static/test_content_css.py::TestMathsStylesheet",
-              "tests/test_static/test_maths_js.py::TestMathsSettings"
-            ],
-            "commands": [
-              "uv run pytest tests/test_static -q -p no:warnings"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "US3",
-      "priority": "P2",
-      "issue": 73,
-      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
-      "status": "done",
-      "replans": 0,
-      "tasks": [
-        {
-          "id": "T003",
-          "status": "done",
-          "attempts": 1,
-          "evidence": {
-            "tests": [
-              "tests/test_page_body.py::TestEntryLinks",
-              "tests/test_views.py::TestEntryLinks",
-              "tests/test_demo.py::TestDemoGuideStates::test_a_source_link_leads_to_a_page_of_the_app"
-            ],
-            "commands": [
-              "uv run pytest tests/test_page_body.py tests/test_views.py tests/test_demo.py -q -p no:warnings -k 'TestEntryLinks or source_link'"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "US4",
-      "priority": "P2",
-      "issue": 74,
-      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
-      "status": "done",
-      "replans": 0,
-      "tasks": [
-        {
-          "id": "T006",
-          "status": "done",
-          "attempts": 1,
-          "evidence": {
-            "tests": [
-              "tests/test_page_body.py::TestEquationRegion",
-              "tests/test_views.py::TestWideContent::test_every_equation_of_a_page_holds_one_focusable_named_region"
-            ],
-            "commands": [
-              "uv run pytest tests/test_page_body.py tests/test_views.py::TestWideContent -q -p no:warnings",
-              "uv run mypy"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "id": "US5",
-      "priority": "P3",
-      "issue": 75,
-      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
-      "status": "done",
-      "replans": 0,
-      "tasks": [
-        {
-          "id": "T007",
-          "status": "done",
-          "attempts": 1,
-          "evidence": {
-            "tests": [
-              "tests/test_views.py::TestNumberedEquations",
-              "tests/test_demo.py::TestDemoGuideStates (5 additions)"
-            ],
-            "commands": [
-              "uv run pytest tests/test_views.py::TestNumberedEquations tests/test_demo.py::TestDemoGuideStates -q -p no:warnings"
-            ]
-          }
-        }
-      ]
-    }
-  ],
-  "budgets": {
-    "converge_cycles": {
-      "used": 1,
-      "max": 2
-    },
-    "review_cycles": {
-      "used": 1,
-      "max": 1
-    },
-    "tokens": {
-      "used": 0,
-      "max": 120
-    },
-    "design_review_cycles": {
-      "used": 1,
-      "max": 1
-    }
+  {
+   "state": "PLAN",
+   "at": "2026-10-02T09:16:13Z",
+   "note": "plan.md, research.md, tasks.md: 5 stories, 7 tasks; continues the approved prototype on pull request #66"
   },
-  "escalations": [],
-  "pr": {
-    "number": 66,
-    "draft": true
+  {
+   "state": "DESIGN_REVIEW",
+   "at": "2026-10-02T09:16:33Z",
+   "note": "one reviewer, three lenses, on plan.md, tasks.md and research.md at 706504c"
+  },
+  {
+   "state": "IMPLEMENT",
+   "at": "2026-10-02T09:23:38Z",
+   "note": "plan gate open; design review approved, seven corrections applied"
+  },
+  {
+   "state": "CONVERGE",
+   "at": "2026-10-02T10:00:42Z",
+   "note": "all five stories done and verified at 01938b8"
+  },
+  {
+   "state": "REVIEW",
+   "at": "2026-10-02T10:03:21Z",
+   "note": "converged green; browser check recorded"
   }
+ ],
+ "gates": {
+  "spec": {
+   "approved_by": "Sam",
+   "at": "2026-10-02T08:31:45Z",
+   "self_resolved": [
+    "approved in the session at commit 8b0e8461e602d50fa11b43cb9b89a1fca4cf8d79 (forge spec-gate, pull request #66)"
+   ]
+  },
+  "sketch": {
+   "approved_by": "Sam",
+   "at": "2026-10-02T08:56:39Z",
+   "self_resolved": [
+    "at commit 09994ec8af3ef0f5afb41a6f417dc7c012c89ed3",
+    "A vertical scrollbar appeared on every maths block \u2014 equations now scroll sideways only, and only when wider than the page",
+    "Whether maths typesetting may come from a CDN \u2014 accepted for now and recorded as decision D6"
+   ]
+  },
+  "plan": {
+   "approved_by": "open",
+   "at": "2026-10-02T09:23:22Z"
+  },
+  "merge": {
+   "approved_by": null,
+   "at": null
+  },
+  "design_review": {
+   "approved_by": "design review, one reviewer, three lenses: approve",
+   "at": "2026-10-02T09:23:22Z",
+   "self_resolved": [
+    "DR-001 entry link takes the id only on a dotted-name boundary: applied to plan and T003",
+    "DR-002 code sample moved to the plain fixture page: applied",
+    "DR-003 region opens after the number only when it is a direct child: applied to plan and T006",
+    "DR-004 README and CHANGELOG state that the script runs in the host project's pages: applied to T005",
+    "DR-005 text outside the page content is still scanned for maths: browser check at convergence, watch item",
+    "DR-006 test for the removed switch dropped: applied to T004",
+    "DR-007 source listing back links: browser check at convergence"
+   ]
+  },
+  "review": {
+   "approved_by": "code review, one reviewer, correctness and security: approve",
+   "at": "2026-10-02T10:10:38Z",
+   "self_resolved": [
+    "SEC-001 MathJax scanned outside the page content: remedied (startup.elements), test tied to the build, confirmed in a browser",
+    "SEC-002 README did not say the address is unpinned and unchecked: remedied",
+    "COR-001 stale entry name on a non-dt sig-object holder: remedied with a test",
+    "TST-001 two change-detector tests: one rewritten against the build, one removed",
+    "COR-002 malformed div.math can be wrapped wrongly: accepted, docstring extended (D22)",
+    "COR-003 raw notation in a neighbour link when the neighbour's title holds maths: accepted, recorded (D22)"
+   ]
+  }
+ },
+ "stories": [
+  {
+   "id": "US1",
+   "priority": "P1",
+   "issue": 68,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+   "status": "done",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T001",
+     "status": "done",
+     "attempts": 1,
+     "evidence": {
+      "tests": [
+       "tests/test_static/test_content_css.py::TestSphinxHooks",
+       "tests/test_static/test_content_css.py::TestReferenceStylesheet"
+      ],
+      "commands": [
+       "uv run pytest tests/test_static/test_content_css.py -q"
+      ]
+     }
+    },
+    {
+     "id": "T002",
+     "status": "done",
+     "attempts": 1,
+     "evidence": {
+      "tests": [
+       "tests/test_demo.py::TestDemoGuideStates"
+      ],
+      "commands": [
+       "uv run pytest tests/test_demo.py -q -p no:warnings -k TestDemoGuideStates"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "US2",
+   "priority": "P1",
+   "issue": 71,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+   "status": "done",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T004",
+     "status": "done",
+     "attempts": 1,
+     "evidence": {
+      "tests": [
+       "tests/test_page_body.py::TestMathsDetection",
+       "tests/test_views.py::TestMaths"
+      ],
+      "commands": [
+       "uv run pytest tests/test_page_body.py::TestMathsDetection tests/test_views.py::TestMaths -q -p no:warnings"
+      ]
+     }
+    },
+    {
+     "id": "T005",
+     "status": "done",
+     "attempts": 1,
+     "evidence": {
+      "tests": [
+       "tests/test_static/test_content_css.py::TestMathsStylesheet",
+       "tests/test_static/test_maths_js.py::TestMathsSettings"
+      ],
+      "commands": [
+       "uv run pytest tests/test_static -q -p no:warnings"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "US3",
+   "priority": "P2",
+   "issue": 73,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+   "status": "done",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T003",
+     "status": "done",
+     "attempts": 1,
+     "evidence": {
+      "tests": [
+       "tests/test_page_body.py::TestEntryLinks",
+       "tests/test_views.py::TestEntryLinks",
+       "tests/test_demo.py::TestDemoGuideStates::test_a_source_link_leads_to_a_page_of_the_app"
+      ],
+      "commands": [
+       "uv run pytest tests/test_page_body.py tests/test_views.py tests/test_demo.py -q -p no:warnings -k 'TestEntryLinks or source_link'"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "US4",
+   "priority": "P2",
+   "issue": 74,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+   "status": "done",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T006",
+     "status": "done",
+     "attempts": 1,
+     "evidence": {
+      "tests": [
+       "tests/test_page_body.py::TestEquationRegion",
+       "tests/test_views.py::TestWideContent::test_every_equation_of_a_page_holds_one_focusable_named_region"
+      ],
+      "commands": [
+       "uv run pytest tests/test_page_body.py tests/test_views.py::TestWideContent -q -p no:warnings",
+       "uv run mypy"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "US5",
+   "priority": "P3",
+   "issue": 75,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+   "status": "done",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T007",
+     "status": "done",
+     "attempts": 1,
+     "evidence": {
+      "tests": [
+       "tests/test_views.py::TestNumberedEquations",
+       "tests/test_demo.py::TestDemoGuideStates (5 additions)"
+      ],
+      "commands": [
+       "uv run pytest tests/test_views.py::TestNumberedEquations tests/test_demo.py::TestDemoGuideStates -q -p no:warnings"
+      ]
+     }
+    }
+   ]
+  }
+ ],
+ "budgets": {
+  "converge_cycles": {
+   "used": 1,
+   "max": 2
+  },
+  "review_cycles": {
+   "used": 1,
+   "max": 1
+  },
+  "tokens": {
+   "used": 0,
+   "max": 120
+  },
+  "design_review_cycles": {
+   "used": 1,
+   "max": 1
+  }
+ },
+ "escalations": [],
+ "pr": {
+  "number": 66,
+  "draft": true
+ }
 }

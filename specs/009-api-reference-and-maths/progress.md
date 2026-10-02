@@ -86,3 +86,11 @@ Browser check (research R9), demo guide, MathJax 4.1.3, on a private port:
 - Source listing: the links back read "[docs]" at the end of the line above each object, in the
   text colour, as the prototype had them; the blank lines above each come from Sphinx's markup.
 Next: code review.
+
+## 2026-10-02T10:10:38Z · Review
+
+Did: one review of the whole change, correctness and security: approved, six findings, none
+blocking. Four fixed test-first or as text, two recorded (decisions D22). Checked in a browser
+after the fix: the demo maths page still typesets all 21 pieces, and notation written into the
+shell outside the page content is left as text.
+Next: ready for review, with the walkthrough.

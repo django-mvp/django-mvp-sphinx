@@ -1,9 +1,11 @@
 """The typesetting settings name only the page's own colours and classes."""
 
+import json
 import re
 from pathlib import Path
 
 import pytest
+from bs4 import BeautifulSoup
 
 import mvp_sphinx
 from tests.test_static.test_content_css import STYLESHEET, Stylesheet
@@ -52,8 +54,25 @@ class TestMathsSettings:
     def test_a_literal_colour_is_recognised_as_one(self, literal) -> None:
         assert COLOUR_VALUE.match(literal)
 
-    def test_the_class_to_process_is_the_one_sphinx_gives_maths(self, settings) -> None:
-        assert re.search(r'processHtmlClass\s*:\s*"math"', settings)
+    def test_only_elements_sphinx_marked_as_maths_are_scanned(
+        self, settings, reference_build
+    ) -> None:
+        scanned = re.search(r'elements\s*:\s*\["\.([\w-]+)"\]', settings)
+        processed = re.search(r'processHtmlClass\s*:\s*"([^"]+)"', settings)
+        page = json.loads((reference_build / "maths.fjson").read_text())
+        body = BeautifulSoup(page["body"], "html.parser")
+
+        notation = [
+            text
+            for text in body.find_all(string=re.compile(r"\\[(\[]"))
+            if not text.find_parent("pre")
+        ]
+        assert scanned and processed
+        assert processed[1] == scanned[1]
+        assert notation
+        assert [
+            text for text in notation if not text.find_parent(class_=scanned[1])
+        ] == []
 
     def test_the_class_to_ignore_is_the_one_the_content_scope_carries(
         self, settings

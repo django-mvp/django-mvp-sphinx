@@ -437,6 +437,20 @@ class TestEntryLinks:
 
         assert re.sub(r' aria-label="[^"]*"', "", result) == api_body
 
+    def test_a_heading_after_an_entry_is_not_named_by_that_entry(self) -> None:
+        markup = (
+            '<dl><dt class="sig sig-object py" id="m.f">'
+            '<span class="sig-name descname">f</span>'
+            '<a class="headerlink" href="#m.f" title="Definition">¶</a></dt></dl>'
+            '<h2 class="sig-object">Other thing'
+            '<a class="headerlink" href="#o" title="Heading">¶</a></h2>'
+        )
+
+        rewritten = BeautifulSoup(BodyRewriter.rewrite(markup), "html.parser")
+
+        link = rewritten.find("a", href="#o")
+        assert link["aria-label"] == "Heading: Other thing"
+
 
 class TestMathsDetection:
     @pytest.mark.parametrize(
@@ -473,21 +487,6 @@ class TestMathsDetection:
     )
     def test_a_body_without_a_math_element_has_none(self, markup) -> None:
         assert BodyRewriter.parse(markup).has_maths is False
-
-    @pytest.mark.parametrize(
-        "markup",
-        [
-            "",
-            TABLE,
-            CAPTIONED.format(text="Caption"),
-            '<p>So <span class="math">\\(x\\)</span>.</p>',
-            '<div class="math" id="equation-a">\n<span class="eqno">(1)</span>'
-            "\\[x\\]</div>",
-        ],
-        ids=["empty", "table", "caption", "inline maths", "numbered equation"],
-    )
-    def test_rewrite_returns_what_parse_splices(self, markup) -> None:
-        assert BodyRewriter.rewrite(markup) == BodyRewriter.parse(markup).splice()
 
 
 class Balance(HTMLParser):
