@@ -61,11 +61,40 @@ inside a frame. Two things recommend doing it there:
   A request header also means a page cannot be asked for without its shell by address alone, so
   the shell-less form adds no new address to the site.
 
+  **A limit found on re-reading, 2026-10-02.** Browsers send `Sec-Fetch-Dest` only to an address
+  they treat as secure: `https`, or `localhost` and `127.0.0.1` over plain `http`. A site reached
+  over plain `http` by any other name gets no such header. That covers an intranet deployment
+  without TLS and the development server reached by its machine name, which is how a walkthrough
+  of this feature is opened. There the example would show with the whole shell inside the frame.
+  The prototype's notes already recorded this and used `?example=1` for that reason. So the header
+  alone is not enough. If django-mvp takes this on, it needs a second signal that works over plain
+  `http`, and the natural one is in the page: `mvp/base.html` marks the document when it finds
+  itself inside a frame, and django-mvp's own stylesheet hides the shell for a marked document.
+  That needs scripts, and the header covers the reader who has them off on a secure site. Both
+  stay inside django-mvp, so the reasoning above for where this belongs is unchanged.
+
 With that in django-mvp, this package needs nothing for FR-009 beyond a higher minimum version of
 django-mvp, and the demo's `base.html` goes back to extending `mvp/base.html`.
 
 **Decision needed from the maintainer** before the plan is written: whether django-mvp gains this,
 and if so whether FS-008 waits for that release.
+
+The question was put to him on 2026-10-02 and has not been answered. A second run later that day
+brought the branch up to date with main, which now carries FS-009, and stopped at the same point.
+
+## Read against FS-009, delivered since this specification was approved
+
+FS-009 styles API reference entries and typesets maths. Its specification leaves live examples to
+this feature by name, and nothing in it changes a behaviour this specification describes:
+
+- It changes how reference entries and maths look and nothing about ordinary highlighted code, so
+  an example's source is still highlighted as a code block of the same language is (FR-005).
+- Its links on reference entries are not headings, so a page's headings list is still what this
+  specification says an example leaves alone (FR-010).
+- Its rule that a page with neither reference entries nor maths looks and loads as before is about
+  what FS-009 itself adds. It does not stop a page with an example loading what the example needs.
+
+No contradiction, and nothing here that FS-009 already delivered.
 
 ### Frame setting
 
