@@ -1,0 +1,96 @@
+# Progress — 009 Make API reference pages and maths look like the rest of the site
+
+## 2026-10-02T09:16:07Z · S3 plan
+
+Did: the queue row read in-flight on this session's own claim, taken when the prototype was
+approved; the build continues on pull request #66 and its branch, already level with origin/main
+(7cc536c). `delivered_since` is empty, so the spec-against-spec check is skipped. Gates: spec
+shut and passed (Sam, 2026-10-02, commit 8b0e846), sketch shut and passed (Sam, 2026-10-02, commit
+09994ec), plan open, merge shut. Research read from Sphinx 9.1.0, a real JSON build of the demo
+guide, and the prototype in a browser with MathJax 4.1.3. plan.md, research.md, tasks.md: 5
+stories, 7 tasks. Decisions D12–D17 appended.
+Analyze: FR-001–FR-022 and SC-001–SC-007 each map to a task or, where only a browser can show it
+(SC-003 typeset output, SC-004 at 320 pixels, FR-013, FR-017), to the browser check at
+convergence (research R9). Every item under "What the prototype faked" has a task except the
+`?typeset=off` switch, which T004 removes, and `demo/links.py`, which stays a demo fixture and
+is documented in T002. No CRITICAL findings.
+Next: design review.
+
+## 2026-10-02T09:30:07Z · Implementer US1 · T001
+
+Did: wrote the whole fixture source `tests/sphinx/reference/` (conf.py, index.rst, api.rst, maths.rst, plain.rst) and the `reference_build` and `reference_app` fixtures in `tests/conftest.py`. api.rst opens with `.. py:module:: demo.links`, so its entries carry the same ids and a `sig-prename` as the autodoc'd ones in the demo guide. Added `TestSphinxHooks` and `TestReferenceStylesheet` to `tests/test_static/test_content_css.py`.
+Verified: `uv run pytest tests/test_static/test_content_css.py -q -p no:warnings` → 39 passed (24 new). The fixture builds with no warnings. Every new test passed on its first run: they pin what the approved prototype already does. Each was then shown able to fail, by breaking one thing and restoring it: renaming `.default_value` in the stylesheet failed the selector test; pointing the `.sig-return-icon` rule and the `dl.field-list > dt` rule at `--color-base-200` / `--color-base-100` failed the contrast tests in both themes; removing the `py:module` line failed the `sig-prename` and same-classes tests; renaming the `dt.sig-object em` selector failed the tag test. Not mutated: the `js:function` test, the demo guide hook tests and the `em` test. They are plain presence checks on the build output.
+Next: T002.
+Watch: `sig-param` is not a selector in the stylesheet. The approved rule is `dt.sig-object em`, so the hooks test ties it by tag instead (D19).
+
+## 2026-10-02T09:32:38Z · Implementer US1 · T002
+
+Did: added six tests to `TestDemoGuideStates` in `tests/test_demo.py`, on the link-helpers page of the demo guide build, found by entry id and class hook: a function entry with a field list; a class entry whose description holds entries; a class nested in it holding an entry (three levels); an entry with an empty description; an entry holding a deprecation; the page links the package stylesheet and none from the build. Wrote the README paragraph under "How pages look and the page template", a CHANGELOG entry under Unreleased/Added, "Reference entry" and "Signature" in CONTEXT.md, and the AGENTS.md note on `demo/links.py`. Nothing under `docs/` (ROADMAP, adr, agents) describes this behaviour, so no page there changed.
+Verified: `uv run pytest tests/test_demo.py -q -p no:warnings -k TestDemoGuideStates` → 21 passed (6 new), exit 0. All six passed on their first run: they pin states the approved prototype's demo pages already hold. Each was then shown able to fail, by breaking one thing and restoring it: a docstring on `strip_heading` failed the empty-description test; removing the `deprecated` directive failed the deprecation test; removing `:members:` from the `autoclass` failed the class and nested-class tests; removing `page_address`'s `Args` section failed the field-list test; pointing the template's stylesheet link elsewhere failed the stylesheet test.
+Next: T003.
+Watch: none.
+
+## 2026-10-02T09:36:55Z · Implementer US3 · T003
+
+Did: `BodyRewriter` now names a reference entry's heading link by the entry. It records, for each `dt.sig-object`, its `id` and the text of its `sig-prename` and `sig-name` elements as they close. When the link starts, the name is the `id` if the signature holds exactly one `sig-name` and the `id` equals its text or ends with a dot and its text. Otherwise it is the text of the `sig-prename` and `sig-name` elements joined as written. With no `sig-name` the whole signature names the link, as before (D20). Tests: `TestEntryLinks` in `tests/test_page_body.py` (18) and in `tests/test_views.py` (4), and `test_a_source_link_leads_to_a_page_of_the_app` in `TestDemoGuideStates`. Changed one line of the T001 fixture: both `render` methods in `tests/sphinx/reference/api.rst` now have the same signature, so the page-level "no two links share a name" test fails on the old naming. README `BodyRewriter` paragraph and the CHANGELOG entry extended.
+Verified: red first: with the old naming, 12 of the 17 page-body tests first written failed (a later one was added for the two-names rule) on names that carried parameters, return types or `[source]`, and with the identical `render` signatures the views test `test_no_two_heading_links_of_the_page_share_a_name` failed too. Green: `uv run pytest tests/test_page_body.py tests/test_views.py tests/test_demo.py -q -p no:warnings -k 'TestEntryLinks or source_link'` → 23 passed, exit 0; `uv run mypy` clean. Passed on their first run, because they pin what the code already did: in `test_page_body.py` the two-names, no-name, outside-a-signature, heading-and-glossary and unchanged-bytes tests; in `test_views.py` the heading-link-to-itself, every-link-named and reference-leads-to-an-entry tests; and the source-link test in `test_demo.py`. Each was shown able to fail by breaking one thing and restoring it: returning the `id` when there is no name failed the no-name test; dropping the `sig-object` gating failed the outside-a-signature test; inserting an extra attribute failed the unchanged-bytes test; loosening the `id` boundary failed three cases; dropping the one-name rule failed the two-names test (after its `id` was made to end in the first name, so the test could tell); skipping names on entries failed the two views tests that read `aria-label`; removing `sphinx.ext.viewcode` from the demo's `conf.py` failed the source-link test; pointing the `:py:func:` reference at a missing entry made the reference test error. Each mutation was reverted.
+Next: none in this dispatch. The maths stories (T004 onwards) come later.
+Watch: C and JavaScript entries whose `id` ends in the name (`c.my_func`) are named by the `id`, as D18 accepts.
+
+## 2026-10-02T09:42:56Z · Implementer US2 · T004
+
+Did: `BodyRewriter.parse(markup)` builds, feeds and closes the parser and returns it; `rewrite` is now `parse(markup).splice()`. A new `has_maths` attribute becomes true when a start tag's class list holds `math`. `PageView.get` takes the body and `has_maths` from one `parse`, and the `?typeset=off` switch and its comment are gone. `page.html` already held the two script tags in the right order, so it is unchanged. Tests: `TestMathsDetection` in `tests/test_page_body.py` (3 test functions, 14 cases) and `TestMaths` in `tests/test_views.py` (13 cases): the maths page's script tags and their order and `defer`, the plain, reference and host pages loading neither, each notation inside a `.math` element, maths in a note, table cell, list item and heading, and the maths page served with Sphinx blocked in `sys.modules`.
+Verified: `uv run pytest tests/test_page_body.py::TestMathsDetection tests/test_views.py::TestMaths -q -p no:warnings` → 27 passed, exit 0; `uv run pre-commit run --files <changed files>` passed (ruff format reformatted one test file, re-run clean). Red first: all 14 cases failed on `AttributeError: no attribute 'parse'`. The 13 `TestMaths` cases all passed on their first run: they pin what the approved prototype's template and the old string test already did, so there was no red step for them. Each mechanism was then broken and restored: matching any class containing `math` failed 3 detection cases; passing `True` for `has_maths` failed the plain and reference page tests; passing `False` failed the maths page tests; dropping `defer` from the library tag failed the `defer` test; making `rewrite` return its input unchanged failed the `rewrite`/`parse` cases and a table test.
+Next: T005.
+Watch: the test of the removed `?typeset=off` switch was dropped as D18 says; nothing asserts the switch is gone.
+
+## 2026-10-02T09:45:10Z · Implementer US2 · T005
+
+Did: `maths.js` gains `tex.noundefined.color` set to `var(--mvp-sphinx-code-error)`; the `mjx-merror` rule in `content.css` takes `--mvp-sphinx-code-error` in place of `--mvp-sphinx-admonition-dangerous`. Tests: `TestMathsStylesheet` in `tests/test_static/test_content_css.py` (the rules naming `math`, `eqno` or `mjx-` that set a colour, each against the page background and every admonition background, both themes) and `TestMathsSettings` in the new `tests/test_static/test_maths_js.py` (every colour named is a `var(--mvp-sphinx-...)` the stylesheet defines; no literal colour; `processHtmlClass` is `math`; `ignoreHtmlClass` is a class the page template and the stylesheet both carry). README: a "Maths" subsection after "How pages look and the page template", and `maths.js` in "Static files". CHANGELOG: one Added entry that says pages with maths load a script from cdn.jsdelivr.net and that it runs in the host project's pages. CONTEXT.md: "Maths". Nothing under `docs/` describes this behaviour, so no page there changed.
+Verified: `uv run pytest tests/test_static -q -p no:warnings` → 48 passed, exit 0; `uv run pre-commit run --files <changed files>` passed. Red first: `TestMathsStylesheet` failed in both themes on `mjx-merror` (the unmixed error colour is below 4.5:1 on the page background and several admonition backgrounds in the light theme, and on two admonition backgrounds in the dark theme), and `test_every_colour_named_is_a_property_the_stylesheet_defines` failed on the empty list of colours named. The other six `TestMathsSettings` cases passed on their first run: they pin what the prototype's file already did. Each was shown able to fail by breaking one thing and restoring it: a literal `#ff0000` failed the literal test and the named-colour test; a `var()` the stylesheet does not define failed the named-colour test; `processHtmlClass: "tex"` and an `ignoreHtmlClass` the page does not carry each failed their test.
+Next: T006.
+Watch: `--mvp-sphinx-code-error` is readable (4.5:1 or better) on the page and on every admonition background in both themes, so no new colour was needed. The test reads `maths.js` with regular expressions and does not run it.
+
+## 2026-10-02T09:48:18Z · Implementer US4 · T006
+
+Did: `BodyRewriter` wraps the notation of each `div.math` in the same named, focusable region it gives tables. It tracks each equation in a small `Equation` dataclass (where its notation starts, and where its number's text starts, ends and has its heading link). The region opens after the number's `</span>` when `span.eqno` is a direct child of the equation, otherwise straight after the equation's start tag, and closes immediately before the equation's end tag. The name is "Equation", or "Equation %(number)s" with the number's text up to its heading link, built with `format_html` so the number is escaped once. `span.math` is never wrapped. In `content.css` the scrolling moved from `div.math > mjx-container` to `div.math > .mvp-sphinx-scroll`, which takes `flex: 1 1 0`, `min-width: 0`, the block padding and `overflow-y: hidden`; `div.math` no longer scrolls, its `:has(mjx-container)` overflow override and the container's own focus outline are gone, and the typeset container inside the region keeps `margin: 0`. `makemessages -l en` added "Equation" and "Equation %(number)s" to `django.po` (it also moved the line numbers of the older entries). README `BodyRewriter` paragraph and the CHANGELOG maths entry extended. Tests: `TestEquationRegion` in `tests/test_page_body.py` (16 cases, including the number-inside-a-paragraph case and an equation in a table) and `test_every_equation_of_a_page_holds_one_focusable_named_region` in `TestWideContent` in `tests/test_views.py`.
+Verified: `uv run pytest tests/test_page_body.py tests/test_views.py::TestWideContent -q -p no:warnings` → 89 passed, exit 0; `uv run mypy` clean; `uv run ruff check` and `ruff format` clean. Red first: 10 of the 16 `TestEquationRegion` cases and the views test failed because no region existed. Six passed before the change and say so: inline maths unwrapped, and the five "removing the inserted tags gives back the original" cases, which hold trivially while nothing is inserted. Each mechanism was then broken and restored: ignoring the number (region always at the start) failed 2; leaving the heading link's text in the name failed the name test; building the opening tag without escaping failed the markup-characters test; dropping `tabindex` failed 3; an unnumbered name for every equation failed 3. Closing the region after the equation's `</div>` instead of before it gives the same bytes, so no test can tell them apart.
+Next: T007.
+Watch: the stylesheet change cannot be seen without a browser, and no server was started. The look is meant to be unchanged; the 320-pixel and sideways-scroll check is the browser check at convergence (research R9). The region is the flex item now, so a typeset equation wider than the page scrolls inside it and the number stays at the end of the line.
+
+## 2026-10-02T09:57:21Z · Implementer US5 · T007
+
+Did: tests only, no production code. `TestNumberedEquations` in `tests/test_views.py`, on `reference_app`: each labelled equation's `div.math` has an `id` and the link in its number points at it; the link's name holds the number; the two links' names differ; each `:eq:` reference is a link to the `id` of an equation on the page. Five additions to `TestDemoGuideStates` in `tests/test_demo.py`: every name in the link-helpers summary table links to an `id` on that page; the summary table sits in a scroll region; the deprecated entry's description holds a `div.deprecated` with a `.versionmodified` and the stylesheet selects both hooks; the demo's maths page loads the settings then the library; each of its numbered equations holds one named region. The `tests/test_demo.py` file now imports `Stylesheet` and `STYLESHEET` from `tests/test_static/test_content_css.py` and `re`.
+Verified: `uv run pytest tests/test_views.py::TestNumberedEquations tests/test_demo.py::TestDemoGuideStates -q -p no:warnings` → 31 passed, exit 0. All nine new tests passed on their first run: they pin what T003, T006 and FS-004 already give, so there was no red step. Each was shown able to fail by breaking one thing and restoring it: rewriting the equation anchors and one summary-table anchor to `#nowhere` failed the equation id/link test, the `:eq:` reference test and the summary-table link test; leaving a heading link in an equation's number unnamed failed the name test and the different-names test; skipping the table wrapper failed the summary-table region test (and the existing table test); skipping the equation region failed the demo maths page region test; making the maths flag never true failed the demo maths page script test; renaming `.versionmodified` in the stylesheet failed the deprecation test. A first version of the deprecation test matched the hook as a substring and survived the rename, so it now matches with a word boundary. Not shown to fail: the check that the notice itself is inside the entry's description, which T002's `test_an_entry_holds_a_deprecation` already covers, and the numbers in the equation link names beyond the "holds the number" check.
+Next: the full verify and the completion report.
+Watch: the deprecated-entry test overlaps T002's by design: it adds the `.versionmodified` hook and the tie to the stylesheet, which T002's did not have. The `:eq:` links are found as every fragment link in the article, because the maths page has no other internal reference.
+
+## 2026-10-02T10:02:16Z · Convergence
+
+Did: all five stories accepted after an independent verify of each dispatch (lint, type checks,
+suite, build, conformance and docs checks) and a check for edits to earlier tests: one flag, an
+import line widened in `tests/test_views.py`, benign. The docs check failed once on the new
+public name `Equation`; the README's building-blocks list now names it and
+`BodyRewriter.parse`. No migrations. Cleanup pass: nothing to remove; the rewrite's additions
+follow the table region's pattern. No decision meets the ADR bar; each records why.
+Browser check (research R9), demo guide, MathJax 4.1.3, on a private port:
+- Maths page: 21 pieces typeset, none left raw; every container carries speech (FR-013); the
+  formula with a mistake is typeset with the unknown command in the theme's error colour and the
+  others unaffected (FR-011, FR-016); typeset maths is the colour of the text around it in the
+  light and dark themes (FR-017).
+- Each equation sits in a focusable region named "Equation" or "Equation (n)", number outside.
+  Only the wide equation scrolls (826 against 709 pixels), sideways only; no vertical scrollbar.
+- At 320 pixels the maths page, the reference page and the source listing do not scroll sideways
+  (SC-004); no signature overflows its bar.
+- "On this page" on the demo maths page holds no maths, so DR-005's case does not arise there.
+- Source listing: the links back read "[docs]" at the end of the line above each object, in the
+  text colour, as the prototype had them; the blank lines above each come from Sphinx's markup.
+Next: code review.
+
+## 2026-10-02T10:10:38Z · Review
+
+Did: one review of the whole change, correctness and security: approved, six findings, none
+blocking. Four fixed test-first or as text, two recorded (decisions D22). Checked in a browser
+after the fix: the demo maths page still typesets all 21 pieces, and notation written into the
+shell outside the page content is left as text.
+Next: ready for review, with the walkthrough.

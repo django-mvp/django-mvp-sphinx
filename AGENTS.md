@@ -70,6 +70,10 @@ because each app in `demo/mounted.py` names its `source_dir`. `build_docs docs` 
 one. The second guide is the staff guide at `/staff-guide/`. Only staff can read it:
 sign in as `staff.user@example.com`.
 
+The guide's Reference part documents `demo/links.py` with `autodoc`, which is why
+`demo/docs/conf.py` puts the repository on `sys.path`. Nothing in the site calls that
+module. It exists so the guide has reference entries of every kind to draw.
+
 **Adding a page** takes four things: a view in `demo/views.py` on
 `mvp.views.MVPTemplateView`, a route in `demo/urls.py`, a template extending
 `page_view.html` and filling `{% block page.content %}`,

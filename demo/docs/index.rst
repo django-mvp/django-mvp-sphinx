@@ -22,6 +22,8 @@ with :doc:`first-visit/index`.
 
    reference/accounts
    reference/sharing-links
+   reference/link-helpers
+   reference/reading-time
    reference/notices
    reference/glossary
    reference/who-sees-what-when-they-sign-in-and-why-the-sidebar-differs
