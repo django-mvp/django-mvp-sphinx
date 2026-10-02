@@ -602,7 +602,12 @@ For a custom view or template:
 - `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
   page's `toc` value into nested headings.
 - `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
-  names table regions and heading links in a page body.
+  names table regions, equation regions and heading links in a page body.
+  `BodyRewriter.parse(markup)` returns the parser itself: `splice()` gives the
+  same rewritten body, and `has_maths` says whether the body holds maths.
+  `mvp_sphinx.page_body.Equation` is the parser's own record of where one
+  equation's number and notation sit while it reads, and nothing a project needs
+  to build.
 - `mvp_sphinx.search.DocsSearch(build)`, given a `DocsBuild`, searches it.
   `results(query)` lists the pages that hold every word of `query`, best match
   first, each with its `title`, `path`, `anchor` and `passage`, or returns `None`

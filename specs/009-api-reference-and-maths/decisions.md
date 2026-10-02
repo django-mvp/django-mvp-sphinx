@@ -270,3 +270,14 @@ README states the exposure.
 **Why:** Sphinx puts the pieces of one name in separate elements and the joining text inside them: `ns::` and `Foo`, `--out` and `=FILE`, and for `-v, --verbose` the comma sits in an empty-looking `sig-prename`. Joining with nothing gives `ns::Foo`, `--out=FILE` and `-v, --verbose`, as the author wrote them; joining with a space would not.
 
 **Revisit if:** a domain writes a name's pieces so that they need a separator.
+
+## D21. An equation numbered inside a paragraph is named without its number
+
+**Decision:** When a build renders maths as images, the number sits inside a paragraph and not
+directly in the equation. The whole paragraph is wrapped, and the region is named "Equation".
+
+**Why:** The plan fixed where the region opens in that case and left the name open. The number
+is then inside the region, where a screen reader meets it anyway, and that configuration is
+outside what the feature promises (spec, Assumptions).
+
+**Revisit if:** image-rendered maths becomes something the package supports on purpose.
