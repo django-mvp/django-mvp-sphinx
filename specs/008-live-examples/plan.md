@@ -55,7 +55,7 @@ stylesheet, two pages of the demo guide.
 | IV Integration-first | Acceptance tests build a real Sphinx source with the host's one line of configuration and request real pages. |
 | V Security | The address is checked when the docs are built and again when the page is served. The source is escaped by Sphinx as any code block is; attribute values by `html.escape` at build time and by the template layer when served. See *Security*. |
 | VI Documentation | README, CHANGELOG and CONTEXT.md in the story that introduces each name: the marker, the base template and the setup step in US1. |
-| VII Dependencies | None added. Pygments is imported only in the build module, where Sphinx already requires it. `deptry` is checked for that import in T001. |
+| VII Dependencies | None added. docutils and Pygments are imported only in the build module, where Sphinx already requires both. `deptry` is told so beside the existing Sphinx entry, in T001. |
 | VIII i18n | The component's strings are translatable (they already are); the catalogue is refreshed. Build warnings are for the author and follow Sphinx's own untranslated convention. |
 | IX Data model | No models. |
 | X Cohesion | The build side is one directive class. The serving side is one class, `LiveExamples`. |
@@ -87,19 +87,19 @@ and reports them.
 
 `mvp_sphinx/examples.py`, `LiveExamples`.
 
-- `LiveExamples.parts(body, request)` returns the body in order as parts: markup, or an example.
+- `LiveExamples.parts(body)` returns the body in order as parts: markup, or an example.
   A body without the marker class returns one markup part holding the body unchanged.
-- An example is a small frozen dataclass or dict with: `id` (`mvp-sphinx-example-<n>`, numbered
+- An example is a dict with: `id` (`mvp-sphinx-example-<n>`, numbered
   in page order, which is what makes two appearances of one example independent), `title`,
   `address`, `available`, and `sources`, each with `name` and the highlighted `html`.
 - `available` is research R6: the address passes Django's same-site check and resolves in the
-  request's urlconf. Anything else is unavailable, and the component then draws the notice and no
+  current urlconf (`resolve` reads the one the request set). Anything else is unavailable, and the component then draws the notice and no
   frame.
 - The parser tracks `div` depth from each wrapper's start tag to its matching end and slices the
   body by offset, so the source's markup is passed through byte for byte. An example whose
   wrapper never closes (a damaged build) is left in the page as markup; the page still renders.
 
-`PageView.get` passes `body_parts=LiveExamples.parts(body, request)` and
+`PageView.get` passes `body_parts=LiveExamples.parts(body)` and
 `has_examples`, alongside `body` and `has_maths`. `page.html` draws the parts in order inside the
 article, and links `example.css` only when `has_examples` is true.
 

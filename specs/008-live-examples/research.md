@@ -1,7 +1,7 @@
 # Research: FS-008 Show working examples live next to their source code
 
 Research for the build, against main as of 2026-10-02 (ddcbfc1, which carries FS-009), django-mvp
-0.25.1 and Sphinx 9.1.0 as installed in the worktree. It answers each of the maintainer's planning
+0.25.0 and Sphinx 9.1.0 as installed in the worktree. It answers each of the maintainer's planning
 notes under his own words, then each line of `sketch.md` under "What the screens need from the
 code" and "What the prototype faked".
 
@@ -122,8 +122,8 @@ No contradiction, and nothing here that FS-009 already delivered.
 ### R1. A page without the shell
 
 `mvp/base.html` draws the shell inside `{% block app %}` (site-packages `mvp/templates/mvp/base.html`,
-lines 83 to 120). The block is public: `mvp/entrance.html` replaces it to draw the sign-in pages.
-The messages are drawn inside it too (`<c-messages :messages="messages" dismissible />`, line 113),
+lines 93 to 133). The block is public: `mvp/entrance.html` replaces it to draw the sign-in pages.
+The messages are drawn inside it too (`<c-messages :messages="messages" dismissible />`, line 125),
 so a template that replaces the block has to draw them itself.
 
 This package ships `mvp_sphinx/example.html`. It extends the host's `base.html`, replaces `app`

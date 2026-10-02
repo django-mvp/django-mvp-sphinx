@@ -41,7 +41,7 @@ FR-006, FR-009, FR-010, FR-014; SC-001, SC-005.
 ### T001 — The marker writes an example into the docs build
 
 **Files**: `mvp_sphinx/live_example.py`, `mvp_sphinx/examples.py` (the shared names only),
-`tests/sphinx/examples/**`, `tests/conftest.py`, `tests/test_live_example.py`
+`tests/sphinx/examples/**`, `tests/conftest.py`, `tests/test_live_example.py`, `pyproject.toml`
 
 Plan, *The build side*, *Fixtures and tests*; research R2, R3, R5, R9. Write
 `tests/sphinx/examples/` in full now, with every page the plan lists, so later tasks add no page:
@@ -65,8 +65,10 @@ written here and line ranges keep working as the prototype has them. Add the `ex
 - the example sits between the two paragraphs it was written between (FR-010, US1.6).
 
 `LiveExamples` gains the constants for the class names and attribute names, and the directive
-imports them. Run `uv run deptry .` and confirm the Pygments import raises nothing; if it does,
-record why and use the mapping the prototype had.
+imports them, and its module docstring describes the elements it writes. `pyproject.toml`: beside
+the existing `sphinx` ignore, `DEP003 = ["docutils", "pygments"]`, with the same Article XII
+reason (this module runs only inside the host's Sphinx build, which installs both). Run
+`uv run deptry .` and confirm it passes.
 
 ### T002 — The served page shows the example, and an example's page has no shell
 
@@ -74,8 +76,9 @@ record why and use the mapping the prototype had.
 `mvp_sphinx/templates/mvp_sphinx/page.html`, `mvp_sphinx/templates/mvp_sphinx/example.html`
 (new), `mvp_sphinx/templates/mvp_sphinx/base.html` (deleted),
 `mvp_sphinx/templates/cotton/mvp_sphinx/live_example.html`, `demo/templates/base.html`,
-`demo/templates/demo/examples/*.html`, `demo/examples/views.py`, `tests/test_examples.py`,
-`tests/test_views.py`
+`demo/templates/demo/examples/*.html`, `demo/examples/views.py`, `demo/docs/examples/*.rst`
+(line ranges that follow the templates), `tests/test_examples.py`, `tests/test_views.py`,
+`tests/test_demo.py`
 
 Plan, *The serving side*, *The component, the stylesheet and the base template*, *The demo*;
 research R1, R2, R6. Tests:
@@ -97,7 +100,7 @@ research R1, R2, R6. Tests:
   attributes (US1.7, FR-010); the page links `example.css` and the plain page does not (FR-017);
   the plain page's article is exactly the rewritten body; the page still answers with Sphinx
   blocked in `sys.modules` (the `TestServingWithoutSphinx` pattern; US1.8, SC-005).
-- `TestExamplePage` in `tests/test_views.py`: the demo's contact example, requested at its own
+- `TestExamplePage` in `tests/test_demo.py`: the demo's contact example, requested at its own
   address, answers 200 with the form and without the shell's sidebar menu, while the overview
   page, through the same `base.html`, has it (FR-009, US1.5); sent invalid, it answers with the
   form's errors and still no sidebar menu; sent valid, it redirects to its own address, and the
@@ -106,7 +109,9 @@ research R1, R2, R6. Tests:
 Delete `LiveExamples.FRAMED`, `framed_address` and `mvp_sphinx/base.html`. The demo's
 `base.html` extends `mvp/base.html` and loses the prototype's comment. The demo's example
 templates extend `mvp_sphinx/example.html` and fill `content`; keep what each example shows.
-`ContactView` redirects to `request.path`.
+`ContactView` redirects to `request.path`. `LiveExamples.parts` takes the body alone, and an
+example is a dict, as the component's `@prop` line says; update that line, which still lists
+`framed_address`.
 
 ### T003 — The documentation for a live example
 
@@ -140,8 +145,8 @@ Plan, *The build side* ("Sources", "Names and languages"); research R3, R4. Test
 
 - in `tests/test_live_example.py`, on the built fixture: the example with three sources holds
   three source elements in the author's order (US2.1); the source named with a range holds
-  exactly those lines of the file, dedented, and a single line number holds that line (US2.2,
-  SC-003); a path with a space in it and no range is read as a path;
+  exactly those lines of the file with their common leading indentation removed (D13), and a
+  single line number holds that line (US2.2, SC-003); a path with a space in it and no range is read as a path;
 - naming, on small sources built in the test: two files of the same name in different folders
   get names that differ and each ends with the file's name; the same file named twice with
   different ranges gets names that differ; a file named once keeps its bare name (US2.1);
@@ -190,7 +195,6 @@ the test with `sphinx_build` and reading the warnings:
   element and no address of that site (FR-003, US3.5);
 - a range that is reversed, not a number, or past the end of the file: the build warns, naming
   the file, and that source is left out;
-- under `-W` any of these fails the build.
 
 README: what the build reports and that `-W` turns each into a failure.
 
@@ -215,10 +219,10 @@ Plan, *The serving side*, *Security*. Tests through `client`, on `examples_app` 
   (FR-011, US3.8);
 - `TestRebuild`: rewrite the page's `.fjson` in a copy of the build with a changed source, and
   the next request shows the new code, with no restart (FR-014, US3.7);
-- `TestWithoutScripts`: a page with an example holds the source, a frame and a plain link to the
-  example's address, and nothing in the page's article depends on a script (FR-015, US3.6);
-- a build made without the extension's directive in use (the existing `guide_build`) serves each
-  page with no example stylesheet and its article exactly the rewritten body (FR-017, US3.9).
+
+FR-015 and US3.6 (scripts off) rest on T002's frame and source tests and T005's test that the
+component holds no script and no inline handler. FR-017 and US3.9 (a build without examples) are
+T002's tests on the plain page. Neither is tested again here.
 
 ### T008 — The demo guide shows every state
 
@@ -226,13 +230,12 @@ Plan, *The serving side*, *Security*. Tests through `client`, on `examples_app` 
 `tests/test_demo.py`, `AGENTS.md`, `CHANGELOG.md`
 
 Tests added to `TestDemoGuideStates`, on the two pages of the demo guide build: for every example
-in the guide, each source shown is the named file's text, or the named lines of it (SC-003); the
+in the guide, each source shown is the named file's text, or the named lines of it with their
+common leading indentation removed (SC-003, D13); the
 working-form page holds two examples, one with three sources and one with a single source that is
 part of a file (screens 1, 3, 8); the cannot-run page holds a frame for the slow example, the
 staff-only example and the failing example, and the notice for the one whose address is gone
-(screens 5, 6, 7); every example's page in the demo, requested on its own, has no sidebar menu
-(FR-009); the contact example answers a valid and an invalid post (SC-002, the part a server can
-show); both pages answer 200 to an anonymous reader (SC-004). Screens 2, 4 and 9 are the narrow
+(screens 5, 6, 7); both pages answer 200 to an anonymous reader (SC-004). Screens 2, 4 and 9 are the narrow
 layout, the used example and scripts off: they are reached on these same pages and are checked
 in a browser at convergence (research R10).
 

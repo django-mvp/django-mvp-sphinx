@@ -176,6 +176,10 @@ standard attribute escaping, and are read with the parser the package already re
 `LiveExamples` stays apart from `BodyRewriter`: one records insertions, the other cuts the body
 into parts, and a page without an example never reaches it.
 
+The build's wrappers carry the same class names as the component's own hooks. A host whose page
+template still draws the body whole gets the example's stylesheet rules on them, which is
+harmless.
+
 **Revisit if:** a third thing needs to read page bodies, which would be the time to share a parse.
 
 **ADR:** none — how one feature carries its data through the build; ADR 0003 covers reading a body
@@ -184,6 +188,9 @@ into parts, and a page without an example never reaches it.
 
 **Decision:** A source line may end with `first-last` or one line number. `literalinclude`'s other
 selectors are not offered.
+
+The lines are shown with their common leading indentation removed, and SC-003's
+"identical" is read as identical after that.
 
 **Why:** The specification asks for "part of a file" and one selector meets it (Article II). Line
 numbers drift when the file is edited, which the author sees at the next build. A selector by

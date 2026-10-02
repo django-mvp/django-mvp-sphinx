@@ -17,3 +17,13 @@ show it (US1.4 and SC-002 inside the frame, US2.4, US2.6 and FR-016 at 320 pixel
 theme), to the browser check at convergence (research R10). Every item under "What the prototype
 faked" has a task or is kept on purpose (plan, table). No CRITICAL findings.
 Next: design review.
+
+## 2026-10-02T16:05:07Z · S3R design review
+
+Did: one reviewer, three lenses, on plan.md, tasks.md and research.md at 8a4caee. Verdict approve:
+no critical or high finding, one medium and four low, all verified. Each was applied as an edit to
+the plan or the tasks and checked against the finding's own evidence (ledger, gates.design_review).
+The reviewer confirmed by running them that a raw HTML node reaches a JSON build's page body, that
+`mvp/base.html` draws the messages inside the `app` block, and that `uv run deptry .` fails today
+on the prototype's docutils import.
+Next: build US1.
