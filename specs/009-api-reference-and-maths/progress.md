@@ -64,3 +64,25 @@ Did: tests only, no production code. `TestNumberedEquations` in `tests/test_view
 Verified: `uv run pytest tests/test_views.py::TestNumberedEquations tests/test_demo.py::TestDemoGuideStates -q -p no:warnings` → 31 passed, exit 0. All nine new tests passed on their first run: they pin what T003, T006 and FS-004 already give, so there was no red step. Each was shown able to fail by breaking one thing and restoring it: rewriting the equation anchors and one summary-table anchor to `#nowhere` failed the equation id/link test, the `:eq:` reference test and the summary-table link test; leaving a heading link in an equation's number unnamed failed the name test and the different-names test; skipping the table wrapper failed the summary-table region test (and the existing table test); skipping the equation region failed the demo maths page region test; making the maths flag never true failed the demo maths page script test; renaming `.versionmodified` in the stylesheet failed the deprecation test. A first version of the deprecation test matched the hook as a substring and survived the rename, so it now matches with a word boundary. Not shown to fail: the check that the notice itself is inside the entry's description, which T002's `test_an_entry_holds_a_deprecation` already covers, and the numbers in the equation link names beyond the "holds the number" check.
 Next: the full verify and the completion report.
 Watch: the deprecated-entry test overlaps T002's by design: it adds the `.versionmodified` hook and the tie to the stylesheet, which T002's did not have. The `:eq:` links are found as every fragment link in the article, because the maths page has no other internal reference.
+
+## 2026-10-02T10:02:16Z · Convergence
+
+Did: all five stories accepted after an independent verify of each dispatch (lint, type checks,
+suite, build, conformance and docs checks) and a check for edits to earlier tests: one flag, an
+import line widened in `tests/test_views.py`, benign. The docs check failed once on the new
+public name `Equation`; the README's building-blocks list now names it and
+`BodyRewriter.parse`. No migrations. Cleanup pass: nothing to remove; the rewrite's additions
+follow the table region's pattern. No decision meets the ADR bar; each records why.
+Browser check (research R9), demo guide, MathJax 4.1.3, on a private port:
+- Maths page: 21 pieces typeset, none left raw; every container carries speech (FR-013); the
+  formula with a mistake is typeset with the unknown command in the theme's error colour and the
+  others unaffected (FR-011, FR-016); typeset maths is the colour of the text around it in the
+  light and dark themes (FR-017).
+- Each equation sits in a focusable region named "Equation" or "Equation (n)", number outside.
+  Only the wide equation scrolls (826 against 709 pixels), sideways only; no vertical scrollbar.
+- At 320 pixels the maths page, the reference page and the source listing do not scroll sideways
+  (SC-004); no signature overflows its bar.
+- "On this page" on the demo maths page holds no maths, so DR-005's case does not arise there.
+- Source listing: the links back read "[docs]" at the end of the line above each object, in the
+  text colour, as the prototype had them; the blank lines above each come from Sphinx's markup.
+Next: code review.

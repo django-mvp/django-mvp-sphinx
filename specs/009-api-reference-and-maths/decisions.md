@@ -27,6 +27,8 @@ a generated entry from a hand-written one, and neither can the package. Treating
 would need information the docs build does not hold. Python is what the tests and the demo will
 exercise.
 
+**ADR:** none — a reading of this feature's scope
+
 ## D2. The general index and the module index are out of scope
 
 **Ambiguous:** Sphinx can also produce a general index and a module index, which are generated
@@ -38,6 +40,8 @@ from code in a loose sense.
 them as data with no page body, so showing them means the documentation app serving a new kind of
 page, which is a larger question than how content looks and is nothing the issue asks for. If it
 is wanted it deserves its own feature request.
+
+**ADR:** none — a scope boundary of this feature; Article XII already bounds what is served
 
 ## D3. Entries get a copyable link, as headings do
 
@@ -53,6 +57,8 @@ does, and in the user guide every anchored heading has this link. Linking to one
 the commonest way reference documentation is shared. Sphinx already writes the anchor and the
 link, so leaving them unstyled would show a stray symbol beside every signature.
 
+**ADR:** none — extends an existing behaviour to one more element
+
 ## D4. Without typesetting, the reader sees the notation as written
 
 **Ambiguous:** What a reader sees when maths cannot be typeset, such as with scripts turned off.
@@ -66,6 +72,8 @@ readable. Requiring typeset maths with scripts off would force typesetting at bu
 time, which means a new dependency (Article VII) or a change to the host project's Sphinx
 configuration, and the issue asks for neither.
 
+**ADR:** none — a requirement of this feature, recorded in the spec
+
 ## D5. Maths works with Sphinx's default settings, and costs other pages nothing
 
 **Ambiguous:** Whether the host project has to configure anything for maths, and whether every
@@ -77,6 +85,8 @@ step by the host project (FR-019). A page with no maths loads nothing for it (FR
 **Why:** G3 and #7 both hold that adopting the package adds no styling step. Most pages of most
 documentation hold no maths, and FS-007 already set the expectation that a page does not load
 script it has no use for.
+
+**ADR:** none — a requirement of this feature, recorded in the spec
 
 ## D6. Maths typesetting is fetched from a CDN for now
 
@@ -93,6 +103,8 @@ with no outside access shows the notation as written and not typeset, which the 
 already treats as a readable state (FR-011). The README should say so. Shipping the typesetting
 with the package stays open as a later change.
 
+**ADR:** none — provisional by the maintainer's own words; an ADR is due if the typesetting is ever shipped with the package
+
 ## D7. Contrast is this package's job for the combinations it creates
 
 **Ambiguous:** Signatures have several parts that a design may want to tell apart by colour.
@@ -104,6 +116,8 @@ of the text around it (FR-016), so it inherits whatever contrast that text has.
 **Why:** The same rule #7 set for admonitions and highlighted code, for the same reason: theme
 colours combined by this package are only as readable as the combinations it makes.
 
+**ADR:** none — the rule ADR 0003 already set, applied to new pairs
+
 ## D8. "On this page" is left alone
 
 **Ambiguous:** Whether reference entries should be listed under "On this page".
@@ -112,6 +126,8 @@ colours combined by this package are only as readable as the combinations it mak
 
 **Why:** #6 owns that list and builds it from what the docs build records. Changing it here would
 widen this feature into a delivered sibling's scope.
+
+**ADR:** none — a scope boundary with a delivered feature
 
 ## D9. Source listings are #7's, the link to them is this feature's
 
@@ -123,6 +139,8 @@ highlighted code, already styled by #7, and get nothing new here.
 
 **Why:** The link sits inside the entry, so an unstyled one would be a visible gap in exactly the
 content this feature covers. The listing is highlighted code, which is delivered.
+
+**ADR:** none — a scope boundary with a delivered feature
 
 ## D10. Appearance is absent from the requirements on purpose
 
@@ -136,6 +154,8 @@ look is settled there.
 built. A requirement that pinned spacing, type or colour would become a test that fails whenever
 the design is adjusted.
 
+**ADR:** none — about how this specification was written
+
 ## D11. The spec directory was created by hand
 
 **Chosen:** `specs/009-api-reference-and-maths/` was written directly, with the number assigned in
@@ -144,6 +164,8 @@ advance.
 **Why:** Several specifications were being written at the same time, each in its own working
 tree, and a script that picks the next free number from one tree would have given two of them the
 same one.
+
+**ADR:** none — a one-off of how the directory was made
 
 ## D12. A page knows it holds maths from its own markup
 
@@ -263,6 +285,8 @@ README states the exposure.
 
 **Revisit if:** the stylesheet's parameter rule moves to `.sig-param`; then `sig-param` leaves `NAMED_BY_TAG`.
 
+**ADR:** none — local to one test
+
 ## D20. An entry's name is its elements' text, joined as written
 
 **Decision:** When the `id` does not name the entry, the name is the text of its `sig-prename` and `sig-name` elements in document order, joined with nothing between them, then whitespace collapsed and trimmed. Only elements inside a `dt.sig-object` count.
@@ -270,6 +294,8 @@ README states the exposure.
 **Why:** Sphinx puts the pieces of one name in separate elements and the joining text inside them: `ns::` and `Foo`, `--out` and `=FILE`, and for `-v, --verbose` the comma sits in an empty-looking `sig-prename`. Joining with nothing gives `ns::Foo`, `--out=FILE` and `-v, --verbose`, as the author wrote them; joining with a space would not.
 
 **Revisit if:** a domain writes a name's pieces so that they need a separator.
+
+**ADR:** none — local to this feature, nothing downstream inherits it
 
 ## D21. An equation numbered inside a paragraph is named without its number
 
@@ -281,3 +307,5 @@ is then inside the region, where a screen reader meets it anyway, and that confi
 outside what the feature promises (spec, Assumptions).
 
 **Revisit if:** image-rendered maths becomes something the package supports on purpose.
+
+**ADR:** none — local to this feature, and outside what it promises
