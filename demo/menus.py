@@ -18,3 +18,7 @@ AppMenu.extend(
         staff_guide.menu_item(),
     ]
 )
+
+# The project's own entry in the guide's sidebar. It follows the contents, stays
+# there when the docs are rebuilt, and is drawn for staff only.
+docs.menu.append(staff_guide.menu_item())

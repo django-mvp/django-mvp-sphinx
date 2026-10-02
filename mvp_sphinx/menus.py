@@ -29,6 +29,11 @@ class DocumentationMenu(Menu):
     The menu is rebuilt only when the navigation file, the build directory or the
     app's front page address has changed since the last request.
 
+    A project adds entries of its own with the menu's ``append``, ``extend`` and
+    ``insert``. A rebuild replaces only what the navigation file put there. An
+    entry placed ahead of the front page stays ahead of it, and every other entry
+    follows the contents.
+
     Args:
         name: The menu's unique name.
         app: The documentation app whose docs build the menu shows.
@@ -37,8 +42,20 @@ class DocumentationMenu(Menu):
     def __init__(self, name: str, app: "DocumentationApp") -> None:
         super().__init__(name, children=[], extra_context={"label": app.name})
         self.app = app
+        # Here from the start, so a project can place entries ahead of it.
+        self.front_page = MenuItem(
+            name="front-page",
+            url=self.front_page_url,
+            parent=self,
+            extra_context={"label": _("Overview")},
+        )
+        self.contents: list[MenuItem] = []
         self.lock = threading.Lock()
         self.stamp: tuple[Any, ...] | None = None
+
+    def front_page_url(self, request: "HttpRequest | None", **kwargs: Any) -> str:
+        """Return the address the app's front page is served at."""
+        return reverse(self.app.landing)
 
     def process(self, request: "HttpRequest", **kwargs: Any) -> MenuItem:
         """Bring the contents up to date, then process it for ``request``."""
@@ -55,21 +72,17 @@ class DocumentationMenu(Menu):
         if stamp == self.stamp:
             return
         groups = docs_build.navigation() or []
-        front_page_label = docs_build.front_page_title() or _("Overview")
-        items = [
-            MenuItem(
-                name="front-page",
-                url=prefix,
-                extra_context={"label": front_page_label},
-            )
-        ]
+        self.front_page.extra_context["label"] = docs_build.front_page_title() or _(
+            "Overview"
+        )
+        contents: list[MenuItem] = []
         for number, group in enumerate(groups):
             entries = [
                 self.entry_item(entry, prefix, f"g{number}-{position}")
                 for position, entry in enumerate(group["entries"])
             ]
             if group["caption"]:
-                items.append(
+                contents.append(
                     MenuGroup(
                         name=f"g{number}",
                         extra_context={"label": group["caption"]},
@@ -77,8 +90,12 @@ class DocumentationMenu(Menu):
                     )
                 )
             else:
-                items += entries
-        self.children = items
+                contents += entries
+        kept = [each for each in self if each not in self.contents]
+        # A project may have taken the front page's entry out.
+        after = kept.index(self.front_page) + 1 if self.front_page in kept else 0
+        self.children = [*kept[:after], *contents, *kept[after:]]
+        self.contents = contents
         self.stamp = stamp
 
     def entry_item(self, entry: dict[str, Any], prefix: str, name: str) -> MenuItem:

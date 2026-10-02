@@ -12,10 +12,12 @@ into place, so the file is replaced in one step.
 
 The serving side reads that file through `DocsBuild` and never imports Sphinx. `DocumentationMenu`
 turns it into the app's django-mvp menu. It rebuilds its items only when the file's modification
-time, size or inode changes, or the build directory or the app's address does. It holds a lock
-across the rebuild and the processing, because the shell processes every documentation app's menu
-on every page of the host and a menu's children are shared between requests. A missing, unreadable
-or malformed file leaves the contents holding the front page entry alone, and never raises.
+time, size or inode changes, or the build directory or the app's address does. A rebuild replaces
+only the items it made from the file: entries a project added to the menu keep their places, ahead
+of the front page's entry or after the contents. It holds a lock across the rebuild and the
+processing, because the shell processes every documentation app's menu on every page of the host
+and a menu's children are shared between requests. A missing, unreadable or malformed file leaves
+the contents holding the front page entry alone, and never raises.
 
 ## Why
 
