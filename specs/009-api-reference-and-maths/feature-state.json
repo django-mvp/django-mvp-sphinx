@@ -2,7 +2,7 @@
   "feature": "009-api-reference-and-maths",
   "branch": "009-api-reference-and-maths",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PLAN",
+  "state": "DESIGN_REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -13,6 +13,11 @@
       "state": "PLAN",
       "at": "2026-10-02T09:16:13Z",
       "note": "plan.md, research.md, tasks.md: 5 stories, 7 tasks; continues the approved prototype on pull request #66"
+    },
+    {
+      "state": "DESIGN_REVIEW",
+      "at": "2026-10-02T09:16:33Z",
+      "note": "one reviewer, three lenses, on plan.md, tasks.md and research.md at 706504c"
     }
   ],
   "gates": {
@@ -142,7 +147,7 @@
       "max": 120
     },
     "design_review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     }
   },

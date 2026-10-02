@@ -231,3 +231,26 @@ README states the exposure.
 **Revisit if:** the typesetting is shipped with the package, which D6 leaves open.
 
 **ADR:** none — a consequence of D6, which is itself provisional.
+
+## D18. What the design review changed
+
+**Decision:** Seven findings, none blocking, all applied to the plan and tasks before any code:
+
+- The entry link's name (D14) takes the `id` only when it equals the documented name or ends
+  with a dot and that name, and only when the signature has one name. A C++ entry's mangled `id`
+  and an option's prefixed one pass the looser test and would have been read out. A C entry
+  (`c.my_func`) and a JavaScript name with a `$` still take the `id`: accepted, watch item.
+- The code sample that only looks like maths moves to the fixture's plain page, so the page that
+  must not load the typesetting exists from the first task.
+- The equation region opens after the number only when the number is a direct child of the
+  equation, so a build that renders maths as images stays well nested.
+- The README and CHANGELOG say that the typesetting script runs in the host project's pages with
+  the reader's session, and that pages with maths load it after upgrading.
+- The test for the removed `?typeset=off` switch is dropped: it could only fail if someone put
+  the switch back.
+- The browser check at convergence also covers "On this page" for a heading with maths, the
+  source listing's back links, and speech and the failed formula with the region in place.
+
+**Why:** Each costs a sentence now and a rework cycle later.
+
+**ADR:** none — corrections to this feature's own plan.

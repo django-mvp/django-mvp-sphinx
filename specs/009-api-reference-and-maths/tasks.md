@@ -91,7 +91,9 @@ said:
   its dotted name and holds no parameter, bracket, return type or `[source]` text; the link of a
   method is named with its class's path, so the two classes' same-named methods get different
   names; the `js:function` link is named by its name; a `dt.sig-object` with no `sig-name`
-  (markup written in the test) is named as before; a heading's link and a glossary term's link
+  (markup written in the test) is named as before; a `dt` with `id="_CPPv43Foo"` and `sig-name`
+  `Foo` (markup written in the test) is named by `Foo`, and one with two `sig-name` elements by
+  its text as written; a heading's link and a glossary term's link
   are named exactly as before (the existing tests stay untouched and green); the link's `title`
   still leads the name. Every byte outside the inserted attribute is unchanged.
 - `TestEntryLinks` in `tests/test_views.py`, through `client` on `reference_app`: every
@@ -127,10 +129,8 @@ Tests:
   `BodyRewriter.rewrite` still returns the same string as `parse(...).splice()`.
 - `TestMaths` in `tests/test_views.py`, on `reference_app`: the maths page carries a script tag
   for `mvp_sphinx/maths.js` and one for the library, the settings tag first, the library tag with
-  `defer` and the settings tag without it (US2.7, research R3); the plain page and the reference
-  page carry neither (FR-012, US2.5, SC-007); the page whose only "maths" is inside a code sample
-  carries neither; `?typeset=off` changes nothing on the maths page (the prototype's switch is
-  gone); each notation of the maths page reaches the response as written, inside an element with
+  `defer` and the settings tag without it (US2.7, research R3); the plain page, whose only "maths" is inside a code
+  sample, and the reference page carry neither (FR-012, US2.5, SC-007); each notation of the maths page reaches the response as written, inside an element with
   class `math` (FR-011, US2.4: this is what a reader without scripts gets); maths inside the
   note, the table cell, the list item and the heading is each inside a `.math` element (edge
   case); a page of the host outside the documentation app carries neither tag (FR-020); the
@@ -142,14 +142,15 @@ Remove `?typeset=off` and its comment from `PageView.get`.
 ### T005 — A failed formula keeps the theme's colours, and the documentation
 
 **Files**: `mvp_sphinx/static/mvp_sphinx/maths.js`, `mvp_sphinx/static/mvp_sphinx/content.css`,
-`tests/test_static/test_content_css.py`, `README.md`, `CHANGELOG.md`, `CONTEXT.md`
+`tests/test_static/test_content_css.py`, `tests/test_static/test_maths_js.py`, `README.md`,
+`CHANGELOG.md`, `CONTEXT.md`
 
 Plan, *The typesetting settings*, *The stylesheet* (second bullet); research R4, R8. Tests:
 
 - `TestMathsStylesheet`, per theme: every rule whose selector names `math`, `eqno` or `mjx-` and
   sets `color` is readable (≥ 4.5:1) on the page background and on every admonition background
-  (maths inside a note). Fails first on `mjx-merror`.
-- `TestMathsSettings`: every colour named in `maths.js` is a `var(--mvp-sphinx-…)` the stylesheet
+  (maths inside a note). Assert the rule list is not empty. Fails first on `mjx-merror`.
+- `TestMathsSettings`, in a new `tests/test_static/test_maths_js.py`: every colour named in `maths.js` is a `var(--mvp-sphinx-…)` the stylesheet
   defines, and the file holds no literal colour (SC-001, FR-016); the file names `math` as the
   class to process and the content scope as the class to ignore (hooks the page depends on).
   Fails first on the missing `noundefined` colour.
@@ -159,10 +160,13 @@ invent a colour. README: a "Maths" subsection under "Using it": typeset by MathJ
 reader's browser fetches from the jsDelivr CDN at the address Sphinx's own HTML build uses; only
 pages with maths load it; it works for a build made with Sphinx's default settings; on a network
 with no outside access, or behind a content security policy that does not allow that origin, the
-reader sees the notation as written and the rest of the page is unaffected; a host that needs
-another source overrides the `extra_js` block of `mvp_sphinx/page.html`; a build that renders
+reader sees the notation as written and the rest of the page is unaffected; the script runs in
+the host project's own pages with the reader's session, signed-in readers included, so a host
+project that does not accept a third-party script, or needs another source, overrides the
+`extra_js` block of `mvp_sphinx/page.html`; a build that renders
 maths as images shows the images. README "Static files": add `mvp_sphinx/maths.js`. CHANGELOG
-Unreleased, Added: one entry. CONTEXT.md: "Maths" (spec, Key Entities). Humanize.
+Unreleased, Added: one entry, which says that pages with maths now load a script from
+cdn.jsdelivr.net. CONTEXT.md: "Maths" (spec, Key Entities). Humanize.
 
 ---
 
@@ -185,7 +189,8 @@ Tests:
   number; the notation between the region's tags is byte-for-byte what Sphinx wrote; a
   `span.math` is not wrapped; an equation inside a table sits in its own region inside the
   table's region, and the result is well nested; a number holding markup characters is escaped
-  in the name; removing the inserted tags gives back the original body.
+  in the name; a `div.math` whose number sits inside a paragraph (markup written in the test, as
+  an image renderer writes it) has the whole paragraph inside the region, well nested; removing the inserted tags gives back the original body.
 - `TestWideContent` in `tests/test_views.py`, on `reference_app`: every `div.math` of the maths
   page holds exactly one focusable named region (FR-015, US4.3).
 

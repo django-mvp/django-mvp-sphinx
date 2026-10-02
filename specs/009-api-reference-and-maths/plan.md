@@ -53,7 +53,7 @@ stylesheet read by the existing `Stylesheet` and `ColourMath` helpers.
 | II Simplicity | No setting, no new class, no new template. `BodyRewriter` gains one attribute and two insertions; the view gains one context value. |
 | III Anti-abstraction | The equation region reuses the table region's class and stylesheet rule. No new colour role: the failed formula uses the existing `--mvp-sphinx-code-error`. |
 | IV Integration-first | Acceptance tests request real pages of a real build and read what the reader's browser would receive. |
-| V Security | The body is the host's own docs build, trusted as before. The one value the rewrite interpolates, an equation's number, goes through `format_html`. The page loads a script from a third-party CDN on pages with maths: see *Risks*. |
+| V Security | The body is the host project's own docs build, trusted as before. The one value the rewrite interpolates, an equation's number, goes through `format_html`. The page loads a script from a third-party CDN on pages with maths: see *Risks*. |
 | VI Documentation | README, CHANGELOG and CONTEXT.md in the story that introduces each behaviour: reference entries in US1, maths in US2. |
 | VII Dependencies | None added. MathJax is fetched by the reader's browser (D6), so nothing is installed and `deptry` is unaffected. |
 | VIII i18n | The region's name ("Equation") is translatable; catalogue refreshed. |
@@ -77,19 +77,24 @@ a start tag, and a class such as `mathematics` is not a match.
 
 **The equation region.** For each `div` whose class list holds `math`, the notation is wrapped in
 `<div class="mvp-sphinx-scroll" role="region" tabindex="0" aria-label="...">` … `</div>`. The
-region opens after the `span.eqno` when the equation has one, otherwise straight after the
-`div`'s start tag, and closes immediately before the `div`'s end tag. The number therefore stays
-outside the region. The name is the translatable word "Equation" followed by the number as
-Sphinx wrote it when there is one ("Equation (1)"), built with `format_html`. A `span.math` is
+region opens after the `span.eqno` when that span is a direct child of the `div`, otherwise
+straight after the `div`'s start tag (a build that renders maths as images puts the number
+inside a paragraph, and the whole paragraph is then wrapped), and closes immediately before the `div`'s end tag. The number therefore stays
+outside the region. The name is "Equation" for an unnumbered equation and, for a numbered one, a single translatable
+string with a placeholder for the number as Sphinx wrote it ("Equation (1)"), so a translator
+can reorder it. Both are built with `format_html`. A `span.math` is
 never wrapped. An equation inside a table is wrapped inside the table's own region, and both
 regions close in the right order because each insertion is recorded at its own offset. The
 notation's bytes are untouched, which is what lets MathJax find its delimiters (research R3).
 
 **The entry link's name.** When a heading link's holder is a `dt` whose class list holds
 `sig-object`, the text part of its name is the entry's own name and not the whole signature:
-the text of the holder's `sig-prename` and `sig-name` elements, in order, or the holder's `id`
-when that `id` ends with the `sig-name` text (the full dotted name of a nested member, research
-R7). When the holder has no `sig-name`, the name is built as it is today. The link's `title`
+the holder's `id` when the holder has exactly one `sig-name` and the `id` either equals its
+text or ends with a dot followed by it (the full dotted name of a Python or JavaScript entry,
+research R7); otherwise the text of the holder's `sig-prename` and `sig-name` elements as
+written, in order. A mangled or prefixed `id` (`_CPPv43Foo`, `cmdoption-v`, `envvar-MY_VAR`)
+therefore never becomes a name. When the holder has no `sig-name`, the name is built as it is
+today. The link's `title`
 still leads the name, so a Python function reads "Link to this definition:
 demo.links.page_address". Every other heading link, the equation number's included, is named as
 today: an equation's link reads "Link to this equation: (1)", which names it by the number a
@@ -106,7 +111,7 @@ and its comment are removed: no query parameter changes what a page loads.
 The template keeps the prototype's block: when `has_maths`, the shell's `extra_js` block gets
 `{{ block.super }}`, then the settings file as a plain script, then the library with `defer`
 from `https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js`. The address is written in the
-template. It is not a setting (Article II); a host that needs another source overrides the block
+template. It is not a setting (Article II); a host project that needs another source overrides the block
 in its own `mvp_sphinx/page.html`, which the README already documents as overridable.
 
 ## The typesetting settings
@@ -143,16 +148,16 @@ with a toctree, and:
   a `py:exception`; a `py:data`; an entry with no description; an entry holding
   `.. deprecated::`; a `js:function` with parameters.
 - `maths.rst`: maths in a sentence; an unnumbered equation; two equations with `:label:` and an
-  `:eq:` reference to each; maths inside a note, a table cell, a list item and a heading; a code
-  block whose text shows `<span class="math">` and a dollar sign.
-- `plain.rst`: prose only.
+  `:eq:` reference to each; maths inside a note, a table cell, a list item and a heading.
+- `plain.rst`: prose, and a code block whose text shows `<span class="math">` and a dollar sign.
+  It is the page whose only "maths" is inside a code sample.
 
 `reference_build` (session) and `reference_app` fixtures in `tests/conftest.py`, on the pattern
 of `reading_build` / `reading_app`.
 
 **Where tests go** (mirrors the source tree): `tests/test_page_body.py` for the rewrite,
 `tests/test_views.py` for what a served page carries, `tests/test_static/test_content_css.py`
-for the stylesheet and the settings file, `tests/test_demo.py::TestDemoGuideStates` for the
+for the stylesheet, `tests/test_static/test_maths_js.py` for the settings file, `tests/test_demo.py::TestDemoGuideStates` for the
 demo guide's states (generated entries, the summary table, the source link).
 
 **The hooks test.** A hand-kept tuple of the classes the new rules select on (`sig-object`,
@@ -178,11 +183,11 @@ side by side.
 
 ## Risks
 
-- **A third-party script.** A page with maths runs a script from jsDelivr in the host's origin.
+- **A third-party script.** A page with maths runs a script from jsDelivr in the host project's origin.
   The maintainer accepted the CDN (D6). The address carries the major version only, as Sphinx's
   does, so it cannot carry an integrity hash, and MathJax fetches further files (fonts, speech)
   from the same CDN that a hash on the first file would not cover. The exposure is limited to
-  pages with maths. The README says where the script comes from, that a host behind a content
+  pages with maths. The README says where the script comes from, that a host project behind a content
   security policy has to allow that origin, and that without it the reader sees the notation as
   written.
 - **What the suite cannot see.** Typeset output, the 320-pixel reflow and the theme switch are

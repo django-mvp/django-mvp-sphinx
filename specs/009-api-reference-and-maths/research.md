@@ -46,7 +46,8 @@ The spec's Assumptions leave that configuration to whatever it produces. Not wor
 
 MathJax reads `window.MathJax` when its script runs. `options.ignoreHtmlClass` and
 `options.processHtmlClass` are matched against whole class names, so ignoring
-`mvp-sphinx-content` and processing `math` typesets only inside `.math` elements. Checked in the
+`mvp-sphinx-content` and processing `math` means that inside the page content only `.math`
+elements are typeset. Text outside the content, such as "On this page", is still scanned. Checked in the
 browser: 21 containers on the demo maths page, all inside `.math`, and a dollar sign or backslash
 elsewhere on the page is untouched. A wrapper with class `mvp-sphinx-scroll` inside `div.math`
 (R5) is still processed, because that class name is not the ignored one.
@@ -103,8 +104,9 @@ A hand-written entry (`.. py:function::`) and a generated one (`.. autofunction:
 identical, and other domains (`js`, `c`) use the same `sig-object`, `sig-name` and `sig-param`
 classes with a different domain class. The stylesheet keys on those shared classes only.
 
-The `id` Sphinx gives a Python or JavaScript entry is its full dotted name
-(`demo.links.Guide.address`). Other domains may mangle it (C++).
+The `id` Sphinx gives a Python entry is its full dotted name (`demo.links.Guide.address`), and
+a JavaScript entry's usually is (`$.getJSON` under a module becomes `jmod.-.getJSON`). Other
+domains prefix or mangle it: C++ `_CPPv43Foo`, an option `cmdoption-v`, C `c.my_func`.
 
 ## R7. The entry link's accessible name
 
@@ -136,6 +138,14 @@ signature and maths rules to those roles, so a later edit could introduce an unm
 Typesetting happens in the reader's browser, so no server-side test sees typeset maths. Tests
 cover what the server decides: which pages carry the two script tags and in what order, that the
 notation reaches the page as written inside `.math`, the scroll region and its name, link names
-and targets. What only a browser shows (SC-003 typeset output, SC-004 at 320 pixels, the theme
-switch) is checked in a browser before the pull request is marked ready, and recorded in
-`progress.md`.
+and targets. What only a browser shows is checked in a browser before the pull request is marked ready, and
+recorded in `progress.md`:
+
+- typeset output on the maths page, with the equation region in place (SC-003), including that
+  each container still carries speech (FR-013) and that the formula with a mistake does not stop
+  the others (FR-011)
+- no sideways scrolling of the page at 320 pixels, on the reference page and the maths page
+  (SC-004)
+- the switch between the light and dark themes (FR-017)
+- what a reader sees in "On this page" for a heading that holds maths
+- the source listing page and its links back to the documentation, in both themes
