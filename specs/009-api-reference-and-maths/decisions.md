@@ -78,17 +78,20 @@ step by the host project (FR-019). A page with no maths loads nothing for it (FR
 documentation hold no maths, and FS-007 already set the expectation that a page does not load
 script it has no use for.
 
-## D6. Left to the plan: where the typesetting comes from
+## D6. Maths typesetting is fetched from a CDN for now
 
 **Ambiguous:** Whether whatever typesets the maths is shipped with the package, served by the
 host project, or fetched by the reader's browser from another site.
 
-**Chosen:** Not decided here. The specification says only what the reader sees.
+**Chosen:** Fetched by the reader's browser from the jsDelivr CDN, the address Sphinx itself uses
+by default. The maintainer decided this when reviewing the prototype on 2026-10-02: "CDN is fine
+for now".
 
-**Why:** It is a choice of tool and delivery, which belongs to planning. It is listed as an open
-risk on the pull request because it has a consequence a maintainer may care about: a documentation
-app behind a sign-in, or on a network with no outside access, should not depend on a third-party
-site to show its equations. The plan should weigh that.
+**Why:** It needs no new dependency and nothing from the host project, and it matches what a
+Sphinx HTML build of the same docs would do. The cost is that a documentation app on a network
+with no outside access shows the notation as written and not typeset, which the specification
+already treats as a readable state (FR-011). The README should say so. Shipping the typesetting
+with the package stays open as a later change.
 
 ## D7. Contrast is this package's job for the combinations it creates
 

@@ -69,9 +69,9 @@ Each is worth opening in the light and the dark theme, and at a phone's width.
 ## What the prototype faked
 
 - **Where the typesetting comes from.** The maths page loads MathJax 4 from the jsDelivr CDN, the
-  address Sphinx itself uses by default. Whether the package ships it, the host project serves it
-  or the reader's browser fetches it is undecided, and a documentation app on a closed network
-  would show untypeset maths with this prototype.
+  address Sphinx itself uses by default. The maintainer has accepted this for now (see
+  `decisions.md`, D6), so the build keeps it. What remains for the build is to say so in the
+  README, because a documentation app on a closed network shows untypeset maths.
 - **The check for maths** is a search of the body for `class="math`. It would also match a code
   sample that contains those characters.
 - **`?typeset=off`** exists only so the untypeset state can be looked at without turning scripts
@@ -105,6 +105,15 @@ build keeps whatever is approved.
 - An equation on its own line is centred, with its number at the end of the line in the muted
   colour.
 - Before typesetting, and without it, the author's notation is shown in the code font.
+
+Review, 2026-10-02:
+
+- Every equation on its own line showed a vertical scrollbar. Scrolling was meant for the wide
+  equation alone, and sideways only. Fixed: an equation's area now scrolls sideways when it is
+  wider than the page and never vertically.
+- Fetching the typesetting from the CDN is accepted for now.
+- The field labels and the outline on a linked-to entry or equation are approved as built.
+- The prototype is approved with that fix.
 
 Settled by a rule and not by eye:
 
