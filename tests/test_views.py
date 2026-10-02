@@ -6,7 +6,7 @@ import re
 import shutil
 import sys
 from html import unescape
-from urllib.parse import urljoin
+from urllib.parse import urldefrag, urljoin
 
 import pytest
 from bs4 import BeautifulSoup
@@ -506,6 +506,21 @@ class TestWideContent:
         response = client.get("/docs/content/")
 
         assert 'aria-label="Release schedule"' in response.content.decode()
+
+    def test_every_equation_of_a_page_holds_one_focusable_named_region(
+        self, client, db, reference_app
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        equations = soup.select("div.math")
+        assert len(equations) == 3
+        for equation in equations:
+            regions = equation.select('[role="region"]')
+            assert len(regions) == 1
+            assert regions[0]["tabindex"] == "0"
+            assert regions[0]["aria-label"]
+            assert regions[0].find_parent("div", class_="math") is equation
 
 
 class TestHeadingLinks:
@@ -1491,3 +1506,201 @@ class TestReadingAfterARebuild:
         assert self.front_page(client).find("a", rel="next")["href"] == (
             "/docs/inserted/"
         )
+
+
+class TestEntryLinks:
+    @pytest.fixture
+    def page(self, client, db, reference_app) -> BeautifulSoup:
+        response = client.get("/docs/api/")
+        return BeautifulSoup(response.content, "html.parser")
+
+    def test_every_entry_holds_a_heading_link_to_itself(self, page) -> None:
+        entries = page.select("dt.sig-object[id]")
+
+        assert entries
+        for each in entries:
+            link = each.select_one("a.headerlink")
+            assert link["href"] == f"#{each['id']}"
+
+    def test_every_entry_link_has_a_name(self, page) -> None:
+        links = [each.select_one("a.headerlink") for each in page.select("dt[id]")]
+
+        assert links
+        assert all(link["aria-label"] for link in links)
+
+    def test_no_two_heading_links_of_the_page_share_a_name(self, page) -> None:
+        names = [link["aria-label"] for link in page.select("a.headerlink")]
+
+        assert len(names) > len(page.select("dt.sig-object[id]"))
+        assert len(names) == len(set(names))
+
+    def test_a_reference_in_a_description_leads_to_an_entry_on_the_page(
+        self, page
+    ) -> None:
+        description = page.select_one(
+            'dt[id="demo.links.page_address"]'
+        ).find_next_sibling("dd")
+
+        link = description.select_one("a.reference.internal[href]")
+        assert page.find("dt", id=urldefrag(link["href"])[1])
+
+
+class TestMaths:
+    SETTINGS_FILE = "mvp_sphinx/maths.js"
+    NOTATIONS = [
+        r"\(a^2 + b^2 = c^2\)",
+        r"\[e^{i\pi} + 1 = 0\]",
+        r"\[x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}\]",
+        r"\[\sum_{k=1}^{n} k = \frac{n(n+1)}{2}\]",
+    ]
+    PLACES = {
+        "note": ".admonition.note",
+        "table cell": "table td",
+        "list item": "ul li",
+        "heading": "h2",
+    }
+
+    @staticmethod
+    def scripts(response) -> list[dict[str, str]]:
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        return [
+            {**tag.attrs, "src": tag["src"]}
+            for tag in soup.find_all("script", src=True)
+        ]
+
+    def settings_scripts(self, response) -> list[dict[str, str]]:
+        return [
+            tag
+            for tag in self.scripts(response)
+            if tag["src"] == static(self.SETTINGS_FILE)
+        ]
+
+    def library_scripts(self, response) -> list[dict[str, str]]:
+        return [
+            tag for tag in self.scripts(response) if "cdn.jsdelivr.net" in tag["src"]
+        ]
+
+    def test_a_page_with_maths_loads_the_settings_then_the_library(
+        self, client, db, reference_app
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        settings, library = (
+            self.settings_scripts(response),
+            self.library_scripts(response),
+        )
+        assert len(settings) == len(library) == 1
+        assert "defer" in library[0]
+        assert "defer" not in settings[0]
+        order = [tag["src"] for tag in self.scripts(response)]
+        assert order.index(settings[0]["src"]) < order.index(library[0]["src"])
+
+    @pytest.mark.parametrize("address", ["/docs/plain/", "/docs/api/"])
+    def test_a_page_without_maths_loads_neither_script(
+        self, client, db, reference_app, address
+    ) -> None:
+        response = client.get(address)
+
+        assert response.status_code == 200
+        assert self.settings_scripts(response) == []
+        assert self.library_scripts(response) == []
+
+    def test_a_page_of_the_host_loads_neither_script(
+        self, client, db, reference_app
+    ) -> None:
+        response = client.get(reverse("overview"))
+
+        assert response.status_code == 200
+        assert self.settings_scripts(response) == []
+        assert self.library_scripts(response) == []
+
+    @pytest.mark.parametrize("notation", NOTATIONS)
+    def test_each_notation_reaches_the_response_as_written_in_a_math_element(
+        self, client, db, reference_app, notation
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        holders = [m for m in soup.select(".math") if notation in m.get_text()]
+        assert len(holders) == 1
+
+    @pytest.mark.parametrize("place", PLACES)
+    def test_maths_in_a_place_inside_the_page_is_in_a_math_element(
+        self, client, db, reference_app, place
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        article = soup.select_one("article")
+        assert article.select(f"{self.PLACES[place]} .math")
+
+    def test_the_maths_page_is_served_when_sphinx_cannot_be_imported(
+        self, client, db, reference_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        response = client.get("/docs/maths/")
+
+        assert response.status_code == 200
+        assert len(self.library_scripts(response)) == 1
+
+
+class TestNumberedEquations:
+    @staticmethod
+    def soup(client) -> BeautifulSoup:
+        response = client.get("/docs/maths/")
+        return BeautifulSoup(response.content.decode(), "html.parser")
+
+    @staticmethod
+    def numbered(soup) -> list:
+        return soup.select("article div.math[id]")
+
+    def test_each_labelled_equation_has_an_id_and_its_number_links_to_it(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        equations = self.numbered(soup)
+        assert len(equations) == 2
+        for equation in equations:
+            link = equation.select_one("span.eqno > a.headerlink[href]")
+            assert urldefrag(link["href"])[1] == equation["id"]
+
+    def test_the_link_in_a_number_is_named_with_the_number(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        for equation in self.numbered(soup):
+            eqno = equation.select_one("span.eqno")
+            number = str(eqno.contents[0]).strip()
+            name = unescape(eqno.select_one("a.headerlink")["aria-label"])
+            assert number
+            assert number in name
+
+    def test_two_equations_links_have_different_names(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        names = [
+            equation.select_one("span.eqno a.headerlink")["aria-label"]
+            for equation in self.numbered(soup)
+        ]
+        assert len(names) == 2
+        assert len(set(names)) == 2
+
+    def test_each_reference_to_an_equation_leads_to_an_equation_of_the_page(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        references = soup.select("article a.reference.internal[href^='#']")
+        equations = {equation["id"] for equation in self.numbered(soup)}
+        assert len(references) == 2
+        assert {urldefrag(link["href"])[1] for link in references} == equations

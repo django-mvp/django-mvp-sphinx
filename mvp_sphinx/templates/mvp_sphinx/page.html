@@ -28,3 +28,10 @@
     </c-container>
   </c-page>
 {% endblock content %}
+{% block extra_js %}
+  {{ block.super }}
+  {% if has_maths %}
+    <script src="{% static 'mvp_sphinx/maths.js' %}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+  {% endif %}
+{% endblock extra_js %}

@@ -468,6 +468,14 @@ load them: `mvp_sphinx/content.css` styles what Sphinx writes into the page, and
 `mvp_sphinx/page.css` places the "On this page" list beside it. Sphinx's own
 stylesheets are never used.
 
+Reference entries, the documented functions, classes and other objects that
+`autodoc` writes and that you write by hand with directives such as
+`.. py:function::`, are styled from the same theme with nothing to configure.
+Each signature sits in a bar in the code colours, its description hangs from a
+rule beneath it, and entries inside other entries read as inside them. This
+holds for any language Sphinx documents, and it makes no difference whether an
+entry was generated or typed.
+
 A heading you follow a link to lands 5rem below the top of the window, and the
 "On this page" list sticks at the same distance, so both clear django-mvp's
 top bar. django-mvp doesn't publish the bar's height, so if yours is taller,
@@ -483,13 +491,19 @@ Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
 wraps each table in a scrolling region that takes keyboard focus and is named by
 the table's caption, or "Table" when it has none, so a table wider than the
 page scrolls sideways for a reader using only a keyboard and a screen reader
-announces what the region holds. It also names each heading link (the ¶ Sphinx
+announces what the region holds. An equation set out on its own line gets the
+same treatment, named "Equation" or, when it is numbered, "Equation (1)", so a
+wide equation can be scrolled from the keyboard before and after it is typeset;
+its number stays outside the region. It also names each heading link (the ¶ Sphinx
 puts beside a section heading, a glossary term or a caption) with the link's own
 title and the heading's text, such as "Link to this heading: Installing", so a
-screen reader tells one link from the next. Everything else in the body reaches
-the page exactly as Sphinx wrote it. `PageView` applies it and hands the result
-to the template as `body`, so a `PageView` subclass gets it too; to use it elsewhere,
-call `BodyRewriter.rewrite(markup)`.
+screen reader tells one link from the next. A reference entry's link is named by
+the entry and not by its whole signature, such as "Link to this definition:
+demo.links.page_address", so a page of entries reads as a list of names.
+Everything else in the body reaches the page exactly as Sphinx wrote it.
+`PageView` applies it and hands the result to the template as `body`, so a
+`PageView` subclass gets it too; to use it elsewhere, call
+`BodyRewriter.rewrite(markup)`.
 
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
 block so both stylesheets still reach the page, render `{{ body }}` rather than
@@ -509,6 +523,38 @@ caller of its own does the same:
   <link rel="stylesheet" href="{% static 'yourproject/docs.css' %}">
 {% endblock styles %}
 ```
+
+### Maths
+
+Notation written with the `math` role or directive is typeset by
+[MathJax](https://www.mathjax.org/) 4, in the reader's browser. Sphinx's own HTML
+build uses the same library from the same place, and so does this package: the
+page loads it from the jsDelivr CDN, at `https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js`.
+Typeset maths takes its colours from your theme and follows light and dark. Notation
+MathJax cannot read, such as an unknown command, is shown in the theme's
+error colour and not in MathJax's red.
+
+Only a page that holds maths loads the library, together with the small settings
+file `mvp_sphinx/maths.js` that tells it to look only inside what Sphinx marked
+as maths, so nothing else on the page, your own shell included, is read as
+notation. Every other page loads neither. It works for a docs build made with
+Sphinx's default settings (`html_math_renderer` left alone, so notation reaches
+the page as `\(...\)` and `\[...\]`). A build that renders maths as images shows
+the images. The library is still loaded on those pages and finds nothing to
+typeset.
+
+If the reader's network has no outside access, or your site sends a content
+security policy that does not allow `cdn.jsdelivr.net`, the library does not load.
+(A policy has to allow that origin for scripts and fonts, and allow inline
+styles, for typeset maths to show.)
+The reader then sees the notation as written, in the code font, and the rest of
+the page is unaffected.
+
+The script runs in your own pages, with the reader's session, signed-in readers
+included. The address follows MathJax's newest 4.x release and is loaded without
+an integrity check, so what runs can change without a release of this package. If your project does not accept a third-party script, or needs the
+library from another source, override `mvp_sphinx/page.html` and write your own
+`extra_js` block, which is where the two script tags are.
 
 ## Public surface
 
@@ -561,7 +607,12 @@ For a custom view or template:
 - `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
   page's `toc` value into nested headings.
 - `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
-  names table regions and heading links in a page body.
+  names table regions, equation regions and heading links in a page body.
+  `BodyRewriter.parse(markup)` returns the parser itself: `splice()` gives the
+  same rewritten body, and `has_maths` says whether the body holds maths.
+  `mvp_sphinx.page_body.Equation` is the parser's own record of where one
+  equation's number and notation sit while it reads, and nothing a project needs
+  to build.
 - `mvp_sphinx.search.DocsSearch(build)`, given a `DocsBuild`, searches it.
   `results(query)` lists the pages that hold every word of `query`, best match
   first, each with its `title`, `path`, `anchor` and `passage`, or returns `None`
@@ -595,6 +646,8 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 - `mvp_sphinx/content.css` is the stylesheet page content uses, and
   `mvp_sphinx/page.css` the one that places "On this page" and sets
   `--mvp-sphinx-header-clearance`.
+- `mvp_sphinx/maths.js` holds the settings for the maths typesetting. A page
+  with maths loads it before the library.
 
 ### Settings
 
