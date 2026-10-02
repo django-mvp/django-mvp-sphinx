@@ -352,3 +352,213 @@
 .mvp-sphinx-content .menuselection {
   font-weight: 600;
 }
+
+/* Reference entries: what Sphinx writes for a documented function, class or
+   other object, in any language. The signature is a bar in the code colours,
+   and the description hangs from a rule below it, so an entry inside another
+   reads as inside it. */
+.mvp-sphinx-content dl:has(> dt.sig-object) {
+  margin-block: 2rem;
+}
+
+.mvp-sphinx-content dd > dl:has(> dt.sig-object) {
+  margin-block: 1.5rem;
+}
+
+/* A long signature wraps between its parts and hangs its later lines, so it
+   never has to scroll sideways. */
+.mvp-sphinx-content dt.sig-object {
+  margin-top: 0;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border-radius: var(--radius-box);
+  background-color: var(--mvp-sphinx-code-bg);
+  color: var(--mvp-sphinx-code-text);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+  font-weight: 400;
+  line-height: 1.6;
+  text-indent: -1.5rem;
+  overflow-wrap: anywhere;
+}
+
+.mvp-sphinx-content dt.sig-object:target {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.mvp-sphinx-content dt.sig-object .sig-name {
+  font-weight: 700;
+}
+
+.mvp-sphinx-content dt.sig-object .sig-prename,
+.mvp-sphinx-content dt.sig-object .sig-return-icon {
+  color: var(--mvp-sphinx-muted);
+}
+
+.mvp-sphinx-content dt.sig-object .property .k,
+.mvp-sphinx-content dt.sig-object > .property:first-child {
+  color: var(--mvp-sphinx-code-keyword);
+}
+
+.mvp-sphinx-content dt.sig-object em {
+  font-style: normal;
+}
+
+.mvp-sphinx-content dt.sig-object abbr {
+  text-decoration: none;
+}
+
+.mvp-sphinx-content dt.sig-object .default_value {
+  color: var(--mvp-sphinx-code-string);
+}
+
+/* The link to an entry's source sits at the end of the signature's last line. */
+.mvp-sphinx-content dt.sig-object .viewcode-link,
+.mvp-sphinx-content .viewcode-back {
+  float: inline-end;
+  margin-inline-start: 0.75rem;
+  font-family: var(--font-sans, ui-sans-serif, sans-serif);
+  text-indent: 0;
+}
+
+.mvp-sphinx-content dt.sig-object + dd {
+  margin-top: 0.75rem;
+  margin-inline-start: 0.75rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid var(--color-base-300);
+}
+
+.mvp-sphinx-content dt.sig-object + dd:empty {
+  display: none;
+}
+
+.mvp-sphinx-content dt.sig-object + dd > :first-child {
+  margin-top: 0;
+}
+
+.mvp-sphinx-content dt.sig-object + dd > :last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 40rem) {
+  .mvp-sphinx-content dt.sig-object + dd {
+    margin-inline-start: 0.25rem;
+    padding-inline-start: 0.625rem;
+  }
+}
+
+/* Parameters, return values and raised errors: a label, then what it lists. */
+.mvp-sphinx-content dl.field-list {
+  margin-block: 1rem;
+}
+
+.mvp-sphinx-content dl.field-list > dt {
+  margin-top: 1rem;
+  color: var(--mvp-sphinx-muted);
+  font-size: 0.8125em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.mvp-sphinx-content dl.field-list > dt .colon {
+  display: none;
+}
+
+.mvp-sphinx-content dl.field-list > dd {
+  margin-top: 0.25rem;
+  padding-inline-start: 0;
+}
+
+.mvp-sphinx-content dl.field-list > dd > ul {
+  margin-block: 0;
+  padding-inline-start: 0;
+  list-style: none;
+}
+
+.mvp-sphinx-content dl.field-list > dd > ul > li {
+  margin-block: 0.25rem;
+  padding-inline-start: 0;
+}
+
+.mvp-sphinx-content dl.field-list > dd p {
+  margin-block: 0.25rem;
+}
+
+.mvp-sphinx-content dl.field-list > dd p > strong:first-child {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+}
+
+/* A summary of documented objects keeps each name on one line. */
+.mvp-sphinx-content table.autosummary td:first-child {
+  white-space: nowrap;
+}
+
+.mvp-sphinx-content table.autosummary td > p {
+  margin-block: 0;
+}
+
+/* Maths. Until it is typeset, and where it cannot be, the notation shows as
+   the author wrote it, in the code font. Typeset maths takes the colour of the
+   text it sits in. */
+.mvp-sphinx-content .math {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875em;
+}
+
+.mvp-sphinx-content .math:has(mjx-container) {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* An equation on its own line: the notation scrolls inside its own area when
+   it is wider than the page, and its number stays at the end of the line. */
+.mvp-sphinx-content div.math {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 1rem;
+  margin-block: 1.5rem;
+  overflow-x: auto;
+}
+
+.mvp-sphinx-content div.math:has(mjx-container) {
+  overflow-x: visible;
+}
+
+.mvp-sphinx-content div.math > mjx-container {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding-block: 0.25rem;
+  overflow-x: auto;
+}
+
+.mvp-sphinx-content div.math > mjx-container:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.mvp-sphinx-content div.math:target {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 0.5rem;
+  border-radius: var(--radius-box);
+}
+
+.mvp-sphinx-content .eqno {
+  flex: none;
+  color: var(--mvp-sphinx-muted);
+  font-family: var(--font-sans, ui-sans-serif, sans-serif);
+  font-size: 1rem;
+}
+
+.mvp-sphinx-content div.math:hover .headerlink {
+  opacity: 1;
+}
+
+/* A formula the typesetter could not read keeps the theme's colours. */
+.mvp-sphinx-content mjx-merror {
+  background-color: inherit;
+  color: var(--mvp-sphinx-admonition-dangerous);
+}
