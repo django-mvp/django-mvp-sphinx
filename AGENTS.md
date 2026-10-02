@@ -5,8 +5,10 @@ Serve a project's Sphinx documentation inside its django-mvp application shell.
 The package is for reading a docs build the host project has already produced
 and serving its pages through a documentation app: the pages render in the host's
 shell and theme, and the contents become the app sidebar's menu. Serving never
-imports Sphinx. The only Sphinx code is the extension that writes the
-navigation file during the build. The `build_docs` management command runs the
+imports Sphinx. Two modules import Sphinx, both only during a build: the
+extension in `mvp_sphinx/navigation.py` that writes the navigation file, and the
+`live-example` directive in `mvp_sphinx/live_example.py` that the extension
+registers. The `build_docs` management command runs the
 build on demand, as a separate process, and imports no Sphinx either. `CONSTITUTION.md` Article XII lists what stays
 out of scope. The contents menu is built: the extension in
 `mvp_sphinx/navigation.py` writes the navigation file during the build, and
@@ -73,6 +75,13 @@ sign in as `staff.user@example.com`.
 The guide's Reference part documents `demo/links.py` with `autodoc`, which is why
 `demo/docs/conf.py` puts the repository on `sys.path`. Nothing in the site calls that
 module. It exists so the guide has reference entries of every kind to draw.
+
+The guide's Examples part shows live examples of the demo's own pages. Their views,
+form and templates are in `demo/examples/` and `demo/templates/demo/examples/`, and the
+templates extend `mvp_sphinx/example.html`, so each draws without the shell. The demo
+keeps `X_FRAME_OPTIONS = "SAMEORIGIN"` so the frames show. The guide's pages name line
+ranges of those files, so a template or view edit that moves lines needs the guide's
+`.rst` ranges updated with it.
 
 **Adding a page** takes four things: a view in `demo/views.py` on
 `mvp.views.MVPTemplateView`, a route in `demo/urls.py`, a template extending

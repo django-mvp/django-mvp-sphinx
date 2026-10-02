@@ -106,6 +106,20 @@ shows the same search again.
 _Avoid_: search page (Sphinx's own search page is the one this replaces), search
 results view.
 
+**Live example**:
+A page of the host project shown running in a frame inside a page, beside the
+code that makes it. It is the host project's own page at its own address and not
+a copy, so it answers as the host project does, to the reader's own session. It
+has that address and one or more example sources.
+_Avoid_: demo, embed, preview (a preview is a copy, and a live example is the
+page itself), playground (the reader cannot change the source).
+
+**Example source**:
+The code shown beside a live example: a file, or part of one, as it was when the
+docs build was made. Each has a name the reader sees and a language. It is a copy
+and a rebuild refreshes it.
+_Avoid_: snippet, listing, code sample.
+
 ## Terms deliberately not used
 
 **Theme**, for anything this package ships. The host project's django-mvp theme

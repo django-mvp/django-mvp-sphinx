@@ -10,7 +10,8 @@ docs build, with the root document's title. The documentation app's sidebar
 is drawn from that file, so serving
 never needs Sphinx. Other builders write nothing.
 
-This is the only module of the package that imports Sphinx.
+Two modules of the package import Sphinx: this one and ``mvp_sphinx.live_example``,
+the directive it registers.
 """
 
 import json

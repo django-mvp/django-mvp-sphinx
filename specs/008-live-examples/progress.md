@@ -86,3 +86,26 @@ Next: T003.
 Watch: the Sphinx-blocked test cannot catch a top-level Sphinx import in `mvp_sphinx/examples.py`,
 because the module is already imported when the test blocks Sphinx; it catches a lazy one. The same
 holds for the existing tests of that pattern.
+
+## 2026-10-02T16:45:00Z · Implementer US1 · T003
+
+Did: README "Live examples" section under "Using it" (what one is; the marker with address,
+`:title:` and one source file; writing the example's page on `mvp_sphinx/example.html` with a short
+template and that a page with the shell shows with the shell; `X_FRAME_OPTIONS = "SAMEORIGIN"` with
+the reason, that it covers the sign-in and error pages, and the `frame-ancestors` note; that the
+source is a copy made at build time; that the host's own rule for the address decides who sees the
+example). README Public surface: the directive, `LiveExamples` and `ExampleReader`, `example.html`,
+the `live_example` component, `example.css`, and the `body_parts` and `has_examples` context values.
+CHANGELOG Unreleased/Added: one entry. CONTEXT.md: "Live example" and "Example source" with
+`_Avoid_` lines. AGENTS.md and the `navigation.py` docstring: two modules import Sphinx; AGENTS.md
+also describes the demo's example views. `makemessages -l en` run, 5 new strings from the
+component. `pyproject.toml`: `mvp_sphinx/live_example.py` added to `[tool.forge.docs] exempt-paths`
+beside `navigation.py`, as the brief directed. The README and CHANGELOG text was read against the
+humanizer skill's patterns; no change followed.
+Verified: no test for this task. `uv run pre-commit run --all-files` and `uv run mypy` passed after
+the edits. The `forge` command is not installed in this environment, so the docs step was not run
+here; the three names the brief lists (`LiveExample`, `LiveExamples`, module `logger`) are now
+covered by the README entry for `LiveExamples` and the exemption for `live_example.py`.
+`ExampleReader` is a new public name from T002 and has a README line too.
+Next: full verify, then the report.
+Watch: no README line shows a line range or several sources; T004 and T005 own those.
