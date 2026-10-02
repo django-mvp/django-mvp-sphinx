@@ -580,6 +580,12 @@ Rebuild the docs and the page shows the frame with the file beside it. A page
 with an example loads one more stylesheet, `mvp_sphinx/example.css`; other pages
 load nothing new.
 
+Each example has two links above the frame. "Start again" loads the example's
+address in the frame again, which puts the page back as it was when the reader
+arrived, and "Open on its own" opens the address as a page of its own. Both are
+plain links, and the tabs for several files are radio inputs, so all of them work
+with scripts off.
+
 #### Several files, and parts of files
 
 List more than one file, one to a line, and the reader gets a tab for each, in the

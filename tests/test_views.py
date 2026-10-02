@@ -1845,3 +1845,54 @@ class TestLiveExamples:
 
         assert len(radios) == 4
         assert len({radio["name"] for radio in radios}) == 2
+
+    def test_start_again_is_a_link_aimed_at_the_examples_own_frame(
+        self, client, db, examples_app
+    ) -> None:
+        example = self.soup(client, "single/").select_one("section.mvp-sphinx-example")
+
+        links = example.select("a[target]")
+
+        assert len(links) == 1
+        assert links[0]["target"] == example.select_one("iframe")["name"]
+        assert links[0]["href"] == "/examples/contact/"
+
+    def test_open_on_its_own_is_a_link_to_the_address_with_no_target(
+        self, client, db, examples_app
+    ) -> None:
+        example = self.soup(client, "single/").select_one("section.mvp-sphinx-example")
+
+        links = [
+            link
+            for link in example.select("a[href]")
+            if link["href"] == "/examples/contact/" and not link.has_attr("target")
+        ]
+
+        assert len(links) == 1
+
+    def test_each_start_again_on_a_page_names_its_own_frame(
+        self, client, db, examples_app
+    ) -> None:
+        examples = self.soup(client, "two/").select("section.mvp-sphinx-example")
+
+        targets = [example.select_one("a[target]")["target"] for example in examples]
+
+        assert targets == [example.select_one("iframe")["name"] for example in examples]
+        assert len(set(targets)) == 2
+
+    @pytest.mark.parametrize("page", ["single/", "two/", "several/", "missing/"])
+    def test_the_component_holds_no_script_and_no_inline_handler(
+        self, client, db, examples_app, page
+    ) -> None:
+        examples = self.soup(client, page).select("section.mvp-sphinx-example")
+
+        assert examples
+        for example in examples:
+            assert example.select("script") == []
+            handlers = [
+                attribute
+                for element in example.find_all(True)
+                for attribute in element.attrs
+                if attribute.startswith("on")
+            ]
+            assert handlers == []
