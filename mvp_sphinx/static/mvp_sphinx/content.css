@@ -564,5 +564,5 @@
 /* A formula the typesetter could not read keeps the theme's colours. */
 .mvp-sphinx-content mjx-merror {
   background-color: inherit;
-  color: var(--mvp-sphinx-admonition-dangerous);
+  color: var(--mvp-sphinx-code-error);
 }

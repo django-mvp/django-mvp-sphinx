@@ -521,6 +521,33 @@ caller of its own does the same:
 {% endblock styles %}
 ```
 
+### Maths
+
+Notation written with the `math` role or directive is typeset by
+[MathJax](https://www.mathjax.org/) 4, in the reader's browser. Sphinx's own HTML
+build uses the same library from the same place, and so does this package: the
+page loads it from the jsDelivr CDN, at `https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js`.
+Typeset maths takes its colours from your theme and follows light and dark. Notation
+MathJax cannot read, such as an unknown command, is shown in the theme's
+error colour and not in MathJax's red.
+
+Only a page that holds maths loads the library, together with the small settings
+file `mvp_sphinx/maths.js` that tells it to typeset only what Sphinx marked as
+maths. Every other page loads neither. It works for a docs build made with
+Sphinx's default settings (`html_math_renderer` left alone, so notation reaches
+the page as `\(...\)` and `\[...\]`). A build that renders maths as images shows
+the images, and the library has nothing to do.
+
+If the reader's network has no outside access, or your site sends a content
+security policy that does not allow `cdn.jsdelivr.net`, the library does not load.
+The reader then sees the notation as written, in the code font, and the rest of
+the page is unaffected.
+
+The script runs in your own pages, with the reader's session, signed-in readers
+included. If your project does not accept a third-party script, or needs the
+library from another source, override `mvp_sphinx/page.html` and write your own
+`extra_js` block, which is where the two script tags are.
+
 ## Public surface
 
 These are the names a project can use, grouped the way a project meets them.
@@ -606,6 +633,8 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 - `mvp_sphinx/content.css` is the stylesheet page content uses, and
   `mvp_sphinx/page.css` the one that places "On this page" and sets
   `--mvp-sphinx-header-clearance`.
+- `mvp_sphinx/maths.js` holds the settings for the maths typesetting. A page
+  with maths loads it before the library.
 
 ### Settings
 

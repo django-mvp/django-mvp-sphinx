@@ -456,3 +456,37 @@ class TestReferenceStylesheet:
         assert rules
         assert len(surfaces) > 1
         assert unreadable == []
+
+
+class TestMathsStylesheet:
+    HOOKS = ("math", "eqno", "mjx-")
+
+    @pytest.mark.parametrize("theme", THEMES)
+    def test_maths_text_is_readable_on_the_page_and_every_admonition(
+        self, stylesheet, theme
+    ) -> None:
+        own, colours = stylesheet.properties(), ColourMath.theme(theme)
+        surfaces = ["var(--color-base-100)"] + [
+            f"var({name})"
+            for name in own
+            if name.startswith("--mvp-sphinx-admonition-") and name.endswith("-bg")
+        ]
+
+        rules = [
+            rule
+            for hook in self.HOOKS
+            for rule in TestReferenceStylesheet.colours(stylesheet, hook)
+        ]
+        unreadable = [
+            (selector, surface)
+            for selector, value in rules
+            for surface in surfaces
+            if ColourMath.contrast(
+                ColourMath.resolve(value, own, colours),
+                ColourMath.resolve(surface, own, colours),
+            )
+            < MINIMUM_CONTRAST
+        ]
+        assert rules
+        assert len(surfaces) > 1
+        assert unreadable == []

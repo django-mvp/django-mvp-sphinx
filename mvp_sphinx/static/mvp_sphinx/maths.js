@@ -4,4 +4,8 @@ window.MathJax = {
     ignoreHtmlClass: "mvp-sphinx-content",
     processHtmlClass: "math",
   },
+  // An unknown command shows in the theme's error colour, not MathJax's red.
+  tex: {
+    noundefined: { color: "var(--mvp-sphinx-code-error)" },
+  },
 };

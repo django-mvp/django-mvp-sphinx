@@ -79,6 +79,13 @@ The line of a reference entry that names the object and shows how it is called
 or declared.
 _Avoid_: header, prototype, title.
 
+**Maths**:
+Mathematical notation an author wrote into a page, either inside a sentence or
+set out on its own line, optionally numbered. Sphinx marks it with the class
+`math`, and the reader's browser typesets it after the page loads.
+_Avoid_: equation (only notation on its own line is one), LaTeX
+(the notation is one input, not the thing the package serves).
+
 **Navigation file**:
 `navigation.json`, which this package's Sphinx extension writes into the docs
 build. It holds the whole contents and the front page's title, because
