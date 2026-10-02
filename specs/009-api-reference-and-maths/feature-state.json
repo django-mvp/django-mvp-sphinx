@@ -112,8 +112,17 @@
       "tasks": [
         {
           "id": "T004",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_page_body.py::TestMathsDetection",
+              "tests/test_views.py::TestMaths"
+            ],
+            "commands": [
+              "uv run pytest tests/test_page_body.py::TestMathsDetection tests/test_views.py::TestMaths -q -p no:warnings"
+            ]
+          }
         },
         {
           "id": "T005",

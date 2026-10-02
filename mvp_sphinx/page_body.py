@@ -20,6 +20,10 @@ class BodyRewriter(HTMLParser):
     malformed raw HTML from a ``raw`` directive may be wrapped wrongly or not at
     all.
 
+    It also notes whether the body holds maths: a start tag whose class list
+    includes ``math``, which is how Sphinx marks both inline and displayed
+    notation. Text inside a code sample is escaped, so it never counts.
+
     Every outermost ``<table>`` is wrapped in a named region that takes keyboard
     focus, so a table wider than the reading area scrolls sideways for a reader
     with no pointer. The region's name is the table's caption, or the word
@@ -72,6 +76,23 @@ class BodyRewriter(HTMLParser):
         self.table_start = 0
         self.caption_start: int | None = None
         self.caption_end: int | None = None
+        self.has_maths = False
+
+    @classmethod
+    def parse(cls, markup: str) -> "BodyRewriter":
+        """Read the whole body and return the parser that holds what it found.
+
+        Args:
+            markup: A page body as Sphinx wrote it.
+
+        Returns:
+            The parser, closed, with ``has_maths`` set and every insertion
+            recorded for ``splice``.
+        """
+        parser = cls(markup)
+        parser.feed(markup)
+        parser.close()
+        return parser
 
     @classmethod
     def rewrite(cls, markup: str) -> str:
@@ -83,10 +104,7 @@ class BodyRewriter(HTMLParser):
         Returns:
             The same markup with each insertion spliced in.
         """
-        parser = cls(markup)
-        parser.feed(markup)
-        parser.close()
-        return parser.splice()
+        return cls.parse(markup).splice()
 
     def position(self) -> int:
         """Return the offset in the markup where the parser stands."""
@@ -191,6 +209,8 @@ class BodyRewriter(HTMLParser):
         if heading_link:
             self.name_heading_link(attributes.get("title"))
         classes = (attributes.get("class") or "").split()
+        if "math" in classes:
+            self.has_maths = True
         if tag == "dt" and "sig-object" in classes:
             self.entry_id = attributes.get("id")
             self.entry_names = []

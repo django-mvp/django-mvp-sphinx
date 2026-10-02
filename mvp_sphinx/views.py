@@ -83,12 +83,12 @@ class PageView(PageMixin, TemplateView):
             raise Http404
         self.page_data = page
         # The body is the host's own docs build, trusted as it always was.
-        body = mark_safe(BodyRewriter.rewrite(page.get("body", "")))  # noqa: S308
-        # Prototype only: ?typeset=off shows a maths page as it reads before, or
-        # without, typesetting.
-        has_maths = 'class="math' in body and request.GET.get("typeset") != "off"
+        rewritten = BodyRewriter.parse(page.get("body", ""))
+        body = mark_safe(rewritten.splice())  # noqa: S308
         return self.render_to_response(
-            self.get_context_data(page_data=page, body=body, has_maths=has_maths)
+            self.get_context_data(
+                page_data=page, body=body, has_maths=rewritten.has_maths
+            )
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:

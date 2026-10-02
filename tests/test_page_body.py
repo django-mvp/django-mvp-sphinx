@@ -435,3 +435,55 @@ class TestEntryLinks:
         result = BodyRewriter.rewrite(api_body)
 
         assert re.sub(r' aria-label="[^"]*"', "", result) == api_body
+
+
+class TestMathsDetection:
+    @pytest.mark.parametrize(
+        "markup",
+        [
+            '<p>So <span class="math notranslate nohighlight">\\(x\\)</span>.</p>',
+            '<div class="math notranslate nohighlight">\n\\[x\\]</div>',
+            '<span class="eqno math">(1)</span>',
+        ],
+        ids=["inline", "display", "among other classes"],
+    )
+    def test_a_body_with_a_math_element_has_maths(self, markup) -> None:
+        assert BodyRewriter.parse(markup).has_maths is True
+
+    @pytest.mark.parametrize(
+        "markup",
+        [
+            "",
+            "<p>Plain prose and $5 and $6.</p>",
+            '<pre><span class="n">&lt;span class="math"&gt;\\(x\\)&lt;/span&gt;'
+            "</span></pre>",
+            '<span class="mathematics">x</span>',
+            '<span class="mathjax_process">x</span>',
+            '<span class="prefix-math">x</span>',
+        ],
+        ids=[
+            "empty",
+            "prose",
+            "a code sample showing the element",
+            "class starting with math",
+            "class starting with math and an underscore",
+            "class ending in math",
+        ],
+    )
+    def test_a_body_without_a_math_element_has_none(self, markup) -> None:
+        assert BodyRewriter.parse(markup).has_maths is False
+
+    @pytest.mark.parametrize(
+        "markup",
+        [
+            "",
+            TABLE,
+            CAPTIONED.format(text="Caption"),
+            '<p>So <span class="math">\\(x\\)</span>.</p>',
+            '<div class="math" id="equation-a">\n<span class="eqno">(1)</span>'
+            "\\[x\\]</div>",
+        ],
+        ids=["empty", "table", "caption", "inline maths", "numbered equation"],
+    )
+    def test_rewrite_returns_what_parse_splices(self, markup) -> None:
+        assert BodyRewriter.rewrite(markup) == BodyRewriter.parse(markup).splice()

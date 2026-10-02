@@ -1528,3 +1528,108 @@ class TestEntryLinks:
 
         link = description.select_one("a.reference.internal[href]")
         assert page.find("dt", id=urldefrag(link["href"])[1])
+
+
+class TestMaths:
+    SETTINGS_FILE = "mvp_sphinx/maths.js"
+    NOTATIONS = [
+        r"\(a^2 + b^2 = c^2\)",
+        r"\[e^{i\pi} + 1 = 0\]",
+        r"\[x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}\]",
+        r"\[\sum_{k=1}^{n} k = \frac{n(n+1)}{2}\]",
+    ]
+    PLACES = {
+        "note": ".admonition.note",
+        "table cell": "table td",
+        "list item": "ul li",
+        "heading": "h2",
+    }
+
+    @staticmethod
+    def scripts(response) -> list[dict[str, str]]:
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        return [
+            {**tag.attrs, "src": tag["src"]}
+            for tag in soup.find_all("script", src=True)
+        ]
+
+    def settings_scripts(self, response) -> list[dict[str, str]]:
+        return [
+            tag
+            for tag in self.scripts(response)
+            if tag["src"] == static(self.SETTINGS_FILE)
+        ]
+
+    def library_scripts(self, response) -> list[dict[str, str]]:
+        return [
+            tag for tag in self.scripts(response) if "cdn.jsdelivr.net" in tag["src"]
+        ]
+
+    def test_a_page_with_maths_loads_the_settings_then_the_library(
+        self, client, db, reference_app
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        settings, library = (
+            self.settings_scripts(response),
+            self.library_scripts(response),
+        )
+        assert len(settings) == len(library) == 1
+        assert "defer" in library[0]
+        assert "defer" not in settings[0]
+        order = [tag["src"] for tag in self.scripts(response)]
+        assert order.index(settings[0]["src"]) < order.index(library[0]["src"])
+
+    @pytest.mark.parametrize("address", ["/docs/plain/", "/docs/api/"])
+    def test_a_page_without_maths_loads_neither_script(
+        self, client, db, reference_app, address
+    ) -> None:
+        response = client.get(address)
+
+        assert response.status_code == 200
+        assert self.settings_scripts(response) == []
+        assert self.library_scripts(response) == []
+
+    def test_a_page_of_the_host_loads_neither_script(
+        self, client, db, reference_app
+    ) -> None:
+        response = client.get(reverse("overview"))
+
+        assert response.status_code == 200
+        assert self.settings_scripts(response) == []
+        assert self.library_scripts(response) == []
+
+    @pytest.mark.parametrize("notation", NOTATIONS)
+    def test_each_notation_reaches_the_response_as_written_in_a_math_element(
+        self, client, db, reference_app, notation
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        holders = [m for m in soup.select(".math") if notation in m.get_text()]
+        assert len(holders) == 1
+
+    @pytest.mark.parametrize("place", PLACES)
+    def test_maths_in_a_place_inside_the_page_is_in_a_math_element(
+        self, client, db, reference_app, place
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        article = soup.select_one("article")
+        assert article.select(f"{self.PLACES[place]} .math")
+
+    def test_the_maths_page_is_served_when_sphinx_cannot_be_imported(
+        self, client, db, reference_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        response = client.get("/docs/maths/")
+
+        assert response.status_code == 200
+        assert len(self.library_scripts(response)) == 1
