@@ -11,27 +11,3 @@
   top: var(--mvp-sphinx-header-clearance);
   max-height: calc(100vh - var(--mvp-sphinx-header-clearance) - 1rem);
 }
-
-/* A live example. The shell's stylesheet emits no height this size and no
-   breakpoint-scoped border, so both are set here. */
-.mvp-sphinx-example-frame {
-  height: 28rem;
-  border: 0;
-}
-
-.mvp-sphinx-example-code {
-  max-height: 26rem;
-}
-
-/* The source sits flush in its pane: no rounding or gap of its own. */
-.mvp-sphinx-example .highlight pre {
-  margin: 0;
-  border-radius: 0;
-}
-
-@media (min-width: 80rem) {
-  .mvp-sphinx-example-source {
-    border-top-width: 0;
-    border-inline-start-width: 1px;
-  }
-}

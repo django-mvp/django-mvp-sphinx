@@ -23,14 +23,14 @@
     {% endif %}
   </div>
   <div class="grid xl:grid-cols-2">
-    <div class="min-w-0">
+    <div class="mvp-sphinx-example-pane min-w-0">
       {% if example.available %}
-        <div class="skeleton rounded-none">
+        <div class="mvp-sphinx-example-holder skeleton rounded-none">
           <iframe src="{{ example.framed_address }}"
                   name="{{ example.id }}-frame"
                   title="{% if example.title %}{{ example.title }}{% else %}{% translate "Live example" %}{% endif %}"
                   loading="lazy"
-                  class="mvp-sphinx-example-frame block w-full"></iframe>
+                  class="mvp-sphinx-example-frame block"></iframe>
         </div>
       {% else %}
         <div class="p-4">

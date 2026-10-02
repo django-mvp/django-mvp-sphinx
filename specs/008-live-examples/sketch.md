@@ -43,8 +43,10 @@ Two pages of the demo guide, under "Live examples" in the sidebar:
   shows.
 - "Start again" must return the example to its first state with scripts off.
 - A build warning for a source file that does not exist, and for an address on another site.
-- The example's height. The prototype uses one fixed height and lets a taller example scroll
-  inside its frame.
+- The example's frame fills its pane beside a taller source, and is never shorter than one fixed
+  height. A taller example scrolls inside it.
+- Stylesheets that a returning reader's browser does not keep serving from an older copy after an
+  upgrade.
 
 ## What the prototype faked
 
@@ -52,7 +54,8 @@ Two pages of the demo guide, under "Live examples" in the sidebar:
   keeps that by posting to its full address and redirecting back to it. A link inside an example
   would lose it and bring the shell back inside the frame.
 - The demo's own `base.html` extends a new `mvp_sphinx/base.html` to get the shell-less rendering.
-  Whether a host project should have to do that is not decided.
+  The maintainer has ruled this out for the build: a host's `base.html` keeps extending
+  `mvp/base.html`, and another means has to be found (see `planning-notes.md`).
 - The demo sets `X_FRAME_OPTIONS = "SAMEORIGIN"` for the whole site.
 - The build passes examples to the served page as HTML comments in the page body, found again
   with a regular expression.
@@ -69,16 +72,19 @@ Two pages of the demo guide, under "Live examples" in the sidebar:
 
 ## What was ruled by eye
 
-Nothing has been reviewed yet. These are the taste choices made so far, each open to change:
+The maintainer reviewed the prototype on 2026-10-02 and approved it. The build may not undo these.
 
-- The example and its source sit in one bordered box with a title bar, set apart from the page's
-  text.
-- Example on the left and source on the right at the widest breakpoint, and stacked with the
-  example first below it.
-- Several source files are tabs, one visible at a time. A single file shows its name with no tabs.
-- "Start again" and "Open on its own" are quiet text buttons in the title bar, with no icons.
-- "Open on its own" opens in the same tab.
-- The unavailable notice is a soft warning in the example's place, and the title bar then has no
-  buttons.
-- While an example loads, its place shows the theme's skeleton shimmer at full height.
-- The source pane scrolls inside itself once it is taller than the example.
+- The arrangement as built is approved: one bordered box with a title bar, the example on the left
+  and its source on the right at the widest breakpoint, stacked with the example first below it,
+  tabs for several source files, quiet text buttons for "Start again" and "Open on its own", a soft
+  warning in the example's place when it is unavailable, and the skeleton while it loads.
+- The running example fills its pane. Beside a taller source pane it grows to the same height, so
+  the box never has an empty area under the frame. It is never shorter than its fixed height.
+- The frame's height stays fixed for now, and a taller example scrolls inside it.
+- Setting `X_FRAME_OPTIONS = "SAMEORIGIN"` is an accepted setup step for a host project, as long
+  as it is documented.
+- A host project's `base.html` keeps extending `mvp/base.html`. The prototype's way of dropping
+  the shell is not approved.
+- The example's styles are in a stylesheet of their own, `example.css`. In review the frame showed
+  at a browser's default height because the browser had kept an older copy of `page.css`, which
+  the prototype had added its rules to.
