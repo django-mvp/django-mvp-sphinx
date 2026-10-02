@@ -203,9 +203,9 @@ class LiveExample(SphinxDirective):
                 ``first-last`` or one number.
 
         Returns:
-            The source, or ``None`` for a blank line, a file that does not exist
-            or a range that is not inside the file, the latter two after a
-            warning naming the file.
+            The source, or ``None`` for a blank line, a file that does not
+            exist or is not UTF-8 text, or a range that is not inside the
+            file, each but the blank line after a warning naming the file.
         """
         line = line.strip()
         if not line:
@@ -222,7 +222,15 @@ class LiveExample(SphinxDirective):
                 location=self.get_location(),
             )
             return None
-        text = file.read_text(encoding="utf-8")
+        try:
+            text = file.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            logger.warning(
+                "live-example: source file %s is not UTF-8 text",
+                path,
+                location=self.get_location(),
+            )
+            return None
         if lines:
             start, _, end = lines.partition("-")
             first, last = int(start), int(end or start)

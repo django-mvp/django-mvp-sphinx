@@ -623,8 +623,8 @@ part of the marker:
   no scheme, host, backslash or space, so `https://host/x`, `//host/x`,
   `/\host/x` and `host/x` are all refused. The page gets no example and none of
   its sources.
-- A source file that does not exist. The message names the file, and the example
-  keeps its other sources.
+- A source file that does not exist, or that is not UTF-8 text. The message names
+  the file, and the example keeps its other sources.
 - A range that is reversed, zero, or past the end of the file. The message names
   the file, and that source is left out. A last word that is not a number is part
   of the path, so it is reported as a file that does not exist.

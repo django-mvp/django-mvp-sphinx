@@ -109,7 +109,25 @@ class TestParts:
         assert parts[2]["html"] == AFTER + damaged
 
     @pytest.mark.parametrize(
-        "address", ["/examples/status/", "/examples/status/?a=1#frag"]
+        "separator", ["\x0c", "\x0b", "\u2028", "\u2029", "\x85", "\x1c", "\r"]
+    )
+    def test_a_line_separator_other_than_a_newline_does_not_shift_the_cuts(
+        self, separator
+    ) -> None:
+        before = f"<p>be{separator}fore</p>\n"
+        source = f"<div><pre>x{separator}y</pre></div>"
+        body = before + example_markup(sources=(("a.py", source),)) * 2 + AFTER
+
+        parts = LiveExamples.parts(body)
+
+        assert parts[0]["html"] == before
+        assert parts[1]["example"]["sources"][0]["html"] == source
+        assert parts[3]["example"]["sources"][0]["html"] == source
+        assert parts[4]["html"] == AFTER
+
+    @pytest.mark.parametrize(
+        "address",
+        ["/examples/status/", "/examples/status/?a=1#frag", "/examples/%73tatus/"],
     )
     def test_an_address_the_urlconf_has_is_available(self, address) -> None:
         example = LiveExamples.parts(example_markup(address=address))[1]["example"]

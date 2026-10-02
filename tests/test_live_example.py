@@ -305,6 +305,24 @@ class TestLiveExampleWarnings:
         assert "gone.py" in warned[0]
         assert source_names(page) == ["kept.py"]
 
+    def test_a_source_that_is_not_text_is_a_warning_and_the_other_sources_are_kept(
+        self, tmp_path, sphinx_build, capsys
+    ) -> None:
+        source = write_source(
+            tmp_path / "source",
+            example_page("picture.bin", "kept.py"),
+            {"kept.py": "a = 1\n"},
+        )
+        (source / "picture.bin").write_bytes(b"\xff\xfe\x00binary")
+
+        page = body(sphinx_build(source), "index")
+
+        warned = build_warnings(capsys)
+        assert len(warned) == 1
+        assert "index.rst" in warned[0]
+        assert "picture.bin" in warned[0]
+        assert source_names(page) == ["kept.py"]
+
     def test_an_example_whose_only_source_is_missing_is_a_warning_and_no_example(
         self, example_build, capsys
     ) -> None:

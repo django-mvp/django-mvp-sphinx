@@ -5,7 +5,7 @@ Imports neither Sphinx nor docutils: serving reads only the docs build's text.
 
 from html.parser import HTMLParser
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from django.urls import Resolver404, get_script_prefix, resolve
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -34,9 +34,11 @@ class ExampleReader(HTMLParser):
         """
         super().__init__(convert_charrefs=True)
         self.body = body
+        # The parser counts a line at each newline and at nothing else, so the
+        # table does the same: a form feed in a source is not a new line to it.
         self.lines = [0]
-        for line in body.splitlines(keepends=True):
-            self.lines.append(self.lines[-1] + len(line))
+        for line in body.split("\n"):
+            self.lines.append(self.lines[-1] + len(line) + 1)
         self.depth = 0
         self.examples: list[dict[str, Any]] = []
         self.example: dict[str, Any] | None = None
@@ -170,12 +172,13 @@ class LiveExamples:
 
         Returns:
             ``True`` when the address names this site and the current urlconf
-            resolves its path, with the query, the fragment and the script
-            prefix taken off. The page itself is never requested.
+            resolves its decoded path, with the query, the fragment and the
+            script prefix taken off. The page itself is never requested.
         """
         if not url_has_allowed_host_and_scheme(address, allowed_hosts=None):
             return False
-        path = urlsplit(address).path
+        # Routes match the decoded path, as they do for a request.
+        path = unquote(urlsplit(address).path)
         prefix = get_script_prefix()
         if not path.startswith(prefix):
             return False
