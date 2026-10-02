@@ -2,7 +2,7 @@
   "feature": "009-api-reference-and-maths",
   "branch": "009-api-reference-and-maths",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "DESIGN_REVIEW",
+  "state": "IMPLEMENT",
   "state_history": [
     {
       "state": "QUEUED",
@@ -18,6 +18,11 @@
       "state": "DESIGN_REVIEW",
       "at": "2026-10-02T09:16:33Z",
       "note": "one reviewer, three lenses, on plan.md, tasks.md and research.md at 706504c"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-10-02T09:23:38Z",
+      "note": "plan gate open; design review approved, seven corrections applied"
     }
   ],
   "gates": {
@@ -38,12 +43,25 @@
       ]
     },
     "plan": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "open",
+      "at": "2026-10-02T09:23:22Z"
     },
     "merge": {
       "approved_by": null,
       "at": null
+    },
+    "design_review": {
+      "approved_by": "design review, one reviewer, three lenses: approve",
+      "at": "2026-10-02T09:23:22Z",
+      "self_resolved": [
+        "DR-001 entry link takes the id only on a dotted-name boundary: applied to plan and T003",
+        "DR-002 code sample moved to the plain fixture page: applied",
+        "DR-003 region opens after the number only when it is a direct child: applied to plan and T006",
+        "DR-004 README and CHANGELOG state that the script runs in the host project's pages: applied to T005",
+        "DR-005 text outside the page content is still scanned for maths: browser check at convergence, watch item",
+        "DR-006 test for the removed switch dropped: applied to T004",
+        "DR-007 source listing back links: browser check at convergence"
+      ]
     }
   },
   "stories": [
