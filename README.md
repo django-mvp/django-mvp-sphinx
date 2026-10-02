@@ -224,6 +224,38 @@ serves the pages still doesn't need Sphinx. Without the line, or with a
 `navigation.json` that can't be read, the sidebar holds only the front page
 entry and every page is still served.
 
+### Adding your own entries to the sidebar
+
+The contents come from the build, and you can add entries of your own beside
+them. This matters most when the docs are your project's main app, mounted with
+`main=True`: django-mvp then draws the documentation menu on every page that
+belongs to no other app and leaves `AppMenu` out, so this menu is where links to
+your other apps and pages go.
+
+Add them to the documentation app's `menu`, in the `menus.py` of one of your
+installed apps:
+
+```python
+# yourapp/menus.py
+from flex_menu import MenuItem
+
+from yourproject.mounted import docs, studio
+
+docs.menu.append(studio.menu_item())
+docs.menu.insert(
+    MenuItem(name="home", view_name="home", extra_context={"label": "Home"}),
+    position=0,
+)
+```
+
+- An entry you `append` or `extend` follows the contents.
+- An entry you `insert` ahead of the front page's entry stays ahead of it.
+  Inserted anywhere else, it follows the contents after the next rebuild.
+- Your entries keep their places when the docs are rebuilt. A rebuild replaces
+  only the entries that came from `navigation.json`.
+- They behave like menu entries everywhere else: an entry whose `check` refuses
+  the request isn't drawn.
+
 ### The page's own headings
 
 On a wide screen, each page lists its own headings beside it, under "On this
@@ -735,7 +767,9 @@ For a custom view or template:
   `front_page_title()` returns the root document's title it records or `None`,
   and `navigation_file()` returns the whole file or `None`.
 - `mvp_sphinx.menus.DocumentationMenu` turns a build's navigation file into the
-  sidebar menu.
+  sidebar menu. `front_page` is the front page's entry, `front_page_url(request)`
+  is the address it links to, and `contents` lists the entries the last rebuild
+  read from the file.
 - `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
   page's `toc` value into nested headings.
 - `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
@@ -836,7 +870,8 @@ uv run python manage.py runserver
 ```
 
 Then open <http://127.0.0.1:8000/docs/> for the user guide. Its sidebar reaches every
-page. After you edit a page under `demo/docs/`, run `build_docs docs` and
+page, and ends with an entry the demo adds itself: a link to the staff guide, drawn
+for staff only. After you edit a page under `demo/docs/`, run `build_docs docs` and
 reload, with no restart. Until a build exists, every address under `/docs/` answers 404.
 
 `seed_demo` made three accounts, all with the password `password`:

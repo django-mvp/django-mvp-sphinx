@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from flex_menu import MenuItem
 from mvp.menus import MenuCollapse, MenuGroup
 
 from mvp_sphinx.docs_build import DocsBuild
@@ -339,6 +340,98 @@ class TestRefresh:
             url.startswith("/manuals/admin/")
             for url in leaves(processed("/manuals/admin/").visible_children)
         )
+
+
+@pytest.fixture
+def project_entry(contents_app):
+    """Add an entry of the project's own to the menu, and take it out afterwards."""
+    added = []
+
+    def add(name, position=None, **kwargs):
+        item = MenuItem(
+            name=name, url=f"/{name}/", extra_context={"label": name}, **kwargs
+        )
+        if position is None:
+            contents_app.menu.append(item)
+        else:
+            contents_app.menu.insert(item, position=position)
+        added.append(item)
+        return item
+
+    yield add
+    for item in added:
+        item.parent = None
+
+
+class TestProjectEntries:
+    def test_an_appended_entry_follows_the_contents(
+        self, processed, project_entry
+    ) -> None:
+        contents = leaves(processed().visible_children)
+
+        project_entry("studio")
+
+        assert leaves(processed().visible_children) == [*contents, "/studio/"]
+
+    def test_an_entry_inserted_first_comes_before_the_front_page(
+        self, processed, project_entry
+    ) -> None:
+        contents = leaves(processed().visible_children)
+
+        project_entry("home", position=0)
+
+        assert leaves(processed().visible_children) == ["/home/", *contents]
+
+    def test_entries_added_before_the_first_processing_keep_their_places(
+        self, processed, project_entry, replaceable
+    ) -> None:
+        project_entry("home", position=0)
+        project_entry("studio")
+
+        drawn = leaves(processed().visible_children)
+
+        assert (drawn[0], drawn[1], drawn[-1]) == ("/home/", "/docs/", "/studio/")
+
+    def test_entries_keep_their_places_across_a_rebuild(
+        self, processed, project_entry, replaceable
+    ) -> None:
+        contents = leaves(processed().visible_children)
+        project_entry("home", position=0)
+        project_entry("studio")
+
+        rewrite_contents(
+            replaceable,
+            lambda groups: groups[1]["entries"].append(
+                {"title": "Added", "url": "added/", "children": []}
+            ),
+        )
+        drawn = leaves(processed().visible_children)
+
+        assert (drawn[0], drawn[-1]) == ("/home/", "/studio/")
+        assert set(drawn[1:-1]) == {*contents, "/docs/added/"}
+
+    def test_the_contents_are_still_drawn_without_the_front_page_entry(
+        self, processed, contents_app, replaceable
+    ) -> None:
+        contents = leaves(processed().visible_children)
+        front_page = contents_app.menu.pop("front-page")
+
+        rewrite_contents(replaceable, lambda groups: None)
+        try:
+            drawn = leaves(processed().visible_children)
+        finally:
+            contents_app.menu.insert(front_page, position=0)
+
+        assert drawn == contents[1:]
+
+    def test_an_entry_whose_check_refuses_the_request_is_not_drawn(
+        self, processed, project_entry
+    ) -> None:
+        contents = leaves(processed().visible_children)
+
+        project_entry("studio", check=lambda request, **kwargs: False)
+
+        assert leaves(processed().visible_children) == contents
 
 
 class TestServingSideImports:
