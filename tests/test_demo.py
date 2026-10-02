@@ -3,6 +3,7 @@
 # Everything in the demo fails quietly: an unresolvable component renders empty
 # and a menu entry whose URL will not resolve is dropped from the tree.
 
+import re
 from urllib.parse import urldefrag, urljoin
 
 import pytest
@@ -15,6 +16,7 @@ from demo.mounted import docs
 from demo.settings import BASE_DIR
 from mvp_sphinx.docs_build import DocsBuild
 from tests.factories import UserFactory
+from tests.test_static.test_content_css import STYLESHEET, Stylesheet
 
 
 class TestOverviewPage:
@@ -140,6 +142,11 @@ def guide_pages(guide_responses):
 @pytest.fixture
 def link_helpers(guide_pages):
     return guide_pages["/docs/reference/link-helpers/"]
+
+
+@pytest.fixture
+def maths_page(guide_pages):
+    return guide_pages["/docs/reference/reading-time/"]
 
 
 def description(page, entry_id):
@@ -319,3 +326,54 @@ class TestDemoGuideStates:
             response = client.get(urldefrag(urljoin(address, link["href"]))[0])
             assert response.status_code == 200
             response.close()
+
+    def test_every_name_in_the_summary_table_links_to_an_entry_of_the_page(
+        self, link_helpers
+    ) -> None:
+        links = link_helpers.select("table.autosummary td:first-child a[href]")
+
+        assert len(links) >= 4
+        for link in links:
+            assert urldefrag(link["href"])[0] == ""
+            assert link_helpers.find(id=urldefrag(link["href"])[1])
+
+    def test_the_summary_table_sits_in_a_scroll_region(self, link_helpers) -> None:
+        table = link_helpers.select_one("table.autosummary")
+
+        region = table.find_parent("div", class_="mvp-sphinx-scroll")
+        assert region["role"] == "region"
+        assert region["tabindex"] == "0"
+
+    def test_a_deprecation_in_an_entry_is_one_the_stylesheet_draws(
+        self, link_helpers
+    ) -> None:
+        entry = description(link_helpers, "demo.links.old_address")
+        selectors = " ".join(
+            selector for selector, declared in Stylesheet(STYLESHEET.read_text()).rules
+        )
+
+        notice = entry.select_one("div.deprecated")
+        assert notice.select_one(".versionmodified")
+        for hook in ("div.deprecated", r"\.versionmodified"):
+            assert re.search(rf"{hook}(?![\w-])", selectors)
+
+    def test_the_maths_page_loads_the_settings_then_the_library(
+        self, maths_page
+    ) -> None:
+        sources = [script["src"] for script in maths_page.select("script[src]")]
+
+        library = [source for source in sources if "cdn.jsdelivr.net" in source]
+        assert len(library) == 1
+        assert sources.index(static("mvp_sphinx/maths.js")) < sources.index(library[0])
+
+    def test_each_numbered_equation_of_the_maths_page_holds_a_region(
+        self, maths_page
+    ) -> None:
+        equations = maths_page.select("article div.math[id]")
+
+        assert len(equations) >= 2
+        for equation in equations:
+            regions = equation.select('[role="region"]')
+            assert len(regions) == 1
+            assert regions[0]["tabindex"] == "0"
+            assert regions[0]["aria-label"]

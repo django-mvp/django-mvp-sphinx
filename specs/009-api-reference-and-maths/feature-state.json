@@ -200,8 +200,17 @@
       "tasks": [
         {
           "id": "T007",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestNumberedEquations",
+              "tests/test_demo.py::TestDemoGuideStates (5 additions)"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py::TestNumberedEquations tests/test_demo.py::TestDemoGuideStates -q -p no:warnings"
+            ]
+          }
         }
       ]
     }

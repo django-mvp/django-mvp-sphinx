@@ -1648,3 +1648,59 @@ class TestMaths:
 
         assert response.status_code == 200
         assert len(self.library_scripts(response)) == 1
+
+
+class TestNumberedEquations:
+    @staticmethod
+    def soup(client) -> BeautifulSoup:
+        response = client.get("/docs/maths/")
+        return BeautifulSoup(response.content.decode(), "html.parser")
+
+    @staticmethod
+    def numbered(soup) -> list:
+        return soup.select("article div.math[id]")
+
+    def test_each_labelled_equation_has_an_id_and_its_number_links_to_it(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        equations = self.numbered(soup)
+        assert len(equations) == 2
+        for equation in equations:
+            link = equation.select_one("span.eqno > a.headerlink[href]")
+            assert urldefrag(link["href"])[1] == equation["id"]
+
+    def test_the_link_in_a_number_is_named_with_the_number(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        for equation in self.numbered(soup):
+            eqno = equation.select_one("span.eqno")
+            number = str(eqno.contents[0]).strip()
+            name = unescape(eqno.select_one("a.headerlink")["aria-label"])
+            assert number
+            assert number in name
+
+    def test_two_equations_links_have_different_names(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        names = [
+            equation.select_one("span.eqno a.headerlink")["aria-label"]
+            for equation in self.numbered(soup)
+        ]
+        assert len(names) == 2
+        assert len(set(names)) == 2
+
+    def test_each_reference_to_an_equation_leads_to_an_equation_of_the_page(
+        self, client, db, reference_app
+    ) -> None:
+        soup = self.soup(client)
+
+        references = soup.select("article a.reference.internal[href^='#']")
+        equations = {equation["id"] for equation in self.numbered(soup)}
+        assert len(references) == 2
+        assert {urldefrag(link["href"])[1] for link in references} == equations
