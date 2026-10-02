@@ -4,7 +4,11 @@
 
 **Created**: 2026-10-01
 
-**Status**: Draft
+**Status**: Approved
+
+**Refined**: 2026-10-02. An example is a page the host project writes to be shown as an example,
+without the application shell around it. Changes FR-008, FR-009, User Story 1 scenario 5 and User
+Story 2 scenario 5. Approved by the maintainer in the session.
 
 **Serves**: G8 · **Roadmap**: R8 · **Issue**: [#12](https://github.com/django-mvp/django-mvp-sphinx/issues/12)
 
@@ -23,8 +27,9 @@ The author adds an example with one marker in the page's Sphinx source. The mark
 example and the files whose code to show. Nothing is added to the host project's Sphinx
 configuration beyond the one line it already has, and the author writes no template.
 
-The example is the host project's own code, served by the host project at its own address. This
-package shows it and shows its source. It ships no examples of its own and never runs code written
+The example is the host project's own code, served by the host project at its own address. The
+host project writes that page to be shown as an example, so it carries its own content and not the
+application shell. This package shows it and shows its source. It ships no examples of its own and never runs code written
 in the documentation. The source is copied into the docs build when the docs are built, so serving
 a page with an example still never imports Sphinx and never starts a build.
 
@@ -60,6 +65,16 @@ issues:
   names no longer exists? → A: The page renders as usual with the example's source, and tells the
   reader in the example's place that it is unavailable. It is never a server error. Integrated into
   FR-012 and User Story 3.
+
+### Session 2026-10-02
+
+- Q: How does a page of the site show without the application shell around it when it is an
+  example? → A: The host project writes the example's page that way. Its template leaves the
+  shell out, and this package ships a base template that does so while keeping the host's theme.
+  The page has no shell wherever it is opened, so opening it on its own shows the same thing as
+  the example does. A page of the site that has the shell can still be named as an example, and
+  it then shows with the shell. Integrated into FR-008, FR-009, User Story 1 scenario 5 and User
+  Story 2 scenario 5.
 
 ## What a reader sees
 
@@ -115,8 +130,9 @@ example's form with valid and invalid input.
    configuration and no template written by the author.
 4. **Given** a live example containing a form, **When** the reader submits it, **Then** the site's
    answer appears in the example and the documentation page's address and content are unchanged.
-5. **Given** a live example, **When** the page renders, **Then** the example shows its own content
-   without a second copy of the application shell's navigation around it.
+5. **Given** a live example whose page is written on the package's base template for examples,
+   **When** the page renders, **Then** the example shows its own content without a second copy of
+   the application shell's navigation around it.
 6. **Given** a page with the example's marker placed between two paragraphs, **When** it renders,
    **Then** the example appears between those paragraphs, and the page's other content, its
    contents in the sidebar and its headings list are the same as without the example.
@@ -152,7 +168,7 @@ only, build, open the page, move between the files, use the example and reset it
 4. **Given** an example the reader has used, **When** they reset it, **Then** it returns to the
    state it had when the page was opened, and the documentation page does not reload.
 5. **Given** a live example, **When** the reader chooses to open it on its own, **Then** they reach
-   the example's address as an ordinary page of the site.
+   the example's address, where it shows as it does in the example.
 6. **Given** a screen too narrow to show the example and its source side by side, **When** the page
    renders, **Then** both remain reachable and neither makes the page scroll sideways.
 
@@ -235,10 +251,11 @@ Request each page as an anonymous and as a signed-in reader, with scripts on and
   documentation page's address or reload it. (US1)
 - **FR-007**: The reader MUST be able to return a live example to the state it had when the page
   was opened. (US2)
-- **FR-008**: The reader MUST be able to open a live example on its own, at its address, as an
-  ordinary page of the site. (US2)
-- **FR-009**: A live example MUST show its own content without a second copy of the application
-  shell's navigation around it. (US1)
+- **FR-008**: The reader MUST be able to open a live example on its own, at its address. (US2)
+- **FR-009**: The package MUST give the host project a way to write an example's page so that it
+  shows its own content without the application shell's navigation around it, in the host's theme,
+  and with what the site says after a form is sent. A host project's own base template MUST NOT
+  need to change for it. (US1)
 - **FR-010**: A live example MUST appear where its marker sits in the page, and a page MAY hold
   several, each independent of the others. A page's other content, its place in the contents and
   its headings list MUST be unaffected by its examples. (US1)
@@ -297,6 +314,10 @@ Request each page as an anonymous and as a signed-in reader, with scripts on and
   the rest of the project's documentation source is.
 - The host project writes its examples as pages of its own site and decides who may see them and
   what they may change. This package adds no examples and no access rule.
+- An example's page is written for the purpose. A page of the site that carries the application
+  shell can be named as an example too, and shows with the shell inside the example's place.
+- The host project allows its own site to show its own pages in a frame. Django refuses that by
+  default, so it is a documented setup step.
 - The example is live and the source is a copy made at build time. The two can drift between
   builds (see Edge Cases).
 - How the example and its source are arranged and how they look are settled on a working prototype

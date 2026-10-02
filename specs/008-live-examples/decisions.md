@@ -121,3 +121,25 @@ arrangement, the controls and the wording are settled on the prototype.
 
 **Why:** Requirements become tests, and a test that pins wording or layout fails whenever the
 design is adjusted. The maintainer asked for this feature to be prototyped before it is built.
+
+## D11. An example's page is written without the shell
+
+**Ambiguous:** D8 left the means of showing an example without the application shell to the plan.
+The prototype did it by having the host's `base.html` extend a template of this package, and the
+maintainer ruled that out: a host's `base.html` extends `mvp/base.html`. Research then proposed a
+change to django-mvp and stopped for his decision.
+
+**Chosen:** The host project writes an example's page without the shell. Its template replaces
+django-mvp's public `app` block, as django-mvp's own sign-in pages do. This package ships
+`mvp_sphinx/example.html`, which extends the host's `base.html` and does that, so an example's
+template extends it and fills `content`. The page has no shell wherever it is opened. The
+specification's FR-008 and FR-009 were reworded to say so (2026-10-02).
+
+**Why:** The maintainer's own answer on 2026-10-02: "if somebody is trying to show a demo page in
+a sphinx view, can't they override content using template blocks in their demo page? Why does a
+demo page have to show the whole thing?" It needs nothing from django-mvp and nothing private to
+it, the host's `base.html` is untouched, and the page stays shell-less after a posted form, a
+redirect and a followed link, which the prototype's address flag did not. What it gives up is
+that an existing page of the site, shell and all, cannot be shown bare. The README says so.
+
+**ADR:** none — a template convention local to this feature; nothing else in the package inherits it
