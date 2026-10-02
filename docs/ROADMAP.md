@@ -135,7 +135,7 @@ imports Sphinx or starts a build.
 
 ### R8 — Live working examples next to their source
 
-*feature · advances G8*
+*delivered in [#12](https://github.com/django-mvp/django-mvp-sphinx/issues/12) · advances G8*
 
 A page can show a working example from the site running live, next to the code
 that defines it, so developer documentation can demonstrate rather than only
@@ -143,7 +143,7 @@ describe.
 
 ### R9 — API reference and maths look right
 
-*feature · advances G9*
+*delivered in [#13](https://github.com/django-mvp/django-mvp-sphinx/issues/13) · advances G9*
 
 Pages generated from code, and pages with mathematical notation, render
 properly in the host's theme.
