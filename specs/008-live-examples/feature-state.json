@@ -2,7 +2,7 @@
   "feature": "008-live-examples",
   "branch": "008-live-examples",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "REVIEW",
+  "state": "PR_READY",
   "state_history": [
     {
       "state": "QUEUED",
@@ -33,6 +33,11 @@
       "state": "REVIEW",
       "at": "2026-10-02T16:38:43Z",
       "note": "converged green; browser check recorded"
+    },
+    {
+      "state": "PR_READY",
+      "at": "2026-10-02T16:44:16Z",
+      "note": "review closed; walkthrough laid out on pull request #67"
     }
   ],
   "gates": {
@@ -84,6 +89,11 @@
         "COR-003 low: an address written percent-encoded was shown as unavailable — remedied, the path is decoded before it is resolved; regression test",
         "notes carried to the pull request: a source path may leave the project as literalinclude allows; an address missing its trailing slash shows as unavailable; the same file named twice with the same lines gives two tabs of one name"
       ]
+    },
+    "walkthrough": {
+      "approved_by": null,
+      "at": "2026-10-02T16:44:19Z",
+      "self_resolved": []
     }
   },
   "stories": [
@@ -265,6 +275,6 @@
   },
   "pr": {
     "number": 67,
-    "draft": true
+    "draft": false
   }
 }
