@@ -1,0 +1,154 @@
+{
+  "feature": "009-api-reference-and-maths",
+  "branch": "009-api-reference-and-maths",
+  "repo": "django-mvp/django-mvp-sphinx",
+  "state": "PLAN",
+  "state_history": [
+    {
+      "state": "QUEUED",
+      "at": "2026-10-02T08:31:45Z",
+      "note": "specification approved by Sam in the session at commit 8b0e8461e602d50fa11b43cb9b89a1fca4cf8d79, on pull request #66; epic #13, stories #68, #71, #73, #74, #75"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-10-02T09:16:13Z",
+      "note": "plan.md, research.md, tasks.md: 5 stories, 7 tasks; continues the approved prototype on pull request #66"
+    }
+  ],
+  "gates": {
+    "spec": {
+      "approved_by": "Sam",
+      "at": "2026-10-02T08:31:45Z",
+      "self_resolved": [
+        "approved in the session at commit 8b0e8461e602d50fa11b43cb9b89a1fca4cf8d79 (forge spec-gate, pull request #66)"
+      ]
+    },
+    "sketch": {
+      "approved_by": "Sam",
+      "at": "2026-10-02T08:56:39Z",
+      "self_resolved": [
+        "at commit 09994ec8af3ef0f5afb41a6f417dc7c012c89ed3",
+        "A vertical scrollbar appeared on every maths block \u2014 equations now scroll sideways only, and only when wider than the page",
+        "Whether maths typesetting may come from a CDN \u2014 accepted for now and recorded as decision D6"
+      ]
+    },
+    "plan": {
+      "approved_by": null,
+      "at": null
+    },
+    "merge": {
+      "approved_by": null,
+      "at": null
+    }
+  },
+  "stories": [
+    {
+      "id": "US1",
+      "priority": "P1",
+      "issue": 68,
+      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T001",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T002",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US2",
+      "priority": "P1",
+      "issue": 71,
+      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T004",
+          "status": "todo",
+          "attempts": 0
+        },
+        {
+          "id": "T005",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US3",
+      "priority": "P2",
+      "issue": 73,
+      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T003",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US4",
+      "priority": "P2",
+      "issue": 74,
+      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T006",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    },
+    {
+      "id": "US5",
+      "priority": "P3",
+      "issue": 75,
+      "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
+      "status": "todo",
+      "replans": 0,
+      "tasks": [
+        {
+          "id": "T007",
+          "status": "todo",
+          "attempts": 0
+        }
+      ]
+    }
+  ],
+  "budgets": {
+    "converge_cycles": {
+      "used": 0,
+      "max": 2
+    },
+    "review_cycles": {
+      "used": 0,
+      "max": 1
+    },
+    "tokens": {
+      "used": 0,
+      "max": 120
+    },
+    "design_review_cycles": {
+      "used": 0,
+      "max": 1
+    }
+  },
+  "escalations": [],
+  "pr": {
+    "number": 66,
+    "draft": true
+  }
+}

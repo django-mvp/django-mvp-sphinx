@@ -144,3 +144,90 @@ advance.
 **Why:** Several specifications were being written at the same time, each in its own working
 tree, and a script that picks the next free number from one tree would have given two of them the
 same one.
+
+## D12. A page knows it holds maths from its own markup
+
+**Decision:** `BodyRewriter` notes an element whose class list holds `math` while it parses the
+body, and the view reads that. The `has_maths_elements` key Sphinx 9.1 writes into a page's file
+is not used.
+
+**Why:** The key is template context the HTML builder happens to pass to the JSON builder, not a
+documented part of the build, and the host builds with its own Sphinx version. The body is parsed
+on every request already, and the same parse is needed for the equation region (D13).
+
+**Revisit if:** Sphinx documents the key as part of the JSON build.
+
+**ADR:** none — local to how one class reads a body; ADR 0003 already covers rewriting a body.
+
+## D13. A wide equation scrolls in the same region a table does
+
+**Decision:** `BodyRewriter` wraps the notation of each equation set out on its own line in the
+focusable, named `mvp-sphinx-scroll` region it already gives tables. The prototype scrolled the
+typeset container itself.
+
+**Why:** MathJax 4 gives each typeset container keyboard focus for its expression explorer, where
+arrow keys walk the expression and do not scroll it, and before typesetting the area took no
+focus at all. FR-015 needs the area reachable and scrollable from the keyboard in both states.
+The table region already does this and is already styled. The approved look does not change.
+
+**Revisit if:** MathJax scrolls its own overflowing containers from the keyboard.
+
+**ADR:** none — an application of ADR 0003 (rewrite only what CSS cannot) to one more element.
+
+## D14. An entry's link is named by the entry's own name
+
+**Decision:** The link on a signature is named with the entry's name: the `id` Sphinx gave it
+when that ends with the documented name, otherwise the module path and name as written. Not the
+whole signature.
+
+**Why:** `sketch.md` asked for it. Named from all the text before it, a link read out every
+parameter, the return type and "[source]". The `id` is the full dotted name for Python and
+JavaScript entries and is unique on the page, so two classes' same-named methods stay distinct.
+
+**Revisit if:** a domain's `id` turns out to end with the name and still be unreadable.
+
+**ADR:** none — local to this feature, nothing downstream inherits it.
+
+## D15. An equation's link keeps its number as its name
+
+**Decision:** The link in an equation's number is named as heading links already are, which gives
+"Link to this equation: (1)". No special case.
+
+**Why:** `sketch.md` asked for a name that says which equation the link leads to. The number is
+how a reader and the text refer to it, and it is unique on the page. The notation itself would be
+raw markup read aloud.
+
+**Revisit if:** equations gain captions.
+
+**ADR:** none — no change to existing behaviour.
+
+## D16. A wrong command is coloured from the theme, by MathJax's own setting
+
+**Decision:** The typesetting settings give `tex.noundefined.color` the value
+`var(--mvp-sphinx-code-error)`, and the stylesheet gives `mjx-merror` the same role. No new
+colour role is made.
+
+**Why:** An unknown command is not an `mjx-merror`: MathJax shows its name in a literal `red`,
+which the prototype's rule never reached and which FR-016 forbids. The setting accepts a CSS
+variable. The prototype's choice for a failed formula, the theme's error colour unmixed, measures
+2.87:1 on the light page background; the existing code-error role measures 9.2:1 and 10.4:1.
+
+**Revisit if:** the role is not readable on an admonition background, or maths needs a second
+colour.
+
+**ADR:** none — local to this feature, nothing downstream inherits it.
+
+## D17. The typesetting address is written in the template, at Sphinx's own version tag
+
+**Decision:** `mathjax@4` from jsDelivr, the exact address Sphinx's HTML build uses, written in
+`page.html`. No setting, no pinned patch version, no integrity hash.
+
+**Why:** D6 accepted the CDN and named that address. A hash needs a pinned patch version, which
+then never receives a fix without a release of this package, and it would cover only the first
+file: MathJax fetches its fonts and speech rules from the same CDN afterwards. A setting has no
+second use yet (Article II); a host that needs another source overrides the template block. The
+README states the exposure.
+
+**Revisit if:** the typesetting is shipped with the package, which D6 leaves open.
+
+**ADR:** none — a consequence of D6, which is itself provisional.
