@@ -10,8 +10,11 @@ configuration is all it needs::
        ../../examples/views.py 12-30
 
 The argument is an address of the host's own site. Each line of the content
-names a source file, relative to the page's own file, and optionally the lines
-of it to show.
+names a source file, relative to the page's own file or from the source
+directory with a leading ``/``, and optionally the lines of it to show as
+``first-last`` or one number, counted from 1. A source is named by its file,
+with as many parent folders as tell it from another of the example, and with
+its lines when the same file is named twice.
 
 The directive writes one element into the page's body, which
 ``mvp_sphinx.examples`` reads back when the page is served::
@@ -30,6 +33,8 @@ anything that does not know about examples shows plain code blocks.
 This module imports Sphinx and is only loaded during a build.
 """
 
+import re
+from dataclasses import dataclass
 from html import escape
 from pathlib import Path
 from textwrap import dedent
@@ -46,12 +51,32 @@ from mvp_sphinx.examples import LiveExamples
 logger = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
+class Source:
+    """One source of an example, as the author wrote it.
+
+    Attributes:
+        file: The file the source reads.
+        lines: The lines written after the file, ``first-last`` or one number,
+            or an empty string for the whole file.
+        block: The highlighted text to show.
+    """
+
+    file: Path
+    lines: str
+    block: nodes.literal_block
+
+
 class LiveExample(SphinxDirective):
     """Write a live example's address and source into the page."""
 
     required_arguments = 1
     has_content = True
     option_spec = {"title": directives.unchanged}
+
+    # The last word of a line is a range only when it has this shape, so a path
+    # with spaces in it still reads as a path.
+    LINES = re.compile(r"^(?P<path>.+?)\s+(?P<lines>\d+(?:-\d+)?)$")
 
     # A Django project's .html files are templates, which Pygments reads as HTML.
     LANGUAGE_OVERRIDES = {".html": "html+django"}
@@ -73,7 +98,7 @@ class LiveExample(SphinxDirective):
                 location=self.get_location(),
             )
             return []
-        sources = [block for line in self.content if (block := self.source(line))]
+        sources = [source for line in self.content if (source := self.source(line))]
         if not sources:
             logger.warning(
                 "live-example: %r names no source file that exists",
@@ -90,13 +115,13 @@ class LiveExample(SphinxDirective):
                 },
             )
         ]
-        for name, block in sources:
+        for name, source in zip(self.names(sources), sources, strict=True):
             result.append(
                 self.opening(
                     LiveExamples.SOURCE_CLASS, {LiveExamples.NAME_ATTRIBUTE: name}
                 )
             )
-            result.append(block)
+            result.append(source.block)
             result.append(self.closing())
         result.append(self.closing())
         return result
@@ -137,20 +162,53 @@ class LiveExample(SphinxDirective):
         lexer = find_lexer_class_for_filename(file.name)
         return lexer.aliases[0] if lexer else "text"
 
-    def source(self, line: str) -> tuple[str, nodes.literal_block] | None:
-        """Return the name and highlighted text of one source line, or nothing.
+    @staticmethod
+    def names(sources: list[Source]) -> list[str]:
+        """Return the name each source is shown under, in the order given.
+
+        Args:
+            sources: The sources of one example.
+
+        Returns:
+            The file's name, with as many parent folders as tell it from every
+            other file of the example, and its lines added when the same file is
+            named more than once.
+        """
+        files = {source.file for source in sources}
+        names = {}
+        for file in files:
+            others = files - {file}
+            depth = 1
+            while depth < len(file.parts) - 1 and any(
+                other.parts[-depth:] == file.parts[-depth:] for other in others
+            ):
+                depth += 1
+            names[file] = "/".join(file.parts[-depth:])
+        times = [source.file for source in sources]
+        return [
+            f"{names[source.file]} {source.lines}"
+            if source.lines and times.count(source.file) > 1
+            else names[source.file]
+            for source in sources
+        ]
+
+    def source(self, line: str) -> Source | None:
+        """Return one source line read from its file, or nothing.
 
         Args:
             line: A content line: a file's path, then optionally its lines as
                 ``first-last`` or one number.
 
         Returns:
-            The file's name and a literal block of its text, or ``None`` for a
-            blank line or a file that does not exist, the latter after a warning.
+            The source, or ``None`` for a blank line, a file that does not exist
+            or a range that is not inside the file, the latter two after a
+            warning naming the file.
         """
-        if not line.strip():
+        line = line.strip()
+        if not line:
             return None
-        path, _, lines = line.strip().partition(" ")
+        found = self.LINES.match(line)
+        path, lines = (found["path"], found["lines"]) if found else (line, "")
         relative, absolute = self.env.relfn2path(path)
         self.env.note_dependency(relative)
         file = Path(absolute)
@@ -162,10 +220,10 @@ class LiveExample(SphinxDirective):
             )
             return None
         text = file.read_text(encoding="utf-8")
-        if lines.strip():
-            first, _, last = lines.strip().partition("-")
+        if lines:
+            first, _, last = lines.partition("-")
             rows = text.splitlines()
             text = dedent("\n".join(rows[int(first) - 1 : int(last or first)]))
         block = nodes.literal_block(text, text)
         block["language"] = self.language(file)
-        return file.name, block
+        return Source(file, lines, block)

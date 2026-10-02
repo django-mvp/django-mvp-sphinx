@@ -130,8 +130,23 @@
       "tasks": [
         {
           "id": "T004",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_live_example.py::TestLiveExampleRanges",
+              "tests/test_live_example.py::TestLiveExampleNames",
+              "tests/test_views.py::TestLiveExamples"
+            ],
+            "commands": [
+              "uv run pytest tests/test_live_example.py tests/test_views.py::TestLiveExamples tests/test_demo.py -q"
+            ],
+            "code": [
+              "mvp_sphinx/live_example.py:166",
+              "mvp_sphinx/live_example.py:195"
+            ],
+            "verified_by_ci": false
+          }
         },
         {
           "id": "T005",

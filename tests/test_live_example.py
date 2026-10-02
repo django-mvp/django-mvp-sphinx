@@ -150,3 +150,140 @@ class TestLiveExampleSources:
         source = written.select(".mvp-sphinx-example-source")[position]
 
         assert f"highlight-{language}" in source.select_one("div")["class"]
+
+
+def write_source(directory: Path, page: str, files: dict[str, str]) -> Path:
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "conf.py").write_text(
+        'extensions = ["mvp_sphinx.navigation"]\n', encoding="utf-8"
+    )
+    (directory / "index.rst").write_text(page, encoding="utf-8")
+    for name, text in files.items():
+        file = directory / name
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(text, encoding="utf-8")
+    return directory
+
+
+def example_page(*content: str, address: str = "/examples/contact/") -> str:
+    lines = "\n".join(f"   {line}" for line in content)
+    return f"A page\n======\n\n.. live-example:: {address}\n\n{lines}\n"
+
+
+@pytest.fixture
+def example_build(tmp_path, sphinx_build):
+    def build(content: list[str], files: dict[str, str]) -> BeautifulSoup:
+        source = write_source(tmp_path / "source", example_page(*content), files)
+        return body(sphinx_build(source), "index")
+
+    return build
+
+
+def source_names(page: BeautifulSoup) -> list[str]:
+    return [s["data-name"] for s in page.select(".mvp-sphinx-example-source")]
+
+
+NESTED = (
+    "class Order:\n"
+    "    def one(self):\n"
+    "        return 1\n"
+    "\n"
+    "    def two(self):\n"
+    "        return 2\n"
+)
+
+
+class TestLiveExampleRanges:
+    def test_a_range_shows_its_lines_with_their_common_indentation_removed(
+        self, example_build
+    ) -> None:
+        page = example_build(["order.py 2-3"], {"order.py": NESTED})
+
+        assert source_text(
+            page.select_one(".mvp-sphinx-example-source")
+        ).splitlines() == [
+            "def one(self):",
+            "    return 1",
+        ]
+
+    def test_a_single_line_number_shows_that_line(self, example_build) -> None:
+        page = example_build(["order.py 5"], {"order.py": NESTED})
+
+        shown = source_text(page.select_one(".mvp-sphinx-example-source"))
+
+        assert shown.splitlines() == ["def two(self):"]
+
+    def test_a_file_with_no_range_is_shown_whole(self, example_build) -> None:
+        page = example_build(["order.py"], {"order.py": NESTED})
+
+        assert source_text(page.select_one(".mvp-sphinx-example-source")) == NESTED
+
+    def test_a_path_with_a_space_and_no_range_is_read_as_a_path(
+        self, example_build
+    ) -> None:
+        page = example_build(["my notes.py"], {"my notes.py": "x = 1\n"})
+
+        assert source_names(page) == ["my notes.py"]
+        assert source_text(page.select_one(".mvp-sphinx-example-source")) == "x = 1\n"
+
+    def test_a_path_with_a_space_takes_a_range_from_its_last_word(
+        self, example_build
+    ) -> None:
+        page = example_build(["my notes.py 2"], {"my notes.py": "x = 1\ny = 2\n"})
+
+        assert source_names(page) == ["my notes.py"]
+        assert source_text(page.select_one(".mvp-sphinx-example-source")) == "y = 2\n"
+
+
+class TestLiveExampleNames:
+    def test_a_file_named_once_keeps_its_bare_name(self, example_build) -> None:
+        page = example_build(
+            ["app/forms.py 1-2", "views.py"],
+            {"app/forms.py": "a = 1\nb = 2\n", "views.py": "c = 3\n"},
+        )
+
+        assert source_names(page) == ["forms.py", "views.py"]
+
+    def test_two_files_of_one_name_take_the_folder_that_tells_them_apart(
+        self, example_build
+    ) -> None:
+        page = example_build(
+            ["a/forms.py", "b/forms.py"],
+            {"a/forms.py": "a = 1\n", "b/forms.py": "b = 2\n"},
+        )
+
+        assert source_names(page) == ["a/forms.py", "b/forms.py"]
+
+    def test_each_file_takes_only_as_many_folders_as_it_needs(
+        self, example_build
+    ) -> None:
+        page = example_build(
+            ["a/x/forms.py", "b/x/forms.py", "c/forms.py"],
+            {
+                "a/x/forms.py": "a = 1\n",
+                "b/x/forms.py": "b = 2\n",
+                "c/forms.py": "c = 3\n",
+            },
+        )
+
+        assert source_names(page) == ["a/x/forms.py", "b/x/forms.py", "c/forms.py"]
+
+    def test_one_file_named_twice_with_different_lines_adds_the_lines(
+        self, example_build
+    ) -> None:
+        page = example_build(
+            ["views.py 1-2", "views.py 4-5"],
+            {"views.py": "a = 1\nb = 2\nc = 3\nd = 4\ne = 5\n"},
+        )
+
+        assert source_names(page) == ["views.py 1-2", "views.py 4-5"]
+
+    def test_the_same_name_in_two_folders_and_one_file_twice_all_differ(
+        self, example_build
+    ) -> None:
+        page = example_build(
+            ["a/forms.py 1", "a/forms.py 2", "b/forms.py"],
+            {"a/forms.py": "a = 1\nb = 2\n", "b/forms.py": "c = 3\n"},
+        )
+
+        assert source_names(page) == ["a/forms.py 1", "a/forms.py 2", "b/forms.py"]

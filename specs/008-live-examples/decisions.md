@@ -255,3 +255,21 @@ nothing else imports it.
 **Revisit if:** another module needs to read example wrappers.
 
 **ADR:** none — local to one module
+
+## D19. Each source takes only the folders it needs, and lines are added only to a file named twice
+
+**Decision:** The name of a source is worked out per file, not per example. A file takes parent
+folders one at a time until its tail differs from the same-length tail of every other file of
+the example, so `a/x/forms.py` and `b/x/forms.py` take three parts and a third `c/forms.py` takes
+two. The lines are added (`views.py 12-25`) only to a source that has lines and whose file is
+named more than once in the example. A whole-file source of a file named twice keeps the bare
+name. Recorded by the Implementer of US2 (T004).
+
+**Why:** Research R4 says each source takes as many folders as it needs to differ, which reads
+per source; one depth for the whole example would lengthen `c/forms.py` for no reader's benefit.
+A file named once keeps its bare name whether or not it has lines, as the approved tabs show.
+
+**Revisit if:** a host names the same file twice with the same lines, which gives two tabs of the
+same name.
+
+**ADR:** none — local to the directive

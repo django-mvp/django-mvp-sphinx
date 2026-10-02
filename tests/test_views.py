@@ -15,6 +15,7 @@ from django.urls import reverse
 
 from mvp_sphinx.page_body import BodyRewriter
 from tests.conftest import SPHINX_SOURCES
+from tests.test_live_example import write_source
 
 pytestmark = pytest.mark.usefixtures("docs_app")
 
@@ -1809,3 +1810,38 @@ class TestLiveExamples:
 
         assert response.status_code == 200
         assert len(BeautifulSoup(response.content, "html.parser").select("iframe")) == 1
+
+    def test_several_sources_are_a_group_of_radio_inputs_the_first_checked(
+        self, client, db, examples_app
+    ) -> None:
+        radios = self.soup(client, "several/").select("input[type=radio]")
+
+        assert [radio["aria-label"] for radio in radios] == [
+            "contact.py",
+            "long.py",
+            "markup.html",
+        ]
+        assert len({radio["name"] for radio in radios}) == 1
+        assert [radio.has_attr("checked") for radio in radios] == [True, False, False]
+
+    def test_a_single_source_shows_no_radio_input(
+        self, client, db, examples_app
+    ) -> None:
+        assert self.soup(client, "single/").select("input[type=radio]") == []
+
+    def test_two_examples_with_several_sources_use_different_group_names(
+        self, client, db, tmp_path, sphinx_build, monkeypatch
+    ) -> None:
+        from demo.mounted import docs
+
+        example = ".. live-example:: /examples/contact/\n\n   a.py\n   b.py\n"
+        page = f"A page\n======\n\n{example}\nBetween.\n\n{example}"
+        source = write_source(
+            tmp_path / "source", page, {"a.py": "a = 1\n", "b.py": "b = 2\n"}
+        )
+        monkeypatch.setattr(docs, "build_dir", sphinx_build(source))
+
+        radios = self.soup(client, "").select("input[type=radio]")
+
+        assert len(radios) == 4
+        assert len({radio["name"] for radio in radios}) == 2

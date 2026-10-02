@@ -580,6 +580,33 @@ Rebuild the docs and the page shows the frame with the file beside it. A page
 with an example loads one more stylesheet, `mvp_sphinx/example.css`; other pages
 load nothing new.
 
+#### Several files, and parts of files
+
+List more than one file, one to a line, and the reader gets a tab for each, in the
+order you wrote them. Follow a file with `first-last`, or with one line number, to
+show only those lines, counted from 1. The lines are shown with the indentation
+they all share removed, so a method reads flush left:
+
+```rst
+.. live-example:: /examples/contact/
+   :title: A contact form
+
+   ../../examples/forms.py
+   ../../examples/views.py 12-25
+   /templates/contact.html
+```
+
+A path is relative to the documentation page's own file, or starts with `/` to
+count from the documentation's source directory. A path may hold spaces. The last
+word is read as lines only when it is a number or two numbers joined by a hyphen.
+Line numbers do not follow edits to the file, so check them when you change it.
+
+Each tab is named by its file. When two files of one example have the same name,
+each tab adds the parent folders it needs to tell them apart, as `a/forms.py` and
+`b/forms.py`. When one file is named twice with different lines, the lines are
+added to the name, as `views.py 12-25`. A file named once keeps its plain name,
+and an example with one file shows no tabs.
+
 #### Writing the example's page
 
 The page in the frame is an ordinary page of your site, with an ordinary view.
