@@ -2,7 +2,7 @@
   "feature": "009-api-reference-and-maths",
   "branch": "009-api-reference-and-maths",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "CONVERGE",
+  "state": "REVIEW",
   "state_history": [
     {
       "state": "QUEUED",
@@ -28,6 +28,11 @@
       "state": "CONVERGE",
       "at": "2026-10-02T10:00:42Z",
       "note": "all five stories done and verified at 01938b8"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-10-02T10:03:21Z",
+      "note": "converged green; browser check recorded"
     }
   ],
   "gates": {
@@ -226,7 +231,7 @@
       "max": 2
     },
     "review_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 1
     },
     "tokens": {
