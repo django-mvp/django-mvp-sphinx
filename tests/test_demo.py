@@ -377,3 +377,52 @@ class TestDemoGuideStates:
             assert len(regions) == 1
             assert regions[0]["tabindex"] == "0"
             assert regions[0]["aria-label"]
+
+
+class TestExamplePage:
+    ADDRESS = "/examples/contact/"
+    VALID = {
+        "name": "Ada",
+        "email": "ada@example.com",
+        "message": "A message of some length.",
+    }
+
+    @staticmethod
+    def has_shell(response) -> bool:
+        return 'aria-label="Main navigation"' in response.content.decode()
+
+    def test_the_example_answers_with_its_form_and_without_the_shell(
+        self, client, db, overview_page
+    ) -> None:
+        response = client.get(self.ADDRESS)
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        assert response.status_code == 200
+        assert soup.select_one("form:has(input[name=email])") is not None
+        assert not self.has_shell(response)
+        assert 'aria-label="Main navigation"' in overview_page
+
+    def test_a_form_sent_invalid_answers_with_its_errors_and_without_the_shell(
+        self, client, db
+    ) -> None:
+        response = client.post(self.ADDRESS, {})
+
+        assert response.status_code == 200
+        assert response.context["form"].has_error("name", code="required")
+        assert not self.has_shell(response)
+
+    def test_a_form_sent_valid_redirects_to_its_own_address(self, client, db) -> None:
+        response = client.post(self.ADDRESS, self.VALID)
+
+        assert response.status_code == 302
+        assert response.url == self.ADDRESS
+
+    def test_the_page_it_redirects_to_carries_the_message(self, client, db) -> None:
+        response = client.post(self.ADDRESS, self.VALID, follow=True)
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        assert [message.level_tag for message in response.context["messages"]] == [
+            "success"
+        ]
+        assert soup.select("[role=alert]")
+        assert not self.has_shell(response)

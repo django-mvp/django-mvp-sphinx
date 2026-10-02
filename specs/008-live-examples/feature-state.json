@@ -77,13 +77,34 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_live_example.py::TestLiveExampleElement",
+              "tests/test_live_example.py::TestLiveExampleSources"
+            ],
+            "commands": [
+              "uv run pytest tests/test_live_example.py -q",
+              "uv run pytest tests/test_demo.py tests/test_navigation.py tests/test_live_example.py -q",
+              "uv run deptry ."
+            ]
+          }
         },
         {
           "id": "T002",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_examples.py::TestParts",
+              "tests/test_views.py::TestLiveExamples",
+              "tests/test_demo.py::TestExamplePage"
+            ],
+            "commands": [
+              "uv run pytest tests/test_examples.py tests/test_views.py::TestLiveExamples tests/test_demo.py -q"
+            ]
+          }
         },
         {
           "id": "T003",

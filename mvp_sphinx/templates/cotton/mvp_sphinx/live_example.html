@@ -1,6 +1,6 @@
 {% load i18n %}
 {# @description A live example: a page of the site running in a frame, beside the source the docs build holds for it. Works without scripts: "Start again" is a link aimed at the frame, and the source files are a radio group. #}
-{# @prop example:dict | description:"From LiveExamples: id, title, address, framed_address, available, and sources (each with name and html, the highlighted code)." #}
+{# @prop example:dict | description:"From LiveExamples: id, title, address, available, and sources (each with name and html, the highlighted code)." #}
 <c-vars example />
 
 <section aria-labelledby="{{ example.id }}-title"
@@ -15,7 +15,7 @@
     </p>
     {% if example.available %}
       <div class="ms-auto flex flex-wrap gap-2">
-        <a href="{{ example.framed_address }}"
+        <a href="{{ example.address }}"
            target="{{ example.id }}-frame"
            class="btn btn-sm btn-ghost">{% translate "Start again" %}</a>
         <a href="{{ example.address }}" class="btn btn-sm btn-ghost">{% translate "Open on its own" %}</a>
@@ -26,7 +26,7 @@
     <div class="mvp-sphinx-example-pane min-w-0">
       {% if example.available %}
         <div class="mvp-sphinx-example-holder skeleton rounded-none">
-          <iframe src="{{ example.framed_address }}"
+          <iframe src="{{ example.address }}"
                   name="{{ example.id }}-frame"
                   title="{% if example.title %}{{ example.title }}{% else %}{% translate "Live example" %}{% endif %}"
                   loading="lazy"

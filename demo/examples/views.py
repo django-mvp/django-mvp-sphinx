@@ -22,7 +22,7 @@ class ContactView(MVPFormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return self.request.get_full_path()
+        return self.request.path
 
 
 class StatusView(MVPTemplateView):

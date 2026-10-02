@@ -86,12 +86,14 @@ class PageView(PageMixin, TemplateView):
         # The body is the host's own docs build, trusted as it always was.
         rewritten = BodyRewriter.parse(page.get("body", ""))
         body = mark_safe(rewritten.splice())  # noqa: S308
+        body_parts = LiveExamples.parts(body)
         return self.render_to_response(
             self.get_context_data(
                 page_data=page,
                 body=body,
                 has_maths=rewritten.has_maths,
-                body_parts=LiveExamples.parts(body),
+                body_parts=body_parts,
+                has_examples=any("example" in part for part in body_parts),
             )
         )
 

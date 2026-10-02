@@ -1,6 +1,9 @@
 One example
 ===========
 
+Setting it up
+-------------
+
 Written before the example.
 
 .. live-example:: /examples/contact/
@@ -9,6 +12,9 @@ Written before the example.
    sources/contact.py
 
 Written after the example.
+
+Using it
+--------
 
 .. code-block:: python
 

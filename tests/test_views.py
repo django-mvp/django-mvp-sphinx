@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from django.templatetags.static import static
 from django.urls import reverse
 
+from mvp_sphinx.page_body import BodyRewriter
 from tests.conftest import SPHINX_SOURCES
 
 pytestmark = pytest.mark.usefixtures("docs_app")
@@ -1704,3 +1705,107 @@ class TestNumberedEquations:
         equations = {equation["id"] for equation in self.numbered(soup)}
         assert len(references) == 2
         assert {urldefrag(link["href"])[1] for link in references} == equations
+
+
+class TestLiveExamples:
+    @staticmethod
+    def soup(client, address: str) -> BeautifulSoup:
+        return BeautifulSoup(client.get(f"/docs/{address}").content, "html.parser")
+
+    def test_the_page_holds_a_frame_on_a_path_of_the_same_site(
+        self, client, db, examples_app
+    ) -> None:
+        response = client.get("/docs/single/")
+
+        frames = BeautifulSoup(response.content, "html.parser").select("iframe")
+        assert response.status_code == 200
+        assert [frame["src"] for frame in frames] == ["/examples/contact/"]
+        assert frames[0]["title"]
+
+    def test_the_example_shows_the_sources_text(self, client, db, examples_app) -> None:
+        code = self.soup(client, "single/").select_one(".mvp-sphinx-example-code pre")
+
+        assert code.get_text() == (
+            SPHINX_SOURCES / "examples" / "sources" / "contact.py"
+        ).read_text(encoding="utf-8")
+
+    def test_the_example_sits_between_the_paragraphs_it_was_written_between(
+        self, client, db, examples_app
+    ) -> None:
+        article = self.soup(client, "single/").select_one("article")
+
+        example = article.select_one(".mvp-sphinx-example")
+
+        assert example.find_previous_sibling().name == "p"
+        assert example.find_next_sibling().name == "p"
+
+    def test_the_sidebar_contents_are_those_of_a_page_with_no_example(
+        self, client, db, examples_app
+    ) -> None:
+        with_example = contents_links(client.get("/docs/single/"), examples_app)
+        without = contents_links(client.get("/docs/plain/"), examples_app)
+
+        assert with_example == without
+
+    def test_on_this_page_lists_the_pages_own_headings_and_none_from_the_example(
+        self, client, db, examples_app
+    ) -> None:
+        soup = self.soup(client, "single/")
+        article = soup.select_one("article")
+
+        listed = [
+            link["href"]
+            for link in soup.find("nav", attrs={"aria-labelledby": True}).find_all("a")
+        ]
+
+        written = [
+            heading.select_one(".headerlink")["href"]
+            for heading in article.select("h2")
+            if heading.find_parent(class_="mvp-sphinx-example") is None
+        ]
+        assert listed == written
+        assert len(listed) == 2
+
+    def test_a_page_with_two_examples_holds_two_frames_with_different_names(
+        self, client, db, examples_app
+    ) -> None:
+        frames = self.soup(client, "two/").select("iframe")
+
+        names = [frame["name"] for frame in frames]
+
+        assert len(names) == 2
+        assert names[0] != names[1]
+
+    def test_a_page_with_an_example_links_the_examples_stylesheet(
+        self, client, db, examples_app
+    ) -> None:
+        stylesheet = static("mvp_sphinx/example.css")
+
+        assert stylesheet in linked_stylesheets(client.get("/docs/single/"))
+        assert stylesheet not in linked_stylesheets(client.get("/docs/plain/"))
+
+    def test_a_page_with_no_example_has_the_rewritten_body_as_its_article(
+        self, client, db, examples_app, examples_build
+    ) -> None:
+        page = json.loads((examples_build / "plain.fjson").read_text())
+        rewritten = BodyRewriter.parse(page["body"]).splice()
+
+        content = client.get("/docs/plain/").content.decode()
+
+        article = re.search(r"<article[^>]*>(.*)</article>", content, re.S)
+        assert article.group(1).strip() == rewritten.strip()
+
+    def test_the_page_is_served_when_sphinx_cannot_be_imported(
+        self, client, db, examples_app, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        response = client.get("/docs/single/")
+
+        assert response.status_code == 200
+        assert len(BeautifulSoup(response.content, "html.parser").select("iframe")) == 1

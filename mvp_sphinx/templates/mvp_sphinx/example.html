@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% comment %}
+  The base for a page of the host project that a documentation page shows in a
+  frame as a live example. The page is drawn without the application shell:
+  extend this in place of a page template and fill the content block. The
+  messages are drawn here because the shell is where the base draws them.
+{% endcomment %}
+{% block app %}
+  <main class="p-4">
+    {% block content %}
+    {% endblock content %}
+    <c-messages :messages="messages" dismissible />
+  </main>
+{% endblock app %}

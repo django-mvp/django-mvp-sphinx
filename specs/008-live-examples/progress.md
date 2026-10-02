@@ -27,3 +27,62 @@ The reviewer confirmed by running them that a raw HTML node reaches a JSON build
 `mvp/base.html` draws the messages inside the `app` block, and that `uv run deptry .` fails today
 on the prototype's docutils import.
 Next: build US1.
+
+## 2026-10-02T16:12:00Z · Implementer US1 · T001
+
+Did: wrote `tests/sphinx/examples/` (conf with the one extension line; pages `single`, `two`,
+`several`, `missing`, `plain` and an index; sources beside them) and the `examples_build` and
+`examples_app` fixtures; wrote `tests/test_live_example.py` (16 tests, classes `TestLiveExampleElement`
+and `TestLiveExampleSources`) before the code. Rebuilt `mvp_sphinx/live_example.py` to write
+`<div class="mvp-sphinx-example" data-address data-title>` around one
+`<div class="mvp-sphinx-example-source" data-name>` per source, each around a `literal_block`;
+wrappers are raw nodes, attribute values go through `html.escape`; language by
+`find_lexer_class_for_filename` with `.html` as `html+django` and no match as `text`. The class and
+attribute names are constants on `LiveExamples` in `mvp_sphinx/examples.py`, which the directive
+imports. The prototype's address and missing-file warnings and its `first-last` line range were
+kept as they were: T004 and T006 own them.
+Verified: red first, 13 of 15 failed for the right reason (the prototype wrote comments, so no
+element was found; first run, before the language case was added). Two passed on first run because
+the markup they describe already existed: the plain page holds no example, and the fixture's conf
+names one extension. Each was shown able to fail: a plain page given an example went red, and a
+conf with an extra `example_setting` went red. Other mutations, each red then restored: no
+escaping (title with quotes and an ampersand), `.html` as plain `html`, every file as python.
+Green: `uv run pytest tests/test_live_example.py -q` 16 passed; with `tests/test_demo.py` and
+`tests/test_navigation.py` 69 passed (the demo guide builds under `-W`); `uv run deptry .` exit 0;
+`uv run pre-commit run --all-files` and `uv run mypy` passed. Committed as 133792a.
+Next: T002.
+Watch: the fixture's `markup.html` writes the ampersand as `&amp;` and not a bare `&`: Pygments'
+Django-HTML lexer warns on a bare `&` and the fixture build must be warning-free. The test still
+checks that the file's `<`, `&` and a template tag read back as written. The T001 commit does not
+carry this entry; it was written afterwards and lands with T002's commit.
+
+## 2026-10-02T16:25:00Z · Implementer US1 · T002
+
+Did: wrote `tests/test_examples.py` (`TestParts`, 14 tests), `TestLiveExamples` in
+`tests/test_views.py` (9 tests, on `examples_app`) and `TestExamplePage` in `tests/test_demo.py`
+(4 tests) first. Rebuilt `LiveExamples.parts(body)` on an `ExampleReader(HTMLParser)` that tracks
+`div` depth and slices by offset (D17, D18); `available` is Django's same-site check, then
+`resolve` on the path with the script prefix taken off. `PageView` passes `body_parts` and
+`has_examples`; `page.html` links `example.css` only when `has_examples`. Added
+`mvp_sphinx/example.html`; deleted `mvp_sphinx/base.html`, `LiveExamples.FRAMED` and
+`framed_address`; the component's frame `src` and "Start again" use `example.address` and its
+`@prop` line is corrected. The demo's `base.html` extends `mvp/base.html`; its three example
+templates extend `mvp_sphinx/example.html` and fill `content`; `ContactView` redirects to
+`request.path` and the contact form posts to `request.path`. The demo guide's line ranges did not
+move (status.html 3-9 and the four views.py ranges still hold the same code). `single.rst` in the
+fixture gained two sections around the example, so the "On this page" test has headings to compare.
+Verified: red first, 20 of 27 failed. Seven passed on first run because they describe behaviour
+the prototype already had: no marker is one markup part; an unclosed wrapper stays markup (the
+regex never matched it); the example sits between two paragraphs; the sidebar contents match the
+plain page's; "On this page" matches the page's own headings; the plain page's article is the
+rewritten body; a valid post redirects to its own address. Each was shown able to fail by breaking
+one thing, red then restored: body stripped; an unclosed example kept; the component wrapped in a
+`div`; an extra heading added on example pages; an entry dropped from the sidebar on the example
+page; the redirect given a query; the article text altered; the stylesheet always linked. A lazy
+`import sphinx` inside `parts` turned the Sphinx-blocked test red.
+Green: `uv run pytest tests/test_examples.py tests/test_views.py::TestLiveExamples
+tests/test_demo.py -q` 65 passed; `uv run pre-commit run --all-files` and `uv run mypy` passed.
+Next: T003.
+Watch: the Sphinx-blocked test cannot catch a top-level Sphinx import in `mvp_sphinx/examples.py`,
+because the module is already imported when the test blocks Sphinx; it catches a lazy one. The same
+holds for the existing tests of that pattern.

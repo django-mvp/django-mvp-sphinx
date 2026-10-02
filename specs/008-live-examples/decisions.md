@@ -228,3 +228,30 @@ file answered it. Cache busting for static files is the host's static files stor
 package's files as for every other.
 
 **ADR:** none — a decision not to build something
+
+## D17. `LiveExamples.parts` always alternates markup and example, markup parts possibly empty
+
+**Decision:** `parts` returns markup, example, markup, example, ..., markup. A markup part is empty
+where an example opens or ends the body. Recorded by the Implementer of US1 (T002).
+
+**Why:** The caller and the tests read the list by position and never have to ask whether a
+neighbour exists. An empty string in the template draws nothing.
+
+**Revisit if:** a second consumer of `parts` appears that wants the empty parts left out.
+
+**ADR:** none — local to one class
+
+## D18. The reader of the body is a second class in `mvp_sphinx/examples.py`
+
+**Decision:** `ExampleReader(HTMLParser)` finds the offsets of each example and each source.
+`LiveExamples` holds the names, builds the dicts and decides `available`. A self-closed `div` is
+counted as an opening, as a browser reads it, and a stray closing `div` does not take the depth
+below zero. Recorded by the Implementer of US1 (T002).
+
+**Why:** The plan says `LiveExamples` reads the body with an `HTMLParser` subclass. A parser is
+a class of its own in the standard library's design, and the module keeps both in one file, so
+nothing else imports it.
+
+**Revisit if:** another module needs to read example wrappers.
+
+**ADR:** none — local to one module
