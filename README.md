@@ -556,6 +556,138 @@ an integrity check, so what runs can change without a release of this package. I
 library from another source, override `mvp_sphinx/page.html` and write your own
 `extra_js` block, which is where the two script tags are.
 
+### Live examples
+
+A live example puts a page of your own site into a documentation page. The page
+runs in a frame, so a reader can use it, and the code that makes it sits beside
+the frame. A reader can fill in a form and see what your site answers without
+leaving the documentation.
+
+Write one with the `live-example` directive. The extension you already named in
+`conf.py` provides it, so Sphinx needs no further setting. The argument is the
+address of the page on your site, a path that starts with a single `/`. The
+option `:title:` names the example, and the line below it names the file whose
+code to show, relative to the documentation page's own file:
+
+```rst
+.. live-example:: /examples/contact/
+   :title: A contact form
+
+   ../../examples/forms.py
+```
+
+Rebuild the docs and the page shows the frame with the file beside it. A page
+with an example loads one more stylesheet, `mvp_sphinx/example.css`; other pages
+load nothing new.
+
+Each example has two links above the frame. "Start again" loads the example's
+address in the frame again, which puts the page back as it was when the reader
+arrived, and "Open on its own" opens the address as a page of its own. Both are
+plain links, and the tabs for several files are radio inputs, so all of them work
+with scripts off.
+
+#### Several files, and parts of files
+
+List more than one file, one to a line, and the reader gets a tab for each, in the
+order you wrote them. Follow a file with `first-last`, or with one line number, to
+show only those lines, counted from 1. The lines are shown with the indentation
+they all share removed, so a method reads flush left:
+
+```rst
+.. live-example:: /examples/contact/
+   :title: A contact form
+
+   ../../examples/forms.py
+   ../../examples/views.py 12-25
+   /templates/contact.html
+```
+
+A path is relative to the documentation page's own file, or starts with `/` to
+count from the documentation's source directory. A path may hold spaces. The last
+word is read as lines only when it is a number or two numbers joined by a hyphen.
+Line numbers do not follow edits to the file, so check them when you change it.
+
+Each tab is named by its file. When two files of one example have the same name,
+each tab adds the parent folders it needs to tell them apart, as `a/forms.py` and
+`b/forms.py`. When one file is named twice with different lines, the lines are
+added to the name, as `views.py 12-25`. A file named once keeps its plain name,
+and an example with one file shows no tabs.
+
+#### What the build reports
+
+A marker the build cannot use is a Sphinx warning, at the line of the directive,
+so the message names the documentation page. The build then goes on without that
+part of the marker:
+
+- An address that is not a path of your site. It must start with one `/` and hold
+  no scheme, host, backslash or space, so `https://host/x`, `//host/x`,
+  `/\host/x` and `host/x` are all refused. The page gets no example and none of
+  its sources.
+- A source file that does not exist, or that is not UTF-8 text. The message names
+  the file, and the example keeps its other sources.
+- A range that is reversed, zero, or past the end of the file. The message names
+  the file, and that source is left out. A last word that is not a number is part
+  of the path, so it is reported as a file that does not exist.
+- An example left with no source at all. The page gets no example.
+
+Run Sphinx with `-W` and each of these fails the build, so a typo in an address
+or a file that was renamed does not reach the published documentation.
+
+#### Writing the example's page
+
+The page in the frame is an ordinary page of your site, with an ordinary view.
+It would show your application shell inside the frame, so give it a template
+that extends `mvp_sphinx/example.html` and fills the `content` block:
+
+```django
+{% extends "mvp_sphinx/example.html" %}
+{% block content %}
+  <c-form method="post" :form-obj="form">
+    <c-button text="Send message" type="submit" variant="primary" />
+  </c-form>
+{% endblock content %}
+```
+
+`mvp_sphinx/example.html` extends your own `base.html`, so the page keeps your
+theme, stylesheets and scripts. It replaces only the `app` block, the one that
+holds the shell, with a `main` element that holds `content` and the messages.
+A page that extends a template with the shell still shows with the shell, inside
+the frame.
+
+A form in an example posts to the example's own address, so the answer appears
+in the frame and the documentation page's address does not change. Have the view
+redirect to `request.path` after a valid post, and a message added with
+`django.contrib.messages` shows in the frame.
+
+#### Letting your site frame itself
+
+Django sends `X-Frame-Options: DENY` by default, and a browser then shows nothing
+in the frame. Set this in your settings:
+
+```python
+X_FRAME_OPTIONS = "SAMEORIGIN"
+```
+
+It lets pages of your site be framed by pages of your site and by nobody else.
+It applies to every page, so it covers the sign-in page and the error pages
+too, which is what lets an example show them. If your site sends a
+`Content-Security-Policy` header with `frame-ancestors`, include `'self'` in it.
+The package cannot check either setting for you, and a frame that is empty or
+shows the browser's own refusal usually means one of them is missing.
+
+#### What the reader sees
+
+The example is your site's own page at its own address, so your own rule for that
+address decides who sees what. A reader your site sends to sign in, or refuses,
+sees that answer in the frame. The documentation app's reader rule decides who
+reads the documentation page, and with it the source shown beside the frame.
+
+The source is a copy made when the docs are built. Change the file and rebuild to
+refresh it. The page in the frame is always your site's current page.
+
+If the site has no page at the address when a documentation page is served, the
+page says so in place of the frame, and the source is still shown.
+
 ## Public surface
 
 These are the names a project can use, grouped the way a project meets them.
@@ -564,7 +696,7 @@ These are the names a project can use, grouped the way a project meets them.
 
 - `mvp_sphinx` is the Django app. Add it to `INSTALLED_APPS` after `mvp`.
 - `mvp_sphinx.navigation` is the Sphinx extension. It writes `navigation.json`
-  into a JSON build.
+  into a JSON build and adds the `live-example` directive.
 
 ### The documentation app
 
@@ -619,13 +751,23 @@ For a custom view or template:
   when the build has no usable search data.
 - `mvp_sphinx.search.PageText`, through `PageText.text(markup)`, gives the text a
   reader sees in a page body, with its whitespace collapsed.
+- `mvp_sphinx.examples.LiveExamples`, through `LiveExamples.parts(body)`, splits a
+  rewritten page body into the markup and the live examples in it, in order.
+  Each part is `{"html": ...}` or `{"example": ...}`, and an example holds its
+  `id`, `title`, `address`, `available` and `sources`. `PageView` passes the
+  result to the template as `body_parts`. `mvp_sphinx.examples.ExampleReader` is
+  the parser `parts` reads with, and nothing a project needs to build.
 
 ### Templates a project may override
 
-- `mvp_sphinx/page.html` draws a page. It receives `body`, `headings`,
-  `previous_page`, `next_page`, `search_url` and `page_data`. It has the `title`,
+- `mvp_sphinx/page.html` draws a page. It receives `body`, `body_parts`,
+  `has_examples`, `headings`, `previous_page`, `next_page`, `search_url` and
+  `page_data`. It has the `title`,
   `styles` and `content` blocks, and it holds the page's body in an element with the
   `mvp-sphinx-content` class.
+- `mvp_sphinx/example.html` is the base for a page of your site that a documentation
+  page shows as a live example. It extends your `base.html`, draws no shell, and has
+  the `content` block.
 - `mvp_sphinx/search.html` draws the results. It receives `query`, `results` and
   `search_url`, and has the `title`, `styles` and `content` blocks. `results` is `None` when
   the build has no search data, and otherwise a list of the pages found, each with
@@ -640,6 +782,8 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 - `mvp_sphinx.page_links` draws the links to the previous and next page. It takes
   `previous` and `next`.
 - `mvp_sphinx.search_form` draws the search box. It takes `action` and `query`.
+- `mvp_sphinx.live_example` draws one live example, the frame and its source. It
+  takes `example`, one `{"example": ...}` part from `LiveExamples.parts`.
 
 ### Static files
 
@@ -648,6 +792,8 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
   `--mvp-sphinx-header-clearance`.
 - `mvp_sphinx/maths.js` holds the settings for the maths typesetting. A page
   with maths loads it before the library.
+- `mvp_sphinx/example.css` sizes the live example's frame and its source. A page
+  with an example loads it.
 
 ### Settings
 

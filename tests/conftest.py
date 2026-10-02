@@ -90,6 +90,11 @@ def reference_build(sphinx_json_build):
     return sphinx_json_build("reference")
 
 
+@pytest.fixture(scope="session")
+def examples_build(sphinx_json_build):
+    return sphinx_json_build("examples")
+
+
 @pytest.fixture(scope="module")
 def demo_guide_build(tmp_path_factory):
     out = tmp_path_factory.mktemp("demo-guide-build")
@@ -169,4 +174,12 @@ def reference_app(reference_build, monkeypatch):
     from demo.mounted import docs
 
     monkeypatch.setattr(docs, "build_dir", reference_build)
+    return docs
+
+
+@pytest.fixture
+def examples_app(examples_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", examples_build)
     return docs

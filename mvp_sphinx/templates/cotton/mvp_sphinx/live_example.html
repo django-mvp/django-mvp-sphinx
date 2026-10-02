@@ -1,0 +1,68 @@
+{% load i18n %}
+{# @description A live example: a page of the site running in a frame, beside the source the docs build holds for it. Works without scripts: "Start again" is a link aimed at the frame, and the source files are a radio group. #}
+{# @prop example:dict | description:"From LiveExamples: id, title, address, available, and sources (each with name and html, the highlighted code)." #}
+<c-vars example />
+
+<section aria-labelledby="{{ example.id }}-title"
+         class="not-prose mvp-sphinx-example my-6 border border-base-300 rounded-box overflow-hidden">
+  <div class="flex flex-wrap items-center gap-2 px-4 py-2 bg-base-200 border-b border-base-300">
+    <p id="{{ example.id }}-title" class="font-medium">
+      {% if example.title %}
+        {{ example.title }}
+      {% else %}
+        {% translate "Live example" %}
+      {% endif %}
+    </p>
+    {% if example.available %}
+      <div class="ms-auto flex flex-wrap gap-2">
+        <a href="{{ example.address }}"
+           target="{{ example.id }}-frame"
+           class="btn btn-sm btn-ghost">{% translate "Start again" %}</a>
+        <a href="{{ example.address }}" class="btn btn-sm btn-ghost">{% translate "Open on its own" %}</a>
+      </div>
+    {% endif %}
+  </div>
+  <div class="grid xl:grid-cols-2">
+    <div class="mvp-sphinx-example-pane min-w-0">
+      {% if example.available %}
+        <div class="mvp-sphinx-example-holder skeleton rounded-none">
+          <iframe src="{{ example.address }}"
+                  name="{{ example.id }}-frame"
+                  title="{% if example.title %}{{ example.title }}{% else %}{% translate "Live example" %}{% endif %}"
+                  loading="lazy"
+                  class="mvp-sphinx-example-frame block"></iframe>
+        </div>
+      {% else %}
+        <div class="p-4">
+          <c-alert variant="warning" soft>
+            <span>{% translate "This example isn't available on this site. Its source is still shown." %}</span>
+          </c-alert>
+        </div>
+      {% endif %}
+    </div>
+    <div class="mvp-sphinx-example-source min-w-0 border-t border-base-300">
+      {% if example.sources|length == 1 %}
+        {% for source in example.sources %}
+          <p class="px-4 py-2 text-sm opacity-70">{{ source.name }}</p>
+          <div class="mvp-sphinx-example-code overflow-auto">{{ source.html }}</div>
+        {% endfor %}
+      {% else %}
+        <div role="tablist"
+             aria-label="{% translate "Source files" %}"
+             class="tabs tabs-border tabs-sm">
+          {% for source in example.sources %}
+            <input type="radio"
+                   name="{{ example.id }}-source"
+                   role="tab"
+                   class="tab"
+                   aria-label="{{ source.name }}"
+                   {% if forloop.first %}checked{% endif %} />
+            <div role="tabpanel" class="tab-content">
+              <div class="mvp-sphinx-example-code overflow-auto">{{ source.html }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>

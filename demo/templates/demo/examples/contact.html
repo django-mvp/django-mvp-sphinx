@@ -1,0 +1,8 @@
+{% extends "mvp_sphinx/example.html" %}
+{% block content %}
+  <div class="w-full lg:max-w-4xl">
+    <c-form method="post" action="{{ request.path }}" :form-obj="form">
+      <c-button text="Send message" type="submit" variant="primary" />
+    </c-form>
+  </div>
+{% endblock content %}

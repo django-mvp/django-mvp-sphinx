@@ -29,6 +29,13 @@ with :doc:`first-visit/index`.
    reference/who-sees-what-when-they-sign-in-and-why-the-sidebar-differs
 
 .. toctree::
+   :caption: Live examples
+   :hidden:
+
+   examples/a-working-form
+   examples/when-an-example-cannot-run
+
+.. toctree::
    :hidden:
 
    about

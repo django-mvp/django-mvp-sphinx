@@ -10,7 +10,8 @@ docs build, with the root document's title. The documentation app's sidebar
 is drawn from that file, so serving
 never needs Sphinx. Other builders write nothing.
 
-This is the only module of the package that imports Sphinx.
+Two modules of the package import Sphinx: this one and ``mvp_sphinx.live_example``,
+the directive it registers.
 """
 
 import json
@@ -23,6 +24,7 @@ from sphinx import addnodes
 from sphinx.application import Sphinx
 
 from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.live_example import LiveExample
 
 
 class NavigationWriter:
@@ -133,6 +135,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
         The extension's metadata.
     """
     app.connect("build-finished", write_navigation)
+    app.add_directive("live-example", LiveExample)
     return {
         "version": version("django-mvp-sphinx"),
         "parallel_read_safe": True,

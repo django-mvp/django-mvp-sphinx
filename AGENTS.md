@@ -5,8 +5,10 @@ Serve a project's Sphinx documentation inside its django-mvp application shell.
 The package is for reading a docs build the host project has already produced
 and serving its pages through a documentation app: the pages render in the host's
 shell and theme, and the contents become the app sidebar's menu. Serving never
-imports Sphinx. The only Sphinx code is the extension that writes the
-navigation file during the build. The `build_docs` management command runs the
+imports Sphinx. Two modules import Sphinx, both only during a build: the
+extension in `mvp_sphinx/navigation.py` that writes the navigation file, and the
+`live-example` directive in `mvp_sphinx/live_example.py` that the extension
+registers. The `build_docs` management command runs the
 build on demand, as a separate process, and imports no Sphinx either. `CONSTITUTION.md` Article XII lists what stays
 out of scope. The contents menu is built: the extension in
 `mvp_sphinx/navigation.py` writes the navigation file during the build, and
@@ -73,6 +75,25 @@ sign in as `staff.user@example.com`.
 The guide's Reference part documents `demo/links.py` with `autodoc`, which is why
 `demo/docs/conf.py` puts the repository on `sys.path`. Nothing in the site calls that
 module. It exists so the guide has reference entries of every kind to draw.
+
+The guide's Examples part has two pages of live examples of the demo's own pages. Their
+views are in `demo/examples/views.py`, the form in `demo/examples/forms.py` and the
+templates in `demo/templates/demo/examples/`, and the templates extend
+`mvp_sphinx/example.html`, so each draws without the shell. The views are:
+
+- `ContactView`, a form that redirects to its own address after a valid post.
+- `StatusView`, a page that only shows something.
+- `SlowView`, the same page after three seconds, to show the held place. No test
+  requests it.
+- `StaffNoteView`, open to staff only, to show the sign-in and the refusal.
+- `BrokenView`, which raises an error every time.
+
+The demo keeps `X_FRAME_OPTIONS = "SAMEORIGIN"` because Django's default, `DENY`, makes
+the browser show nothing in the frame. The second page also names an address the site
+does not have, to show the notice. The guide's pages name line ranges of those files, so
+a template or view edit that moves lines needs the `.rst` ranges updated with it. The
+tests compare each source shown with the lines the page names, so a range that has
+drifted still passes them and shows the wrong code; read the two pages after such an edit.
 
 **Adding a page** takes four things: a view in `demo/views.py` on
 `mvp.views.MVPTemplateView`, a route in `demo/urls.py`, a template extending

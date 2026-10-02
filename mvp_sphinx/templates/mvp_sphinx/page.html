@@ -7,6 +7,7 @@
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
   <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
+  {% if has_examples %}<link rel="stylesheet" href="{% static 'mvp_sphinx/example.css' %}">{% endif %}
 {% endblock styles %}
 {% block content %}
   <c-page>
@@ -15,7 +16,13 @@
         <div class="min-w-0 w-full max-w-prose xl:max-w-none xl:flex-1">
           <c-mvp_sphinx.search_form :action="search_url" />
           <article class="prose xl:max-w-none mvp-sphinx-content py-4">
-            {{ body }}
+            {% for part in body_parts %}
+              {% if part.example %}
+                <c-mvp_sphinx.live_example :example="part.example" />
+              {% else %}
+                {{ part.html }}
+              {% endif %}
+            {% endfor %}
           </article>
           <c-mvp_sphinx.page_links :previous="previous_page" :next="next_page" />
         </div>
