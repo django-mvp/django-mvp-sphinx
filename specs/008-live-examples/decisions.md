@@ -26,6 +26,8 @@ page. It never runs code found in the documentation and ships no examples (FR-00
 be a new way to execute untrusted text, which CONSTITUTION.md Article V rules out, and it would be
 a far larger feature than the issue asks for.
 
+**ADR:** none — a reading of the issue, recorded in the specification
+
 ## D2. Only examples on the same site
 
 **Ambiguous:** Whether a marker may name any address.
@@ -34,6 +36,8 @@ a far larger feature than the issue asks for.
 
 **Why:** The issue says "from the site". Embedding other sites is a different feature with its own
 security questions, and nothing in the goals asks for it.
+
+**ADR:** none — a reading of the issue, recorded in the specification
 
 ## D3. The source is copied into the docs build
 
@@ -47,6 +51,8 @@ the two can drift until the next build, and that is accepted.
 project source at request time would break that and would let a page expose files the build never
 named. Sphinx authors already expect included code to be as of the build.
 
+**ADR:** none — follows Article XII; nothing new to record
+
 ## D4. Using the example never moves the documentation page
 
 **Ambiguous:** "Work right there on the page" doesn't say what happens after the reader submits
@@ -59,6 +65,8 @@ can reset the example and can open it on its own (FR-006, FR-007, FR-008).
 example belongs to. Reset is needed because a form that has been submitted successfully often can't
 be tried again otherwise.
 
+**ADR:** none — a reading of the issue, recorded in the specification
+
 ## D5. The host project's own rule decides who sees an example
 
 **Ambiguous:** Whether showing an example on a documentation page changes who may see it.
@@ -69,6 +77,8 @@ is what appears. The documentation's reader rule covers the page and its source,
 
 **Why:** FS-006 gave the documentation app one reader rule and said it adds no others. An example
 that became visible through the documentation to someone the site refuses would be an access hole.
+
+**ADR:** none — follows FS-006 and its record; nothing new
 
 ## D6. A broken example never breaks the page
 
@@ -81,6 +91,8 @@ its place. A missing source file is reported by the build (FR-012, FR-013).
 **Why:** It follows what FS-001 and FS-007 already do: a missing build and missing search data both
 leave the pages working and say what is missing.
 
+**ADR:** none — a reading of the issue, recorded in the specification
+
 ## D7. At least one source file, and as many as the author names
 
 **Ambiguous:** Whether an example may have no source, or several files.
@@ -89,6 +101,8 @@ leave the pages working and say what is missing.
 
 **Why:** The issue's title is "next to their source code", so an example with no source is outside
 it. A form example usually involves a form, a view and a template, so one file is too few.
+
+**ADR:** none — a reading of the issue, recorded in the specification
 
 ## D8. The example shows without the application shell around it
 
@@ -101,6 +115,8 @@ rendered that way is left to the plan.
 **Why:** A reader looking at a form example wants the form. A nested copy of the site's navigation
 would take most of the space and invite the reader to navigate away inside the example.
 
+**ADR:** none — its means is D11
+
 ## D9. The demo guide carries an example of every state
 
 **Ambiguous:** Nothing in the issue mentions the demo project.
@@ -110,6 +126,8 @@ specification (FR-018).
 
 **Why:** The arrangement and look are judged on a working prototype in a browser, and the earlier
 features each added their states to the demo for the same reason.
+
+**ADR:** none — about the demo project only
 
 ## D10. How it looks is not in the specification
 
@@ -121,6 +139,8 @@ arrangement, the controls and the wording are settled on the prototype.
 
 **Why:** Requirements become tests, and a test that pins wording or layout fails whenever the
 design is adjusted. The maintainer asked for this feature to be prototyped before it is built.
+
+**ADR:** none — about how the specification was written
 
 ## D11. An example's page is written without the shell
 
@@ -143,3 +163,61 @@ redirect and a followed link, which the prototype's address flag did not. What i
 that an existing page of the site, shell and all, cannot be shown bare. The README says so.
 
 **ADR:** none — a template convention local to this feature; nothing else in the package inherits it
+
+## D12. The build writes an example as elements, and the page reads them with a parser
+
+**Decision:** The directive wraps an example and each of its sources in `div` elements carrying
+`data-` attributes, with ordinary highlighted code blocks between them. `LiveExamples` reads the
+served body with `html.parser` and splits it into markup and examples.
+
+**Why:** The prototype's HTML comments needed a regular expression over markup and showed nothing
+to a reader whose host replaces the page template. Elements degrade to plain code blocks, use the
+standard attribute escaping, and are read with the parser the package already relies on.
+`LiveExamples` stays apart from `BodyRewriter`: one records insertions, the other cuts the body
+into parts, and a page without an example never reaches it.
+
+**Revisit if:** a third thing needs to read page bodies, which would be the time to share a parse.
+
+**ADR:** none — how one feature carries its data through the build; ADR 0003 covers reading a body
+
+## D13. Part of a file is a range of lines, and nothing more for now
+
+**Decision:** A source line may end with `first-last` or one line number. `literalinclude`'s other
+selectors are not offered.
+
+**Why:** The specification asks for "part of a file" and one selector meets it (Article II). Line
+numbers drift when the file is edited, which the author sees at the next build. A selector by
+name can be added when a host asks.
+
+**ADR:** none — a small syntax choice, reversible by adding selectors
+
+## D14. A source is called by its file name, with only as much path as tells two apart
+
+**Decision:** Research R4.
+
+**Why:** The approved tabs show bare file names, and a path in every tab would crowd them. Two
+tabs that read the same are the only case that needs more.
+
+**ADR:** none — local to the directive
+
+## D15. The address is checked when the docs are built and again when the page is served
+
+**Decision:** The directive refuses an address that is not a path of this site. `LiveExamples`
+checks it again with Django's own same-site test before it draws a frame.
+
+**Why:** The docs build is trusted, but the cost of one mistake is another site framed inside a
+page of this one, and the second check is one call. It also covers a build made by an older
+version of the extension.
+
+**ADR:** none — a guard inside one class
+
+## D16. No general scheme for stale stylesheets
+
+**Decision:** `example.css` is its own file, linked only by pages that hold an example. Nothing is
+added to bust a browser's cache of the package's stylesheets.
+
+**Why:** The fault seen in review came from adding rules to a file the browser already had. A new
+file answered it. Cache busting for static files is the host's static files storage, for this
+package's files as for every other.
+
+**ADR:** none — a decision not to build something

@@ -1,0 +1,136 @@
+{
+ "feature": "008-live-examples",
+ "branch": "008-live-examples",
+ "repo": "django-mvp/django-mvp-sphinx",
+ "state": "QUEUED",
+ "state_history": [
+  {
+   "state": "QUEUED",
+   "at": "2026-10-02T08:31:45Z",
+   "note": "specification approved by Sam in the session at commit a76abb8f0d4beaa1ff803c4b596d677f118e80f2, on pull request #67; epic #12, stories #69, #70, #72"
+  }
+ ],
+ "gates": {
+  "spec": {
+   "approved_by": "Sam",
+   "at": "2026-10-02T08:31:40Z",
+   "self_resolved": [
+    "approved in the session at commit a76abb8f0d4beaa1ff803c4b596d677f118e80f2 (forge spec-gate, pull request #67)",
+    "refined 2026-10-02 with his approval in the session: an example's page is written without the shell (FR-008, FR-009, D11)"
+   ]
+  },
+  "sketch": {
+   "approved_by": "Sam",
+   "at": "2026-10-02T09:09:46Z",
+   "self_resolved": [
+    "at commit e244c122162e81e48f41abc00f95286a92ea9a50",
+    "The running example showed only about 150px tall — the example's styles moved to their own stylesheet and the frame now fills its pane",
+    "A host's base.html keeps extending mvp/base.html — recorded as a planning constraint; met by D11",
+    "X_FRAME_OPTIONS = SAMEORIGIN is fine if documented — recorded as a planning constraint",
+    "Frame height can be discussed later — height stays fixed for this build"
+   ]
+  },
+  "plan": {
+   "approved_by": null,
+   "at": null
+  },
+  "merge": {
+   "approved_by": null,
+   "at": null
+  }
+ },
+ "stories": [
+  {
+   "id": "US1",
+   "priority": "P1",
+   "issue": 69,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-008-live-examples",
+   "status": "todo",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T001",
+     "status": "todo",
+     "attempts": 0
+    },
+    {
+     "id": "T002",
+     "status": "todo",
+     "attempts": 0
+    },
+    {
+     "id": "T003",
+     "status": "todo",
+     "attempts": 0
+    }
+   ]
+  },
+  {
+   "id": "US2",
+   "priority": "P2",
+   "issue": 70,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-008-live-examples",
+   "status": "todo",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T004",
+     "status": "todo",
+     "attempts": 0
+    },
+    {
+     "id": "T005",
+     "status": "todo",
+     "attempts": 0
+    }
+   ]
+  },
+  {
+   "id": "US3",
+   "priority": "P3",
+   "issue": 72,
+   "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-008-live-examples",
+   "status": "todo",
+   "replans": 0,
+   "tasks": [
+    {
+     "id": "T006",
+     "status": "todo",
+     "attempts": 0
+    },
+    {
+     "id": "T007",
+     "status": "todo",
+     "attempts": 0
+    },
+    {
+     "id": "T008",
+     "status": "todo",
+     "attempts": 0
+    }
+   ]
+  }
+ ],
+ "budgets": {
+  "converge_cycles": {
+   "used": 0,
+   "max": 2
+  },
+  "review_cycles": {
+   "used": 0,
+   "max": 1
+  },
+  "tokens": {
+   "used": 0,
+   "max": 120
+  },
+  "design_review_cycles": {
+   "used": 0,
+   "max": 1
+  }
+ },
+ "pr": {
+  "number": 67,
+  "draft": true
+ }
+}
