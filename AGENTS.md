@@ -76,12 +76,24 @@ The guide's Reference part documents `demo/links.py` with `autodoc`, which is wh
 `demo/docs/conf.py` puts the repository on `sys.path`. Nothing in the site calls that
 module. It exists so the guide has reference entries of every kind to draw.
 
-The guide's Examples part shows live examples of the demo's own pages. Their views,
-form and templates are in `demo/examples/` and `demo/templates/demo/examples/`, and the
-templates extend `mvp_sphinx/example.html`, so each draws without the shell. The demo
-keeps `X_FRAME_OPTIONS = "SAMEORIGIN"` so the frames show. The guide's pages name line
-ranges of those files, so a template or view edit that moves lines needs the guide's
-`.rst` ranges updated with it.
+The guide's Examples part has two pages of live examples of the demo's own pages. Their
+views are in `demo/examples/views.py`, the form in `demo/examples/forms.py` and the
+templates in `demo/templates/demo/examples/`, and the templates extend
+`mvp_sphinx/example.html`, so each draws without the shell. The views are:
+
+- `ContactView`, a form that redirects to its own address after a valid post.
+- `StatusView`, a page that only shows something.
+- `SlowView`, the same page after three seconds, to show the held place. No test
+  requests it.
+- `StaffNoteView`, open to staff only, to show the sign-in and the refusal.
+- `BrokenView`, which raises an error every time.
+
+The demo keeps `X_FRAME_OPTIONS = "SAMEORIGIN"` because Django's default, `DENY`, makes
+the browser show nothing in the frame. The second page also names an address the site
+does not have, to show the notice. The guide's pages name line ranges of those files, so
+a template or view edit that moves lines needs the `.rst` ranges updated with it. The
+tests compare each source shown with the lines the page names, so a range that has
+drifted still passes them and shows the wrong code; read the two pages after such an edit.
 
 **Adding a page** takes four things: a view in `demo/views.py` on
 `mvp.views.MVPTemplateView`, a route in `demo/urls.py`, a template extending

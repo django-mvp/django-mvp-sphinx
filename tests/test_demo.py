@@ -4,6 +4,8 @@
 # and a menu entry whose URL will not resolve is dropped from the tree.
 
 import re
+from pathlib import Path
+from textwrap import dedent
 from urllib.parse import urldefrag, urljoin
 
 import pytest
@@ -117,6 +119,40 @@ def admonition_classes(pages) -> set[str]:
         for each in soup.select("div.admonition")
         for name in each["class"]
     }
+
+
+WORKING_FORM = "/docs/examples/a-working-form/"
+CANNOT_RUN = "/docs/examples/when-an-example-cannot-run/"
+SOURCE_LINE = re.compile(r"^(?P<path>.+?)(?:\s+(?P<first>\d+)(?:-(?P<last>\d+))?)?$")
+
+
+def written_sources(address: str) -> list[list[tuple[Path, int | None, int | None]]]:
+    page = (
+        BASE_DIR / "demo" / "docs" / f"{address.removeprefix('/docs/').rstrip('/')}.rst"
+    )
+    examples: list[list[tuple[Path, int | None, int | None]]] = []
+    inside = False
+    for line in page.read_text(encoding="utf-8").splitlines():
+        if line.startswith(".. live-example::"):
+            examples.append([])
+            inside = True
+        elif inside and line and not line.startswith(" "):
+            inside = False
+        elif inside and line.strip() and not line.strip().startswith(":"):
+            found = SOURCE_LINE.match(line.strip())
+            first, last = found["first"], found["last"]
+            examples[-1].append(
+                (
+                    (page.parent / found["path"]).resolve(),
+                    int(first) if first else None,
+                    int(last or first) if first else None,
+                )
+            )
+    return examples
+
+
+def shown_examples(soup: BeautifulSoup) -> list:
+    return soup.select("section.mvp-sphinx-example")
 
 
 @pytest.fixture
@@ -377,6 +413,58 @@ class TestDemoGuideStates:
             assert len(regions) == 1
             assert regions[0]["tabindex"] == "0"
             assert regions[0]["aria-label"]
+
+    @pytest.mark.parametrize("address", [WORKING_FORM, CANNOT_RUN])
+    def test_each_source_shown_is_the_named_file_or_the_named_lines_of_it(
+        self, guide_pages, address
+    ) -> None:
+        written = written_sources(address)
+        shown = shown_examples(guide_pages[address])
+
+        assert len(shown) == len(written)
+        for example, sources in zip(shown, written, strict=True):
+            panes = example.select(".mvp-sphinx-example-code pre")
+            assert len(panes) == len(sources)
+            for pane, (file, first, last) in zip(panes, sources, strict=True):
+                text = file.read_text(encoding="utf-8")
+                if first:
+                    text = dedent("\n".join(text.splitlines()[first - 1 : last]))
+                assert pane.get_text().splitlines() == text.splitlines()
+
+    def test_the_working_form_page_holds_an_example_of_three_sources_and_one_of_part_of_a_file(
+        self, guide_pages
+    ) -> None:
+        form, status = shown_examples(guide_pages[WORKING_FORM])
+
+        file, first, last = written_sources(WORKING_FORM)[1][0]
+        assert len(form.select("input[type=radio]")) == 3
+        assert len(form.select(".mvp-sphinx-example-code")) == 3
+        assert status.select("input[type=radio]") == []
+        assert len(status.select(".mvp-sphinx-example-code")) == 1
+        assert first is not None
+        assert last - first + 1 < len(file.read_text(encoding="utf-8").splitlines())
+
+    def test_the_cannot_run_page_holds_three_frames_and_one_notice(
+        self, guide_pages
+    ) -> None:
+        examples = shown_examples(guide_pages[CANNOT_RUN])
+
+        framed = [example for example in examples if example.select("iframe")]
+        gone = [example for example in examples if not example.select("iframe")]
+        assert [example.select_one("iframe")["src"] for example in framed] == [
+            "/examples/slow/",
+            "/examples/staff/",
+            "/examples/broken/",
+        ]
+        assert len(gone) == 1
+        assert len(gone[0].select("[role=alert]")) == 1
+        assert all(example.select("[role=alert]") == [] for example in framed)
+
+    @pytest.mark.parametrize("address", [WORKING_FORM, CANNOT_RUN])
+    def test_both_example_pages_answer_200_to_an_anonymous_reader(
+        self, guide_responses, address
+    ) -> None:
+        assert guide_responses[address].status_code == 200
 
 
 class TestExamplePage:
