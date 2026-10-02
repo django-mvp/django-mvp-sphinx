@@ -18,7 +18,7 @@ message, to see what the site says. Nothing you send goes anywhere.
    ../../templates/demo/examples/contact.html
 
 "Start again" puts the form back to how it was when you opened this page.
-"Open on its own" takes you to the form as an ordinary page of the site.
+"Open on its own" takes you to the form at its own address.
 
 An order's status
 -----------------

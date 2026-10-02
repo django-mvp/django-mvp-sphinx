@@ -146,3 +146,27 @@ Did: Tests in `tests/test_demo.py::TestDemoGuideStates`, on the two pages of the
 Verified: `uv run pytest tests/test_demo.py -q` 48 passed; the six new cases alone `uv run pytest tests/test_demo.py::TestDemoGuideStates -q -k "shown or working_form or cannot_run or anonymous_reader"` 6 passed. `uv run pre-commit run --all-files` and `uv run mypy` passed. All six passed on their first run, because the pages and the code already did this; that is not a red step. Each shown able to fail by breaking one thing and restoring it: dedent removed in the directive (both source cases red, since `status.html` 3-9 is indented); the range's first line shifted by one (both red); the third source removed from the contact example (the three-source test); the retired address changed to a real one (the cannot-run test); the slow address changed to the retired one (the cannot-run test). The anonymous-reader cases would fail on a missing page (a KeyError in the responses), which I did not run as a mutation beyond hiding the page, where the build itself failed.
 Next: full verify, then the report.
 Watch: the tests compare the shown source with the range the page writes, so they cannot see a range that has drifted from the code it was meant to show; that stays by eye, as AGENTS.md now says. Screens 2, 4 and 9 (narrow layout, a used example, scripts off) are browser checks for convergence (R10).
+
+## 2026-10-02T16:37:28Z · S5 converge
+
+Did: all three stories accepted after an independent verify each (lint, types, docs check, suite,
+build green; tamper check clean for US1, and for US2 and US3 one flag on `tests/test_views.py`
+that is an import line with no assertion touched). Every FR and SC of the specification maps to a
+passing test or to the browser check below; no gap, so no converge task. No migrations. The
+simplify pass over the feature's diff found nothing to remove. All 19 decisions carry an ADR
+verdict, none graduates. One line of the demo guide still called an example's own address "an
+ordinary page of the site" and was reworded to match the refined specification.
+Browser check (research R10), Chromium against the demo on the development server, both demo pages:
+- A form sent inside the frame: sent empty with the browser's own validation off, the frame
+  showed the three field errors; sent filled in, it showed the thanks message. Both times the
+  frame stayed at the example's address with no shell in it, and the documentation page's address
+  and its script state were unchanged, so it had not reloaded (US1.4, SC-002).
+- "Start again" returned the form to its empty state without reloading the page (US2.4).
+- The second example on the page was untouched throughout (US1.7).
+- At 320 pixels wide neither page scrolls sideways, and neither does the content of any frame; the
+  example and its source stack, frame 448 pixels tall (US2.6, FR-016).
+- With the dark theme chosen, each frame is in the dark theme too.
+- The cannot-run page: the slow example arrived; the missing one shows the notice; the staff-only
+  one shows the sign-in page to a signed-out reader; the failing one shows the site's error page.
+  The documentation page was unaffected in each case (SC-004).
+Next: code review.
