@@ -70,7 +70,7 @@
       "priority": "P1",
       "issue": 68,
       "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -127,7 +127,7 @@
       "priority": "P2",
       "issue": 73,
       "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-009-api-reference-and-maths",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
