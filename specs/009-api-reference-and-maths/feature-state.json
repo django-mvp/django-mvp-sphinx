@@ -75,8 +75,17 @@
       "tasks": [
         {
           "id": "T001",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_static/test_content_css.py::TestSphinxHooks",
+              "tests/test_static/test_content_css.py::TestReferenceStylesheet"
+            ],
+            "commands": [
+              "uv run pytest tests/test_static/test_content_css.py -q"
+            ]
+          }
         },
         {
           "id": "T002",

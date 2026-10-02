@@ -254,3 +254,11 @@ README states the exposure.
 **Why:** Each costs a sentence now and a rework cycle later.
 
 **ADR:** none — corrections to this feature's own plan.
+
+## D19. The hooks test ties the parameter rule to its tag
+
+**Decision:** `sig-param` is in the hand-kept hooks tuple, and a hand-written build must hold it, but the stylesheet has no `.sig-param` selector: the approved rule is `dt.sig-object em`. The test checks that selector is present and that every `em` inside a `dt.sig-object` in both builds carries `sig-param`. The stylesheet is unchanged.
+
+**Why:** Checking the class name in a selector would have failed on the approved look, and changing the selector is not this task's to do. Tying the tag to the class catches the same drift: if Sphinx stopped writing `em.sig-param`, the rule would style the wrong thing and the test would fail.
+
+**Revisit if:** the stylesheet's parameter rule moves to `.sig-param`; then `sig-param` leaves `NAMED_BY_TAG`.

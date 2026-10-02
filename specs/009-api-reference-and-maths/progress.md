@@ -15,3 +15,10 @@ convergence (research R9). Every item under "What the prototype faked" has a tas
 `?typeset=off` switch, which T004 removes, and `demo/links.py`, which stays a demo fixture and
 is documented in T002. No CRITICAL findings.
 Next: design review.
+
+## 2026-10-02T09:30:07Z · Implementer US1 · T001
+
+Did: wrote the whole fixture source `tests/sphinx/reference/` (conf.py, index.rst, api.rst, maths.rst, plain.rst) and the `reference_build` and `reference_app` fixtures in `tests/conftest.py`. api.rst opens with `.. py:module:: demo.links`, so its entries carry the same ids and a `sig-prename` as the autodoc'd ones in the demo guide. Added `TestSphinxHooks` and `TestReferenceStylesheet` to `tests/test_static/test_content_css.py`.
+Verified: `uv run pytest tests/test_static/test_content_css.py -q -p no:warnings` → 39 passed (24 new). The fixture builds with no warnings. Every new test passed on its first run: they pin what the approved prototype already does. Each was then shown able to fail, by breaking one thing and restoring it: renaming `.default_value` in the stylesheet failed the selector test; pointing the `.sig-return-icon` rule and the `dl.field-list > dt` rule at `--color-base-200` / `--color-base-100` failed the contrast tests in both themes; removing the `py:module` line failed the `sig-prename` and same-classes tests; renaming the `dt.sig-object em` selector failed the tag test. Not mutated: the `js:function` test, the demo guide hook tests and the `em` test. They are plain presence checks on the build output.
+Next: T002.
+Watch: `sig-param` is not a selector in the stylesheet. The approved rule is `dt.sig-object em`, so the hooks test ties it by tag instead (D19).
