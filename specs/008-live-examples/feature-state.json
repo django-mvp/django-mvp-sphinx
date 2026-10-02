@@ -2,7 +2,7 @@
   "feature": "008-live-examples",
   "branch": "008-live-examples",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "IMPLEMENT",
+  "state": "CONVERGE",
   "state_history": [
     {
       "state": "QUEUED",
@@ -23,6 +23,11 @@
       "state": "IMPLEMENT",
       "at": "2026-10-02T16:05:14Z",
       "note": "plan gate open; design review approved, five corrections applied"
+    },
+    {
+      "state": "CONVERGE",
+      "at": "2026-10-02T16:35:33Z",
+      "note": "all three stories done and verified at 8a19d54"
     }
   ],
   "gates": {
@@ -125,7 +130,7 @@
       "priority": "P2",
       "issue": 70,
       "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-008-live-examples",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -169,7 +174,7 @@
       "priority": "P3",
       "issue": 72,
       "worktree": "/home/sam/projects/django-mvp/worktrees/sphinx-008-live-examples",
-      "status": "todo",
+      "status": "done",
       "replans": 0,
       "tasks": [
         {
@@ -227,7 +232,7 @@
   ],
   "budgets": {
     "converge_cycles": {
-      "used": 0,
+      "used": 1,
       "max": 2
     },
     "review_cycles": {
@@ -235,7 +240,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 4.39,
+      "used": 15.11,
       "max": 120
     },
     "design_review_cycles": {
