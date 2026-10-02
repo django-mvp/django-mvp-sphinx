@@ -21,6 +21,7 @@ from django.views.generic import TemplateView
 from mvp.views.base import PageMixin
 
 from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.headings import PageHeadings
 from mvp_sphinx.page_body import BodyRewriter
 from mvp_sphinx.search import DocsSearch
@@ -84,7 +85,11 @@ class PageView(PageMixin, TemplateView):
         self.page_data = page
         # The body is the host's own docs build, trusted as it always was.
         body = mark_safe(BodyRewriter.rewrite(page.get("body", "")))  # noqa: S308
-        return self.render_to_response(self.get_context_data(page_data=page, body=body))
+        return self.render_to_response(
+            self.get_context_data(
+                page_data=page, body=body, body_parts=LiveExamples.parts(body)
+            )
+        )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Add the app's search address, the page's headings and its neighbours."""

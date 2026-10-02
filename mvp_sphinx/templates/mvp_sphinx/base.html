@@ -1,0 +1,18 @@
+{% extends "mvp/base.html" %}
+{% comment %}
+  A base for a host project whose pages are shown as live examples. Extend this
+  from the project's own base.html in place of mvp/base.html. A page asked for
+  as an example renders its content alone, without the application shell around
+  it; any other request gets the shell as usual.
+{% endcomment %}
+{% block app %}
+  {% if request.GET.example %}
+    <main class="p-4">
+      {% block content %}
+      {% endblock content %}
+      <c-messages :messages="messages" dismissible />
+    </main>
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock app %}

@@ -23,6 +23,7 @@ from sphinx import addnodes
 from sphinx.application import Sphinx
 
 from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.live_example import LiveExample
 
 
 class NavigationWriter:
@@ -133,6 +134,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
         The extension's metadata.
     """
     app.connect("build-finished", write_navigation)
+    app.add_directive("live-example", LiveExample)
     return {
         "version": version("django-mvp-sphinx"),
         "parallel_read_safe": True,

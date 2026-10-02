@@ -61,6 +61,11 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
+# A live example is a page of this site shown in a frame on a documentation
+# page. Django refuses every frame by default; this allows the site to frame
+# its own pages and nobody else to.
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
 ROOT_URLCONF = "demo.urls"
 
 TEMPLATES = [
