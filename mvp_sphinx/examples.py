@@ -21,6 +21,11 @@ class LiveExamples:
         re.DOTALL,
     )
     SOURCE = re.compile(r'<!--mvp-example-source name="([^"]*)"-->')
+    EXAMPLE_CLASS = "mvp-sphinx-example"
+    SOURCE_CLASS = "mvp-sphinx-example-source"
+    ADDRESS_ATTRIBUTE = "data-address"
+    TITLE_ATTRIBUTE = "data-title"
+    NAME_ATTRIBUTE = "data-name"
     # Prototype only: how a page knows it is being shown as an example.
     FRAMED = "example=1"
 
