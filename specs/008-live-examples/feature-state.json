@@ -174,8 +174,21 @@
       "tasks": [
         {
           "id": "T006",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_live_example.py::TestLiveExampleWarnings"
+            ],
+            "commands": [
+              "uv run pytest tests/test_live_example.py tests/test_demo.py -q"
+            ],
+            "code": [
+              "mvp_sphinx/live_example.py:97",
+              "mvp_sphinx/live_example.py:232"
+            ],
+            "verified_by_ci": false
+          }
         },
         {
           "id": "T007",

@@ -38,7 +38,6 @@ from dataclasses import dataclass
 from html import escape
 from pathlib import Path
 from textwrap import dedent
-from urllib.parse import urlsplit
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -71,12 +70,17 @@ class LiveExample(SphinxDirective):
     """Write a live example's address and source into the page."""
 
     required_arguments = 1
+    final_argument_whitespace = True
     has_content = True
     option_spec = {"title": directives.unchanged}
 
     # The last word of a line is a range only when it has this shape, so a path
     # with spaces in it still reads as a path.
     LINES = re.compile(r"^(?P<path>.+?)\s+(?P<lines>\d+(?:-\d+)?)$")
+
+    # One slash and then no host, backslash or whitespace: the shapes a browser
+    # reads as another site (``//host/``, ``/\host/``) are all refused.
+    ADDRESS = re.compile(r"/(?!/)[^\\\s]*")
 
     # A Django project's .html files are templates, which Pygments reads as HTML.
     LANGUAGE_OVERRIDES = {".html": "html+django"}
@@ -90,8 +94,7 @@ class LiveExample(SphinxDirective):
             or no source file exists, after a warning.
         """
         address = self.arguments[0]
-        parts = urlsplit(address)
-        if parts.scheme or parts.netloc or not address.startswith("/"):
+        if not self.ADDRESS.fullmatch(address):
             logger.warning(
                 "live-example: %r is not an address of this site",
                 address,
@@ -221,9 +224,18 @@ class LiveExample(SphinxDirective):
             return None
         text = file.read_text(encoding="utf-8")
         if lines:
-            first, _, last = lines.partition("-")
+            start, _, end = lines.partition("-")
+            first, last = int(start), int(end or start)
             rows = text.splitlines()
-            text = dedent("\n".join(rows[int(first) - 1 : int(last or first)]))
+            if not 1 <= first <= last <= len(rows):
+                logger.warning(
+                    "live-example: lines %s are not inside %s",
+                    lines,
+                    path,
+                    location=self.get_location(),
+                )
+                return None
+            text = dedent("\n".join(rows[first - 1 : last]))
         block = nodes.literal_block(text, text)
         block["language"] = self.language(file)
         return Source(file, lines, block)

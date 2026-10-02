@@ -287,3 +287,90 @@ class TestLiveExampleNames:
         )
 
         assert source_names(page) == ["a/forms.py 1", "a/forms.py 2", "b/forms.py"]
+
+
+def build_warnings(capsys) -> list[str]:
+    return [line for line in capsys.readouterr().err.splitlines() if "WARNING" in line]
+
+
+class TestLiveExampleWarnings:
+    def test_a_missing_source_file_is_a_warning_and_the_other_sources_are_kept(
+        self, example_build, capsys
+    ) -> None:
+        page = example_build(["gone.py", "kept.py"], {"kept.py": "a = 1\n"})
+
+        warned = build_warnings(capsys)
+        assert len(warned) == 1
+        assert "index.rst" in warned[0]
+        assert "gone.py" in warned[0]
+        assert source_names(page) == ["kept.py"]
+
+    def test_an_example_whose_only_source_is_missing_is_a_warning_and_no_example(
+        self, example_build, capsys
+    ) -> None:
+        page = example_build(["gone.py"], {})
+
+        warned = build_warnings(capsys)
+        assert any("gone.py" in line and "index.rst" in line for line in warned)
+        assert page.select(".mvp-sphinx-example") == []
+
+    def test_an_example_with_no_source_lines_is_a_warning_and_no_example(
+        self, example_build, capsys
+    ) -> None:
+        page = example_build([], {})
+
+        warned = build_warnings(capsys)
+        assert len(warned) == 1
+        assert "index.rst" in warned[0]
+        assert page.select(".mvp-sphinx-example") == []
+
+    @pytest.mark.parametrize(
+        "address",
+        ["https://host/x", "//host/x", "/\\host/x", "host/x", "/a b"],
+        ids=["scheme", "network-path", "backslash", "no-slash", "space"],
+    )
+    def test_an_address_that_is_not_of_this_site_is_a_warning_and_no_example(
+        self, tmp_path, sphinx_build, capsys, address
+    ) -> None:
+        source = write_source(
+            tmp_path / "source",
+            example_page("kept.py", address=address),
+            {"kept.py": "a = 1\n"},
+        )
+
+        build = sphinx_build(source)
+
+        warned = build_warnings(capsys)
+        text = (build / "index.fjson").read_text(encoding="utf-8")
+        assert len(warned) == 1
+        assert "index.rst" in warned[0]
+        assert "mvp-sphinx-example" not in text
+        assert "host" not in text
+        assert "a b" not in text
+
+    @pytest.mark.parametrize(
+        "lines",
+        ["3-1", "0", "0-2", "4", "2-9", "three", "2-x"],
+        ids=[
+            "reversed",
+            "zero",
+            "zero-first",
+            "past-the-end",
+            "last-past-the-end",
+            "not-a-number",
+            "last-not-a-number",
+        ],
+    )
+    def test_a_range_that_is_not_inside_the_file_is_a_warning_and_that_source_is_left_out(
+        self, example_build, capsys, lines
+    ) -> None:
+        page = example_build(
+            [f"long.py {lines}", "kept.py"],
+            {"long.py": "a = 1\nb = 2\nc = 3\n", "kept.py": "d = 4\n"},
+        )
+
+        warned = build_warnings(capsys)
+        assert len(warned) == 1
+        assert "index.rst" in warned[0]
+        assert "long.py" in warned[0]
+        assert source_names(page) == ["kept.py"]

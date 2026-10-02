@@ -613,6 +613,26 @@ each tab adds the parent folders it needs to tell them apart, as `a/forms.py` an
 added to the name, as `views.py 12-25`. A file named once keeps its plain name,
 and an example with one file shows no tabs.
 
+#### What the build reports
+
+A marker the build cannot use is a Sphinx warning, at the line of the directive,
+so the message names the documentation page. The build then goes on without that
+part of the marker:
+
+- An address that is not a path of your site. It must start with one `/` and hold
+  no scheme, host, backslash or space, so `https://host/x`, `//host/x`,
+  `/\host/x` and `host/x` are all refused. The page gets no example and none of
+  its sources.
+- A source file that does not exist. The message names the file, and the example
+  keeps its other sources.
+- A range that is reversed, zero, or past the end of the file. The message names
+  the file, and that source is left out. A last word that is not a number is part
+  of the path, so it is reported as a file that does not exist.
+- An example left with no source at all. The page gets no example.
+
+Run Sphinx with `-W` and each of these fails the build, so a typo in an address
+or a file that was renamed does not reach the published documentation.
+
 #### Writing the example's page
 
 The page in the frame is an ordinary page of your site, with an ordinary view.
