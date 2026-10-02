@@ -65,9 +65,8 @@ written here and line ranges keep working as the prototype has them. Add the `ex
 - the example sits between the two paragraphs it was written between (FR-010, US1.6).
 
 `LiveExamples` gains the constants for the class names and attribute names, and the directive
-imports them, and its module docstring describes the elements it writes. `pyproject.toml`: beside
-the existing `sphinx` ignore, `DEP003 = ["docutils", "pygments"]`, with the same Article XII
-reason (this module runs only inside the host's Sphinx build, which installs both). Run
+imports them, and its module docstring describes the elements it writes. The `DEP003` entry for docutils and Pygments is already in `pyproject.toml`,
+added before this task so the base it starts from is green. Run
 `uv run deptry .` and confirm it passes.
 
 ### T002 — The served page shows the example, and an example's page has no shell
