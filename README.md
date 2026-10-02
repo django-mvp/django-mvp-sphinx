@@ -494,10 +494,13 @@ page scrolls sideways for a reader using only a keyboard and a screen reader
 announces what the region holds. It also names each heading link (the ¶ Sphinx
 puts beside a section heading, a glossary term or a caption) with the link's own
 title and the heading's text, such as "Link to this heading: Installing", so a
-screen reader tells one link from the next. Everything else in the body reaches
-the page exactly as Sphinx wrote it. `PageView` applies it and hands the result
-to the template as `body`, so a `PageView` subclass gets it too; to use it elsewhere,
-call `BodyRewriter.rewrite(markup)`.
+screen reader tells one link from the next. A reference entry's link is named by
+the entry and not by its whole signature, such as "Link to this definition:
+demo.links.page_address", so a page of entries reads as a list of names.
+Everything else in the body reaches the page exactly as Sphinx wrote it.
+`PageView` applies it and hands the result to the template as `body`, so a
+`PageView` subclass gets it too; to use it elsewhere, call
+`BodyRewriter.rewrite(markup)`.
 
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
 block so both stylesheets still reach the page, render `{{ body }}` rather than

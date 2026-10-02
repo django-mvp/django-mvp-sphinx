@@ -6,7 +6,7 @@ import re
 import shutil
 import sys
 from html import unescape
-from urllib.parse import urljoin
+from urllib.parse import urldefrag, urljoin
 
 import pytest
 from bs4 import BeautifulSoup
@@ -1491,3 +1491,40 @@ class TestReadingAfterARebuild:
         assert self.front_page(client).find("a", rel="next")["href"] == (
             "/docs/inserted/"
         )
+
+
+class TestEntryLinks:
+    @pytest.fixture
+    def page(self, client, db, reference_app) -> BeautifulSoup:
+        response = client.get("/docs/api/")
+        return BeautifulSoup(response.content, "html.parser")
+
+    def test_every_entry_holds_a_heading_link_to_itself(self, page) -> None:
+        entries = page.select("dt.sig-object[id]")
+
+        assert entries
+        for each in entries:
+            link = each.select_one("a.headerlink")
+            assert link["href"] == f"#{each['id']}"
+
+    def test_every_entry_link_has_a_name(self, page) -> None:
+        links = [each.select_one("a.headerlink") for each in page.select("dt[id]")]
+
+        assert links
+        assert all(link["aria-label"] for link in links)
+
+    def test_no_two_heading_links_of_the_page_share_a_name(self, page) -> None:
+        names = [link["aria-label"] for link in page.select("a.headerlink")]
+
+        assert len(names) > len(page.select("dt.sig-object[id]"))
+        assert len(names) == len(set(names))
+
+    def test_a_reference_in_a_description_leads_to_an_entry_on_the_page(
+        self, page
+    ) -> None:
+        description = page.select_one(
+            'dt[id="demo.links.page_address"]'
+        ).find_next_sibling("dd")
+
+        link = description.select_one("a.reference.internal[href]")
+        assert page.find("dt", id=urldefrag(link["href"])[1])

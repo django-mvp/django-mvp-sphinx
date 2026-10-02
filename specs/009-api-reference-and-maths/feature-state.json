@@ -132,8 +132,18 @@
       "tasks": [
         {
           "id": "T003",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_page_body.py::TestEntryLinks",
+              "tests/test_views.py::TestEntryLinks",
+              "tests/test_demo.py::TestDemoGuideStates::test_a_source_link_leads_to_a_page_of_the_app"
+            ],
+            "commands": [
+              "uv run pytest tests/test_page_body.py tests/test_views.py tests/test_demo.py -q -p no:warnings -k 'TestEntryLinks or source_link'"
+            ]
+          }
         }
       ]
     },

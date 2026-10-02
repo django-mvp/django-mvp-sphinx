@@ -1,6 +1,8 @@
 """BodyRewriter adds names and focus to a page's body and touches nothing else."""
 
+import json
 import re
+from html import unescape
 from html.parser import HTMLParser
 
 import pytest
@@ -60,6 +62,25 @@ def heading(text: str, title: str | None = "Link to this heading", tag="h2") -> 
         f'<{tag} id="anchor">{text}'
         f'<a class="headerlink" href="#anchor"{attribute}>\u00b6</a></{tag}>'
     )
+
+
+def entry(entry_id: str, signature: str, classes: str = "sig sig-object py") -> str:
+    return (
+        f'<dt class="{classes}" id="{entry_id}">{signature}'
+        f'<a class="headerlink" href="#{entry_id}" title="Link to this definition">'
+        "\u00b6</a></dt>"
+    )
+
+
+def sig_name(text: str) -> str:
+    return (
+        '<span class="sig-name descname"><span class="n">'
+        f'<span class="pre">{text}</span></span></span>'
+    )
+
+
+def sig_prename(text: str) -> str:
+    return f'<span class="sig-prename descclassname">{text}</span>'
 
 
 def regions(markup: str) -> list[dict[str, str | None]]:
@@ -288,3 +309,129 @@ class TestBodyRewriterHeadingLinks:
         markup = '<h2>Title <a href="#x" title="Elsewhere">here</a></h2>'
 
         assert BodyRewriter.rewrite(markup) == markup
+
+
+class TestEntryLinks:
+    @pytest.fixture
+    def api_body(self, reference_build) -> str:
+        return json.loads((reference_build / "api.fjson").read_text())["body"]
+
+    @pytest.fixture
+    def api_links(self, api_body) -> dict[str, dict[str, str | None]]:
+        links = heading_links(BodyRewriter.rewrite(api_body))
+        return {link["href"]: link for link in links}
+
+    @staticmethod
+    def name(link: dict[str, str | None]) -> str:
+        return unescape(link["aria-label"]).split(": ", 1)[1]
+
+    def test_a_top_level_function_is_named_by_its_dotted_name(self, api_links) -> None:
+        link = api_links["#demo.links.page_address"]
+
+        assert self.name(link) == "demo.links.page_address"
+
+    def test_the_names_of_same_named_methods_of_two_classes_differ(
+        self, api_links
+    ) -> None:
+        names = [
+            self.name(api_links[f"#demo.links.{each}.render"])
+            for each in ("Link", "Shortcut")
+        ]
+
+        assert names == ["demo.links.Link.render", "demo.links.Shortcut.render"]
+
+    def test_a_method_in_a_nested_class_is_named_by_its_whole_path(
+        self, api_links
+    ) -> None:
+        link = api_links["#demo.links.Link.Reader.can_open"]
+
+        assert self.name(link) == "demo.links.Link.Reader.can_open"
+
+    def test_another_languages_function_is_named_by_its_name(self, api_links) -> None:
+        assert self.name(api_links["#buildAddress"]) == "buildAddress"
+
+    def test_a_link_beside_a_source_link_is_named_without_its_text(self) -> None:
+        source = (
+            '<a class="reference internal" href="_modules/demo/#f">'
+            '<span class="viewcode-link"><span class="pre">[source]</span></span></a>'
+        )
+        signature = (
+            f"{sig_prename('demo.')}{sig_name('f')}(<em>a</em>) &#8594; str{source}"
+        )
+
+        result = BodyRewriter.rewrite(entry("demo.f", signature))
+
+        assert self.name(heading_links(result)[0]) == "demo.f"
+
+    def test_the_title_still_leads_the_name(self, api_links) -> None:
+        link = api_links["#demo.links.page_address"]
+
+        assert link["aria-label"] == f"{link['title']}: demo.links.page_address"
+
+    @pytest.mark.parametrize(
+        ("entry_id", "prename", "name", "expected"),
+        [
+            ("demo.links.f", "demo.links.", "f", "demo.links.f"),
+            ("Foo", "", "Foo", "Foo"),
+            ("_CPPv43Foo", "", "Foo", "Foo"),
+            ("_CPPv4N2ns3FooE", "ns::", "Foo", "ns::Foo"),
+            ("barFoo", "ns.", "Foo", "ns.Foo"),
+            ("envvar-MY_VAR", "", "MY_VAR", "MY_VAR"),
+        ],
+    )
+    def test_an_ids_text_names_the_link_only_when_it_ends_in_the_name(
+        self, entry_id, prename, name, expected
+    ) -> None:
+        signature = f"{sig_prename(prename)}{sig_name(name)}(<em>a</em>)"
+
+        result = BodyRewriter.rewrite(entry(entry_id, signature))
+
+        assert self.name(heading_links(result)[0]) == expected
+
+    def test_a_signature_with_two_names_is_named_by_its_text_as_written(self) -> None:
+        signature = f"{sig_name('-v')}{sig_prename('')}{sig_prename(', ')}{sig_name('--verbose')}"
+
+        result = BodyRewriter.rewrite(entry("cmdoption-v", signature))
+
+        assert self.name(heading_links(result)[0]) == "-v, --verbose"
+
+    def test_two_names_are_not_replaced_by_an_id_ending_in_the_first(self) -> None:
+        signature = f"{sig_name('-v')}{sig_prename(', ')}{sig_name('--verbose')}"
+
+        result = BodyRewriter.rewrite(entry("program.-v", signature))
+
+        assert self.name(heading_links(result)[0]) == "-v, --verbose"
+
+    def test_an_entry_with_no_name_is_named_by_its_text_as_before(self) -> None:
+        markup = entry("thing", '<span class="n">thing</span> (<em>a</em>)')
+
+        result = BodyRewriter.rewrite(markup)
+
+        assert self.name(heading_links(result)[0]) == "thing (a)"
+
+    def test_a_names_class_outside_a_signature_does_not_name_a_link(self) -> None:
+        markup = entry("term", f"widget {sig_name('other')}", classes="glossary")
+
+        result = BodyRewriter.rewrite(markup)
+
+        assert self.name(heading_links(result)[0]) == "widget other"
+
+    def test_a_heading_and_a_glossary_term_are_named_as_before(self) -> None:
+        markup = (
+            heading("Installing")
+            + '<dl class="glossary"><dt id="term-widget">widget'
+            + '<a class="headerlink" href="#term-widget" title="Link to this term">'
+            + "\u00b6</a></dt><dd></dd></dl>"
+        )
+
+        result = BodyRewriter.rewrite(markup)
+
+        assert [link["aria-label"] for link in heading_links(result)] == [
+            "Link to this heading: Installing",
+            "Link to this term: widget",
+        ]
+
+    def test_nothing_but_the_inserted_attributes_changes(self, api_body) -> None:
+        result = BodyRewriter.rewrite(api_body)
+
+        assert re.sub(r' aria-label="[^"]*"', "", result) == api_body

@@ -262,3 +262,11 @@ README states the exposure.
 **Why:** Checking the class name in a selector would have failed on the approved look, and changing the selector is not this task's to do. Tying the tag to the class catches the same drift: if Sphinx stopped writing `em.sig-param`, the rule would style the wrong thing and the test would fail.
 
 **Revisit if:** the stylesheet's parameter rule moves to `.sig-param`; then `sig-param` leaves `NAMED_BY_TAG`.
+
+## D20. An entry's name is its elements' text, joined as written
+
+**Decision:** When the `id` does not name the entry, the name is the text of its `sig-prename` and `sig-name` elements in document order, joined with nothing between them, then whitespace collapsed and trimmed. Only elements inside a `dt.sig-object` count.
+
+**Why:** Sphinx puts the pieces of one name in separate elements and the joining text inside them: `ns::` and `Foo`, `--out` and `=FILE`, and for `-v, --verbose` the comma sits in an empty-looking `sig-prename`. Joining with nothing gives `ns::Foo`, `--out=FILE` and `-v, --verbose`, as the author wrote them; joining with a space would not.
+
+**Revisit if:** a domain writes a name's pieces so that they need a separator.

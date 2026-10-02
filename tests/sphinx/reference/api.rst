@@ -55,7 +55,7 @@ Classes
 
    Another link.
 
-   .. py:method:: render(style: str = 'short') -> str
+   .. py:method:: render(style: str = 'plain') -> str
 
       Return the shortcut as text.
 

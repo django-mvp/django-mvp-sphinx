@@ -307,3 +307,15 @@ class TestDemoGuideStates:
 
         assert static("mvp_sphinx/content.css") in sheets
         assert not [each for each in sheets if "_static" in each]
+
+    def test_a_source_link_leads_to_a_page_of_the_app(
+        self, link_helpers, client
+    ) -> None:
+        address = "/docs/reference/link-helpers/"
+        links = link_helpers.select("dt.sig-object a:has(> span.viewcode-link)")
+
+        assert links
+        for link in links:
+            response = client.get(urldefrag(urljoin(address, link["href"]))[0])
+            assert response.status_code == 200
+            response.close()

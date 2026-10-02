@@ -28,7 +28,12 @@ class BodyRewriter(HTMLParser):
     Every heading link (``a.headerlink``, which Sphinx puts on section headings,
     glossary terms and captions) is named for a screen reader: its ``title``, a
     colon and the text of the element that holds it, so each link on a page has
-    a name of its own. A link with no ``title`` is named by the text alone.
+    a name of its own. A link with no ``title`` is named by the text alone. On a
+    reference entry's signature (``dt.sig-object``) the text is the entry's own
+    name and not the whole signature: its ``id`` when that is the full dotted name
+    of the one ``sig-name`` it holds, otherwise the text of its ``sig-prename``
+    and ``sig-name`` elements as written. An entry with no ``sig-name`` is named
+    by the whole signature, as any other heading is.
 
     Args:
         markup: The body to read.
@@ -59,7 +64,10 @@ class BodyRewriter(HTMLParser):
         for line in markup.split("\n")[:-1]:
             self.line_starts.append(self.line_starts[-1] + len(line) + 1)
         self.insertions: list[tuple[int, str]] = []
-        self.open_elements: list[tuple[str, int]] = []
+        self.open_elements: list[tuple[str, int, list[str]]] = []
+        self.entry_id: str | None = None
+        self.entry_names: list[str] = []
+        self.entry_parts: list[str] = []
         self.table_depth = 0
         self.table_start = 0
         self.caption_start: int | None = None
@@ -126,6 +134,23 @@ class BodyRewriter(HTMLParser):
         text = unescape(strip_tags(self.markup[start:end]))
         return re.sub(r"\s+", " ", text).strip()
 
+    def entry_name(self) -> str:
+        """Return the name of the reference entry whose signature is open.
+
+        Returns:
+            The entry's ``id`` when it holds one ``sig-name`` and the ``id``
+            equals its text or ends with a dot and its text. Otherwise the text
+            of its ``sig-prename`` and ``sig-name`` elements as written, or an
+            empty string when it has no ``sig-name``.
+        """
+        if not self.entry_names:
+            return ""
+        if len(self.entry_names) == 1 and self.entry_id:
+            name = self.entry_names[0]
+            if self.entry_id == name or self.entry_id.endswith(f".{name}"):
+                return self.entry_id
+        return re.sub(r"\s+", " ", "".join(self.entry_parts)).strip()
+
     def name_heading_link(self, title: str | None) -> None:
         """Record an ``aria-label`` for the heading link starting here.
 
@@ -134,12 +159,28 @@ class BodyRewriter(HTMLParser):
         """
         start = self.position()
         holder_start = self.open_elements[-1][1] if self.open_elements else start
-        text = self.text_between(holder_start, start)
+        holder = self.open_elements[-1][2] if self.open_elements else []
+        entry_name = self.entry_name() if "sig-object" in holder else ""
+        text = entry_name or self.text_between(holder_start, start)
         label = ": ".join(part for part in (title, text) if part)
         if label:
             self.insertions.append(
                 (start + len("<a"), format_html(' aria-label="{}"', label))
             )
+
+    def note_entry_part(self, content: int, classes: list[str]) -> None:
+        """Keep the text of a name in a signature as the element closes.
+
+        Args:
+            content: The offset the closing element's content began at.
+            classes: Its class list.
+        """
+        in_signature = any("sig-object" in held for _, _, held in self.open_elements)
+        if in_signature and ("sig-name" in classes or "sig-prename" in classes):
+            text = unescape(strip_tags(self.markup[content : self.position()]))
+            self.entry_parts.append(text)
+            if "sig-name" in classes:
+                self.entry_names.append(text.strip())
 
     def handle_starttag(self, tag, attrs):
         """Note where a table and its caption begin, and name a heading link."""
@@ -149,9 +190,14 @@ class BodyRewriter(HTMLParser):
         )
         if heading_link:
             self.name_heading_link(attributes.get("title"))
+        classes = (attributes.get("class") or "").split()
+        if tag == "dt" and "sig-object" in classes:
+            self.entry_id = attributes.get("id")
+            self.entry_names = []
+            self.entry_parts = []
         if tag not in self.VOID_TAGS:
             content = self.position() + len(self.get_starttag_text())
-            self.open_elements.append((tag, content))
+            self.open_elements.append((tag, content, classes))
         if tag == "table":
             if self.table_depth == 0:
                 self.table_start = self.position()
@@ -171,6 +217,7 @@ class BodyRewriter(HTMLParser):
         """Wrap the outermost table once its end tag is read."""
         for index in range(len(self.open_elements) - 1, -1, -1):
             if self.open_elements[index][0] == tag:
+                self.note_entry_part(*self.open_elements[index][1:])
                 del self.open_elements[index:]
                 break
         if tag == "caption" and self.table_depth == 1 and self.caption_end is None:
