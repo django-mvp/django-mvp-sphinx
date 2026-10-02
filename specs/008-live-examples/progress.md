@@ -170,3 +170,11 @@ Browser check (research R10), Chromium against the demo on the development serve
   one shows the sign-in page to a signed-out reader; the failing one shows the site's error page.
   The documentation page was unaffected in each case (SC-004).
 Next: code review.
+
+## 2026-10-02T16:43:50Z · S6 review
+
+Did: one reviewer with the correctness, specification and security lenses over the feature's diff at
+9488273. Verdict request changes: one high finding and two low, all verified, no security finding.
+Each was given a test that failed first and then remedied, and each remedy was checked against the
+finding's own reproduction (ledger, gates.review). Full verify green afterwards.
+Next: walkthrough and the pull request opened for review.

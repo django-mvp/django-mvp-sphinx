@@ -49,10 +49,10 @@
       "at": "2026-10-02T09:09:46Z",
       "self_resolved": [
         "at commit e244c122162e81e48f41abc00f95286a92ea9a50",
-        "The running example showed only about 150px tall \u2014 the example's styles moved to their own stylesheet and the frame now fills its pane",
-        "A host's base.html keeps extending mvp/base.html \u2014 recorded as a planning constraint; met by D11",
-        "X_FRAME_OPTIONS = SAMEORIGIN is fine if documented \u2014 recorded as a planning constraint",
-        "Frame height can be discussed later \u2014 height stays fixed for this build"
+        "The running example showed only about 150px tall — the example's styles moved to their own stylesheet and the frame now fills its pane",
+        "A host's base.html keeps extending mvp/base.html — recorded as a planning constraint; met by D11",
+        "X_FRAME_OPTIONS = SAMEORIGIN is fine if documented — recorded as a planning constraint",
+        "Frame height can be discussed later — height stays fixed for this build"
       ]
     },
     "plan": {
@@ -73,6 +73,16 @@
         "SPEC-003 the -W bullet tested Sphinx, not the package: removed from T006",
         "ARCH-002 LiveExamples.parts took a request it did not need: now takes the body alone",
         "notes: citations corrected to django-mvp 0.25.0; an example is a dict; TestExamplePage moved to tests/test_demo.py; T002 lists the demo pages whose line ranges follow its template edits"
+      ]
+    },
+    "review": {
+      "approved_by": "code review, one reviewer, correctness, spec and security lenses: request changes, all three findings remedied",
+      "at": "2026-10-02T16:43:50Z",
+      "self_resolved": [
+        "COR-001 high: the page body was cut by a line table that counted more line breaks than the parser does — remedied, the table now splits on newlines only; regression test over seven separators",
+        "COR-002 low: a source file that is not UTF-8 text stopped the build — remedied, it is now a warning naming the file; regression test",
+        "COR-003 low: an address written percent-encoded was shown as unavailable — remedied, the path is decoded before it is resolved; regression test",
+        "notes carried to the pull request: a source path may leave the project as literalinclude allows; an address missing its trailing slash shows as unavailable; the same file named twice with the same lines gives two tabs of one name"
       ]
     }
   },
