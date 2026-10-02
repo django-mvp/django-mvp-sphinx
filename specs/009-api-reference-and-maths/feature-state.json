@@ -2,7 +2,7 @@
   "feature": "009-api-reference-and-maths",
   "branch": "009-api-reference-and-maths",
   "repo": "django-mvp/django-mvp-sphinx",
-  "state": "PR_READY",
+  "state": "MERGED",
   "state_history": [
     {
       "state": "QUEUED",
@@ -38,6 +38,11 @@
       "state": "PR_READY",
       "at": "2026-10-02T10:11:53Z",
       "note": "review closed; walkthrough laid out on pull request #66"
+    },
+    {
+      "state": "MERGED",
+      "at": "2026-10-02T14:59:53Z",
+      "note": "PR #66 merged; approved by SamuelJennings"
     }
   ],
   "gates": {
@@ -62,8 +67,8 @@
       "at": "2026-10-02T09:23:22Z"
     },
     "merge": {
-      "approved_by": null,
-      "at": null
+      "approved_by": "SamuelJennings",
+      "at": "2026-10-02T14:59:41Z"
     },
     "design_review": {
       "approved_by": "design review, one reviewer, three lenses: approve",
@@ -91,8 +96,8 @@
       ]
     },
     "walkthrough": {
-      "approved_by": null,
-      "at": "2026-10-02T10:11:53Z",
+      "approved_by": "SamuelJennings",
+      "at": "2026-10-02T14:59:41Z",
       "self_resolved": []
     }
   },
@@ -257,7 +262,7 @@
       "max": 1
     },
     "tokens": {
-      "used": 0,
+      "used": 20.7,
       "max": 120
     },
     "design_review_cycles": {
@@ -268,6 +273,6 @@
   "escalations": [],
   "pr": {
     "number": 66,
-    "draft": true
+    "draft": false
   }
 }
