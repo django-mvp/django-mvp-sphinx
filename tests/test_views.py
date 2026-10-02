@@ -10,11 +10,14 @@ from urllib.parse import urldefrag, urljoin
 
 import pytest
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.templatetags.static import static
+from django.test import Client
 from django.urls import reverse
 
 from mvp_sphinx.page_body import BodyRewriter
-from tests.conftest import SPHINX_SOURCES
+from tests.conftest import DEMO_GUIDE, SPHINX_SOURCES
+from tests.factories import UserFactory
 from tests.test_live_example import write_source
 
 pytestmark = pytest.mark.usefixtures("docs_app")
@@ -1896,3 +1899,185 @@ class TestLiveExamples:
                 if attribute.startswith("on")
             ]
             assert handlers == []
+
+
+def rewrite_body(build, page: str, change) -> None:
+    file = build / f"{page}.fjson"
+    data = json.loads(file.read_text(encoding="utf-8"))
+    data["body"] = change(data["body"])
+    file.write_text(json.dumps(data), encoding="utf-8")
+
+
+@pytest.fixture
+def examples_copy(examples_build, tmp_path, monkeypatch):
+    from demo.mounted import docs
+
+    copy = tmp_path / "examples-copy"
+    shutil.copytree(examples_build, copy)
+    monkeypatch.setattr(docs, "build_dir", copy)
+    return copy
+
+
+class TestUnavailableExample:
+    def test_the_page_names_an_address_the_site_lacks_and_still_shows_the_source(
+        self, client, db, examples_app
+    ) -> None:
+        response = client.get("/docs/missing/")
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        example = soup.select_one("section.mvp-sphinx-example")
+        assert response.status_code == 200
+        assert example.select("iframe") == []
+        assert example.select("a[href='/examples/retired/']") == []
+        assert len(example.select("[role=alert]")) == 1
+        assert example.select_one(".mvp-sphinx-example-code pre").get_text() == (
+            SPHINX_SOURCES / "examples" / "sources" / "contact.py"
+        ).read_text(encoding="utf-8")
+
+    @pytest.mark.parametrize(
+        "address",
+        [
+            "https://host/examples/contact/",
+            "//host/examples/contact/",
+            "/\\host/examples/contact/",
+        ],
+        ids=["scheme", "network-path", "backslash"],
+    )
+    def test_a_build_naming_an_address_on_another_site_is_served_with_no_frame(
+        self, client, db, examples_copy, address
+    ) -> None:
+        rewrite_body(
+            examples_copy,
+            "single",
+            lambda body: body.replace("/examples/contact/", address),
+        )
+
+        response = client.get("/docs/single/")
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        assert response.status_code == 200
+        assert soup.select("iframe") == []
+        assert soup.select("section.mvp-sphinx-example [role=alert]")
+        assert soup.select("section.mvp-sphinx-example a[href]") == []
+
+
+class TestRefusedExample:
+    PAGE = "/docs/examples/when-an-example-cannot-run/"
+    STAFF = "/examples/staff/"
+
+    @pytest.fixture(params=["anonymous", "regular"])
+    def reader(self, request, db):
+        client = Client()
+        if request.param == "regular":
+            client.force_login(UserFactory())
+        return client
+
+    @pytest.fixture
+    def staff_example(self, reader, demo_guide_app):
+        response = reader.get(self.PAGE)
+        soup = BeautifulSoup(response.content, "html.parser")
+        return response, next(
+            example
+            for example in soup.select("section.mvp-sphinx-example")
+            if [frame["src"] for frame in example.select("iframe")] == [self.STAFF]
+        )
+
+    def test_the_page_answers_200_with_the_source_and_nothing_of_the_example(
+        self, staff_example
+    ) -> None:
+        response, example = staff_example
+
+        panes = example.select(".mvp-sphinx-example-code pre")
+        frame = example.select_one("iframe")
+        assert response.status_code == 200
+        assert panes[-1].get_text() == (
+            DEMO_GUIDE.parent / "templates" / "demo" / "examples" / "staff_note.html"
+        ).read_text(encoding="utf-8")
+        assert frame.contents == []
+        assert not frame.has_attr("srcdoc")
+
+    def test_the_examples_address_answers_as_it_does_with_no_page_involved(
+        self, reader, staff_example
+    ) -> None:
+        alone = Client()
+        if "_auth_user_id" in reader.session:
+            alone.force_login(UserFactory())
+
+        answered = reader.get(self.STAFF)
+        baseline = alone.get(self.STAFF)
+
+        assert answered.status_code == baseline.status_code
+        assert answered.status_code in {302, 403}
+        if answered.status_code == 302:
+            assert answered.url.split("?")[0] == settings.LOGIN_URL
+
+
+class TestFailingExample:
+    def test_the_page_naming_the_failing_example_answers_200(
+        self, client, db, demo_guide_app
+    ) -> None:
+        response = client.get("/docs/examples/when-an-example-cannot-run/")
+
+        sources = [
+            frame["src"]
+            for frame in BeautifulSoup(response.content, "html.parser").select("iframe")
+        ]
+        assert response.status_code == 200
+        assert "/examples/broken/" in sources
+
+
+class TestReaderRule:
+    PLAIN = "/staff-guide/plain/"
+    EXAMPLE = "/staff-guide/single/"
+
+    @pytest.fixture
+    def guide(self, examples_build, staff_guide_app, monkeypatch):
+        monkeypatch.setattr(staff_guide_app, "build_dir", examples_build)
+
+    def test_an_anonymous_reader_gets_what_the_rule_gives_any_page(
+        self, client, db, guide
+    ) -> None:
+        refused = client.get(self.PLAIN)
+
+        response = client.get(self.EXAMPLE)
+
+        assert response.status_code == refused.status_code == 302
+        assert response.url.split("?")[0] == refused.url.split("?")[0]
+
+    def test_a_signed_in_reader_the_rule_excludes_gets_the_forbidden_page_and_no_source(
+        self, client, db, guide
+    ) -> None:
+        client.force_login(UserFactory())
+        refused = client.get(self.PLAIN)
+        source = (SPHINX_SOURCES / "examples" / "sources" / "contact.py").read_text()
+
+        response = client.get(self.EXAMPLE)
+
+        assert response.status_code == refused.status_code == 403
+        assert source.splitlines()[0] not in response.content.decode()
+        assert "mvp-sphinx-example" not in response.content.decode()
+
+    def test_a_reader_the_rule_admits_gets_the_example(self, client, db, guide) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        response = client.get(self.EXAMPLE)
+
+        assert response.status_code == 200
+        assert BeautifulSoup(response.content, "html.parser").select("iframe")
+
+
+class TestRebuild:
+    def test_the_next_request_shows_a_rebuilt_source_with_no_restart(
+        self, client, db, examples_copy
+    ) -> None:
+        before = client.get("/docs/single/").content.decode()
+
+        rewrite_body(
+            examples_copy,
+            "single",
+            lambda body: body.replace("ContactForm", "RenamedForm"),
+        )
+        after = client.get("/docs/single/").content.decode()
+
+        assert "RenamedForm" not in before
+        assert "RenamedForm" in after

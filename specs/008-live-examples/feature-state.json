@@ -192,8 +192,21 @@
         },
         {
           "id": "T007",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 2,
+          "evidence": {
+            "tests": [
+              "tests/test_views.py::TestUnavailableExample",
+              "tests/test_views.py::TestRefusedExample",
+              "tests/test_views.py::TestFailingExample",
+              "tests/test_views.py::TestReaderRule",
+              "tests/test_views.py::TestRebuild"
+            ],
+            "commands": [
+              "uv run pytest tests/test_views.py -k \"TestLiveExamples or TestUnavailableExample or TestRefusedExample or TestFailingExample or TestReaderRule or TestRebuild\" -q"
+            ],
+            "verified_by_ci": false
+          }
         },
         {
           "id": "T008",
