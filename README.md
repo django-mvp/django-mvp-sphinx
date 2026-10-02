@@ -491,7 +491,10 @@ Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
 wraps each table in a scrolling region that takes keyboard focus and is named by
 the table's caption, or "Table" when it has none, so a table wider than the
 page scrolls sideways for a reader using only a keyboard and a screen reader
-announces what the region holds. It also names each heading link (the ¶ Sphinx
+announces what the region holds. An equation set out on its own line gets the
+same treatment, named "Equation" or, when it is numbered, "Equation (1)", so a
+wide equation can be scrolled from the keyboard before and after it is typeset;
+its number stays outside the region. It also names each heading link (the ¶ Sphinx
 puts beside a section heading, a glossary term or a caption) with the link's own
 title and the heading's text, such as "Link to this heading: Installing", so a
 screen reader tells one link from the next. A reference entry's link is named by

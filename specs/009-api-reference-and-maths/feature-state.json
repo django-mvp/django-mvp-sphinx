@@ -175,8 +175,18 @@
       "tasks": [
         {
           "id": "T006",
-          "status": "todo",
-          "attempts": 0
+          "status": "done",
+          "attempts": 1,
+          "evidence": {
+            "tests": [
+              "tests/test_page_body.py::TestEquationRegion",
+              "tests/test_views.py::TestWideContent::test_every_equation_of_a_page_holds_one_focusable_named_region"
+            ],
+            "commands": [
+              "uv run pytest tests/test_page_body.py tests/test_views.py::TestWideContent -q -p no:warnings",
+              "uv run mypy"
+            ]
+          }
         }
       ]
     },

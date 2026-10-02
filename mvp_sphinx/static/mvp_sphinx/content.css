@@ -512,36 +512,28 @@
   font-size: inherit;
 }
 
-/* An equation on its own line: the notation scrolls inside its own area when
-   it is wider than the page, and its number stays at the end of the line. */
+/* An equation on its own line: the notation scrolls inside the region the page
+   wraps it in when it is wider than the page, and its number stays at the end
+   of the line. */
 .mvp-sphinx-content div.math {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   gap: 1rem;
   margin-block: 1.5rem;
-  overflow-x: auto;
-  overflow-y: hidden;
 }
 
-.mvp-sphinx-content div.math:has(mjx-container) {
-  overflow: visible;
-}
-
-.mvp-sphinx-content div.math > mjx-container {
+.mvp-sphinx-content div.math > .mvp-sphinx-scroll {
   flex: 1 1 0;
   min-width: 0;
-  margin: 0;
   padding-block: 0.25rem;
   /* Sideways only. Scrolling one way makes the other scroll too unless it is
      hidden, and typeset maths always overflows its line by a few pixels. */
-  overflow-x: auto;
   overflow-y: hidden;
 }
 
-.mvp-sphinx-content div.math > mjx-container:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.mvp-sphinx-content div.math > .mvp-sphinx-scroll > mjx-container {
+  margin: 0;
 }
 
 .mvp-sphinx-content div.math:target {

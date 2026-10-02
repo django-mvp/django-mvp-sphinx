@@ -6,6 +6,7 @@ from html import unescape
 from html.parser import HTMLParser
 
 import pytest
+from bs4 import BeautifulSoup
 
 from mvp_sphinx.page_body import BodyRewriter
 
@@ -487,3 +488,176 @@ class TestMathsDetection:
     )
     def test_rewrite_returns_what_parse_splices(self, markup) -> None:
         assert BodyRewriter.rewrite(markup) == BodyRewriter.parse(markup).splice()
+
+
+class Balance(HTMLParser):
+    """Check that every element opened is closed in the order it was opened."""
+
+    VOID = BodyRewriter.VOID_TAGS
+
+    def __init__(self, markup: str) -> None:
+        super().__init__()
+        self.stack: list[str] = []
+        self.mismatches: list[str] = []
+        self.feed(markup)
+        self.close()
+
+    def handle_starttag(self, tag, attrs):
+        if tag not in self.VOID:
+            self.stack.append(tag)
+
+    def handle_endtag(self, tag):
+        if not self.stack or self.stack.pop() != tag:
+            self.mismatches.append(tag)
+
+    @property
+    def balanced(self) -> bool:
+        return not self.stack and not self.mismatches
+
+
+def soup(markup: str) -> BeautifulSoup:
+    return BeautifulSoup(markup, "html.parser")
+
+
+NOTATION = "\n\\[e^{i\\pi} + 1 = 0\\]"
+NUMBER = (
+    '\n<span class="eqno">{number}'
+    '<a class="headerlink" href="#equation-first" title="Link to this equation">'
+    "¶</a></span>"
+)
+UNNUMBERED = f'<div class="math notranslate nohighlight">{NOTATION}</div>'
+NUMBERED = (
+    '<div class="math notranslate nohighlight" id="equation-first">'
+    f"{NUMBER.format(number='(1)')}\\[x = y\\]</div>"
+)
+IN_A_PARAGRAPH = (
+    '<div class="math"><p><span class="eqno">(1)</span> \\[x = y\\]</p></div>'
+)
+REGION_OPENING = re.compile(r'<div class="mvp-sphinx-scroll"[^>]*>')
+
+
+class TestEquationRegion:
+    def test_an_unnumbered_equation_is_in_a_focusable_named_region(self) -> None:
+        result = BodyRewriter.rewrite(UNNUMBERED)
+
+        found = regions(result)
+        assert len(found) == 1
+        assert found[0]["tabindex"] == "0"
+        assert found[0]["aria-label"]
+        region = soup(result).select_one("div.math > .mvp-sphinx-scroll")
+        assert region["role"] == "region"
+        assert "e^{i" in region.get_text()
+
+    def test_the_region_of_a_numbered_equation_follows_the_number(self) -> None:
+        result = BodyRewriter.rewrite(NUMBERED)
+
+        equation = soup(result).select_one("div.math")
+        children = [child.name for child in equation.children if child.name]
+        assert children == ["span", "div"]
+        number, region = (
+            equation.find(name, recursive=False) for name in ("span", "div")
+        )
+        assert "eqno" in number["class"]
+        assert region["role"] == "region"
+        assert not number.find_parent(attrs={"role": "region"})
+        assert "x = y" in region.get_text()
+        assert "x = y" not in number.get_text()
+
+    def test_the_name_of_a_numbered_equation_holds_its_number(self) -> None:
+        result = BodyRewriter.rewrite(NUMBERED)
+
+        label = regions(result)[0]["aria-label"]
+        assert "(1)" in label
+        assert "\u00b6" not in label
+        assert label != regions(BodyRewriter.rewrite(UNNUMBERED))[0]["aria-label"]
+
+    def test_two_numbered_equations_are_named_by_their_own_numbers(self) -> None:
+        second = NUMBERED.replace("(1)", "(2)")
+
+        found = regions(BodyRewriter.rewrite(NUMBERED + second))
+
+        assert ["(1)" in f["aria-label"] for f in found] == [True, False]
+        assert ["(2)" in f["aria-label"] for f in found] == [False, True]
+
+    @pytest.mark.parametrize(
+        "markup", [UNNUMBERED, NUMBERED], ids=["unnumbered", "numbered"]
+    )
+    def test_the_notation_between_the_regions_tags_is_as_sphinx_wrote_it(
+        self, markup
+    ) -> None:
+        result = BodyRewriter.rewrite(markup)
+
+        inside = re.search(REGION_OPENING.pattern + r"(.*)</div></div>$", result, re.S)
+        assert inside
+        start = markup.index("</span>") + len("</span>") if "eqno" in markup else None
+        notation = markup[start or markup.index(">") + 1 : -len("</div>")]
+        assert inside[1] == notation
+
+    def test_inline_maths_is_not_wrapped(self) -> None:
+        markup = '<p>So <span class="math notranslate">\\(a^2\\)</span> holds.</p>'
+
+        assert BodyRewriter.rewrite(markup) == markup
+
+    def test_a_span_with_a_math_class_inside_an_equation_is_not_wrapped_on_its_own(
+        self,
+    ) -> None:
+        markup = '<div class="math">\\[x\\] <span class="math">\\(y\\)</span></div>'
+
+        assert len(regions(BodyRewriter.rewrite(markup))) == 1
+
+    def test_an_equation_in_a_table_has_its_own_region_inside_the_tables(
+        self,
+    ) -> None:
+        markup = f"<table><tbody><tr><td>{UNNUMBERED}</td></tr></tbody></table>"
+
+        result = BodyRewriter.rewrite(markup)
+
+        assert Balance(result).balanced
+        outer, inner = soup(result).select('[role="region"]')
+        assert outer.find("table")
+        assert inner.find_parent(attrs={"role": "region"}) is outer
+        assert inner.find_parent("div", class_="math")
+        assert not inner.find("table")
+
+    def test_a_number_holding_markup_characters_is_escaped_in_the_name(self) -> None:
+        markup = NUMBERED.replace("(1)", "(1&amp;&lt;b&gt;&quot;)")
+
+        result = BodyRewriter.rewrite(markup)
+
+        assert Balance(result).balanced
+        found = regions(result)
+        assert len(found) == 1
+        assert '(1&<b>")' in found[0]["aria-label"]
+        assert "<b>" not in REGION_OPENING.search(result).group()
+
+    def test_an_equation_whose_number_is_in_a_paragraph_is_wrapped_whole(self) -> None:
+        result = BodyRewriter.rewrite(IN_A_PARAGRAPH)
+
+        assert Balance(result).balanced
+        region = soup(result).select_one("div.math > .mvp-sphinx-scroll")
+        assert region["role"] == "region"
+        assert region.find("p", recursive=False)
+        assert region.find("span", class_="eqno")
+        assert result.startswith(
+            '<div class="math">' + REGION_OPENING.search(result)[0]
+        )
+
+    @pytest.mark.parametrize(
+        "markup",
+        [
+            UNNUMBERED,
+            NUMBERED,
+            IN_A_PARAGRAPH,
+            f"<p>R&D &amp; &copy caf&eacute;</p>\n{NUMBERED}\n<p>end</p>",
+            f"{UNNUMBERED}{NUMBERED}",
+        ],
+        ids=["unnumbered", "numbered", "in a paragraph", "entities", "two"],
+    )
+    def test_removing_the_inserted_tags_gives_back_the_original(self, markup) -> None:
+        result = BodyRewriter.rewrite(markup)
+
+        opened = re.sub(
+            r"(?<=<a) aria-label=\"[^\"]*\"", "", REGION_OPENING.sub("", result)
+        )
+        assert opened.count("</div>") == markup.count("</div>") + len(regions(result))
+        assert opened.replace("</div></div>", "</div>") == markup

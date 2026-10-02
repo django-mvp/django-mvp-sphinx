@@ -507,6 +507,21 @@ class TestWideContent:
 
         assert 'aria-label="Release schedule"' in response.content.decode()
 
+    def test_every_equation_of_a_page_holds_one_focusable_named_region(
+        self, client, db, reference_app
+    ) -> None:
+        response = client.get("/docs/maths/")
+
+        soup = BeautifulSoup(response.content.decode(), "html.parser")
+        equations = soup.select("div.math")
+        assert len(equations) == 3
+        for equation in equations:
+            regions = equation.select('[role="region"]')
+            assert len(regions) == 1
+            assert regions[0]["tabindex"] == "0"
+            assert regions[0]["aria-label"]
+            assert regions[0].find_parent("div", class_="math") is equation
+
 
 class TestHeadingLinks:
     HEADING_LINK = re.compile(

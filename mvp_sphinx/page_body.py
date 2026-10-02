@@ -1,11 +1,30 @@
 """The rewrite that gives a page's body the attributes CSS cannot add."""
 
 import re
+from dataclasses import dataclass
 from html import unescape
 from html.parser import HTMLParser
 
 from django.utils.html import format_html, strip_tags
 from django.utils.translation import gettext_lazy as _
+
+
+@dataclass
+class Equation:
+    """Where the parts of an equation set out on its own line begin and end.
+
+    Attributes:
+        region_start: The offset the equation's notation begins at: just after
+            its start tag, or after its number when the number is a direct child.
+        number_start: The offset the number's content begins at, if it has one.
+        number_link: The offset the number's heading link begins at, if it has one.
+        number_end: The offset the number's end tag begins at, once it has closed.
+    """
+
+    region_start: int
+    number_start: int | None = None
+    number_link: int | None = None
+    number_end: int | None = None
 
 
 class BodyRewriter(HTMLParser):
@@ -28,6 +47,14 @@ class BodyRewriter(HTMLParser):
     focus, so a table wider than the reading area scrolls sideways for a reader
     with no pointer. The region's name is the table's caption, or the word
     "Table" when it has none.
+
+    Every equation set out on its own line (``div.math``) has its notation wrapped
+    in the same kind of region, named "Equation" or, when numbered, "Equation"
+    and the number as Sphinx wrote it, so a wide equation scrolls sideways for a
+    reader with no pointer. The region opens after the number (``span.eqno``) when
+    that is a direct child of the equation, so the number stays outside it, and
+    otherwise straight after the equation's start tag. Inline maths is not
+    wrapped.
 
     Every heading link (``a.headerlink``, which Sphinx puts on section headings,
     glossary terms and captions) is named for a screen reader: its ``title``, a
@@ -77,6 +104,7 @@ class BodyRewriter(HTMLParser):
         self.caption_start: int | None = None
         self.caption_end: int | None = None
         self.has_maths = False
+        self.equations: list[Equation] = []
 
     @classmethod
     def parse(cls, markup: str) -> "BodyRewriter":
@@ -169,6 +197,68 @@ class BodyRewriter(HTMLParser):
                 return self.entry_id
         return re.sub(r"\s+", " ", "".join(self.entry_parts)).strip()
 
+    def in_equation(self) -> bool:
+        """Return whether the innermost open element is an equation's ``div``."""
+        if not self.open_elements:
+            return False
+        tag, classes = self.open_elements[-1][0], self.open_elements[-1][2]
+        return tag == "div" and "math" in classes
+
+    def end_number(self, content: int) -> None:
+        """Move the region's start to after the number that is closing.
+
+        Args:
+            content: The offset the closing element's content began at.
+        """
+        equation = self.equations[-1]
+        if equation.number_start != content or equation.number_end is not None:
+            return
+        start = self.position()
+        equation.number_end = start
+        equation.region_start = self.markup.index(">", start) + 1
+
+    def end_equation(self) -> None:
+        """Record the region around the notation of the equation that is closing."""
+        equation = self.equations.pop()
+        number = ""
+        if equation.number_start is not None and equation.number_end is not None:
+            stop = equation.number_link or equation.number_end
+            number = self.text_between(equation.number_start, stop)
+        label = str(_("Equation"))
+        if number:
+            label = str(_("Equation %(number)s")) % {"number": number}
+        opening = format_html(
+            '<div class="mvp-sphinx-scroll" role="region" tabindex="0" '
+            'aria-label="{}">',
+            label,
+        )
+        self.insertions.append((equation.region_start, opening))
+        self.insertions.append((self.position(), "</div>"))
+
+    def note_number_link(self) -> None:
+        """Note where the heading link in an equation's number begins."""
+        if not (self.equations and self.open_elements):
+            return
+        equation = self.equations[-1]
+        holder_content = self.open_elements[-1][1]
+        if equation.number_start == holder_content and equation.number_link is None:
+            equation.number_link = self.position()
+
+    def note_equation_end(self, index: int) -> None:
+        """Close the equation or number whose element ends here.
+
+        Args:
+            index: The position in ``open_elements`` of the element being closed.
+        """
+        tag, content, classes = self.open_elements[index]
+        if tag == "span" and "eqno" in classes and self.equations:
+            self.end_number(content)
+        elif tag == "div" and "math" in classes:
+            for held in self.open_elements[index + 1 :]:
+                if held[0] == "div" and "math" in held[2]:
+                    self.equations.pop()
+            self.end_equation()
+
     def name_heading_link(self, title: str | None) -> None:
         """Record an ``aria-label`` for the heading link starting here.
 
@@ -206,9 +296,11 @@ class BodyRewriter(HTMLParser):
         heading_link = (
             tag == "a" and "headerlink" in (attributes.get("class") or "").split()
         )
+        classes = (attributes.get("class") or "").split()
         if heading_link:
             self.name_heading_link(attributes.get("title"))
-        classes = (attributes.get("class") or "").split()
+            self.note_number_link()
+        direct_child = self.in_equation()
         if "math" in classes:
             self.has_maths = True
         if tag == "dt" and "sig-object" in classes:
@@ -218,6 +310,10 @@ class BodyRewriter(HTMLParser):
         if tag not in self.VOID_TAGS:
             content = self.position() + len(self.get_starttag_text())
             self.open_elements.append((tag, content, classes))
+            if tag == "div" and "math" in classes:
+                self.equations.append(Equation(region_start=content))
+            elif tag == "span" and "eqno" in classes and direct_child:
+                self.equations[-1].number_start = content
         if tag == "table":
             if self.table_depth == 0:
                 self.table_start = self.position()
@@ -238,6 +334,7 @@ class BodyRewriter(HTMLParser):
         for index in range(len(self.open_elements) - 1, -1, -1):
             if self.open_elements[index][0] == tag:
                 self.note_entry_part(*self.open_elements[index][1:])
+                self.note_equation_end(index)
                 del self.open_elements[index:]
                 break
         if tag == "caption" and self.table_depth == 1 and self.caption_end is None:
