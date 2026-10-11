@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Pages no longer raise `TemplateDoesNotExist` on django-mvp 0.27 or later. That release moved django-mvp's components under the `mvp.` prefix, and this package's templates still used the old names. They now use `<c-mvp.page>`, `<c-mvp.container>` and `<c-mvp.messages>`.
+
+### Changed
+
+- django-mvp 0.27 or later is required. A project on an earlier django-mvp stays on django-mvp-sphinx 0.1.0 until it upgrades. If you override `mvp_sphinx/page.html`, `mvp_sphinx/search.html` or `mvp_sphinx/example.html`, rename the same tags in your copy.
+
 ## [v0.1.0] - 2026-10-04
 
 ### Added

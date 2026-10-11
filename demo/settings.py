@@ -32,9 +32,12 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "mvp",
+    # Below "mvp": both ship an icon component, and django-mvp's has to be the
+    # one the template loader finds.
+    "daisy_cotton",
     "easy_icons",
     "crispy_forms",
-    "crispy_tailwind",
+    "mvp_forms",
     "flex_menu",
     "django_cotton",
     # Reloads the browser on a change to a template, a stylesheet or Python. It
@@ -99,8 +102,8 @@ AUTH_PASSWORD_VALIDATORS: list[dict] = []
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = ["tailwind"]
-CRISPY_TEMPLATE_PACK = "tailwind"
+CRISPY_ALLOWED_TEMPLATE_PACKS = ["daisyui"]
+CRISPY_TEMPLATE_PACK = "daisyui"
 
 # Which class draws the sidebar tree declared in demo/menus.py, and which draws
 # the dock shown below the sidebar breakpoint.

@@ -609,7 +609,7 @@ def page_address(name: str) -> str:
 def sidebar_of(app, response):
     # The app's own menu, a navigation landmark named after the app.
     return BeautifulSoup(response.content, "html.parser").find(
-        attrs={"role": "navigation", "aria-label": str(app.name)}
+        "nav", attrs={"aria-label": str(app.name)}
     )
 
 

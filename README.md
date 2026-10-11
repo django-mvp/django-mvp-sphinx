@@ -36,6 +36,9 @@ whose application shell already works. This package renders inside django-mvp's
 layout and reads its colours from the theme django-mvp supplies, so it does
 nothing useful on its own.
 
+django-mvp has to be 0.27 or later. That release moved its components under the
+`mvp.` prefix, and this package's templates use those names.
+
 You also need a Sphinx source directory for your user guide. The examples call
 it `docs/`. If you don't have one yet, Sphinx's own
 [`sphinx-quickstart`](https://www.sphinx-doc.org/en/master/usage/quickstart.html)

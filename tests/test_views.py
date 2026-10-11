@@ -69,7 +69,7 @@ def linked_stylesheets(response) -> list[str]:
 def contents_links(response, app) -> list[str]:
     """Return the addresses the app's contents links to, as the page draws it."""
     soup = BeautifulSoup(response.content, "html.parser")
-    contents = soup.find("ul", attrs={"aria-label": str(app.name)})
+    contents = soup.find("nav", attrs={"aria-label": str(app.name)})
     return [link["href"] for link in contents.find_all("a")]
 
 
@@ -608,7 +608,7 @@ class TestContentsInTheSidebar:
         self, client, db, contents_app
     ) -> None:
         soup = BeautifulSoup(client.get("/docs/").content, "html.parser")
-        contents = soup.find("ul", attrs={"aria-label": str(contents_app.name)})
+        contents = soup.find("nav", attrs={"aria-label": str(contents_app.name)})
 
         link = contents.find("a", href="/docs/markup/")
 
@@ -1292,7 +1292,7 @@ class TestOnThisPage:
         name = soup.find(id=nav["aria-labelledby"]).get_text(strip=True)
 
         assert name != str(reading_app.name)
-        assert soup.find("ul", attrs={"aria-label": str(reading_app.name)})
+        assert soup.find("nav", attrs={"aria-label": str(reading_app.name)})
 
     def test_a_page_with_one_section_lists_one_link(
         self, client, db, reading_app
