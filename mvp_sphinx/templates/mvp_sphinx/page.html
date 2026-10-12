@@ -10,8 +10,8 @@
   {% if has_examples %}<link rel="stylesheet" href="{% static 'mvp_sphinx/example.css' %}">{% endif %}
 {% endblock styles %}
 {% block content %}
-  <c-page>
-    <c-container>
+  <c-mvp.page>
+    <c-mvp.container>
       <div class="xl:flex gap-10">
         <div class="min-w-0 w-full max-w-prose xl:max-w-none xl:flex-1">
           <c-mvp_sphinx.search_form :action="search_url" />
@@ -32,8 +32,8 @@
           </aside>
         {% endif %}
       </div>
-    </c-container>
-  </c-page>
+    </c-mvp.container>
+  </c-mvp.page>
 {% endblock content %}
 {% block extra_js %}
   {{ block.super }}

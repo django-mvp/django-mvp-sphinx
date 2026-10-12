@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
 {% endblock styles %}
 {% block content %}
-  <c-page>
-    <c-container>
+  <c-mvp.page>
+    <c-mvp.container>
       <h1 class="text-2xl font-semibold pt-4">{% translate "Search" %}</h1>
       <c-mvp_sphinx.search_form :action="search_url" :query="query" />
       {% if results is None %}
@@ -32,6 +32,6 @@
       {% else %}
         <p role="status">{% translate "Nothing matched your search." %}</p>
       {% endif %}
-    </c-container>
-  </c-page>
+    </c-mvp.container>
+  </c-mvp.page>
 {% endblock content %}
