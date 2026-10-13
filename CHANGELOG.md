@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-10-13
+
 ### Fixed
 
 - Pages no longer raise `TemplateDoesNotExist` on django-mvp 0.27 or later. That release moved django-mvp's components under the `mvp.` prefix, and this package's templates still used the old names. They now use `<c-mvp.page>`, `<c-mvp.container>` and `<c-mvp.messages>`.
