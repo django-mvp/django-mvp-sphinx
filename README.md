@@ -1,5 +1,16 @@
 # django-mvp-sphinx
 
+[![Tests](https://github.com/django-mvp/django-mvp-sphinx/actions/workflows/tests.yml/badge.svg)](https://github.com/django-mvp/django-mvp-sphinx/actions/workflows/tests.yml)
+[![Build](https://github.com/django-mvp/django-mvp-sphinx/actions/workflows/build.yml/badge.svg)](https://github.com/django-mvp/django-mvp-sphinx/actions/workflows/build.yml)
+[![Publish](https://github.com/django-mvp/django-mvp-sphinx/actions/workflows/publish.yml/badge.svg)](https://github.com/django-mvp/django-mvp-sphinx/actions/workflows/publish.yml)
+[![Coverage](https://codecov.io/gh/django-mvp/django-mvp-sphinx/branch/main/graph/badge.svg)](https://codecov.io/gh/django-mvp/django-mvp-sphinx)
+[![PyPI](https://img.shields.io/pypi/v/django-mvp-sphinx)](https://pypi.org/project/django-mvp-sphinx/)
+[![Development status](https://img.shields.io/pypi/status/django-mvp-sphinx)](https://pypi.org/project/django-mvp-sphinx/)
+[![Python](https://img.shields.io/pypi/pyversions/django-mvp-sphinx)](https://pypi.org/project/django-mvp-sphinx/)
+[![Django](https://img.shields.io/pypi/djversions/django-mvp-sphinx)](https://pypi.org/project/django-mvp-sphinx/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Licence](https://img.shields.io/github/license/django-mvp/django-mvp-sphinx)](https://github.com/django-mvp/django-mvp-sphinx/blob/main/LICENSE)
+
 Serve a project's Sphinx documentation inside its django-mvp application shell.
 
 ## Scope & philosophy
@@ -22,6 +33,13 @@ translations.
 
 When two designs conflict, the one that makes the docs look like the rest of
 the site beats the one that copies a Sphinx theme.
+
+## Requirements
+
+- Python 3.12 or later.
+- Django 5.2, 6.0 or 6.1.
+- [django-mvp](https://github.com/django-mvp/django-mvp) 0.27.0 or later and
+  [django-flex-menus](https://github.com/django-mvp/django-flex-menus) 0.4.5 or later.
 
 ## Quickstart
 
@@ -887,6 +905,10 @@ Only the staff and superuser accounts can open the staff guide at
 <http://127.0.0.1:8000/staff-guide/>. Everyone else is asked to sign in or is shown
 the forbidden page, and the sidebar has no entry for them. The command refuses to run
 unless `DEBUG` is on.
+
+## Changelog
+
+See [CHANGELOG.md](https://github.com/django-mvp/django-mvp-sphinx/blob/main/CHANGELOG.md).
 
 ## License
 
