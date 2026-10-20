@@ -1,9 +1,10 @@
 {% load i18n %}
 {# @description A live example: a page of the site running in a frame, beside the source the docs build holds for it. Works without scripts: "Start again" is a link aimed at the frame, and the source files are a radio group. #}
-{# @prop example:dict | description:"From LiveExamples: id, title, address, available, and sources (each with name and html, the highlighted code)." #}
+{# @prop example:dict | description:"From LiveExamples: id, title, address, layout (side-by-side or stacked), available, and sources (each with name and html, the highlighted code)." #}
 <c-vars example />
 
 <section aria-labelledby="{{ example.id }}-title"
+         data-layout="{{ example.layout }}"
          class="not-prose mvp-sphinx-example my-6 border border-base-300 rounded-box overflow-hidden">
   <div class="flex flex-wrap items-center gap-2 px-4 py-2 bg-base-200 border-b border-base-300">
     <p id="{{ example.id }}-title" class="font-medium">
@@ -22,7 +23,7 @@
       </div>
     {% endif %}
   </div>
-  <div class="grid xl:grid-cols-2">
+  <div class="mvp-sphinx-example-panes grid">
     <div class="mvp-sphinx-example-pane min-w-0">
       {% if example.available %}
         <div class="mvp-sphinx-example-holder skeleton rounded-none">

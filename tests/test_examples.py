@@ -18,14 +18,16 @@ def example_markup(
     address: str = "/examples/status/",
     title: str = "A status page",
     sources: tuple[tuple[str, str], ...] = (("status.html", FIRST_SOURCE),),
+    layout: str | None = None,
 ) -> str:
     inner = "".join(
         f'<div class="mvp-sphinx-example-source" data-name="{name}">{html}</div>\n'
         for name, html in sources
     )
+    written = "" if layout is None else f' data-layout="{layout}"'
     return (
         f'<div class="mvp-sphinx-example" data-address="{address}" '
-        f'data-title="{title}">\n{inner}</div>'
+        f'data-title="{title}"{written}>\n{inner}</div>'
     )
 
 
@@ -59,6 +61,20 @@ class TestParts:
             {"name": "status.html", "html": FIRST_SOURCE},
             {"name": "views.py", "html": SECOND_SOURCE},
         ]
+
+    @pytest.mark.parametrize("layout", ["side-by-side", "stacked"])
+    def test_the_example_carries_the_layout_written(self, layout) -> None:
+        example = LiveExamples.parts(example_markup(layout=layout))[1]["example"]
+
+        assert example["layout"] == layout
+
+    @pytest.mark.parametrize(
+        "layout", [None, "", "wide"], ids=["older-build", "empty", "unknown"]
+    )
+    def test_an_example_with_no_layout_it_knows_is_side_by_side(self, layout) -> None:
+        example = LiveExamples.parts(example_markup(layout=layout))[1]["example"]
+
+        assert example["layout"] == "side-by-side"
 
     def test_attribute_values_are_read_back_unescaped(self) -> None:
         markup = example_markup(title="Status of &quot;an order&quot; &amp; items")

@@ -24,10 +24,12 @@ An order's status
 -----------------
 
 An example doesn't need a form. This one is a page that only shows something,
-and its source is the part of one template that draws it.
+and its source is the part of one template that draws it. It is stacked, with
+its source under the page, however wide the screen.
 
 .. live-example:: /examples/status/
    :title: An order's status
+   :layout: stacked
 
    ../../templates/demo/examples/status.html 3-9
 

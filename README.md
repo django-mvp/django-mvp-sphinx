@@ -633,6 +633,37 @@ Rebuild the docs and the page shows the frame with the file beside it. A page
 with an example loads one more stylesheet, `mvp_sphinx/example.css`; other pages
 load nothing new.
 
+#### Side by side or stacked
+
+An example puts its source beside the frame when it has room for both, and under
+the frame when it doesn't. The room is the width the example has on the page, so
+an example in a page with the sidebar and the "On this page" list open can stack
+in a wide window.
+
+To have the source under the frame at every width, add `:layout: stacked`:
+
+```rst
+.. live-example:: /examples/contact/
+   :title: A contact form
+   :layout: stacked
+
+   ../../examples/forms.py
+```
+
+The other value is `side-by-side`, which is what an example gets without the
+option. Documentation that is mostly examples can make stacked the default for
+the whole build in `conf.py`, and an example that should sit side by side then
+says `:layout: side-by-side`:
+
+```python
+mvp_sphinx_live_example_layout = "stacked"
+```
+
+A layout that is neither value is reported when the docs are built. In the
+directive the example is left out of the page. In `conf.py` the build warns and
+every example without the option sits side by side. Docs built before this
+release have no layout written into them and are shown side by side.
+
 Each example has two links above the frame. "Start again" loads the example's
 address in the frame again, which puts the page back as it was when the reader
 arrived, and "Open on its own" opens the address as a page of its own. Both are

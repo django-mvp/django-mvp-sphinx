@@ -70,6 +70,7 @@ class ExampleReader(HTMLParser):
                     "start": self.position(),
                     "address": values.get(LiveExamples.ADDRESS_ATTRIBUTE) or "",
                     "title": values.get(LiveExamples.TITLE_ATTRIBUTE) or "",
+                    "layout": values.get(LiveExamples.LAYOUT_ATTRIBUTE) or "",
                     "sources": [],
                 }
                 self.example_depth = self.depth
@@ -108,6 +109,10 @@ class LiveExamples:
     ADDRESS_ATTRIBUTE = "data-address"
     TITLE_ATTRIBUTE = "data-title"
     NAME_ATTRIBUTE = "data-name"
+    LAYOUT_ATTRIBUTE = "data-layout"
+    # The first is what an example takes when its build names none it knows,
+    # as a build made before layouts existed does.
+    LAYOUTS = ("side-by-side", "stacked")
 
     @classmethod
     def parts(cls, body: str) -> list[dict[str, Any]]:
@@ -120,10 +125,10 @@ class LiveExamples:
             Markup and examples alternating, starting and ending with markup,
             which is empty where an example opens or ends the body. Markup is
             ``{"html": ...}`` and an example is ``{"example": ...}``: a dict
-            with ``id``, ``title``, ``address``, ``available`` and ``sources``,
-            each source a dict with ``name`` and ``html``. A body without the
-            example class is one markup part, unparsed. An example whose wrapper
-            never closes stays in the markup.
+            with ``id``, ``title``, ``address``, ``layout``, ``available`` and
+            ``sources``, each source a dict with ``name`` and ``html``. A body
+            without the example class is one markup part, unparsed. An example
+            whose wrapper never closes stays in the markup.
         """
         if cls.EXAMPLE_CLASS not in body:
             return [{"html": mark_safe(body)}]  # noqa: S308
@@ -153,6 +158,9 @@ class LiveExamples:
             "id": f"{cls.EXAMPLE_CLASS}-{number}",
             "title": found["title"],
             "address": found["address"],
+            "layout": found["layout"]
+            if found["layout"] in cls.LAYOUTS
+            else cls.LAYOUTS[0],
             "available": cls.available(found["address"]),
             "sources": [
                 {

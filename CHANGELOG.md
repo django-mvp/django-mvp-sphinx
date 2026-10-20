@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A live example can put its source under the running page at every width with `:layout: stacked`. Setting `mvp_sphinx_live_example_layout = "stacked"` in `conf.py` makes that the default for the whole build, and `:layout: side-by-side` keeps one example side by side.
+
+### Changed
+
+- A live example now sits side by side only when the example itself is at least 64rem wide, not when the window is. With the sidebar and the "On this page" list open, examples that used to get two narrow panes in a window about 1440 px wide are now stacked. Nothing needs changing in your docs.
+
 ## [v0.2.0] - 2026-10-13
 
 ### Fixed

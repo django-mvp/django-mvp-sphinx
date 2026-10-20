@@ -152,10 +152,12 @@ class TestLiveExampleSources:
         assert f"highlight-{language}" in source.select_one("div")["class"]
 
 
-def write_source(directory: Path, page: str, files: dict[str, str]) -> Path:
+def write_source(
+    directory: Path, page: str, files: dict[str, str], settings: str = ""
+) -> Path:
     directory.mkdir(parents=True, exist_ok=True)
     (directory / "conf.py").write_text(
-        'extensions = ["mvp_sphinx.navigation"]\n', encoding="utf-8"
+        f'extensions = ["mvp_sphinx.navigation"]\n{settings}', encoding="utf-8"
     )
     (directory / "index.rst").write_text(page, encoding="utf-8")
     for name, text in files.items():
@@ -165,9 +167,12 @@ def write_source(directory: Path, page: str, files: dict[str, str]) -> Path:
     return directory
 
 
-def example_page(*content: str, address: str = "/examples/contact/") -> str:
+def example_page(
+    *content: str, address: str = "/examples/contact/", options: tuple[str, ...] = ()
+) -> str:
+    written = "".join(f"   {option}\n" for option in options)
     lines = "\n".join(f"   {line}" for line in content)
-    return f"A page\n======\n\n.. live-example:: {address}\n\n{lines}\n"
+    return f"A page\n======\n\n.. live-example:: {address}\n{written}\n{lines}\n"
 
 
 @pytest.fixture
@@ -392,3 +397,66 @@ class TestLiveExampleWarnings:
         assert "index.rst" in warned[0]
         assert "long.py" in warned[0]
         assert source_names(page) == ["kept.py"]
+
+
+class TestLiveExampleLayout:
+    @staticmethod
+    def layouts(tmp_path, sphinx_build, *options: str, settings: str = "") -> list:
+        source = write_source(
+            tmp_path / "source",
+            example_page("kept.py", options=options),
+            {"kept.py": "a = 1\n"},
+            settings,
+        )
+        page = body(sphinx_build(source), "index")
+        return [e["data-layout"] for e in page.select(".mvp-sphinx-example")]
+
+    def test_an_example_with_no_option_and_no_setting_is_side_by_side(
+        self, tmp_path, sphinx_build
+    ) -> None:
+        assert self.layouts(tmp_path, sphinx_build) == ["side-by-side"]
+
+    def test_the_layout_option_stacks_an_example(self, tmp_path, sphinx_build) -> None:
+        assert self.layouts(tmp_path, sphinx_build, ":layout: stacked") == ["stacked"]
+
+    def test_the_setting_stacks_an_example_with_no_option(
+        self, tmp_path, sphinx_build
+    ) -> None:
+        settings = 'mvp_sphinx_live_example_layout = "stacked"\n'
+
+        assert self.layouts(tmp_path, sphinx_build, settings=settings) == ["stacked"]
+
+    def test_the_option_wins_over_the_setting(self, tmp_path, sphinx_build) -> None:
+        settings = 'mvp_sphinx_live_example_layout = "stacked"\n'
+
+        layouts = self.layouts(
+            tmp_path, sphinx_build, ":layout: side-by-side", settings=settings
+        )
+
+        assert layouts == ["side-by-side"]
+
+    def test_a_setting_that_is_not_a_layout_is_a_warning_and_side_by_side(
+        self, tmp_path, sphinx_build, capsys
+    ) -> None:
+        settings = 'mvp_sphinx_live_example_layout = "wide"\n'
+
+        layouts = self.layouts(tmp_path, sphinx_build, settings=settings)
+
+        warned = build_warnings(capsys)
+        assert len(warned) == 1
+        assert "mvp_sphinx_live_example_layout" in warned[0]
+        assert layouts == ["side-by-side"]
+
+    def test_an_option_that_is_not_a_layout_is_reported_on_the_page_and_no_example(
+        self, tmp_path, sphinx_build, capsys
+    ) -> None:
+        layouts = self.layouts(tmp_path, sphinx_build, ":layout: wide")
+
+        reported = [
+            line
+            for line in capsys.readouterr().err.splitlines()
+            if "ERROR" in line or "WARNING" in line
+        ]
+        assert len(reported) == 1
+        assert "index.rst" in reported[0]
+        assert layouts == []

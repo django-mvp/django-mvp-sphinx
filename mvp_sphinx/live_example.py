@@ -5,9 +5,14 @@ configuration is all it needs::
 
     .. live-example:: /examples/contact/
        :title: A contact form
+       :layout: stacked
 
        ../../examples/forms.py
        ../../examples/views.py 12-30
+
+The option ``:layout:`` is ``side-by-side`` or ``stacked``. Without it the
+example takes the build's ``mvp_sphinx_live_example_layout`` setting, which is
+``side-by-side`` unless ``conf.py`` sets it.
 
 The argument is an address of the host's own site. Each line of the content
 names a source file, relative to the page's own file or from the source
@@ -20,7 +25,7 @@ The directive writes one element into the page's body, which
 ``mvp_sphinx.examples`` reads back when the page is served::
 
     <div class="mvp-sphinx-example" data-address="/examples/contact/"
-         data-title="A contact form">
+         data-title="A contact form" data-layout="stacked">
       <div class="mvp-sphinx-example-source" data-name="forms.py">
         <div class="highlight-python notranslate">...</div>
       </div>
@@ -72,7 +77,10 @@ class LiveExample(SphinxDirective):
     required_arguments = 1
     final_argument_whitespace = True
     has_content = True
-    option_spec = {"title": directives.unchanged}
+    option_spec = {
+        "title": directives.unchanged,
+        "layout": lambda value: directives.choice(value, LiveExamples.LAYOUTS),
+    }
 
     # The last word of a line is a range only when it has this shape, so a path
     # with spaces in it still reads as a path.
@@ -115,6 +123,7 @@ class LiveExample(SphinxDirective):
                 {
                     LiveExamples.ADDRESS_ATTRIBUTE: address,
                     LiveExamples.TITLE_ATTRIBUTE: self.options.get("title", ""),
+                    LiveExamples.LAYOUT_ATTRIBUTE: self.layout(),
                 },
             )
         ]
@@ -128,6 +137,19 @@ class LiveExample(SphinxDirective):
             result.append(self.closing())
         result.append(self.closing())
         return result
+
+    def layout(self) -> str:
+        """Return the layout the example is written with.
+
+        Returns:
+            The ``:layout:`` option, else the build's setting when it is a
+            layout, else the first layout. Sphinx warns about a setting that
+            is not one.
+        """
+        layout: str = self.options.get(
+            "layout", self.config.mvp_sphinx_live_example_layout
+        )
+        return layout if layout in LiveExamples.LAYOUTS else LiveExamples.LAYOUTS[0]
 
     @staticmethod
     def opening(class_name: str, attributes: dict[str, str]) -> nodes.raw:
