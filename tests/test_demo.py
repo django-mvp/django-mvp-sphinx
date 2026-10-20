@@ -19,6 +19,7 @@ from demo.settings import BASE_DIR
 from mvp_sphinx.docs_build import DocsBuild
 from tests.factories import UserFactory
 from tests.test_static.test_content_css import STYLESHEET, Stylesheet
+from tests.test_views import search_dialog
 
 
 class TestOverviewPage:
@@ -48,11 +49,18 @@ class TestDocumentationSearch:
     ) -> None:
         monkeypatch.setattr(docs, "build_dir", sphinx_build(BASE_DIR / "demo" / "docs"))
 
-        form = BeautifulSoup(client.get("/docs/").content, "html.parser").find(
-            "form", role="search"
-        )
+        form = search_dialog(client.get("/docs/"))
 
         assert form["action"] == reverse("docs:search")
+
+    def test_the_staff_guide_offers_a_search_of_the_staff_guide(
+        self, client, db, staff_guide_app
+    ) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        form = search_dialog(client.get("/staff-guide/"))
+
+        assert form["action"] == reverse("staff_guide:search")
 
 
 class TestStaffGuideEntry:

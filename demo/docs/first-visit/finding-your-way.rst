@@ -23,12 +23,13 @@ Above each page's title a trail shows where you are. On a page inside a group it
 starts at the name of the guide and passes through each page above this one. Follow
 any part of the trail to go up a level.
 
-The search box
---------------
+Searching the guide
+-------------------
 
-Every page of the guide has a search box at the top of its text. Type a word and
-press Enter: the results list the pages that hold it, each with a short passage
-around the word. Searching covers the guide only, not the other pages of the site.
+Every page of the guide has a search button at the right of the top bar. Press
+it, or press Ctrl+K (⌘K on a Mac), type a word and press Enter: the results list
+the pages that hold it, each with a short passage around the word. Searching
+covers the guide only, not the other pages of the site.
 
 On this page
 ------------

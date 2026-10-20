@@ -14,6 +14,7 @@ from django.conf import settings
 from django.templatetags.static import static
 from django.test import Client
 from django.urls import reverse
+from django_cotton.utils import render_component
 
 from mvp_sphinx.page_body import BodyRewriter
 from tests.conftest import DEMO_GUIDE, SPHINX_SOURCES
@@ -806,8 +807,23 @@ LANTERN_HREFS = [
 ]
 
 
+def search_dialog(response):
+    """The search form in the dialog that the page's search toggle opens."""
+    soup = BeautifulSoup(response.content, "html.parser")
+    toggle = soup.find("button", attrs={"data-mvp-sphinx-search": True})
+    if toggle is None:
+        return None
+    assert toggle["command"] == "show-modal"
+    return soup.find("dialog", id=toggle["commandfor"]).find("form", role="search")
+
+
 def search_form(response):
-    return BeautifulSoup(response.content, "html.parser").find("form", role="search")
+    """The search form in the results page's own content."""
+    return (
+        BeautifulSoup(response.content, "html.parser")
+        .find("main")
+        .find("form", role="search")
+    )
 
 
 def query_field(response):
@@ -824,8 +840,15 @@ def result_hrefs(response) -> list[str]:
 
 
 def submit_search(client, response, query):
-    form = search_form(response)
+    form = search_dialog(response)
     return client.get(form["action"], {form.find("input")["name"]: query})
+
+
+def is_labelled(form) -> bool:
+    field = form.find("input", attrs={"name": "q"})
+    if field.find_parent("label") is not None:
+        return True
+    return form.find("label", attrs={"for": field.get("id")}) is not None
 
 
 class TestSearchForm:
@@ -833,12 +856,18 @@ class TestSearchForm:
     def test_every_page_of_the_app_offers_a_search_of_the_app(
         self, client, db, search_app, path
     ) -> None:
-        form = search_form(client.get(f"/docs/{path}"))
+        form = search_dialog(client.get(f"/docs/{path}"))
 
         assert form is not None
         assert form["method"].lower() == "get"
         assert form["action"] == reverse(f"{search_app.namespace}:search")
         assert form.find("input", attrs={"name": "q"}) is not None
+
+    def test_every_page_loads_the_search_shortcut(self, client, db, search_app) -> None:
+        soup = BeautifulSoup(client.get("/docs/").content, "html.parser")
+
+        sources = [script.get("src", "") for script in soup.find_all("script")]
+        assert static("mvp_sphinx/search.js") in sources
 
     def test_the_results_page_offers_the_search_again(
         self, client, db, search_app
@@ -847,21 +876,39 @@ class TestSearchForm:
 
         assert form["action"] == "/docs/search/"
 
-    def test_the_search_input_has_a_label(self, client, db, search_app) -> None:
-        form = search_form(client.get("/docs/"))
-        field = form.find("input", attrs={"name": "q"})
-
-        assert form.find("label", attrs={"for": field["id"]}) is not None
+    @pytest.mark.parametrize("find", [search_dialog, search_form])
+    def test_the_search_input_has_a_label(self, client, db, search_app, find) -> None:
+        assert is_labelled(find(client.get("/docs/search/")))
 
     def test_a_page_of_the_host_offers_no_search(self, client, db, search_app) -> None:
-        assert search_form(client.get(reverse("overview"))) is None
+        assert search_dialog(client.get(reverse("overview"))) is None
 
     def test_a_second_app_offers_a_search_of_its_own(
         self, client, db, handbook_app
     ) -> None:
-        form = search_form(client.get("/manuals/admin/"))
+        form = search_dialog(client.get("/manuals/admin/"))
 
         assert form["action"] == "/manuals/admin/search/"
+
+
+class TestSearchToggles:
+    @pytest.mark.parametrize("component", ["search-toggle", "search-icon"])
+    def test_a_toggle_opens_the_dialog_it_names(self, rf, component) -> None:
+        markup = render_component(
+            rf.get("/"),
+            f"mvp_sphinx.{component}",
+            action="/guide/search/",
+            id="guide-search",
+        )
+        soup = BeautifulSoup(markup, "html.parser")
+
+        toggle = soup.find("button", attrs={"data-mvp-sphinx-search": True})
+        assert toggle["commandfor"] == "guide-search"
+        assert toggle["command"] == "show-modal"
+        form = soup.find("dialog", id="guide-search").find("form", role="search")
+        assert form["action"] == "/guide/search/"
+        assert form["method"].lower() == "get"
+        assert is_labelled(form)
 
 
 class TestSearchResults:

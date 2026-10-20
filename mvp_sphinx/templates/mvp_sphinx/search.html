@@ -1,13 +1,8 @@
-{% extends "base.html" %}
+{% extends "mvp_sphinx/base.html" %}
 {% load i18n static %}
 {% block title %}
   {{ page.title }}
 {% endblock title %}
-{% block styles %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
-  <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
-{% endblock styles %}
 {% block content %}
   <c-mvp.page>
     <c-mvp.container>

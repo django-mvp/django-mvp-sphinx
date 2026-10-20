@@ -95,6 +95,11 @@ a template or view edit that moves lines needs the `.rst` ranges updated with it
 tests compare each source shown with the lines the page names, so a range that has
 drifted still passes them and shows the wrong code; read the two pages after such an edit.
 
+`demo/templates/mvp_sphinx/base.html` overrides the package's documentation base the
+way the README tells a project to, so the staff guide shows the icon search button
+and the user guide keeps the default one. It extends the package's own copy of the
+same template, so everything else on those pages still comes from the package.
+
 **Adding a page** takes four things: a view in `demo/views.py` on
 `mvp.views.MVPTemplateView`, a route in `demo/urls.py`, a template extending
 `page_view.html` and filling `{% block page.content %}`,
