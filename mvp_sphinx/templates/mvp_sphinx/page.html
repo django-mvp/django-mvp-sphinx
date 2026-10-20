@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "mvp_sphinx/base.html" %}
 {% load static %}
 {% block title %}
   {{ page.title }}
@@ -11,8 +11,6 @@
 {% endblock head %}
 {% block styles %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
-  <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
   {% if has_examples %}<link rel="stylesheet" href="{% static 'mvp_sphinx/example.css' %}">{% endif %}
 {% endblock styles %}
 {% block content %}
@@ -20,7 +18,6 @@
     <c-mvp.container>
       <div class="xl:flex gap-10">
         <div class="min-w-0 w-full max-w-prose xl:max-w-none xl:flex-1">
-          <c-mvp_sphinx.search_form :action="search_url" />
           <article class="prose xl:max-w-none mvp-sphinx-content py-4">
             {% for part in body_parts %}
               {% if part.example %}

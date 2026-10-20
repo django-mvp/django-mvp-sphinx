@@ -27,8 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A page's own metadata now reaches its `<head>`. Tags written with MyST's `html_meta` front matter or the reStructuredText `meta` directive, such as a description, keywords or Open Graph properties, are added to the page, with nothing to configure. `PageView.get_meta_tags()` returns them for a subclass to change.
 - A live example can put its source under the running page at every width with `:layout: stacked`. Setting `mvp_sphinx_live_example_layout = "stacked"` in `conf.py` makes that the default for the whole build, and `:layout: side-by-side` keeps one example side by side.
 
+- The search now opens from a button at the end of the top bar, in a search box over the page, and from the keyboard with Ctrl+K (⌘K on a Mac). The box is the same `GET` form as before, and the button opens it without a script. `<c-mvp_sphinx.search_toggle>` and `<c-mvp_sphinx.search_icon>` are the two buttons a project can use.
+- Every page of a documentation app now extends `mvp_sphinx/base.html`. Override it and fill its `mvp_sphinx.search_toggle` block to swap the search button or move it elsewhere in the shell.
+
 ### Changed
 
+- The search box is no longer drawn at the top of each page's content. The results page keeps its own.
 - A live example now sits side by side only when the example itself is at least 64rem wide, not when the window is. With the sidebar and the "On this page" list open, examples that used to get two narrow panes in a window about 1440 px wide are now stacked. Nothing needs changing in your docs.
 
 ## [v0.2.0] - 2026-10-13

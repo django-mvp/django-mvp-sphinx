@@ -1,0 +1,21 @@
+{# @description A rounded button drawn like a search field that opens the documentation's search dialog, showing the Ctrl K shortcut. Below the md breakpoint only its icon shows. #}
+{# @prop action:text | description:"The address of the results page the dialog's form submits to." #}
+{# @prop id:text | default:"mvp-sphinx-search" | description:"The dialog's id. Give each toggle on one page its own." #}
+{% load i18n %}
+<c-vars action id="mvp-sphinx-search" />
+
+<button type="button"
+        commandfor="{{ id }}"
+        command="show-modal"
+        data-mvp-sphinx-search
+        aria-label="{% translate "Search this documentation" %}"
+        aria-keyshortcuts="Control+K Meta+K"
+        class="btn btn-sm rounded-full font-normal gap-2 text-base-content/70"
+        {{ attrs }}>
+  <c-icon name="search" />
+  <span class="hidden md:inline">{% translate "Search the docs" %}</span>
+  <span class="hidden md:inline-flex md:ms-6 gap-1" aria-hidden="true">
+    <kbd class="kbd kbd-sm" data-mvp-sphinx-modifier>Ctrl</kbd><kbd class="kbd kbd-sm">K</kbd>
+  </span>
+</button>
+<c-mvp_sphinx.search_modal :id="id" :action="action" />

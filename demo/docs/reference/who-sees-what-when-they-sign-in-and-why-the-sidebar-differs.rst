@@ -19,5 +19,5 @@ What stays the same
 -------------------
 
 The pages of this guide read the same for every visitor, signed in or not. The
-breadcrumbs, the search box, the previous and next links and the *On this page*
+breadcrumbs, the search button, the previous and next links and the *On this page*
 panel do not depend on who you are.

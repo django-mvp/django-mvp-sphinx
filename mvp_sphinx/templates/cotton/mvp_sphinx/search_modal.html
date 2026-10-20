@@ -1,0 +1,26 @@
+{# @description The search of a documentation app as a dialog: the same GET form as the results page, opened by a search toggle. Opening and closing it is plain HTML; the keyboard shortcut is the only script. #}
+{# @prop id:text | default:"mvp-sphinx-search" | description:"The dialog's id, which the toggle that opens it names." #}
+{# @prop action:text | description:"The address of the results page the form submits to." #}
+{% load i18n %}
+<c-vars id="mvp-sphinx-search" action />
+
+<c-modal id="{{ id }}"
+         content_class="w-11/12 max-w-3xl bg-transparent p-0 overflow-visible"
+         aria-label="{% translate "Search this documentation" %}">
+  <form role="search"
+        method="get"
+        action="{{ action }}"
+        aria-label="{% translate "Search this documentation" %}"
+        class="join w-full">
+    <label class="input input-lg join-item w-full">
+      <c-icon name="search" class="opacity-70" />
+      <span class="sr-only">{% translate "Search" %}</span>
+      <input type="search"
+             name="q"
+             autofocus
+             placeholder="{% translate "Search the documentation…" %}" />
+      <kbd class="kbd kbd-sm hidden md:inline-flex" aria-hidden="true">Esc</kbd>
+    </label>
+    <button type="submit" class="btn btn-lg btn-primary join-item">{% translate "Search" %}</button>
+  </form>
+</c-modal>

@@ -309,7 +309,9 @@ that page is rebuilt. Run a full rebuild (`-E`) if in doubt.
 
 ### Search
 
-Every page of a documentation app has a search box. It lists the pages of that
+Every page of a documentation app has a search button at the end of the top bar.
+It opens a search box, which you can also open from the keyboard with Ctrl+K, or
+⌘K on a Mac. The search lists the pages of that
 docs build that contain all the words typed, in any order and any case, and finds
 other forms of a word too, so `lanterns` finds a page that says "lantern". It
 searches that one app's pages and never the rest of your site or another
@@ -327,8 +329,12 @@ no Sphinx where the site runs. The only extra dependency is `snowballstemmer`, t
 stemmer Sphinx itself uses to build that data.
 
 The box is an ordinary form that sends `GET` to the app's `search/` address, for
-example `/docs/search/?q=lantern`, so it works with scripts turned off and a search
-can be bookmarked or shared. That address is where Sphinx's own search page would
+example `/docs/search/?q=lantern`, so a search can be bookmarked or shared. Nothing
+is fetched while you type. The button opens the box with plain HTML, so the search
+works with scripts turned off. The one script, `mvp_sphinx/search.js`, adds the
+keyboard shortcut. Opening the box from its button needs a browser that supports
+the HTML `command` attribute: Chrome 135, Firefox 144 or Safari 26.2 and later.
+In an older browser the results page at `search/` still works. That address is where Sphinx's own search page would
 be, so a `:ref:` link to `search` in your docs lands on it. Whoever may read the
 pages may search them, under the same `check`.
 
@@ -339,6 +345,40 @@ else.
 The search data is read on each search, so a rebuild is searchable straight away.
 A build without it still serves its pages, and the results page says search is
 unavailable.
+
+#### Choosing the search button and where it sits
+
+The package has two search buttons, both Cotton components. Each draws its
+button and the search box it opens:
+
+- `<c-mvp_sphinx.search_toggle>` is drawn like a search field and shows the
+  shortcut. It is the default. Below the `md` breakpoint it shrinks to its icon.
+- `<c-mvp_sphinx.search_icon>` is only a magnifying-glass icon, for a bar with
+  little room.
+
+Both take `action`, the address of the results page, which every page of a
+documentation app has as `search_url`. Both also take `id`, the id of the search
+box they open. Give each button on one page its own `id`.
+
+Every page of a documentation app extends `mvp_sphinx/base.html`, which puts the
+button in its own `mvp_sphinx.search_toggle` block inside the top bar. To swap or
+move the button, override that template in your project, extend the package's
+own copy and fill the block:
+
+```django
+{# yourproject/templates/mvp_sphinx/base.html #}
+{% extends "mvp_sphinx/base.html" %}
+{% block mvp_sphinx.search_toggle %}
+  <c-mvp_sphinx.search_icon :action="search_url" />
+{% endblock mvp_sphinx.search_toggle %}
+```
+
+To move it, leave the block empty and place the button in another block of
+django-mvp's shell, such as `app.navbar.center`. A template can extend one with
+the same name because Django skips the template doing the extending when it
+looks for the parent. Your project's `templates` directory, or your app, has to
+come before `mvp_sphinx` in the template search order for the override to be
+found.
 
 ### Naming the documentation
 
@@ -550,9 +590,9 @@ drawn, subclass `PageView` and pass it to your app as `view_class`.
 
 Pages take your site's theme with nothing to configure: the colours are
 django-mvp's own, so a page follows the light and dark themes and any theme your
-project defines. The package's page template links two stylesheets, served
-like the rest of your static files, and only pages the documentation app renders
-load them: `mvp_sphinx/content.css` styles what Sphinx writes into the page, and
+project defines. The package's base template, `mvp_sphinx/base.html`, links two
+stylesheets, served like the rest of your static files, and only pages the
+documentation app renders load them: `mvp_sphinx/content.css` styles what Sphinx writes into the page, and
 `mvp_sphinx/page.css` places the "On this page" list beside it. Sphinx's own
 stylesheets are never used.
 
@@ -886,6 +926,10 @@ For a custom view or template:
 
 ### Templates a project may override
 
+- `mvp_sphinx/base.html` is the base of `page.html` and `search.html`. It extends
+  your `base.html`, links the two stylesheets in `styles`, puts the search button
+  in the top bar in the `mvp_sphinx.search_toggle` block, and loads the shortcut
+  script in `extra_js`.
 - `mvp_sphinx/page.html` draws a page. It receives `body`, `body_parts`,
   `has_examples`, `meta_tags`, `headings`, `previous_page`, `next_page`,
   `search_url` and `page_data`. It has the `title`, `head`, `styles` and
@@ -895,7 +939,7 @@ For a custom view or template:
   page shows as a live example. It extends your `base.html`, draws no shell, and has
   the `content` block.
 - `mvp_sphinx/search.html` draws the results. It receives `query`, `results` and
-  `search_url`, and has the `title`, `styles` and `content` blocks. `results` is `None` when
+  `search_url`, and has the `title` and `content` blocks. `results` is `None` when
   the build has no search data, and otherwise a list of the pages found, each with
   its `title`, `passage` and `href`.
 
@@ -907,7 +951,14 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 - `mvp_sphinx.heading_list` draws nested headings as a list. It takes `headings`.
 - `mvp_sphinx.page_links` draws the links to the previous and next page. It takes
   `previous` and `next`.
-- `mvp_sphinx.search_form` draws the search box. It takes `action` and `query`.
+- `mvp_sphinx.search_form` draws the search box on the results page. It takes
+  `action` and `query`.
+- `mvp_sphinx.search_toggle` draws the search button drawn like a field and the
+  search box it opens. It takes `action` and `id`.
+- `mvp_sphinx.search_icon` draws the icon-only search button and the search box it
+  opens. It takes `action` and `id`.
+- `mvp_sphinx.search_modal` draws the search box as a dialog, closed until a button
+  names its `id`. It takes `action` and `id`.
 - `mvp_sphinx.live_example` draws one live example, the frame and its source. It
   takes `example`, one `{"example": ...}` part from `LiveExamples.parts`.
 
@@ -918,6 +969,8 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
   `--mvp-sphinx-header-clearance`.
 - `mvp_sphinx/maths.js` holds the settings for the maths typesetting. A page
   with maths loads it before the library.
+- `mvp_sphinx/search.js` opens the search box with Ctrl+K, or ⌘K on a Mac. Every
+  page of a documentation app loads it.
 - `mvp_sphinx/example.css` sizes the live example's frame and its source. A page
   with an example loads it.
 

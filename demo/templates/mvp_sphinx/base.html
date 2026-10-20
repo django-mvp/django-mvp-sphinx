@@ -1,0 +1,13 @@
+{% extends "mvp_sphinx/base.html" %}
+{% comment %}
+  The demo's override of the documentation base, the way a project swaps the
+  search toggle: the staff guide shows the icon button in place of the rounded
+  one the user guide keeps.
+{% endcomment %}
+{% block mvp_sphinx.search_toggle %}
+  {% if request.resolver_match.namespace == "staff_guide" %}
+    <c-mvp_sphinx.search_icon :action="search_url" />
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock mvp_sphinx.search_toggle %}
