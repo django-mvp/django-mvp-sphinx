@@ -23,6 +23,7 @@ from mvp.views.base import PageMixin
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.headings import PageHeadings
+from mvp_sphinx.meta_tags import MetaTags
 from mvp_sphinx.page_body import BodyRewriter
 from mvp_sphinx.search import DocsSearch
 
@@ -98,9 +99,10 @@ class PageView(PageMixin, TemplateView):
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add the app's search address, the page's headings and its neighbours."""
+        """Add the app's search address, the page's metadata, headings and neighbours."""
         context = super().get_context_data(**kwargs)
         context["search_url"] = reverse(f"{self.app.namespace}:search")
+        context["meta_tags"] = self.get_meta_tags()
         context["headings"] = self.get_headings()
         context["previous_page"] = self.get_neighbour("prev")
         context["next_page"] = self.get_neighbour("next")
@@ -123,6 +125,19 @@ class PageView(PageMixin, TemplateView):
         """Return the page's title as plain text, for the tab."""
         # Sphinx's general index and search pages carry no title.
         return self.plain_text(self.page_data.get("title", ""))
+
+    def get_meta_tags(self) -> list[dict[str, str]]:
+        """Return the metadata tags the page's author gave it, for its head.
+
+        Sphinx also writes a ``viewport`` tag into every page. It is left out,
+        because the application shell sets the viewport for every page of the site.
+
+        Returns:
+            The attributes of each tag, such as ``name`` or ``property`` and
+            ``content``; empty when the page has none.
+        """
+        tags = MetaTags.from_markup(self.page_data.get("metatags") or "")
+        return [tag for tag in tags if tag.get("name") != "viewport"]
 
     def get_headings(self) -> list[dict[str, Any]]:
         """Return the headings below the page's title, nested as the page nests them.

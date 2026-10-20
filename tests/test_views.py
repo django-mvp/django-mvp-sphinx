@@ -464,6 +464,42 @@ class TestTwoAppsSideBySide:
         assert str(docs_app.name) not in tabs["/manuals/admin/"]
 
 
+def head_meta_tags(response) -> list[dict[str, str]]:
+    """Return the attributes of every ``<meta>`` tag in the page's head."""
+    soup = BeautifulSoup(response.content, "html.parser")
+    return [dict(tag.attrs) for tag in soup.head.find_all("meta")]
+
+
+class TestPageMetadata:
+    def test_the_tags_a_page_names_are_in_its_head(
+        self, client, db, metadata_app
+    ) -> None:
+        tags = head_meta_tags(client.get("/docs/"))
+        assert {"name": "description", "content": 'Fish & "chips" <served> hot'} in (
+            tags
+        )
+        assert {"name": "keywords", "content": "fish, chips"} in tags
+        assert {"property": "og:title", "content": "Fish and chips"} in tags
+        assert {"property": "og:type", "content": "article"} in tags
+
+    def test_the_only_viewport_tag_is_the_shells(
+        self, client, db, metadata_app
+    ) -> None:
+        def viewports(response):
+            return [t for t in head_meta_tags(response) if t.get("name") == "viewport"]
+
+        page = viewports(client.get("/docs/"))
+        assert len(page) == 1
+        assert page == viewports(client.get(reverse("overview")))
+
+    def test_a_page_without_metadata_adds_no_tags(
+        self, client, db, metadata_app
+    ) -> None:
+        page = client.get("/docs/plain/")
+        assert page.status_code == 200
+        assert head_meta_tags(page) == head_meta_tags(client.get(reverse("overview")))
+
+
 class TestContentStyling:
     STYLESHEET = "mvp_sphinx/content.css"
     PAGE_STYLESHEET = "mvp_sphinx/page.css"

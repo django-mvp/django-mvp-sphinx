@@ -184,6 +184,31 @@ then mount a second documentation app with its own name and build at a second pr
 
 ---
 
+### User Story 5 - A page carries the metadata its author gave it (Priority: P3)
+
+An author gives a page a description, keywords or Open Graph properties in its source, with MyST's
+`html_meta` front matter or the reStructuredText `meta` directive. When the page is served, those
+tags are in its head, so search engines and link previews read the page the way the author
+described it.
+
+**Why this priority**: The pages read correctly without it. It matters once the documentation is
+public and found through search or shared as links.
+
+**Independent Test**: Build a page with a `meta` directive and a page without one, mount the build,
+and read the `<meta>` tags in the head of each.
+
+**Acceptance Scenarios**:
+
+1. **Given** a page whose source gives it metadata, **When** it renders, **Then** its head carries
+   one tag per entry, with the entry's name or property and its value exactly as the author wrote
+   it, markup characters included.
+2. **Given** any served page, **When** it renders, **Then** its head carries exactly one viewport
+   tag, the one the host project's base template sets.
+3. **Given** a page whose source gives it no metadata, **When** it renders, **Then** its head carries
+   the same tags as the host project's own pages and no others.
+
+---
+
 ### Edge Cases
 
 - A page title containing markup, such as inline code, appears as plain text wherever the page is
@@ -239,6 +264,9 @@ then mount a second documentation app with its own name and build at a second pr
   prefix with its own docs build, without any affecting another's pages, names or links. (US4)
 - **FR-017**: Adopting the documentation app MUST NOT require the host project to write a template.
   (US1)
+- **FR-018**: Each served page MUST carry in its head the metadata tags its source gives it, and
+  MUST NOT add a viewport tag of its own beside the one the host project's base template sets.
+  (US5)
 
 ### Key Entities
 
@@ -246,8 +274,8 @@ then mount a second documentation app with its own name and build at a second pr
   name, a prefix and the location of its docs build.
 - **Docs build**: the directory `sphinx-build -b json` writes. It holds one data file per page,
   plus the images and downloads the pages link to. It is the documentation app's only input.
-- **Page**: one document of the docs build, served at its own address, with a title, a body and
-  its chain of parent pages.
+- **Page**: one document of the docs build, served at its own address, with a title, a body, its
+  chain of parent pages and any metadata its author gave it.
 - **Front page**: the page built from the docs' root document, served at the documentation app's
   prefix.
 

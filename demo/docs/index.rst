@@ -1,3 +1,8 @@
+.. meta::
+   :description: How to use the demo site: signing in, finding your way, the staff guide and the reference.
+   :property=og:title: Using the demo site
+   :property=og:type: website
+
 Using the demo site
 ===================
 

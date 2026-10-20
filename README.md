@@ -395,6 +395,41 @@ docs = DocumentationApp(
 )
 ```
 
+### Page metadata
+
+A page can carry its own metadata for search engines and link previews: a
+description, keywords, an author, Open Graph properties. Write it in the page's
+source and it is added to the page's `<head>`, with nothing to configure.
+
+In a Markdown page read by [MyST](https://myst-parser.readthedocs.io/), put it in
+the front matter:
+
+```yaml
+---
+myst:
+  html_meta:
+    description: "The German definite article in the nominative and accusative."
+    keywords: "german, a1, grammar, definite article"
+    "property=og:title": "Definite articles"
+    "property=og:type": "article"
+    author: "Open Language"
+---
+```
+
+In reStructuredText, use the `meta` directive at the top of the page:
+
+```rst
+.. meta::
+   :description: The German definite article in the nominative and accusative.
+   :keywords: german, a1, grammar, definite article
+   :property=og:title: Definite articles
+```
+
+Each entry becomes one `<meta>` tag. A plain key is the tag's `name`, and a key
+such as `property=og:title` names the attribute itself. Sphinx also writes a viewport tag into every
+page, which is left out because your site's base template already sets one. A
+page with no metadata adds no tags.
+
 ### Choosing who can read it
 
 The documentation is open to everyone unless you say otherwise. To keep it for
@@ -599,7 +634,8 @@ Everything else in the body reaches the page exactly as Sphinx wrote it.
 `BodyRewriter.rewrite(markup)`.
 
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
-block so both stylesheets still reach the page, render `{{ body }}` rather than
+block so both stylesheets still reach the page, and in its `head` block if you
+override that, so the page's metadata does, render `{{ body }}` rather than
 `{{ page_data.body }}` so your override keeps the rewrite, and keep the
 `mvp-sphinx-content` class on the element that holds it, because every rule in
 `content.css` is scoped to that class. An override of the `content` block also
@@ -844,7 +880,8 @@ These are the names a project can use, grouped the way a project meets them.
 
 - `mvp_sphinx.views.PageView` renders a page. Subclass it and pass the subclass as
   `view_class` to change how a page is drawn. A subclass may override
-  `template_name`, `get_context_data()`, `get_page_title()`, `get_headings()`,
+  `template_name`, `get_context_data()`, `get_page_title()`, `get_meta_tags()`,
+  `get_headings()`,
   `get_neighbour(key)` (`key` is `"prev"` or `"next"`) and `get_breadcrumbs()`.
 - `mvp_sphinx.views.SearchView` renders the results of a search.
 
@@ -862,6 +899,9 @@ For a custom view or template:
   sidebar menu. `front_page` is the front page's entry, `front_page_url(request)`
   is the address it links to, and `contents` lists the entries the last rebuild
   read from the file.
+- `mvp_sphinx.meta_tags.MetaTags`, through `MetaTags.from_markup(markup)`, turns
+  a page's `metatags` value into the attributes of each `<meta>` tag, one dict per
+  tag.
 - `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
   page's `toc` value into nested headings.
 - `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
@@ -891,10 +931,10 @@ For a custom view or template:
   in the top bar in the `mvp_sphinx.search_toggle` block, and loads the shortcut
   script in `extra_js`.
 - `mvp_sphinx/page.html` draws a page. It receives `body`, `body_parts`,
-  `has_examples`, `headings`, `previous_page`, `next_page`, `search_url` and
-  `page_data`. It has the `title`,
-  `styles` and `content` blocks, and it holds the page's body in an element with the
-  `mvp-sphinx-content` class.
+  `has_examples`, `meta_tags`, `headings`, `previous_page`, `next_page`,
+  `search_url` and `page_data`. It has the `title`, `head`, `styles` and
+  `content` blocks, writes `meta_tags` at the end of `head`, and holds the page's
+  body in an element with the `mvp-sphinx-content` class.
 - `mvp_sphinx/example.html` is the base for a page of your site that a documentation
   page shows as a live example. It extends your `base.html`, draws no shell, and has
   the `content` block.
