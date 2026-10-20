@@ -1,0 +1,17 @@
+{# @description A ghost icon button that opens the documentation's search dialog, for a bar with little room. #}
+{# @prop action:text | description:"The address of the results page the dialog's form submits to." #}
+{# @prop id:text | default:"mvp-sphinx-search" | description:"The dialog's id. Give each toggle on one page its own." #}
+{% load i18n %}
+<c-vars action id="mvp-sphinx-search" />
+
+<button type="button"
+        commandfor="{{ id }}"
+        command="show-modal"
+        data-mvp-sphinx-search
+        aria-keyshortcuts="Control+K Meta+K"
+        aria-label="{% translate "Search this documentation" %}"
+        class="btn btn-ghost btn-square"
+        {{ attrs }}>
+  <c-icon name="search" />
+</button>
+<c-mvp_sphinx.search_modal :id="id" :action="action" />

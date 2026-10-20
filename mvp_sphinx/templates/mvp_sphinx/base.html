@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% comment %}
+  The base of every page a documentation app draws. A project replaces or moves
+  the search toggle by overriding this template, extending it, and filling the
+  mvp_sphinx.search_toggle block (or emptying it and placing a toggle in
+  another block of the shell).
+{% endcomment %}
+{% load static %}
+{% block styles %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
+  <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
+{% endblock styles %}
+{% block app.navbar.end %}
+  {{ block.super }}
+  {% block mvp_sphinx.search_toggle %}
+    <c-mvp_sphinx.search_toggle :action="search_url" />
+  {% endblock mvp_sphinx.search_toggle %}
+{% endblock app.navbar.end %}
+{% block extra_js %}
+  {{ block.super }}
+  <script src="{% static 'mvp_sphinx/search.js' %}" defer></script>
+{% endblock extra_js %}

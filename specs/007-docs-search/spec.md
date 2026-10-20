@@ -58,11 +58,25 @@ issues:
   read the pages decides who may search them. This feature adds no access rule. Integrated into
   FR-012 and recorded under Assumptions.
 
+### Session 2026-10-20
+
+- Q: Where does a reader find the search? → A: A search button in the application shell's top
+  bar opens a dialog holding the same form, which leads to the results page as before. The form
+  is no longer drawn inside each page's content. Integrated into FR-001 and User Story 1.
+- Q: May the search use JavaScript? → A: Only for a keyboard shortcut, Ctrl+K (⌘K on a Mac), that
+  opens the dialog. The button opens the dialog with plain HTML, and nothing fetches or shows
+  results while the reader types. Integrated into FR-003 and User Story 1.
+- Q: How does a project choose the button and where it sits? → A: The package ships two buttons,
+  one drawn like a search field and one that is only an icon. Every page of a documentation app is
+  drawn from one base template that holds the button in a block of its own, and the project
+  overrides that template to swap or move it. Integrated into FR-016, FR-017 and User Story 4.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Find the pages that mention a word (Priority: P1)
 
-A reader on any page of the documentation types a word into the search and submits it. A results
+A reader on any page of the documentation opens the search from the top bar, or with Ctrl+K (⌘K on
+a Mac), types a word into it and submits it. A results
 page opens inside the application shell and lists every page of this documentation that contains
 the word, each leading to its page. Several words narrow the list to pages containing all of them.
 When nothing matches, the results page says so and the reader can search again from it.
@@ -76,8 +90,8 @@ page of the app.
 
 **Acceptance Scenarios**:
 
-1. **Given** any page of a documentation app, **When** it renders, **Then** it offers a search
-   that submits to that documentation app's results page.
+1. **Given** any page of a documentation app, **When** it renders, **Then** it offers a button that
+   opens a search of that documentation app, which submits to that app's results page.
 2. **Given** a word that appears in exactly one page's text, **When** a reader searches for it,
    **Then** the results list that page, and only that page.
 3. **Given** a word that appears in several pages, **When** a reader searches for it, **Then** every
@@ -99,10 +113,12 @@ page of the app.
 10. **Given** a search that contains characters with meaning in HTML or in a URL, **When** the
     results page renders, **Then** the reader's text is shown back as plain text and never
     interpreted as markup.
-11. **Given** the browser has JavaScript turned off, **When** a reader searches, **Then** the
-    results are the same as with it on.
+11. **Given** the browser has JavaScript turned off, **When** a reader opens the search with its
+    button and searches, **Then** the results are the same as with it on.
 12. **Given** a link in the docs to Sphinx's own search page, **When** a reader follows it, **Then**
     they reach this documentation app's search.
+13. **Given** any page of a documentation app, **When** a reader presses Ctrl+K, or ⌘K on a Mac,
+    **Then** the search opens.
 
 ---
 
@@ -164,6 +180,33 @@ and search.
 
 ---
 
+### User Story 4 - Choose the search button and where it sits (Priority: P3)
+
+A developer serving their docs picks how the search is offered to fit their site's top bar: a
+button drawn like a search field, or a button that is only an icon. They swap it, or move it to
+another part of the application shell, by overriding the one template every page of a
+documentation app is drawn from.
+
+**Why this priority**: The search works without it. This matters once a host project's top bar
+holds more than the shell's own controls.
+
+**Independent Test**: Mount a documentation app, override its base template to show the icon
+button in place of the default one, then place a button with a second dialog elsewhere on a page.
+
+**Acceptance Scenarios**:
+
+1. **Given** a documentation app with no template overrides, **When** any of its pages renders,
+   **Then** the top bar shows the button drawn like a search field, and it opens the app's search.
+2. **Given** a project that overrides the base template and fills its search button block with the
+   icon button, **When** a page of the app renders, **Then** the icon button is shown in its place
+   and opens the same search.
+3. **Given** a project that empties the search button block and places a button in another block
+   of the shell, **When** a page renders, **Then** the button is drawn there and opens the search.
+4. **Given** two buttons on one page, each naming its own dialog, **When** a reader presses either,
+   **Then** it opens its own dialog, and each dialog searches the app its button was given.
+
+---
+
 ### Edge Cases
 
 - A search much longer than any sensible query is still answered, without a server error. Words
@@ -180,13 +223,15 @@ and search.
 
 ### Functional Requirements
 
-- **FR-001**: Every page served by a documentation app MUST offer a search of that documentation
-  app, and the host project's pages outside the documentation app MUST NOT gain one. (US1)
+- **FR-001**: Every page served by a documentation app MUST offer a button that opens a search of
+  that documentation app, and the host project's pages outside the documentation app MUST NOT gain
+  one. (US1)
 - **FR-002**: A search MUST lead to a results page at an address of the documentation app that
   carries the search's words, rendered inside the host project's application shell, so the same
   address shows the same search and results again. (US1)
-- **FR-003**: Searching and reading the results MUST work in a browser with JavaScript turned off.
-  (US1)
+- **FR-003**: Opening the search with its button, searching and reading the results MUST work in a
+  browser with JavaScript turned off. A script MAY open the search from a keyboard shortcut, and
+  nothing MAY fetch or show results while the reader types. (US1)
 - **FR-004**: The results MUST list the pages of the documentation app's own docs build and nothing
   else, each page at most once, each linking to the page's address under that documentation app.
   (US1, US3)
@@ -217,6 +262,12 @@ and search.
 - **FR-015**: Search MUST NOT import Sphinx or start a build, MUST work where Sphinx is not
   installed, and MUST need nothing added to the host project's Sphinx configuration beyond what
   serving pages already needs. (US3)
+- **FR-016**: Every page a documentation app draws MUST extend one base template that holds the
+  search button in a block of its own, so a project can swap or move the button by overriding that
+  one template. (US4)
+- **FR-017**: The package MUST provide two search buttons, one drawn like a search field and one
+  that is only an icon, each opening a dialog it names, so two buttons on one page open their own
+  dialogs. (US4)
 
 ### Key Entities
 
@@ -257,7 +308,7 @@ and search.
   ([#9](https://github.com/django-mvp/django-mvp-sphinx/issues/9)) exists, that is the host
   project's existing configuration.
 - How the search and the results look comes from the host's django-mvp theme and application
-  shell (CONSTITUTION.md Article XIII). Where the search sits on the page is settled when the
-  feature is looked at in a browser, not in this specification.
+  shell (CONSTITUTION.md Article XIII). By default the search button sits at the end of the
+  shell's top bar.
 - Suggestions while typing, highlighting the searched words on the page a result leads to, and
   searching Sphinx's general index are not part of this feature.
