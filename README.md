@@ -385,8 +385,8 @@ In reStructuredText, use the `meta` directive at the top of the page:
    :property=og:title: Definite articles
 ```
 
-Each entry becomes one `<meta>` tag, written with `name`, or with `property`
-when the key starts `property=`. Sphinx also writes a viewport tag into every
+Each entry becomes one `<meta>` tag. A plain key is the tag's `name`, and a key
+such as `property=og:title` names the attribute itself. Sphinx also writes a viewport tag into every
 page, which is left out because your site's base template already sets one. A
 page with no metadata adds no tags.
 
