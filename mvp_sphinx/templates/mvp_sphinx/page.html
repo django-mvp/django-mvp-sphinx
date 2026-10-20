@@ -3,6 +3,12 @@
 {% block title %}
   {{ page.title }}
 {% endblock title %}
+{% block head %}
+  {{ block.super }}
+  {% for tag in meta_tags %}
+    <meta{% for name, value in tag.items %} {{ name }}="{{ value }}"{% endfor %}>
+  {% endfor %}
+{% endblock head %}
 {% block styles %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">

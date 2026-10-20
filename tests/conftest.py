@@ -91,6 +91,11 @@ def reference_build(sphinx_json_build):
 
 
 @pytest.fixture(scope="session")
+def metadata_build(sphinx_json_build):
+    return sphinx_json_build("metadata")
+
+
+@pytest.fixture(scope="session")
 def examples_build(sphinx_json_build):
     return sphinx_json_build("examples")
 
@@ -182,4 +187,12 @@ def examples_app(examples_build, monkeypatch):
     from demo.mounted import docs
 
     monkeypatch.setattr(docs, "build_dir", examples_build)
+    return docs
+
+
+@pytest.fixture
+def metadata_app(metadata_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", metadata_build)
     return docs

@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A page's own metadata now reaches its `<head>`. Tags written with MyST's `html_meta` front matter or the reStructuredText `meta` directive, such as a description, keywords or Open Graph properties, are added to the page, with nothing to configure. `PageView.get_meta_tags()` returns them for a subclass to change.
 - A live example can put its source under the running page at every width with `:layout: stacked`. Setting `mvp_sphinx_live_example_layout = "stacked"` in `conf.py` makes that the default for the whole build, and `:layout: side-by-side` keeps one example side by side.
 
 ### Changed
