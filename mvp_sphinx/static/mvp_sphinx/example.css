@@ -1,5 +1,12 @@
 /* Styles for a live example on a docs page. The shell's stylesheet emits no
-   height this size and no breakpoint-scoped border, so they are set here. */
+   height this size and no container query, so they are set here. */
+
+/* Side by side is decided by the room the example has, not the window: with
+   the sidebar and the page's headings list showing, a wide window can still
+   leave the example too narrow for two panes. */
+.mvp-sphinx-example {
+  container-type: inline-size;
+}
 
 /* The frame holds its place while the example loads, and fills its pane when
    the source beside it is taller. */
@@ -32,8 +39,12 @@
   border-radius: 0;
 }
 
-@media (min-width: 80rem) {
-  .mvp-sphinx-example-source {
+@container (min-width: 64rem) {
+  [data-layout="side-by-side"] .mvp-sphinx-example-panes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-layout="side-by-side"] .mvp-sphinx-example-source {
     border-top-width: 0;
     border-inline-start-width: 1px;
   }

@@ -1849,6 +1849,16 @@ class TestLiveExamples:
         assert len(radios) == 4
         assert len({radio["name"] for radio in radios}) == 2
 
+    @pytest.mark.parametrize(
+        ("page", "layout"), [("single/", "side-by-side"), ("stacked/", "stacked")]
+    )
+    def test_the_example_carries_the_layout_its_page_was_written_with(
+        self, client, db, examples_app, page, layout
+    ) -> None:
+        example = self.soup(client, page).select_one("section.mvp-sphinx-example")
+
+        assert example["data-layout"] == layout
+
     def test_start_again_is_a_link_aimed_at_the_examples_own_frame(
         self, client, db, examples_app
     ) -> None:

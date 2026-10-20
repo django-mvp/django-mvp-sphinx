@@ -75,7 +75,8 @@ Two pages of the demo guide, under "Live examples" in the sidebar:
 The maintainer reviewed the prototype on 2026-10-02 and approved it. The build may not undo these.
 
 - The arrangement as built is approved: one bordered box with a title bar, the example on the left
-  and its source on the right at the widest breakpoint, stacked with the example first below it,
+  and its source on the right when the example has room for both, stacked with the example first
+  below it otherwise or when its author asks for that,
   tabs for several source files, quiet text buttons for "Start again" and "Open on its own", a soft
   warning in the example's place when it is unavailable, and the skeleton while it loads.
 - The running example fills its pane. Beside a taller source pane it grows to the same height, so

@@ -22,8 +22,10 @@ from typing import Any
 
 from sphinx import addnodes
 from sphinx.application import Sphinx
+from sphinx.config import ENUM
 
 from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.live_example import LiveExample
 
 
@@ -136,6 +138,12 @@ def setup(app: Sphinx) -> dict[str, Any]:
     """
     app.connect("build-finished", write_navigation)
     app.add_directive("live-example", LiveExample)
+    app.add_config_value(
+        "mvp_sphinx_live_example_layout",
+        LiveExamples.LAYOUTS[0],
+        "env",
+        ENUM(*LiveExamples.LAYOUTS),
+    )
     return {
         "version": version("django-mvp-sphinx"),
         "parallel_read_safe": True,

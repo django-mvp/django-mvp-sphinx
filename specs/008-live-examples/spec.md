@@ -82,9 +82,11 @@ These are the screens and states the feature puts in front of a person. How each
 settled on a working prototype, looked at in a browser, and is not specified here.
 
 1. A page with a live example. Among the page's ordinary content sits the example, running, with
-   its source beside it on a wide screen. The rest of the page reads as it did before.
-2. The same page on a narrow screen. The example and its source no longer fit side by side. Both
-   are still there and the reader can get to each.
+   its source beside it when the example has room for both. The rest of the page reads as it did
+   before.
+2. The same example with too little room, on a narrow screen or a wide one with the sidebar and the
+   headings list showing. The example and its source no longer fit side by side. Both are still
+   there and the reader can get to each.
 3. An example with several source files. The reader sees one file's code at a time, can tell which
    file it is, and can move between them.
 4. An example that has been used. After the reader submits a form, the example shows what the site
@@ -101,6 +103,8 @@ settled on a working prototype, looked at in a browser, and is not specified her
    others.
 9. A page read with JavaScript turned off. The source is shown and the reader can still reach the
    example.
+10. A stacked example. Its author asked for the source under the running example, and it is there
+    at every width.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -169,8 +173,13 @@ only, build, open the page, move between the files, use the example and reset it
    state it had when the page was opened, and the documentation page does not reload.
 5. **Given** a live example, **When** the reader chooses to open it on its own, **Then** they reach
    the example's address, where it shows as it does in the example.
-6. **Given** a screen too narrow to show the example and its source side by side, **When** the page
-   renders, **Then** both remain reachable and neither makes the page scroll sideways.
+6. **Given** an example with too little room to show itself and its source side by side, **When**
+   the page renders, **Then** both remain reachable and neither makes the page scroll sideways.
+7. **Given** a marker that asks for the stacked layout, **When** the page renders at any width,
+   **Then** the source is under the running example.
+8. **Given** a build whose Sphinx configuration makes stacked the default, **When** a page renders,
+   **Then** every example whose marker asks for no layout is stacked, and one whose marker asks
+   for side by side is not.
 
 ---
 
@@ -274,12 +283,18 @@ Request each page as an anonymous and as a signed-in reader, with scripts on and
   NOT import Sphinx, start a build, or read source files from outside the docs build. (US1, US3)
 - **FR-015**: With JavaScript turned off, a page with a live example MUST still show the source and
   give the reader a way to reach the example. (US3)
-- **FR-016**: On a screen too narrow for the example and its source side by side, both MUST remain
-  reachable and neither may make the page scroll sideways. (US2)
+- **FR-016**: Where an example has too little room for itself and its source side by side, both
+  MUST remain reachable and neither may make the page scroll sideways. Whether there is room MUST
+  depend on the width the example has on the page, not the width of the window. (US2)
 - **FR-017**: A docs build that contains no live examples MUST be served the same as before this
   feature. (US3)
 - **FR-018**: The demo project's guide MUST include live examples that between them show every
   state listed under "What a reader sees", so each can be looked at in a browser. (US1, US2, US3)
+- **FR-019**: An author MUST be able to ask, on one marker, for the source under the running
+  example at every width, and to make that the default for a whole build in its Sphinx
+  configuration. A marker's own choice MUST win over the default, and side by side MUST stay the
+  default when neither is given. A layout that is neither MUST be reported when the docs are
+  built. (US2)
 
 ### Key Entities
 

@@ -8,5 +8,6 @@ Pages that hold live examples.
    single
    two
    several
+   stacked
    missing
    plain
