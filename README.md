@@ -426,9 +426,56 @@ In reStructuredText, use the `meta` directive at the top of the page:
 ```
 
 Each entry becomes one `<meta>` tag. A plain key is the tag's `name`, and a key
-such as `property=og:title` names the attribute itself. Sphinx also writes a viewport tag into every
-page, which is left out because your site's base template already sets one. A
-page with no metadata adds no tags.
+such as `property=og:title` names the attribute itself. Sphinx also writes a
+viewport tag into every page, which is left out because your site's base template
+already sets one. A page with no metadata adds no tags.
+
+### Reading a page's front matter
+
+The other keys of a page's front matter reach the page too, so a `PageView`
+subclass or an override of `mvp_sphinx/page.html` can act on them. In a Markdown
+page they are the top-level keys beside `myst:`. In reStructuredText they are a
+field list at the very top of the file:
+
+```yaml
+---
+level: A1
+hide_on_this_page: true
+---
+```
+
+```rst
+:level: A1
+:hide_on_this_page:
+```
+
+Sphinx writes them into the page's data under `meta`, which a template reads as
+`{{ page_data.meta.level }}` and a view as `self.page_data["meta"]`. Some things
+to know about it:
+
+- Every value is a string. `true` arrives as `"True"`, `3` as `"3"`, and a list
+  or a mapping as JSON, such as `'["grammar", "articles"]'`. A field with no
+  value is `""`, so test for the key rather than its value.
+- Sphinx keeps keys of its own there too, such as `wordcount`.
+- Settings under `myst:` are not in it. MyST applies them while it builds the
+  page, so their effect is already in the body.
+- Sphinx's general index and search pages have no `meta`.
+
+For example, to leave "On this page" off any page that asks for it:
+
+```python
+from mvp_sphinx.views import PageView
+
+
+class GuidePageView(PageView):
+    def get_headings(self):
+        if "hide_on_this_page" in self.page_data.get("meta", {}):
+            return []
+        return super().get_headings()
+```
+
+Pass it to your app as `view_class=GuidePageView`. A page with no headings
+draws no "On this page" list.
 
 ### Choosing who can read it
 
