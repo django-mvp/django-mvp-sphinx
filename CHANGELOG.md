@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-10-21
+
 ### Changed
 
 - Requires django-mvp 0.30.1 or later. Add `"django_filters"` to `INSTALLED_APPS`, which django-mvp has required since 0.29. django-mvp's own changelog lists its other breaking changes, so read it before you upgrade.
