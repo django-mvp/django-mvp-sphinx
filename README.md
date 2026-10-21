@@ -38,7 +38,7 @@ the site beats the one that copies a Sphinx theme.
 
 - Python 3.12 or later.
 - Django 5.2, 6.0 or 6.1.
-- [django-mvp](https://github.com/django-mvp/django-mvp) 0.30.0 or later and
+- [django-mvp](https://github.com/django-mvp/django-mvp) 0.30.1 or later and
   [django-flex-menus](https://github.com/django-mvp/django-flex-menus) 0.4.5 or later.
 
 ## Quickstart
@@ -54,7 +54,7 @@ whose application shell already works. This package renders inside django-mvp's
 layout and reads its colours from the theme django-mvp supplies, so it does
 nothing useful on its own.
 
-django-mvp has to be 0.30 or later. This package's templates use its `mvp.`
+django-mvp has to be 0.30.1 or later. This package's templates use its `mvp.`
 component names and its page side panel.
 
 You also need a Sphinx source directory for your user guide. The examples call
@@ -653,7 +653,8 @@ entry was generated or typed.
 "On this page" is django-mvp's side panel. On a wide screen the list is a column
 beside the page that sticks under the header. On a narrower screen an
 "On this page" button in the top bar opens it as a drawer, so a reader can
-reach it anywhere down a long page. A page with no headings has neither the
+reach it anywhere down a long page. Following a heading from the drawer closes
+it and moves to that heading. A page with no headings has neither the
 column nor the button.
 
 A heading you follow a link to lands below the header at whatever height it is,

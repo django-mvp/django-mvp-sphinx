@@ -24,8 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Requires django-mvp 0.30 or later. Add `"django_filters"` to `INSTALLED_APPS`, which django-mvp has required since 0.29. django-mvp's own changelog lists its other breaking changes, so read it before you upgrade.
-- "On this page" is now django-mvp's side panel. On a wide screen it is still a column beside the page. On a screen narrower than `xl` an "On this page" button in the top bar opens it as a drawer, where before it was hidden.
+- Requires django-mvp 0.30.1 or later. Add `"django_filters"` to `INSTALLED_APPS`, which django-mvp has required since 0.29. django-mvp's own changelog lists its other breaking changes, so read it before you upgrade.
+- "On this page" is now django-mvp's side panel. On a wide screen it is still a column beside the page. On a screen narrower than `xl` an "On this page" button in the top bar opens it as a drawer, where before it was hidden. Following a heading from the drawer closes it and moves to that heading.
 
 ### Removed
 

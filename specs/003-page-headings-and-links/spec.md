@@ -68,8 +68,8 @@ second page has no "On this page" at all.
 7. **Given** a page with sections, **When** the list is read by assistive technology, **Then** it
    is a navigation region with a name of its own, distinct from the sidebar's navigation.
 8. **Given** a page with sections on a narrow screen, **When** the reader activates the
-   "On this page" button, **Then** the list opens over the page. A page with no sections shows no
-   button.
+   "On this page" button, **Then** the list opens over the page, and following a heading from it
+   closes the list and moves to that heading. A page with no sections shows no button.
 
 ---
 
@@ -158,7 +158,8 @@ the next link leads to the inserted page.
   page the docs build records for each page. Sphinx derives them from the toctrees, so reading
   order is the order the contents list the pages in, front page first.
 - Q: What happens to "On this page" on narrow screens? → A: The list is behind an "On this page"
-  button in the top bar, which opens it as a drawer over the page. The top bar stays in view down a
+  button in the top bar, which opens it as a drawer over the page. Following a heading from the
+  drawer closes it and moves to that heading. The top bar stays in view down a
   long page, so the list is in reach wherever the reader is. A page with no sections shows no
   button. Where the list sits and at what width it becomes a drawer is judged by eye, not by a
   test.
