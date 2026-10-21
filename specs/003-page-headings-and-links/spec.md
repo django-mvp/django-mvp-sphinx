@@ -23,7 +23,8 @@ in reading order."
 
 Two pieces of navigation that live on the page itself, next to the contents in the app sidebar.
 
-- **On this page** lists the current page's headings beside it on wide screens, nested the way the
+- **On this page** lists the current page's headings beside it on wide screens, and behind an
+  "On this page" button in the top bar that opens it as a drawer on narrow ones, nested the way the
   page nests them, each one linking to its heading. It lists only the current page, never other
   pages, and a page with no headings below its title has none.
 - **Previous and next** links end every page, leading to the page before and after it in reading
@@ -66,6 +67,9 @@ second page has no "On this page" at all.
    other page.
 7. **Given** a page with sections, **When** the list is read by assistive technology, **Then** it
    is a navigation region with a name of its own, distinct from the sidebar's navigation.
+8. **Given** a page with sections on a narrow screen, **When** the reader activates the
+   "On this page" button, **Then** the list opens over the page. A page with no sections shows no
+   button.
 
 ---
 
@@ -153,10 +157,11 @@ the next link leads to the inserted page.
 - Q: What does "reading order" mean when the issue does not define it? → A: The previous and next
   page the docs build records for each page. Sphinx derives them from the toctrees, so reading
   order is the order the contents list the pages in, front page first.
-- Q: What happens to "On this page" on narrow screens? → A: It is not shown there, and nothing
-  replaces it. The issue asks for it on wide screens, the prototype this package grew from did the
-  same, and on a narrow screen the page itself has the width. Where the list sits and at what width
-  it appears is judged by eye, not by a test.
+- Q: What happens to "On this page" on narrow screens? → A: The list is behind an "On this page"
+  button in the top bar, which opens it as a drawer over the page. The top bar stays in view down a
+  long page, so the list is in reach wherever the reader is. A page with no sections shows no
+  button. Where the list sits and at what width it becomes a drawer is judged by eye, not by a
+  test.
 - Q: Does the list mark the section being read as the reader scrolls? → A: No. The issue does not
   ask for it and it needs script to follow scrolling. It can be asked for separately.
 - Q: Do the previous and next links sit on pages outside reading order, or lead outside the

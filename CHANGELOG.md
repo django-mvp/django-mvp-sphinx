@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Requires django-mvp 0.30 or later. Add `"django_filters"` to `INSTALLED_APPS`, which django-mvp has required since 0.29. django-mvp's own changelog lists its other breaking changes, so read it before you upgrade.
+- "On this page" is now django-mvp's side panel. On a wide screen it is still a column beside the page. On a screen narrower than `xl` an "On this page" button in the top bar opens it as a drawer, where before it was hidden.
+
+### Removed
+
+- `mvp_sphinx/page.css` and the `--mvp-sphinx-header-clearance` property are gone. django-mvp now measures the header (`--mvp-header-height`), so a linked heading clears it at any height. If your project set the property, delete that rule.
+
 ## [v0.3.0] - 2026-10-20
 
 ### Added
