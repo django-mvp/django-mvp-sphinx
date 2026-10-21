@@ -302,8 +302,7 @@
 }
 
 /* Heading links: shown when the reader points at the heading that holds one
-   or moves keyboard focus onto it, and clear of the sticky top bar when
-   followed. */
+   or moves keyboard focus onto it. */
 .mvp-sphinx-content .headerlink {
   margin-inline-start: 0.5rem;
   color: var(--mvp-sphinx-muted);
@@ -330,10 +329,6 @@
   .mvp-sphinx-content .headerlink {
     transition: none;
   }
-}
-
-.mvp-sphinx-content [id] {
-  scroll-margin-top: var(--mvp-sphinx-header-clearance);
 }
 
 /* Glossary terms stand out from their definitions, which the host's prose

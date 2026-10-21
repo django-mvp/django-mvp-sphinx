@@ -38,7 +38,7 @@ the site beats the one that copies a Sphinx theme.
 
 - Python 3.12 or later.
 - Django 5.2, 6.0 or 6.1.
-- [django-mvp](https://github.com/django-mvp/django-mvp) 0.27.0 or later and
+- [django-mvp](https://github.com/django-mvp/django-mvp) 0.30.1 or later and
   [django-flex-menus](https://github.com/django-mvp/django-flex-menus) 0.4.5 or later.
 
 ## Quickstart
@@ -54,8 +54,8 @@ whose application shell already works. This package renders inside django-mvp's
 layout and reads its colours from the theme django-mvp supplies, so it does
 nothing useful on its own.
 
-django-mvp has to be 0.27 or later. That release moved its components under the
-`mvp.` prefix, and this package's templates use those names.
+django-mvp has to be 0.30.1 or later. This package's templates use its `mvp.`
+component names and its page side panel.
 
 You also need a Sphinx source directory for your user guide. The examples call
 it `docs/`. If you don't have one yet, Sphinx's own
@@ -637,11 +637,10 @@ drawn, subclass `PageView` and pass it to your app as `view_class`.
 
 Pages take your site's theme with nothing to configure: the colours are
 django-mvp's own, so a page follows the light and dark themes and any theme your
-project defines. The package's base template, `mvp_sphinx/base.html`, links two
-stylesheets, served like the rest of your static files, and only pages the
-documentation app renders load them: `mvp_sphinx/content.css` styles what Sphinx writes into the page, and
-`mvp_sphinx/page.css` places the "On this page" list beside it. Sphinx's own
-stylesheets are never used.
+project defines. The package's base template, `mvp_sphinx/base.html`, links a
+stylesheet, served like the rest of your static files, and only pages the
+documentation app renders load it: `mvp_sphinx/content.css` styles what Sphinx
+writes into the page. Sphinx's own stylesheets are never used.
 
 Reference entries, the documented functions, classes and other objects that
 `autodoc` writes and that you write by hand with directives such as
@@ -651,16 +650,16 @@ rule beneath it, and entries inside other entries read as inside them. This
 holds for any language Sphinx documents, and it makes no difference whether an
 entry was generated or typed.
 
-A heading you follow a link to lands 5rem below the top of the window, and the
-"On this page" list sticks at the same distance, so both clear django-mvp's
-top bar. django-mvp doesn't publish the bar's height, so if yours is taller,
-with a tray or a second row, set the distance in your own stylesheet:
+"On this page" is django-mvp's side panel. On a wide screen the list is a column
+beside the page that sticks under the header. On a narrower screen an
+"On this page" button in the top bar opens it as a drawer, so a reader can
+reach it anywhere down a long page. Following a heading from the drawer closes
+it and moves to that heading. A page with no headings has neither the
+column nor the button.
 
-```css
-:root {
-  --mvp-sphinx-header-clearance: 7rem;
-}
-```
+A heading you follow a link to lands below the header at whatever height it is,
+because django-mvp measures the header and leaves that much room above the
+linked heading.
 
 Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
 wraps each table in a scrolling region that takes keyboard focus and is named by
@@ -994,7 +993,8 @@ For a custom view or template:
 
 Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 
-- `mvp_sphinx.on_this_page` draws a page's headings. It takes `headings`.
+- `mvp_sphinx.on_this_page` draws a page's headings as the page's side panel. It takes
+  `headings`.
 - `mvp_sphinx.heading_list` draws nested headings as a list. It takes `headings`.
 - `mvp_sphinx.page_links` draws the links to the previous and next page. It takes
   `previous` and `next`.
@@ -1011,9 +1011,7 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 
 ### Static files
 
-- `mvp_sphinx/content.css` is the stylesheet page content uses, and
-  `mvp_sphinx/page.css` the one that places "On this page" and sets
-  `--mvp-sphinx-header-clearance`.
+- `mvp_sphinx/content.css` is the stylesheet page content uses.
 - `mvp_sphinx/maths.js` holds the settings for the maths typesetting. A page
   with maths loads it before the library.
 - `mvp_sphinx/search.js` opens the search box with Ctrl+K, or ⌘K on a Mac. Every

@@ -1,12 +1,11 @@
 {% load i18n %}
-{# @description The current page's own headings, as a named navigation region. #}
+{# @description The current page's own headings, drawn as the page's side panel: a column beside the page that sticks under the header, and a drawer opened from the top bar on a narrower screen. #}
 {# @prop headings:list | description:"Headings from PageHeadings; never empty, the page draws nothing otherwise." #}
 <c-vars headings />
 
-<nav aria-labelledby="mvp-sphinx-on-this-page"
-     class="mvp-sphinx-on-this-page sticky self-start overflow-y-auto">
-  <h2 id="mvp-sphinx-on-this-page" class="px-3 text-sm font-medium opacity-70">
-    {% trans "On this page" %}
-  </h2>
-  <c-mvp_sphinx.heading_list :headings="headings" class="menu menu-sm w-full" />
-</nav>
+{% trans "On this page" as label %}
+<c-mvp.page.side id="mvp-sphinx-on-this-page" :label="label" width="sm" breakpoint="xl">
+  <nav aria-labelledby="mvp-sphinx-on-this-page-label">
+    <c-mvp_sphinx.heading_list :headings="headings" class="menu menu-sm w-full" />
+  </nav>
+</c-mvp.page.side>

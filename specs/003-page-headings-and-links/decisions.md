@@ -23,7 +23,7 @@ serves G2.
 | 2 | What "reading order" is | The previous and next page the docs build records for each page | Sphinx derives them from the toctrees, so they match the order of the contents in the sidebar. Inventing an order would let the two disagree |
 | 3 | A page with no sections | No list at all, not an empty one | An empty list is noise. Sphinx themes and the prototype both hide it |
 | 4 | A page with one section | Still gets the list | The rule is whether headings exist below the title. A count threshold would be arbitrary |
-| 5 | Narrow screens | No list and no substitute | The issue scopes it to wide screens, and the prototype did the same. Where it appears is judged by eye, so it is an assumption, not a requirement |
+| 5 | Narrow screens | An "On this page" button in the top bar opens the list as a drawer | The top bar stays in view down a long page, so the list is in reach anywhere. A page with no headings shows no button. Where it appears is judged by eye, so it is an assumption, not a requirement |
 | 6 | Marking the section being read while scrolling | Out of scope | Not asked for, and it needs script following the scroll position. It can be requested on its own |
 | 7 | Pages outside every toctree (orphans) | Served without previous or next links | Sphinx gives them no neighbours, and linking them in would put them in an order the docs never gave them |
 | 8 | Pages listed only in a hidden toctree | In reading order like any other | Sphinx treats them so, and the sidebar contents in #5 include them too |

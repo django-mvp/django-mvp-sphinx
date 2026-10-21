@@ -56,7 +56,7 @@ pages to navigate between.
   docs name them
 - A page with pages of its own opens as a group holding them
 - The current page marked, and its group open
-- "On this page" beside the page on wide screens, listing the page's headings
+- "On this page" beside the page on wide screens, and behind a top-bar button on narrow ones, listing the page's headings
 - Links to the previous and next page at the foot of each page
 - A rebuilt docs build shows its new contents without restarting the site
 

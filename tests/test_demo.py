@@ -234,7 +234,7 @@ class TestDemoGuideStates:
 
     def test_a_page_lists_three_headings_with_a_nested_list(self, guide_pages) -> None:
         landmarks = [
-            soup.find("nav", attrs={"aria-labelledby": "mvp-sphinx-on-this-page"})
+            soup.find("nav", attrs={"aria-labelledby": "mvp-sphinx-on-this-page-label"})
             for soup in guide_pages.values()
         ]
 
