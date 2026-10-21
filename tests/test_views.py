@@ -502,7 +502,6 @@ class TestPageMetadata:
 
 class TestContentStyling:
     STYLESHEET = "mvp_sphinx/content.css"
-    PAGE_STYLESHEET = "mvp_sphinx/page.css"
 
     def test_a_docs_page_links_the_packages_stylesheet(self, client, db) -> None:
         response = client.get("/docs/content/")
@@ -518,19 +517,6 @@ class TestContentStyling:
         response = client.get("/docs/content/")
 
         assert not [s for s in linked_stylesheets(response) if "_static" in s]
-
-    @pytest.mark.parametrize("address", ["/docs/content/", "/docs/search/?q=a"])
-    def test_docs_pages_link_the_page_stylesheet(self, client, db, address) -> None:
-        response = client.get(address)
-
-        assert static(self.PAGE_STYLESHEET) in linked_stylesheets(response)
-
-    def test_the_hosts_own_pages_do_not_link_the_page_stylesheet(
-        self, client, db
-    ) -> None:
-        response = client.get(reverse("overview"))
-
-        assert static(self.PAGE_STYLESHEET) not in linked_stylesheets(response)
 
 
 class TestWideContent:
@@ -1354,6 +1340,34 @@ class TestOnThisPage:
         self, client, db, reading_app
     ) -> None:
         assert self.on_this_page(self.soup(client, "plain/")) is None
+
+    def test_the_panel_carries_the_id_the_toggle_opens(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "")
+
+        assert soup.find(id="mvp-sphinx-on-this-page") is not None
+
+    def test_a_page_with_sections_has_a_toggle_for_the_panel(
+        self, client, db, reading_app
+    ) -> None:
+        soup = self.soup(client, "")
+
+        toggle = soup.find("button", attrs={"aria-controls": "mvp-sphinx-on-this-page"})
+
+        assert toggle is not None
+
+    @pytest.mark.parametrize("address", ["plain/", "search/?q=a"])
+    def test_a_page_with_no_section_has_no_panel_and_no_toggle(
+        self, client, db, reading_app, address
+    ) -> None:
+        soup = self.soup(client, address)
+
+        assert soup.find(id="mvp-sphinx-on-this-page") is None
+        assert (
+            soup.find("button", attrs={"aria-controls": "mvp-sphinx-on-this-page"})
+            is None
+        )
 
     def test_the_front_page_lists_none_of_the_headings_of_the_pages_it_lists(
         self, client, db, reading_app

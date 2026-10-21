@@ -1,5 +1,5 @@
 {% extends "mvp_sphinx/base.html" %}
-{% load static %}
+{% load i18n static %}
 {% block title %}
   {{ page.title }}
 {% endblock title %}
@@ -13,11 +13,18 @@
   {{ block.super }}
   {% if has_examples %}<link rel="stylesheet" href="{% static 'mvp_sphinx/example.css' %}">{% endif %}
 {% endblock styles %}
+{% block app.navbar.end %}
+  {{ block.super }}
+  {% if headings %}
+    {% trans "On this page" as on_this_page_label %}
+    <c-mvp.page.side.toggle for="mvp-sphinx-on-this-page" :text="on_this_page_label" icon="list-view" class="btn-ghost btn-sm" />
+  {% endif %}
+{% endblock app.navbar.end %}
 {% block content %}
   <c-mvp.page>
     <c-mvp.container>
-      <div class="xl:flex gap-10">
-        <div class="min-w-0 w-full max-w-prose xl:max-w-none xl:flex-1">
+      <c-mvp.page.layout>
+        <div class="min-w-0 w-full max-w-prose xl:max-w-none">
           <article class="prose xl:max-w-none mvp-sphinx-content py-4">
             {% for part in body_parts %}
               {% if part.example %}
@@ -30,11 +37,11 @@
           <c-mvp_sphinx.page_links :previous="previous_page" :next="next_page" />
         </div>
         {% if headings %}
-          <aside class="hidden xl:block w-56 shrink-0">
+          <c-slot name="side">
             <c-mvp_sphinx.on_this_page :headings="headings" />
-          </aside>
+          </c-slot>
         {% endif %}
-      </div>
+      </c-mvp.page.layout>
     </c-mvp.container>
   </c-mvp.page>
 {% endblock content %}
