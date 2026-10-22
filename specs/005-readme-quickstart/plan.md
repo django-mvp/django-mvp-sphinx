@@ -212,7 +212,7 @@ than the site. The build stays gitignored (spec decision 4).
     `mvp_sphinx`, so the assertion is that the app renders with the package's templates alone.
     This is a fixture property, not an extra test.
   Serving without Sphinx (US1.4) is already `TestServingWithoutSphinx` (FS-001). It is not
-  repeated. The quickstart test cites it in `progress.md`.
+  repeated. The quickstart test cites it in the build log.
 - **`tests/test_demo.py`**: `TestDemoGuideStates`. A module-scoped build of `demo/docs` into a
   temporary folder, and the demo's `docs` app pointed at it with `monkeypatch` (the
   `staff_guide_app` pattern). One test walks every page the front page's sidebar links under `/docs/`

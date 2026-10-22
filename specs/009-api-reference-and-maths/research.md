@@ -139,7 +139,7 @@ Typesetting happens in the reader's browser, so no server-side test sees typeset
 cover what the server decides: which pages carry the two script tags and in what order, that the
 notation reaches the page as written inside `.math`, the scroll region and its name, link names
 and targets. What only a browser shows is checked in a browser before the pull request is marked ready, and
-recorded in `progress.md`:
+recorded in the build log:
 
 - typeset output on the maths page, with the equation region in place (SC-003), including that
   each container still carries speech (FR-013) and that the formula with a mistake does not stop
