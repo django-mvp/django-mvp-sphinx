@@ -45,7 +45,7 @@ changing the docs) and move today's *Installation* and *Usage* content into it a
 exactly per the plan. The code in the five steps is the code the test runs, with the project's own
 names in place of the test's. Before you finish, list every subsection heading and every
 fact-bearing paragraph of the README on origin/main and confirm each one is still in the README,
-moved or kept. Report the list in `progress.md`. Nothing FS-001 to FS-007 documented may be dropped.
+moved or kept. Report the list in the build log. Nothing FS-001 to FS-007 documented may be dropped.
 The step-5 snippet is labelled as an installed app's module, `yourapp/menus.py`, never
 `yourproject/menus.py` (DR-001). While moving the later snippets, use one idiom for the build path
 throughout (`settings.BASE_DIR`, D11). Remove the template comment in *Quickstart*. Every link absolute (FR-014). Do not mention a build
@@ -72,7 +72,7 @@ page valid, and use Cotton components only. Run the suite scope that covers smok
 Write *Public surface*, replacing its template comment. For every entry, check it against the source
 before you write it: the import resolves, each `DocumentationApp` option is an attribute or `__init__`
 keyword, each URL name reverses, each component's attributes are the ones its `@prop` lines declare,
-each template exists. Record the check (command or read, per entry) in `progress.md`. A public name
+each template exists. Record the check (command or read, per entry) in the build log. A public name
 you find that the plan's list lacks is added, and raised in `concerns`. End the section with the
 sentence that anything unlisted is internal. State that there are no settings. Include `page.html`'s `styles` and `content` blocks and the
 `mvp-sphinx-content` class, and `search.html`'s context as `SearchView` supplies it (DR-006).
