@@ -20,7 +20,9 @@ AppMenu.extend(
             name="info_dialogs",
             extra_context={"label": "Info dialogs"},
             children=[
-                MenuItem(name=name, view_name=f"info_{name}", extra_context={"label": label})
+                MenuItem(
+                    name=name, view_name=f"info_{name}", extra_context={"label": label}
+                )
                 for name, label in [
                     ("whole_page", "A whole page"),
                     ("section", "One section"),

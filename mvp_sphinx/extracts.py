@@ -91,8 +91,10 @@ class SectionFinder(HTMLParser):
             return
         if self.start == -1 and tag in HEADINGS:
             self.in_heading = True
-        elif self.in_heading and tag == "a" and "headerlink" in (
-            dict(attrs).get("class") or ""
+        elif (
+            self.in_heading
+            and tag == "a"
+            and "headerlink" in (dict(attrs).get("class") or "")
         ):
             self.in_heading = False
 
@@ -179,4 +181,3 @@ def rewrite_links(markup: str, page_url: str) -> str:
         return f"{match.group(1)}{urljoin(page_url, target)}{match.group(3)}"
 
     return LINK_ATTRIBUTE.sub(absolute, markup)
-

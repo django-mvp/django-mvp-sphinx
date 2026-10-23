@@ -4,9 +4,9 @@ from django.urls import include, path
 from mvp.mounted import mount
 from mvp.views.account import SignInView
 
+from demo import views
 from demo.examples import views as examples
 from demo.mounted import docs, staff_guide
-from demo import views
 
 urlpatterns = [
     path("", views.OverviewView.as_view(), name="overview"),
