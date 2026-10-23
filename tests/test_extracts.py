@@ -3,6 +3,7 @@
 import json
 import shutil
 import sys
+from urllib.parse import urldefrag, urlsplit
 
 import pytest
 from bs4 import BeautifulSoup
@@ -12,6 +13,7 @@ from django.urls import reverse
 from django.utils.html import conditional_escape
 
 from mvp_sphinx.examples import LiveExamples
+from mvp_sphinx.extracts import LinkRewriter
 
 
 @pytest.fixture
@@ -174,3 +176,91 @@ class TestWithoutSphinx:
         extract = extracts_app.page_extract("screens/", page_request)
 
         assert extract.title == "Screens"
+
+
+class TestExtractLinks:
+    @pytest.fixture
+    def extract(self, extracts_app, page_request):
+        return extracts_app.page_extract("screens/", page_request)
+
+    def test_every_internal_link_and_image_is_answered_by_the_documentation_app(
+        self, client, db, extract
+    ) -> None:
+        page = soup(extract)
+        targets = [
+            urldefrag(tag[attribute])[0] or extract.url
+            for tag, attribute in [
+                *((tag, "href") for tag in page.find_all("a", href=True)),
+                *((tag, "src") for tag in page.find_all("img", src=True)),
+            ]
+            if not urlsplit(tag[attribute]).scheme
+        ]
+
+        assert targets
+        for target in targets:
+            response = client.get(target)
+            assert response.status_code == 200, target
+
+    def test_a_link_to_another_page_leads_to_that_page(self, extract) -> None:
+        link = soup(extract).find("a", href=lambda href: "other" in href)
+
+        assert link["href"] == reverse("docs:page", kwargs={"path": "other/"})
+
+    def test_an_image_leads_to_the_file_the_documentation_app_serves(
+        self, client, extract
+    ) -> None:
+        image = soup(extract).find("img")
+
+        assert image["src"] == "/docs/_images/pixel.png"
+
+    def test_a_link_to_a_section_of_the_page_leads_to_it_in_the_documentation_app(
+        self, extract
+    ) -> None:
+        link = soup(extract).find("a", href=lambda href: href.endswith("#details"))
+
+        assert link["href"] == f"{extract.url}#details"
+
+    def test_an_external_link_is_left_as_written(self, extract) -> None:
+        assert 'href="https://example.com/a?b=1&amp;c=2"' in str(extract)
+
+    def test_an_ampersand_in_a_rewritten_address_stays_as_written(self) -> None:
+        markup = '<a href="../other/?a=1&amp;b=2">x</a>'
+
+        assert LinkRewriter.rewrite(markup, "/docs/screens/") == (
+            '<a href="/docs/other/?a=1&amp;b=2">x</a>'
+        )
+
+
+class TestLinkRewriter:
+    @pytest.mark.parametrize(
+        "markup",
+        [
+            '<a href="/elsewhere/">x</a>',
+            '<a href="https://example.com/">x</a>',
+            '<a href="mailto:someone@example.com">x</a>',
+            '<a href="//example.com/path">x</a>',
+            "<p>an href=&quot;../other/&quot; inside text</p>",
+            '<p>say href="../other/" in prose</p>',
+        ],
+    )
+    def test_an_address_that_is_not_relative_is_left_alone(self, markup) -> None:
+        assert LinkRewriter.rewrite(markup, "/docs/screens/") == markup
+
+    def test_a_self_closing_image_is_rewritten(self) -> None:
+        markup = '<img alt="" src="../_images/pixel.png" />'
+
+        assert LinkRewriter.rewrite(markup, "/docs/screens/") == (
+            '<img alt="" src="/docs/_images/pixel.png" />'
+        )
+
+    def test_a_fragment_only_address_leads_to_the_page(self) -> None:
+        assert LinkRewriter.rewrite('<a href="#x">x</a>', "/docs/screens/") == (
+            '<a href="/docs/screens/#x">x</a>'
+        )
+
+    def test_every_byte_but_the_address_is_kept(self) -> None:
+        markup = '<P  CLASS="a"\n   HREF = \'../b/\' >&nbsp;&amp;\n<A href="../c/">'
+
+        assert LinkRewriter.rewrite(markup, "/docs/screens/") == (
+            '<P  CLASS="a"\n   HREF = \'/docs/b/\' >&nbsp;&amp;\n<A href="/docs/c/">'
+        )

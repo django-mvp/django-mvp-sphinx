@@ -13,7 +13,7 @@ from mvp.mounted import MountedApp
 
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
-from mvp_sphinx.extracts import PageExtract, SectionFinder, plain_text
+from mvp_sphinx.extracts import LinkRewriter, PageExtract, SectionFinder, plain_text
 from mvp_sphinx.menus import DocumentationMenu
 from mvp_sphinx.page_body import BodyRewriter
 from mvp_sphinx.views import PageView, SearchView
@@ -111,7 +111,8 @@ class DocumentationApp(MountedApp):
             page_url = reverse(f"{self.namespace}:page", kwargs={"path": page_path})
         else:
             page_url = reverse(f"{self.namespace}:front_page")
-        rewritten = BodyRewriter.parse(body[found.start : found.end]).splice()
+        linked = LinkRewriter.rewrite(body[found.start : found.end], page_url)
+        rewritten = BodyRewriter.parse(linked).splice()
         # Live examples need the documentation app's own page around them.
         kept = "".join(
             str(part["html"])
