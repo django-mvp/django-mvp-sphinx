@@ -47,7 +47,16 @@ class TestPageExtract:
         extract = extracts_app.page_extract("screens/", page_request)
 
         assert not soup(extract).find("h1")
-        assert not soup(extract).find(id="screens")
+        assert not soup(extract).find("a", href="/docs/screens/#screens")
+
+    def test_a_second_top_level_section_is_kept(
+        self, extracts_app, page_request
+    ) -> None:
+        extract = extracts_app.page_extract("two-parts/", page_request)
+
+        page = soup(extract)
+        assert page.find(id="second-part")
+        assert not page.find(id="first-part").find("h1")
 
     def test_the_title_is_the_pages_title_as_plain_text(
         self, extracts_app, page_request
@@ -497,6 +506,13 @@ class TestLinkRewriter:
 
         assert LinkRewriter.rewrite(markup, "/docs/screens/") == (
             '<img alt="" src="/docs/_images/pixel.png" />'
+        )
+
+    def test_an_embedded_objects_data_address_is_rewritten(self) -> None:
+        markup = '<object data="../_images/graph.svg" type="image/svg+xml"></object>'
+
+        assert LinkRewriter.rewrite(markup, "/docs/screens/") == (
+            '<object data="/docs/_images/graph.svg" type="image/svg+xml"></object>'
         )
 
     def test_a_fragment_only_address_leads_to_the_page(self) -> None:

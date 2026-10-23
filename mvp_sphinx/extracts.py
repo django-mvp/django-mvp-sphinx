@@ -64,6 +64,8 @@ class SectionFinder(HTMLParser):
     ``BodyRewriter`` counts them, so they index the body as written.
 
     Attributes:
+        heading_start: The offset of the start tag of the section's heading, or
+            ``None`` when the body has no such section.
         start: The offset just after the end tag of the section's heading, or
             ``None`` when the body has no such section.
         end: The offset of the section's end tag, or ``None`` when there is no
@@ -91,6 +93,7 @@ class SectionFinder(HTMLParser):
         self.in_heading = False
         self.heading_from = 0
         self.heading_to: int | None = None
+        self.heading_start: int | None = None
         self.start: int | None = None
         self.end: int | None = None
         self.title = ""
@@ -118,6 +121,7 @@ class SectionFinder(HTMLParser):
             and self.end is None
         ):
             self.in_heading = True
+            self.heading_start = self.position()
             self.heading_from = self.position() + len(self.get_starttag_text() or "")
         elif (
             self.in_heading
@@ -144,8 +148,8 @@ class LinkRewriter(HTMLParser):
     """Find every relative address a page's body links or shows, and point it onward.
 
     A relative address is one with no scheme, no network location and no leading
-    ``/``. The parser records where the value of each ``href`` and ``src``
-    attribute on a start tag lies in the body, and the result is the body with
+    ``/``. The parser records where the value of each ``href``, ``src`` and
+    ``data`` attribute on a start tag lies in the body, and the result is the body with
     each value joined to the page's address. Every other byte comes back as written.
 
     Args:
@@ -153,7 +157,7 @@ class LinkRewriter(HTMLParser):
     """
 
     ATTRIBUTE = re.compile(r"""([^\s"'<>/=]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s>"']+))?""")
-    ADDRESSES = frozenset(["href", "src"])
+    ADDRESSES = frozenset(["href", "src", "data"])
 
     def __init__(self, markup: str) -> None:
         super().__init__(convert_charrefs=False)
@@ -172,7 +176,7 @@ class LinkRewriter(HTMLParser):
             base: The page's address, which relative addresses are read against.
 
         Returns:
-            The same markup with each relative ``href`` and ``src`` value
+            The same markup with each relative ``href``, ``src`` and ``data`` value
             replaced by its joined address. Values are joined as written, entity
             references included.
         """
@@ -194,7 +198,7 @@ class LinkRewriter(HTMLParser):
         return self.line_starts[line - 1] + column
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        """Record where each relative ``href`` and ``src`` value lies in the tag."""
+        """Record where each relative address attribute's value lies in the tag."""
         # The parser hands attribute values over unescaped and without positions,
         # so each is found again in the tag as written.
         text = self.get_starttag_text() or ""

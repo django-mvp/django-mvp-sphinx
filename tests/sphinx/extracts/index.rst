@@ -9,3 +9,4 @@ The front page holds one paragraph.
    screens
    other
    toc-only
+   two-parts

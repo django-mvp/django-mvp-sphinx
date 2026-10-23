@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `DocumentationApp.page_extract(address, request)` returns a page of the docs build for use elsewhere on your site, such as a view's `page_info`, so the info dialog can hold the documentation itself. The extract carries the page's content without its title, drawn in the documentation app's styles, with every link and image leading into the documentation app, and its title and address. See "Showing a page somewhere else" in the README.
 
+### Removed
+
+- `PageView.plain_text` is gone. A subclass that called it imports `plain_text` from `mvp_sphinx.extracts` instead, which does the same thing.
+
 ## [v0.4.0] - 2026-10-21
 
 ### Changed

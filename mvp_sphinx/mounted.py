@@ -118,14 +118,22 @@ class DocumentationApp(MountedApp):
             return None
         body = page.get("body", "")
         found = SectionFinder(body, anchor)
-        if found.start is None or found.end is None:
+        if found.heading_start is None or found.start is None:
             logger.warning("%s: no section at %r.", self.namespace, address)
             return None
+        if anchor:
+            if found.end is None:
+                logger.warning("%s: no section at %r.", self.namespace, address)
+                return None
+            markup = body[found.start : found.end]
+        else:
+            # A whole page is its body less the title, whatever follows the title.
+            markup = body[: found.heading_start] + body[found.start :]
         if page_path:
             page_url = reverse(f"{self.namespace}:page", kwargs={"path": page_path})
         else:
             page_url = reverse(f"{self.namespace}:front_page")
-        linked = LinkRewriter.rewrite(body[found.start : found.end], page_url)
+        linked = LinkRewriter.rewrite(markup, page_url)
         rewritten = BodyRewriter.parse(linked).splice()
         # Live examples need the documentation app's own page around them.
         kept = "".join(

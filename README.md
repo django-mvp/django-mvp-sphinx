@@ -936,9 +936,10 @@ class AccountsView(MVPTemplateView):
 
 `page_extract(address, request)` returns a page extract, or `None`. The extract
 holds the page's body without its title, so the dialog is not headed twice, and
-it is drawn in the same styles as the documentation app's own pages. Every link
-and image in it leads into the documentation app, including links to other
-sections of the same page, so they work wherever the extract is shown. Its
+it is drawn in the same styles as the documentation app's own pages. Every link,
+image and embedded diagram in it leads into the documentation app, including
+links to other sections of the same page, so they work wherever the extract is
+shown. Its
 `title` is the page's title as plain text and its `url` is the page's address,
 with the app's prefix, which is what the button above links to. The empty address
 is the front page. With several documentation apps mounted, ask the one the
