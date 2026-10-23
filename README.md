@@ -987,11 +987,12 @@ section, and the extract is `None`.
 - The page's file can't be read.
 
 An address that names no page, an anchor that names no section, and a page file
-that can't be read, also log a warning from `mvp_sphinx.mounted` that names the
-documentation app and the address, so a mistyped address does not fail without a
-trace. A page with nothing to show, such as one holding only a table of
-contents, gives an extract that is false, so `extract or ""` handles it the same way. In every case the
-view renders as if it had set no `page_info`.
+that can't be read, also log a warning that names the documentation app and the
+address, so a mistyped address does not fail without a trace. The warning comes
+from the `logger` of `mvp_sphinx.mounted`, so a project's `LOGGING` setting
+can route it by that name. A page with nothing to show, such as one holding only
+a table of contents, gives an extract that is false, so `extract or ""` handles
+it the same way. In every case the view renders as if it had set no `page_info`.
 
 ## Public surface
 
