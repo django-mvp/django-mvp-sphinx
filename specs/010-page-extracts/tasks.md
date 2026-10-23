@@ -89,3 +89,20 @@ Issue: #105. Delivers FR-002 (address), FR-007 (section address); SC-001.
 Tests: an app mounted under the test project's own prefix gives a `url` beginning with it, for a
 page and for a section; two documentation apps give addresses under their own prefixes. No
 production code expected: show each test can fail. README example shows the action button.
+
+## Review fixes
+
+### T007 — A whole page keeps everything after its title (US1)
+
+**Files**: `mvp_sphinx/extracts.py`, `mvp_sphinx/mounted.py`, `tests/sphinx/extracts/two-parts.rst`,
+`tests/test_extracts.py`
+
+A page with two top-level sections kept only the first. The whole-page extract is now the body
+less its title's heading.
+
+### T008 — Embedded objects' addresses lead into the documentation app (US1)
+
+**Files**: `mvp_sphinx/extracts.py`, `tests/test_extracts.py`, `README.md`
+
+The `data` address of an `<object>`, which Sphinx uses for SVG diagrams, is rewritten like `href`
+and `src`.
