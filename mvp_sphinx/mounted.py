@@ -3,11 +3,19 @@
 from typing import Any
 
 from django.core.exceptions import ImproperlyConfigured
-from django.urls import path
+from django.http import HttpRequest
+from django.templatetags.static import static
+from django.urls import path, reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from mvp.mounted import MountedApp
 
+from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.examples import LiveExamples
+from mvp_sphinx.extracts import PageExtract, SectionFinder, plain_text
 from mvp_sphinx.menus import DocumentationMenu
+from mvp_sphinx.page_body import BodyRewriter
 from mvp_sphinx.views import PageView, SearchView
 
 
@@ -79,3 +87,43 @@ class DocumentationApp(MountedApp):
         self.landing = f"{self.namespace}:front_page"
         # The shell processes every app's menu on host pages no mount serves.
         self.menu = DocumentationMenu(f"mvp_sphinx-{self.namespace}", app=self)
+
+    def page_extract(self, address: str, request: HttpRequest) -> PageExtract | None:
+        """Return a page of the docs build, for use outside the documentation app.
+
+        Args:
+            address: The page's address below the app's prefix, such as
+                ``"reference/accounts/"``. The empty address is the front page.
+            request: The request being served.
+
+        Returns:
+            The page's extract, or ``None`` when the page can't be had.
+        """
+        page_path = address.partition("#")[0]
+        page = DocsBuild(self.build_dir).page(page_path)
+        if page is None:
+            return None
+        body = page.get("body", "")
+        found = SectionFinder(body)
+        if found.start is None or found.end is None:
+            return None
+        if page_path:
+            page_url = reverse(f"{self.namespace}:page", kwargs={"path": page_path})
+        else:
+            page_url = reverse(f"{self.namespace}:front_page")
+        rewritten = BodyRewriter.parse(body[found.start : found.end]).splice()
+        # Live examples need the documentation app's own page around them.
+        kept = "".join(
+            str(part["html"])
+            for part in LiveExamples.parts(rewritten)
+            if "html" in part
+        )
+        content = format_html(
+            '<link rel="stylesheet" href="{}">'
+            '<div class="prose mvp-sphinx-content">{}</div>',
+            static("mvp_sphinx/content.css"),
+            mark_safe(kept),  # noqa: S308 the host's own docs build
+        )
+        return PageExtract(
+            content=content, title=plain_text(page.get("title", "")), url=page_url
+        )

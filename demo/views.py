@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from mvp.views import MVPTemplateView
 
 from demo.mounted import docs, staff_guide
-from mvp_sphinx.extracts import PageExtract, page_extract
+from mvp_sphinx.extracts import PageExtract
 
 
 class OverviewView(MVPTemplateView):
@@ -35,7 +35,7 @@ class InfoDialogView(MVPTemplateView):
     def get_extract(self) -> PageExtract | None:
         """Return the page or section, once per request."""
         if not hasattr(self, "extract"):
-            self.extract = page_extract(self.app, self.address, self.request)
+            self.extract = self.app.page_extract(self.address, self.request)
         return self.extract
 
     def get_page_info(self):

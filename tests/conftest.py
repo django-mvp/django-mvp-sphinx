@@ -100,6 +100,11 @@ def examples_build(sphinx_json_build):
     return sphinx_json_build("examples")
 
 
+@pytest.fixture(scope="session")
+def extracts_build(sphinx_json_build):
+    return sphinx_json_build("extracts")
+
+
 @pytest.fixture(scope="module")
 def demo_guide_build(tmp_path_factory):
     out = tmp_path_factory.mktemp("demo-guide-build")
@@ -187,6 +192,14 @@ def examples_app(examples_build, monkeypatch):
     from demo.mounted import docs
 
     monkeypatch.setattr(docs, "build_dir", examples_build)
+    return docs
+
+
+@pytest.fixture
+def extracts_app(extracts_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", extracts_build)
     return docs
 
 
