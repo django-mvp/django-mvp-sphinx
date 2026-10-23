@@ -238,6 +238,53 @@ class TestSectionFinder:
         assert found.end is None
 
 
+class TestExtractAddress:
+    @pytest.fixture
+    def handbook(self, handbook_app, extracts_build, monkeypatch):
+        monkeypatch.setattr(handbook_app, "build_dir", extracts_build)
+        return handbook_app
+
+    def test_a_page_address_begins_with_the_prefix_the_app_is_mounted_at(
+        self, handbook, page_request
+    ) -> None:
+        extract = handbook.page_extract("screens/", page_request)
+
+        assert extract.url == "/manuals/admin/screens/"
+
+    def test_a_section_address_begins_with_the_prefix_the_app_is_mounted_at(
+        self, handbook, page_request
+    ) -> None:
+        extract = handbook.page_extract("screens/#third-section", page_request)
+
+        assert extract.url == "/manuals/admin/screens/#third-section"
+
+    def test_links_in_the_content_lead_under_the_prefix_the_app_is_mounted_at(
+        self, handbook, page_request
+    ) -> None:
+        extract = handbook.page_extract("screens/", page_request)
+
+        link = soup(extract).find("a", href=lambda href: "other" in href)
+        assert link["href"] == "/manuals/admin/other/"
+        assert soup(extract).find("img")["src"] == "/manuals/admin/_images/pixel.png"
+
+    def test_two_apps_give_addresses_under_their_own_prefixes(
+        self, extracts_app, handbook, page_request
+    ) -> None:
+        first = extracts_app.page_extract("screens/", page_request)
+        second = handbook.page_extract("screens/", page_request)
+
+        assert first.url == "/docs/screens/"
+        assert second.url == "/manuals/admin/screens/"
+
+    def test_each_app_gives_extracts_of_its_own_pages_only(
+        self, extracts_app, handbook_build, handbook, page_request, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(handbook, "build_dir", handbook_build)
+
+        assert handbook.page_extract("backups/", page_request).title == "Backups"
+        assert extracts_app.page_extract("backups/", page_request) is None
+
+
 class TestReaderRule:
     @pytest.fixture
     def reader(self, rf):

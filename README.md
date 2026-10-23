@@ -941,7 +941,9 @@ and image in it leads into the documentation app, including links to other
 sections of the same page, so they work wherever the extract is shown. Its
 `title` is the page's title as plain text and its `url` is the page's address,
 with the app's prefix, which is what the button above links to. The empty address
-is the front page.
+is the front page. With several documentation apps mounted, ask the one the
+page belongs to: each gives addresses under its own prefix, and none gives an
+extract of another's pages.
 
 The extract renders as its content, so `page_info` takes it as it is, and
 `extract or ""` gives a page with nothing to show an empty `page_info`, which
