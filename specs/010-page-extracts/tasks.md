@@ -33,15 +33,17 @@ Issue: #102. Delivers FR-001 – FR-005, FR-011 – FR-013; SC-001, SC-002, SC-0
 
 Plan, *The extract* and *Fixtures and tests*. Write the fixture source in full now. Delete the
 sketch's `extracts.py` and rebuild it test-first: `PageExtract`, `SectionFinder` (page case
-only is enough for this task), `plain_text`, `extract_page` steps 2, 3 (found case), 5–8, and
-`DocumentationApp.page_extract`. Move `PageView.plain_text` to `extracts.plain_text`.
-Tests: `TestPageExtract`, `TestExtractContent`.
+only is enough for this task), `plain_text`, and `DocumentationApp.page_extract` steps 2, 3
+(found case), 5–8. No module-level extract function. Move `PageView.plain_text` to
+`extracts.plain_text`. Tests: `TestPageExtract`, `TestExtractContent`, `TestWithoutSphinx`, the
+toc-only extract being false.
 
 ### T002 — Links and images lead into the documentation app
 
 **Files**: `tests/test_extracts.py`, `mvp_sphinx/extracts.py`
 
-Plan, *The extract*, `LinkRewriter`. Tests: `TestExtractLinks`.
+Plan, *The extract*, `LinkRewriter`. Tests: `TestExtractLinks`, every link fetched with the test
+client and answering 200.
 
 ### T003 — The demo screens call the documentation app, and the documentation
 
@@ -62,7 +64,7 @@ Issue: #104. Delivers FR-008 – FR-010; SC-003, SC-004.
 **Files**: `tests/test_extracts.py`, `tests/test_demo.py`, `mvp_sphinx/extracts.py`, `README.md`
 
 Plan, *The extract*, steps 1 and 3. Tests: `TestReaderRule`, `TestNothingToShow` (except the
-section case, which is T005's), and the staff and moved screens in `TestInfoDialog`. README
+section case, which is T005's; the toc-only case is T001's), and the staff and moved screens in `TestInfoDialog`. README
 subsection gains what happens when nothing can be shown.
 
 ## US2 — A developer shows one section of a page (P2)

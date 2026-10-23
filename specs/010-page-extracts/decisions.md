@@ -27,3 +27,11 @@ never have existed or may not have been built yet. A warning is the one signal t
 
 "Page extract" joins `CONTEXT.md` when the feature is built: the content of a page, or of one of
 its sections, shown outside the documentation app. It is the word the issue and the spec use.
+
+## The design review's findings were all applied
+
+Six findings, none blocking. Each was a small edit to the plan: links are checked by fetching them,
+since the catch-all route resolves anything; an extract with no text and no image is false; a
+section title keeps its entity references; a test runs with Sphinx blocked; the extract logic lives
+in the app's method, with no second public function; and a section's link to a sibling section is
+tested.

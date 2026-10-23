@@ -21,7 +21,8 @@ rebuilt test-first.
   test module does.
 - Files: `mvp_sphinx/extracts.py` (new), `mvp_sphinx/mounted.py` (one method),
   `mvp_sphinx/views.py` (`plain_text` moves out), `tests/test_extracts.py` (new),
-  `tests/sphinx/extracts/` (new fixture source), `tests/conftest.py`, the demo, `README.md`,
+  `tests/test_demo.py`, `mvp_sphinx/locale/en/LC_MESSAGES/django.po`,
+  `tests/sphinx/extracts/` (new fixture source), `tests/conftest.py` (reuses `staff_guide_app`), the demo, `README.md`,
   `CHANGELOG.md`, `CONTEXT.md`.
 
 ## Constitution Check
@@ -40,21 +41,26 @@ rebuilt test-first.
 
 - **`PageExtract`**, a frozen dataclass: `content` (a `SafeString`), `title` (plain text), `url`
   (the address in the documentation app, with `#anchor` for a section). `__str__` and `__html__`
-  return `content`. `__bool__` is false when the extracted markup was empty or whitespace before
-  it was wrapped, so `extract or ""` gives no icon (spec, Edge Cases).
+  return `content`. `__bool__` is false when the content holds no text (`strip_tags`, stripped)
+  and no `<img>`, so `extract or ""` gives no icon (spec, Edge Cases). Sphinx leaves an empty
+  `toctree-wrapper` div even for a hidden toctree, which is why markup alone is not the test.
 - **`SectionFinder(HTMLParser)`**: given a body and an anchor (`""` for the page), records the
   offset after the end tag of the matching section's first heading, the offset of that section's
   own end tag, and the heading's text. The section is the first `<section>` when the anchor is
   empty, otherwise the `<section>` whose `id` equals the anchor. Section depth is counted so a
-  nested section's end tag never ends the outer one. The heading text skips the `a.headerlink`
-  inside it. Offsets come from `getpos()` and line starts, as in `BodyRewriter`. Not found → both
-  offsets `None`.
+  nested section's end tag never ends the outer one. The heading's title is its raw markup from
+  after its start tag up to its `a.headerlink`, passed through `plain_text()`, so entity
+  references such as `&amp;` survive. Offsets come from `getpos()` and line starts, computed
+  exactly as `BodyRewriter` does (not `splitlines`). Not found → both offsets `None`.
 - **`LinkRewriter(HTMLParser)`**: records the offset and length of every `href` and `src`
   attribute value on a start tag (and a self-closing tag) whose value is relative: no scheme, no
-  network location, not starting with `/`. `rewrite(markup, base)` splices `urljoin(base, value)`
-  in, every other byte as written. Values are joined as Sphinx wrote them, entity references
+  network location, not starting with `/`. `HTMLParser` hands attribute values over unescaped and
+  without positions, so the rewriter finds each raw value inside `get_starttag_text()` at the
+  tag's offset. `rewrite(markup, base)` splices `urljoin(base, value)` in, every other byte as
+  written. Values are joined as Sphinx wrote them, entity references
   included, so `&amp;` in a query stays `&amp;`.
-- **`extract_page(app, address, request)`**: the whole job, in this order.
+- **`DocumentationApp.page_extract(self, address, request)`** in `mounted.py`: the whole job, in
+  this order. It is the one public way in; `extracts.py` holds the value and the two parsers.
   1. `app.has_permission(request)` false → `None`, nothing logged.
   2. Split the address at the first `#` into path and anchor.
   3. `DocsBuild(app.build_dir).page(path)`. `ValueError` or `OSError` → warning, `None`. `None` →
@@ -70,9 +76,6 @@ rebuilt test-first.
      `url`: the page's address, plus `#anchor` for a section.
 - Warnings use `logging.getLogger(__name__)` and name the app's namespace and the address as
   given.
-
-`DocumentationApp.page_extract(self, address, request)` in `mounted.py` returns
-`extract_page(self, address, request)`. One public way in, documented on the method.
 
 `PageView.plain_text` becomes `plain_text()` in `extracts.py`, imported by `views.py`, so the
 title is made plain the same way in both. No alias is left behind.
@@ -90,12 +93,13 @@ A fixture source, `tests/sphinx/extracts/`, built once per session like the othe
 (`extracts_build`, `extracts_app` in `tests/conftest.py`):
 
 - `index.rst`: a toctree of the pages below, and one paragraph.
-- `screens.rst`: a title, an opening paragraph, three sections, the second holding a subsection.
+- `screens.rst`: a title, an opening paragraph, three sections, the second holding a subsection
+  and titled with an ampersand ("Search & filters"). The second section links to the third.
   Links to another page (`:doc:`), to its own third section (`:ref:`), an image from the guide's
   `pixel.png` (copied in), a table, inline and displayed maths. The opening paragraph links to a
   subsection.
 - `other.rst`: a short page the links lead to.
-- `toc-only.rst`: a title and a toctree with no text.
+- `toc-only.rst`: a title and a `:hidden:` toctree, no text.
 
 Live examples need the directive's configuration and a running example, so the live-example case
 reuses `examples_build` and its app.
@@ -104,17 +108,21 @@ reuses `examples_build` and its app.
 
 - `TestPageExtract`: content holds the opening paragraph and every section; no `<h1>`; title and
   url; front page at `""`; rebuilt build read on the next call (write a new `.fjson` into a copy).
-- `TestExtractLinks`: every `href`/`src` in a page extract resolves (`resolve()` on the path) to
-  the documentation app's page or file view, own-section links carry the page's address and anchor,
+- `TestExtractLinks`: every internal `href`/`src` in a page extract, fetched with the test client
+  (fragment dropped), answers 200. `resolve()` is not enough: the app's catch-all route resolves a
+  broken address too. own-section links carry the page's address and anchor,
   external links unchanged. Parser unit tests on `LinkRewriter` for a `/`-rooted value, a scheme, a
   self-closing tag and an attribute-looking string inside text.
 - `TestSectionExtract`: holds its subsection, not the sections around it, no heading of its own,
-  title from the heading, url with the anchor, unknown anchor → `None` and a warning.
+  title from the heading with its `&` intact, a link to another section of the page leads to the
+  page's address and that anchor, url with the anchor, unknown anchor → `None` and a warning.
 - `TestReaderRule`: `staff_guide_app`-style app with `user_is_staff`: anonymous and regular users
   get `None`, staff get the extract.
 - `TestNothingToShow`: missing build, missing page, address without its trailing slash, `..` in the
   address, unreadable file → `None`, no exception; warnings logged (`caplog`) for the page,
   section and unreadable cases; toc-only page gives a false extract.
+- `TestWithoutSphinx`: an extract is had with `sphinx` blocked in `sys.modules`, as
+  `tests/test_views.py` already does for pages.
 - `TestExtractContent`: the `mvp-sphinx-content` wrapper and the stylesheet link are present;
   maths markup kept; live examples dropped from an `examples_build` page.
 - `TestInfoDialog` in `tests/test_demo.py`: each demo screen renders 200; the whole-page and
