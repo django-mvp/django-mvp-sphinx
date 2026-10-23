@@ -522,3 +522,54 @@ class TestExamplePage:
         ]
         assert soup.select("[role=alert]")
         assert not self.has_shell(response)
+
+
+class TestInfoDialog:
+    def dialog(self, client, name):
+        response = client.get(reverse(f"info_{name}"))
+        assert response.status_code == 200
+        page = BeautifulSoup(response.content, "html.parser")
+        return page.find(id="pageInfoModal")
+
+    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    def test_the_dialog_holds_the_extract_of_the_page(
+        self, client, db, demo_guide_app, rf, name
+    ) -> None:
+        address = {
+            "whole_page": "first-visit/finding-your-way/",
+            "notices": "reference/notices/",
+        }[name]
+        request = rf.get("/")
+        request.user = UserFactory.build()
+        extract = demo_guide_app.page_extract(address, request)
+
+        dialog = self.dialog(client, name)
+
+        wanted = BeautifulSoup(str(extract), "html.parser")
+        assert dialog.select_one("div.mvp-sphinx-content")
+        for tag, attribute in [("a", "href"), ("img", "src")]:
+            assert [
+                each[attribute]
+                for each in dialog.select(f".mvp-sphinx-content {tag}[{attribute}]")
+            ] == [each[attribute] for each in wanted.select(f"{tag}[{attribute}]")]
+
+    def test_the_notices_page_shows_its_notices_and_its_picture(
+        self, client, db, demo_guide_app
+    ) -> None:
+        dialog = self.dialog(client, "notices")
+
+        assert dialog.select(".mvp-sphinx-content div.admonition")
+        assert dialog.select(".mvp-sphinx-content img")
+
+    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    def test_the_dialog_offers_the_full_page(
+        self, client, db, demo_guide_app, name
+    ) -> None:
+        address = {
+            "whole_page": "first-visit/finding-your-way/",
+            "notices": "reference/notices/",
+        }[name]
+
+        dialog = self.dialog(client, name)
+
+        assert dialog.find("a", href=reverse("docs:page", kwargs={"path": address}))

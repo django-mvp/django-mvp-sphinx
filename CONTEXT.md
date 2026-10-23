@@ -120,6 +120,14 @@ docs build was made. Each has a name the reader sees and a language. It is a cop
 and a rebuild refreshes it.
 _Avoid_: snippet, listing, code sample.
 
+**Page extract**:
+The content of one page of a documentation app, taken for use outside it, such as
+in a view's page info dialog. It holds the page's body without its title, drawn in
+the documentation app's styles with every link and image leading into the
+documentation app, the page's title as plain text and the page's address in the
+documentation app. It is read from the docs build each time it is asked for.
+_Avoid_: snippet, excerpt, embed, fragment.
+
 ## Terms deliberately not used
 
 **Theme**, for anything this package ships. The host project's django-mvp theme
