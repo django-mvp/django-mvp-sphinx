@@ -39,4 +39,8 @@
 
 ## What was ruled by eye
 
-Nothing yet.
+- Approved as sketched in the first round: the dialog is django-mvp's own info dialog, its heading
+  stays the screen's title, the content keeps the documentation app's styles and heading links,
+  and every dialog has an "Open the full page" button at its foot.
+- The dialog's width is left to django-mvp. A view can't choose it yet, which is asked for in
+  django-mvp/django-mvp#592. This feature doesn't work round it.
