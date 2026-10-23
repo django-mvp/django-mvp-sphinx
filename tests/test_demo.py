@@ -605,3 +605,27 @@ class TestInfoDialog:
         self, client, db, demo_guide_app
     ) -> None:
         assert self.dialog(client, "moved") is None
+
+    def test_the_section_screen_holds_its_section_and_nothing_around_it(
+        self, client, db, demo_guide_app
+    ) -> None:
+        dialog = self.dialog(client, "section")
+
+        assert dialog.select_one(".mvp-sphinx-content")
+        assert not dialog.find(id="the-sidebar")
+        assert not dialog.find(id="on-this-page")
+        assert not dialog.select(".mvp-sphinx-content h2")
+
+    def test_the_section_screen_offers_the_page_at_that_section(
+        self, client, db, demo_guide_app
+    ) -> None:
+        dialog = self.dialog(client, "section")
+
+        buttons = [
+            link
+            for link in dialog.find_all("a", href=True)
+            if not link.find_parent(class_="mvp-sphinx-content")
+        ]
+        assert [link["href"] for link in buttons] == [
+            "/docs/first-visit/finding-your-way/#searching-the-guide"
+        ]

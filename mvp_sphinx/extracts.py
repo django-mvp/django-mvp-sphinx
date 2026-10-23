@@ -56,34 +56,44 @@ class PageExtract:
 
 
 class SectionFinder(HTMLParser):
-    """Find where a page's content starts and ends in its body.
+    """Find where a section's content starts and ends in a page's body.
 
-    The content is everything inside the page's first section after its first
-    heading. Offsets are counted as ``BodyRewriter`` counts them, so they index
-    the body as written.
+    The section is the first one in the body when no anchor is given, otherwise
+    the one whose ``id`` is the anchor. Its content is everything inside it after
+    its first heading, so its subsections come with it. Offsets are counted as
+    ``BodyRewriter`` counts them, so they index the body as written.
 
     Attributes:
-        start: The offset just after the end tag of the first heading, or ``None``
-            when the body has none.
-        end: The offset of the end tag of the section, or ``None`` when it never
-            closes.
+        start: The offset just after the end tag of the section's heading, or
+            ``None`` when the body has no such section.
+        end: The offset of the section's end tag, or ``None`` when there is no
+            such section or it never closes.
+        title: The heading's text, from after its start tag up to its heading
+            link, with markup removed and entity references decoded. Empty when
+            the section is not found.
 
     Args:
         body: A page body as Sphinx wrote it.
+        anchor: The ``id`` of the section, or empty for the first section.
     """
 
     HEADINGS = frozenset(["h1", "h2", "h3", "h4", "h5", "h6"])
 
-    def __init__(self, body: str) -> None:
+    def __init__(self, body: str, anchor: str = "") -> None:
         super().__init__(convert_charrefs=False)
         self.body = body
+        self.anchor = anchor
         self.line_starts = [0]
         for line in body.split("\n")[:-1]:
             self.line_starts.append(self.line_starts[-1] + len(line) + 1)
         self.depth = 0
+        self.section_depth: int | None = None
         self.in_heading = False
+        self.heading_from = 0
+        self.heading_to: int | None = None
         self.start: int | None = None
         self.end: int | None = None
+        self.title = ""
         self.feed(body)
         self.close()
 
@@ -93,19 +103,39 @@ class SectionFinder(HTMLParser):
         return self.line_starts[line - 1] + column
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        """Count a section and note the first heading directly inside the first."""
+        """Count a section, find the one asked for and note its first heading."""
+        attributes = dict(attrs)
         if tag == "section":
             self.depth += 1
-        elif tag in self.HEADINGS and self.depth == 1 and self.start is None:
+            if self.section_depth is None and (
+                not self.anchor or attributes.get("id") == self.anchor
+            ):
+                self.section_depth = self.depth
+        elif (
+            tag in self.HEADINGS
+            and self.section_depth == self.depth
+            and self.start is None
+            and self.end is None
+        ):
             self.in_heading = True
+            self.heading_from = self.position() + len(self.get_starttag_text() or "")
+        elif (
+            self.in_heading
+            and tag == "a"
+            and "headerlink" in (attributes.get("class") or "").split()
+        ):
+            self.heading_to = self.position()
 
     def handle_endtag(self, tag: str) -> None:
-        """Note where the heading ends and where the first section does."""
+        """Note where the heading ends and where the section does."""
         if tag in self.HEADINGS and self.in_heading:
             self.in_heading = False
-            self.start = self.body.index(">", self.position()) + 1
+            here = self.position()
+            self.start = self.body.index(">", here) + 1
+            heading = self.body[self.heading_from : self.heading_to or here]
+            self.title = plain_text(heading).strip()
         elif tag == "section":
-            if self.depth == 1 and self.end is None:
+            if self.depth == self.section_depth and self.end is None:
                 self.end = self.position()
             self.depth -= 1
 

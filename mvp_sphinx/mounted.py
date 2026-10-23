@@ -106,7 +106,8 @@ class DocumentationApp(MountedApp):
         """
         if not self.has_permission(request):
             return None
-        page_path = address.partition("#")[0]
+        page_path, *fragment = address.split("#", 1)
+        anchor = fragment[0] if fragment else ""
         try:
             page = DocsBuild(self.build_dir).page(page_path)
         except (OSError, ValueError):
@@ -116,8 +117,9 @@ class DocumentationApp(MountedApp):
             logger.warning("%s: no page at %r.", self.namespace, address)
             return None
         body = page.get("body", "")
-        found = SectionFinder(body)
+        found = SectionFinder(body, anchor)
         if found.start is None or found.end is None:
+            logger.warning("%s: no section at %r.", self.namespace, address)
             return None
         if page_path:
             page_url = reverse(f"{self.namespace}:page", kwargs={"path": page_path})
@@ -137,6 +139,10 @@ class DocumentationApp(MountedApp):
             static("mvp_sphinx/content.css"),
             mark_safe(kept),  # noqa: S308 the host's own docs build
         )
+        if anchor:
+            return PageExtract(
+                content=content, title=found.title, url=f"{page_url}#{anchor}"
+            )
         return PageExtract(
             content=content, title=plain_text(page.get("title", "")), url=page_url
         )

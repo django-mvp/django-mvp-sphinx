@@ -950,6 +950,28 @@ for, so a rebuild shows without a restart, and it works where Sphinx is not
 installed. Maths is left as Sphinx wrote it and a live example is left out. The
 rest of the page is shown.
 
+`mvp_sphinx.extracts.PageExtract` is the value that comes back, with `content`,
+`title` and `url`. `SectionFinder` and `LinkRewriter`, in the same module, are the
+parsers `page_extract` reads with, and `plain_text(markup)` turns a title Sphinx
+wrote as HTML into text. A project needs to build none of them.
+
+#### Showing one section
+
+A guide often covers several screens on one page. To show only one of them, add
+the section's anchor to the address, as in `reference/accounts/#sharing`: the
+address a reader follows to reach that section. The extract then holds that
+section and its subsections, and nothing before or after them. The section's own
+heading is left out, as the page's is, and becomes the extract's `title`, with
+its text as a reader sees it. The extract's `url` is the page's address with the
+anchor, so a button linking to it opens the page at that section. A link in the
+section to another section of the page leads to that section in the documentation
+app.
+
+An anchor names a section only when it is the `id` Sphinx gave the section's
+heading, the one in the address a reader follows. An anchor that names anything
+else, such as a label's own target on the line before a heading, names no
+section, and the extract is `None`.
+
 #### When nothing can be shown
 
 `page_extract` returns `None`, and never raises, when the extract can't be had:
@@ -957,22 +979,17 @@ rest of the page is shown.
 - The documentation app's reader rule does not admit the request, so a page of
   restricted documentation never reaches a reader through a dialog.
 - The docs build has not been made on this machine yet.
-- The address names no page. An address needs its trailing slash, as it does when
-  a reader requests it, and an address that leaves the build, such as one holding
-  `..`, names no page.
+- The address names no page, or the anchor names no section. An address needs its
+  trailing slash, as it does when a reader requests it, and an address that
+  leaves the build, such as one holding `..`, names no page.
 - The page's file can't be read.
 
-An address that names no page, and a page file that can't be read, also log a
-warning from `mvp_sphinx.mounted` that names the documentation app and the
-address, so a mistyped address does not fail without a trace. A page with
-nothing to show, such as one holding only a table of contents, gives an extract
-that is false, so `extract or ""` handles it the same way. In every case the
+An address that names no page, an anchor that names no section, and a page file
+that can't be read, also log a warning from `mvp_sphinx.mounted` that names the
+documentation app and the address, so a mistyped address does not fail without a
+trace. A page with nothing to show, such as one holding only a table of
+contents, gives an extract that is false, so `extract or ""` handles it the same way. In every case the
 view renders as if it had set no `page_info`.
-
-`mvp_sphinx.extracts.PageExtract` is the value that comes back, with `content`,
-`title` and `url`. `SectionFinder` and `LinkRewriter`, in the same module, are the
-parsers `page_extract` reads with, and `plain_text(markup)` turns a title Sphinx
-wrote as HTML into text. A project needs to build none of them.
 
 ## Public surface
 

@@ -15,7 +15,7 @@ from django.utils.html import conditional_escape
 
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
-from mvp_sphinx.extracts import LinkRewriter
+from mvp_sphinx.extracts import LinkRewriter, SectionFinder
 from tests.factories import UserFactory
 
 
@@ -131,6 +131,111 @@ class TestExtractContent:
         assert LiveExamples.EXAMPLE_CLASS not in str(extract)
         assert "Written before the example." in str(extract)
         assert "Written after the example." in str(extract)
+
+
+class TestSectionExtract:
+    @pytest.fixture
+    def extract(self, extracts_app, page_request):
+        return extracts_app.page_extract("screens/#search-filters", page_request)
+
+    def test_it_holds_the_section_and_its_subsection(self, extract) -> None:
+        page = soup(extract)
+
+        assert page.find(id="details")
+        assert page.find("table")
+        assert "Written for the second screen" in str(extract)
+
+    def test_it_holds_nothing_from_the_sections_around_it(self, extract) -> None:
+        page = soup(extract)
+
+        assert not page.find(id="first-section")
+        assert not page.find(id="third-section")
+        assert "Written for the first screen" not in str(extract)
+        assert "Written for the third screen" not in str(extract)
+        assert not page.find(attrs={"alt": "A single pixel"})
+
+    def test_it_leaves_out_the_sections_own_heading(self, extract) -> None:
+        page = soup(extract)
+
+        assert not page.find("h2")
+        assert not page.find(id="search-filters")
+
+    def test_the_title_is_the_headings_text_with_its_ampersand_intact(
+        self, extract
+    ) -> None:
+        assert extract.title == "Search & filters"
+
+    def test_the_address_leads_to_the_section_in_the_documentation_app(
+        self, extract
+    ) -> None:
+        assert extract.url == "/docs/screens/#search-filters"
+
+    def test_a_link_to_another_section_leads_to_it_in_the_documentation_app(
+        self, extract
+    ) -> None:
+        link = soup(extract).find("a", href=lambda href: href.endswith("#third"))
+
+        assert link["href"] == "/docs/screens/#third"
+
+    def test_a_subsection_ends_at_its_own_end_not_its_parents(
+        self, extracts_app, page_request
+    ) -> None:
+        extract = extracts_app.page_extract("screens/#details", page_request)
+
+        assert extract.title == "Details"
+        assert soup(extract).find("table")
+        assert "Written for the second screen" not in str(extract)
+        assert "Written for the third screen" not in str(extract)
+
+    def test_the_last_section_of_a_page_is_had(
+        self, extracts_app, page_request
+    ) -> None:
+        extract = extracts_app.page_extract("screens/#third-section", page_request)
+
+        assert "Written for the third screen" in str(extract)
+        assert extract.title == "Third section"
+
+    @pytest.mark.parametrize("anchor", ["no-such-section", "search-and-filters", "id1"])
+    def test_an_anchor_that_names_no_section_gives_no_extract_and_a_warning(
+        self, extracts_app, page_request, caplog, anchor
+    ) -> None:
+        address = f"screens/#{anchor}"
+
+        assert extracts_app.page_extract(address, page_request) is None
+        assert [
+            record
+            for record in caplog.records
+            if record.levelno == logging.WARNING
+            and address in record.getMessage()
+            and "docs" in record.getMessage()
+        ]
+
+
+class TestSectionFinder:
+    BODY = (
+        '<section id="page">\n<h1>Page<a class="headerlink" href="#page">¶</a></h1>\n'
+        '<section id="one">\n<h2><code class="literal"><span>a</span></code> &amp; '
+        '<em>b</em><a class="headerlink" href="#one" title="Link">¶</a></h2>\n'
+        "<p>One.</p>\n</section>\n</section>\n"
+    )
+
+    def test_the_title_is_the_headings_text_up_to_its_link(self) -> None:
+        found = SectionFinder(self.BODY, "one")
+
+        assert found.title == "a & b"
+
+    def test_the_content_runs_from_after_the_heading_to_the_end_of_the_section(
+        self,
+    ) -> None:
+        found = SectionFinder(self.BODY, "one")
+
+        assert self.BODY[found.start : found.end] == "\n<p>One.</p>\n"
+
+    def test_a_body_with_no_such_section_has_no_offsets(self) -> None:
+        found = SectionFinder(self.BODY, "two")
+
+        assert found.start is None
+        assert found.end is None
 
 
 class TestReaderRule:
