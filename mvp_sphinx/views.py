@@ -1,7 +1,6 @@
 """The view that renders a page of the docs build."""
 
 import mimetypes
-from html import unescape
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
@@ -14,7 +13,6 @@ from django.http import (
 )
 from django.http.response import HttpResponseBase
 from django.urls import reverse
-from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
@@ -22,6 +20,7 @@ from mvp.views.base import PageMixin
 
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
+from mvp_sphinx.extracts import plain_text
 from mvp_sphinx.headings import PageHeadings
 from mvp_sphinx.meta_tags import MetaTags
 from mvp_sphinx.page_body import BodyRewriter
@@ -108,23 +107,10 @@ class PageView(PageMixin, TemplateView):
         context["next_page"] = self.get_neighbour("next")
         return context
 
-    @staticmethod
-    def plain_text(markup: str) -> str:
-        """Return the text of a title Sphinx wrote as HTML.
-
-        Args:
-            markup: A title as it appears in a page's JSON, possibly with inline
-                markup such as ``<code>``.
-
-        Returns:
-            The title's text, unescaped, ready for a template to escape.
-        """
-        return unescape(strip_tags(markup))
-
     def get_page_title(self) -> str:
         """Return the page's title as plain text, for the tab."""
         # Sphinx's general index and search pages carry no title.
-        return self.plain_text(self.page_data.get("title", ""))
+        return plain_text(self.page_data.get("title", ""))
 
     def get_meta_tags(self) -> list[dict[str, str]]:
         """Return the metadata tags the page's author gave it, for its head.
@@ -188,7 +174,7 @@ class PageView(PageMixin, TemplateView):
         for parent in self.page_data.get("parents", []):
             crumbs.append(
                 {
-                    "text": self.plain_text(parent["title"]),
+                    "text": plain_text(parent["title"]),
                     "href": urljoin(self.request.path, parent["link"]),
                 }
             )

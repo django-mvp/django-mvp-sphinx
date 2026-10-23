@@ -894,6 +894,107 @@ refresh it. The page in the frame is always your site's current page.
 If the site has no page at the address when a documentation page is served, the
 page says so in place of the frame, and the source is still shown.
 
+### Showing a page somewhere else
+
+A page of the documentation can be shown elsewhere on your site, most usefully in
+a view's page info dialog: the info icon beside the page title opens the
+documentation itself instead of a link to it. Ask the documentation app for the
+page by its address below the prefix, the address the page is served at.
+
+```python
+# yourapp/views.py
+from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
+from mvp.views import MVPTemplateView
+
+from yourproject.mounted import docs
+
+
+class AccountsView(MVPTemplateView):
+    template_name = "accounts.html"
+    page_title = _("Accounts")
+
+    @cached_property
+    def extract(self):
+        return docs.page_extract("reference/accounts/", self.request)
+
+    def get_page_info(self):
+        return self.extract or ""
+
+    def get_page_info_actions(self):
+        if not self.extract:
+            return []
+        return [
+            {
+                "text": _("Open the full page"),
+                "href": self.extract.url,
+                "icon": "document",
+                "variant": "primary",
+            }
+        ]
+```
+
+`page_extract(address, request)` returns a page extract, or `None`. The extract
+holds the page's body without its title, so the dialog is not headed twice, and
+it is drawn in the same styles as the documentation app's own pages. Every link,
+image and embedded diagram in it leads into the documentation app, including
+links to other sections of the same page, so they work wherever the extract is
+shown. Its
+`title` is the page's title as plain text and its `url` is the page's address,
+with the app's prefix, which is what the button above links to. The empty address
+is the front page. With several documentation apps mounted, ask the one the
+page belongs to: each gives addresses under its own prefix, and none gives an
+extract of another's pages.
+
+The extract renders as its content, so `page_info` takes it as it is, and
+`extract or ""` gives a page with nothing to show an empty `page_info`, which
+draws no info icon. An extract is read from the docs build each time it is asked
+for, so a rebuild shows without a restart, and it works where Sphinx is not
+installed. Maths is left as Sphinx wrote it and a live example is left out. The
+rest of the page is shown.
+
+`mvp_sphinx.extracts.PageExtract` is the value that comes back, with `content`,
+`title` and `url`. `SectionFinder` and `LinkRewriter`, in the same module, are the
+parsers `page_extract` reads with, and `plain_text(markup)` turns a title Sphinx
+wrote as HTML into text. A project needs to build none of them.
+
+#### Showing one section
+
+A guide often covers several screens on one page. To show only one of them, add
+the section's anchor to the address, as in `reference/accounts/#sharing`: the
+address a reader follows to reach that section. The extract then holds that
+section and its subsections, and nothing before or after them. The section's own
+heading is left out, as the page's is, and becomes the extract's `title`, with
+its text as a reader sees it. The extract's `url` is the page's address with the
+anchor, so a button linking to it opens the page at that section. A link in the
+section to another section of the page leads to that section in the documentation
+app.
+
+An anchor names a section only when it is the `id` Sphinx gave the section's
+heading, the one in the address a reader follows. An anchor that names anything
+else, such as a label's own target on the line before a heading, names no
+section, and the extract is `None`.
+
+#### When nothing can be shown
+
+`page_extract` returns `None`, and never raises, when the extract can't be had:
+
+- The documentation app's reader rule does not admit the request, so a page of
+  restricted documentation never reaches a reader through a dialog.
+- The docs build has not been made on this machine yet.
+- The address names no page, or the anchor names no section. An address needs its
+  trailing slash, as it does when a reader requests it, and an address that
+  leaves the build, such as one holding `..`, names no page.
+- The page's file can't be read.
+
+An address that names no page, an anchor that names no section, and a page file
+that can't be read, also log a warning that names the documentation app and the
+address, so a mistyped address does not fail without a trace. The warning comes
+from the `logger` of `mvp_sphinx.mounted`, so a project's `LOGGING` setting
+can route it by that name. A page with nothing to show, such as one holding only
+a table of contents, gives an extract that is false, so `extract or ""` handles
+it the same way. In every case the view renders as if it had set no `page_info`.
+
 ## Public surface
 
 These are the names a project can use, grouped the way a project meets them.
@@ -913,6 +1014,8 @@ These are the names a project can use, grouped the way a project meets them.
   add to your own menus.
 - `menu` is the app's `DocumentationMenu`, which draws the contents as the app
   sidebar.
+- `page_extract(address, request)` returns a page of the build as a
+  `PageExtract`, or `None`. See "Showing a page somewhere else".
 - Its URL names are `<namespace>:front_page`, `<namespace>:page` (which takes
   `path`) and `<namespace>:search`.
 

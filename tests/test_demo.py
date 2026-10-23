@@ -522,3 +522,110 @@ class TestExamplePage:
         ]
         assert soup.select("[role=alert]")
         assert not self.has_shell(response)
+
+
+class TestInfoDialog:
+    def dialog(self, client, name):
+        response = client.get(reverse(f"info_{name}"))
+        assert response.status_code == 200
+        page = BeautifulSoup(response.content, "html.parser")
+        return page.find(id="pageInfoModal")
+
+    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    def test_the_dialog_holds_the_extract_of_the_page(
+        self, client, db, demo_guide_app, rf, name
+    ) -> None:
+        address = {
+            "whole_page": "first-visit/finding-your-way/",
+            "notices": "reference/notices/",
+        }[name]
+        request = rf.get("/")
+        request.user = UserFactory.build()
+        extract = demo_guide_app.page_extract(address, request)
+
+        dialog = self.dialog(client, name)
+
+        wanted = BeautifulSoup(str(extract), "html.parser")
+        assert dialog.select_one("div.mvp-sphinx-content")
+        for tag, attribute in [("a", "href"), ("img", "src")]:
+            assert [
+                each[attribute]
+                for each in dialog.select(f".mvp-sphinx-content {tag}[{attribute}]")
+            ] == [each[attribute] for each in wanted.select(f"{tag}[{attribute}]")]
+
+    def test_the_notices_page_shows_its_notices_and_its_picture(
+        self, client, db, demo_guide_app
+    ) -> None:
+        dialog = self.dialog(client, "notices")
+
+        assert dialog.select(".mvp-sphinx-content div.admonition")
+        assert dialog.select(".mvp-sphinx-content img")
+
+    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    def test_the_dialog_offers_the_full_page(
+        self, client, db, demo_guide_app, name
+    ) -> None:
+        address = {
+            "whole_page": "first-visit/finding-your-way/",
+            "notices": "reference/notices/",
+        }[name]
+
+        dialog = self.dialog(client, name)
+
+        assert dialog.find("a", href=reverse("docs:page", kwargs={"path": address}))
+
+    @pytest.fixture
+    def built_staff_guide(self, sphinx_build, monkeypatch):
+        from demo.mounted import staff_guide
+
+        monkeypatch.setattr(
+            staff_guide, "build_dir", sphinx_build(BASE_DIR / "demo" / "staff_guide")
+        )
+
+    def test_the_staff_screen_has_no_dialog_for_an_anonymous_reader(
+        self, client, db, built_staff_guide
+    ) -> None:
+        assert self.dialog(client, "staff") is None
+
+    def test_the_staff_screen_has_no_dialog_for_a_regular_user(
+        self, client, user, built_staff_guide
+    ) -> None:
+        client.force_login(user)
+
+        assert self.dialog(client, "staff") is None
+
+    def test_the_staff_screen_has_a_dialog_for_staff(
+        self, client, db, built_staff_guide
+    ) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        assert self.dialog(client, "staff").select_one("div.mvp-sphinx-content")
+
+    def test_the_moved_screen_renders_without_a_dialog(
+        self, client, db, demo_guide_app
+    ) -> None:
+        assert self.dialog(client, "moved") is None
+
+    def test_the_section_screen_holds_its_section_and_nothing_around_it(
+        self, client, db, demo_guide_app
+    ) -> None:
+        dialog = self.dialog(client, "section")
+
+        assert dialog.select_one(".mvp-sphinx-content")
+        assert not dialog.find(id="the-sidebar")
+        assert not dialog.find(id="on-this-page")
+        assert not dialog.select(".mvp-sphinx-content h2")
+
+    def test_the_section_screen_offers_the_page_at_that_section(
+        self, client, db, demo_guide_app
+    ) -> None:
+        dialog = self.dialog(client, "section")
+
+        buttons = [
+            link
+            for link in dialog.find_all("a", href=True)
+            if not link.find_parent(class_="mvp-sphinx-content")
+        ]
+        assert [link["href"] for link in buttons] == [
+            "/docs/first-visit/finding-your-way/#searching-the-guide"
+        ]

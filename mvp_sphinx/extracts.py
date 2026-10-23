@@ -1,0 +1,215 @@
+"""A page of the docs build, or one section of it, shown outside the documentation app.
+
+Imports neither Sphinx nor docutils: serving reads only the docs build's text.
+"""
+
+import re
+from dataclasses import dataclass
+from html import unescape
+from html.parser import HTMLParser
+from urllib.parse import urljoin, urlsplit
+
+from django.utils.html import strip_tags
+from django.utils.safestring import SafeString
+
+
+def plain_text(markup: str) -> str:
+    """Return the text of a title Sphinx wrote as HTML.
+
+    Args:
+        markup: A title as it appears in a page's JSON, possibly with inline
+            markup such as ``<code>``.
+
+    Returns:
+        The title's text, unescaped, ready for a template to escape.
+    """
+    return unescape(strip_tags(markup))
+
+
+@dataclass(frozen=True)
+class PageExtract:
+    """What a page of a documentation app holds, ready to place in a template.
+
+    It renders as its content, so it can be set as a view's ``page_info`` as it is.
+    It is false when its content holds no text and no image, so ``extract or ""``
+    gives a view an empty ``page_info``, which draws no info icon.
+
+    Attributes:
+        content: The page's body without its title, wrapped in the documentation
+            app's content styles.
+        title: The page's title as plain text.
+        url: The page's address in the documentation app.
+    """
+
+    content: SafeString
+    title: str
+    url: str
+
+    def __str__(self) -> str:
+        return self.content
+
+    def __html__(self) -> str:
+        return self.content
+
+    def __bool__(self) -> bool:
+        return bool(strip_tags(self.content).strip()) or "<img" in self.content
+
+
+class SectionFinder(HTMLParser):
+    """Find where a section's content starts and ends in a page's body.
+
+    The section is the first one in the body when no anchor is given, otherwise
+    the one whose ``id`` is the anchor. Its content is everything inside it after
+    its first heading, so its subsections come with it. Offsets are counted as
+    ``BodyRewriter`` counts them, so they index the body as written.
+
+    Attributes:
+        heading_start: The offset of the start tag of the section's heading, or
+            ``None`` when the body has no such section.
+        start: The offset just after the end tag of the section's heading, or
+            ``None`` when the body has no such section.
+        end: The offset of the section's end tag, or ``None`` when there is no
+            such section or it never closes.
+        title: The heading's text, from after its start tag up to its heading
+            link, with markup removed and entity references decoded. Empty when
+            the section is not found.
+
+    Args:
+        body: A page body as Sphinx wrote it.
+        anchor: The ``id`` of the section, or empty for the first section.
+    """
+
+    HEADINGS = frozenset(["h1", "h2", "h3", "h4", "h5", "h6"])
+
+    def __init__(self, body: str, anchor: str = "") -> None:
+        super().__init__(convert_charrefs=False)
+        self.body = body
+        self.anchor = anchor
+        self.line_starts = [0]
+        for line in body.split("\n")[:-1]:
+            self.line_starts.append(self.line_starts[-1] + len(line) + 1)
+        self.depth = 0
+        self.section_depth: int | None = None
+        self.in_heading = False
+        self.heading_from = 0
+        self.heading_to: int | None = None
+        self.heading_start: int | None = None
+        self.start: int | None = None
+        self.end: int | None = None
+        self.title = ""
+        self.feed(body)
+        self.close()
+
+    def position(self) -> int:
+        """Return the offset in the body where the parser stands."""
+        line, column = self.getpos()
+        return self.line_starts[line - 1] + column
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """Count a section, find the one asked for and note its first heading."""
+        attributes = dict(attrs)
+        if tag == "section":
+            self.depth += 1
+            if self.section_depth is None and (
+                not self.anchor or attributes.get("id") == self.anchor
+            ):
+                self.section_depth = self.depth
+        elif (
+            tag in self.HEADINGS
+            and self.section_depth == self.depth
+            and self.start is None
+            and self.end is None
+        ):
+            self.in_heading = True
+            self.heading_start = self.position()
+            self.heading_from = self.position() + len(self.get_starttag_text() or "")
+        elif (
+            self.in_heading
+            and tag == "a"
+            and "headerlink" in (attributes.get("class") or "").split()
+        ):
+            self.heading_to = self.position()
+
+    def handle_endtag(self, tag: str) -> None:
+        """Note where the heading ends and where the section does."""
+        if tag in self.HEADINGS and self.in_heading:
+            self.in_heading = False
+            here = self.position()
+            self.start = self.body.index(">", here) + 1
+            heading = self.body[self.heading_from : self.heading_to or here]
+            self.title = plain_text(heading).strip()
+        elif tag == "section":
+            if self.depth == self.section_depth and self.end is None:
+                self.end = self.position()
+            self.depth -= 1
+
+
+class LinkRewriter(HTMLParser):
+    """Find every relative address a page's body links or shows, and point it onward.
+
+    A relative address is one with no scheme, no network location and no leading
+    ``/``. The parser records where the value of each ``href``, ``src`` and
+    ``data`` attribute on a start tag lies in the body, and the result is the body with
+    each value joined to the page's address. Every other byte comes back as written.
+
+    Args:
+        markup: The body to read.
+    """
+
+    ATTRIBUTE = re.compile(r"""([^\s"'<>/=]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s>"']+))?""")
+    ADDRESSES = frozenset(["href", "src", "data"])
+
+    def __init__(self, markup: str) -> None:
+        super().__init__(convert_charrefs=False)
+        self.markup = markup
+        self.line_starts = [0]
+        for line in markup.split("\n")[:-1]:
+            self.line_starts.append(self.line_starts[-1] + len(line) + 1)
+        self.addresses: list[tuple[int, int]] = []
+
+    @classmethod
+    def rewrite(cls, markup: str, base: str) -> str:
+        """Return the body with each relative address joined to the page's own.
+
+        Args:
+            markup: A page body as Sphinx wrote it.
+            base: The page's address, which relative addresses are read against.
+
+        Returns:
+            The same markup with each relative ``href``, ``src`` and ``data`` value
+            replaced by its joined address. Values are joined as written, entity
+            references included.
+        """
+        parser = cls(markup)
+        parser.feed(markup)
+        parser.close()
+        pieces = []
+        last = 0
+        for start, end in parser.addresses:
+            pieces.append(markup[last:start])
+            pieces.append(urljoin(base, markup[start:end]))
+            last = end
+        pieces.append(markup[last:])
+        return "".join(pieces)
+
+    def position(self) -> int:
+        """Return the offset in the markup where the parser stands."""
+        line, column = self.getpos()
+        return self.line_starts[line - 1] + column
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """Record where each relative address attribute's value lies in the tag."""
+        # The parser hands attribute values over unescaped and without positions,
+        # so each is found again in the tag as written.
+        text = self.get_starttag_text() or ""
+        offset = self.position()
+        for found in self.ATTRIBUTE.finditer(text, len(tag) + 1):
+            value = found.group(2)
+            if found.group(1).lower() not in self.ADDRESSES or value is None:
+                continue
+            quoted = value[0] in "\"'"
+            start = offset + found.start(2) + quoted
+            end = offset + found.end(2) - quoted
+            parts = urlsplit(self.markup[start:end])
+            if not (parts.scheme or parts.netloc or self.markup[start:end][:1] == "/"):
+                self.addresses.append((start, end))

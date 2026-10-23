@@ -1,14 +1,25 @@
 """The documentation app a host project mounts to serve its docs build."""
 
+import logging
 from typing import Any
 
 from django.core.exceptions import ImproperlyConfigured
-from django.urls import path
+from django.http import HttpRequest
+from django.templatetags.static import static
+from django.urls import path, reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from mvp.mounted import MountedApp
 
+from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.examples import LiveExamples
+from mvp_sphinx.extracts import LinkRewriter, PageExtract, SectionFinder, plain_text
 from mvp_sphinx.menus import DocumentationMenu
+from mvp_sphinx.page_body import BodyRewriter
 from mvp_sphinx.views import PageView, SearchView
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentationApp(MountedApp):
@@ -79,3 +90,67 @@ class DocumentationApp(MountedApp):
         self.landing = f"{self.namespace}:front_page"
         # The shell processes every app's menu on host pages no mount serves.
         self.menu = DocumentationMenu(f"mvp_sphinx-{self.namespace}", app=self)
+
+    def page_extract(self, address: str, request: HttpRequest) -> PageExtract | None:
+        """Return a page of the docs build, for use outside the documentation app.
+
+        Args:
+            address: The page's address below the app's prefix, such as
+                ``"reference/accounts/"``. The empty address is the front page.
+            request: The request being served.
+
+        Returns:
+            The page's extract, or ``None`` when the reader may not read the
+            app, or the build or the page is missing or broken. A page that is
+            missing or can't be read is logged as a warning.
+        """
+        if not self.has_permission(request):
+            return None
+        page_path, *fragment = address.split("#", 1)
+        anchor = fragment[0] if fragment else ""
+        try:
+            page = DocsBuild(self.build_dir).page(page_path)
+        except (OSError, ValueError):
+            logger.warning("%s: the page at %r can't be read.", self.namespace, address)
+            return None
+        if page is None:
+            logger.warning("%s: no page at %r.", self.namespace, address)
+            return None
+        body = page.get("body", "")
+        found = SectionFinder(body, anchor)
+        if found.heading_start is None or found.start is None:
+            logger.warning("%s: no section at %r.", self.namespace, address)
+            return None
+        if anchor:
+            if found.end is None:
+                logger.warning("%s: no section at %r.", self.namespace, address)
+                return None
+            markup = body[found.start : found.end]
+        else:
+            # A whole page is its body less the title, whatever follows the title.
+            markup = body[: found.heading_start] + body[found.start :]
+        if page_path:
+            page_url = reverse(f"{self.namespace}:page", kwargs={"path": page_path})
+        else:
+            page_url = reverse(f"{self.namespace}:front_page")
+        linked = LinkRewriter.rewrite(markup, page_url)
+        rewritten = BodyRewriter.parse(linked).splice()
+        # Live examples need the documentation app's own page around them.
+        kept = "".join(
+            str(part["html"])
+            for part in LiveExamples.parts(rewritten)
+            if "html" in part
+        )
+        content = format_html(
+            '<link rel="stylesheet" href="{}">'
+            '<div class="prose mvp-sphinx-content">{}</div>',
+            static("mvp_sphinx/content.css"),
+            mark_safe(kept),  # noqa: S308 the host's own docs build
+        )
+        if anchor:
+            return PageExtract(
+                content=content, title=found.title, url=f"{page_url}#{anchor}"
+            )
+        return PageExtract(
+            content=content, title=plain_text(page.get("title", "")), url=page_url
+        )
