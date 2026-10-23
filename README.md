@@ -950,6 +950,25 @@ for, so a rebuild shows without a restart, and it works where Sphinx is not
 installed. Maths is left as Sphinx wrote it and a live example is left out. The
 rest of the page is shown.
 
+#### When nothing can be shown
+
+`page_extract` returns `None`, and never raises, when the extract can't be had:
+
+- The documentation app's reader rule does not admit the request, so a page of
+  restricted documentation never reaches a reader through a dialog.
+- The docs build has not been made on this machine yet.
+- The address names no page. An address needs its trailing slash, as it does when
+  a reader requests it, and an address that leaves the build, such as one holding
+  `..`, names no page.
+- The page's file can't be read.
+
+An address that names no page, and a page file that can't be read, also log a
+warning from `mvp_sphinx.mounted` that names the documentation app and the
+address, so a mistyped address does not fail without a trace. A page with
+nothing to show, such as one holding only a table of contents, gives an extract
+that is false, so `extract or ""` handles it the same way. In every case the
+view renders as if it had set no `page_info`.
+
 `mvp_sphinx.extracts.PageExtract` is the value that comes back, with `content`,
 `title` and `url`. `SectionFinder` and `LinkRewriter`, in the same module, are the
 parsers `page_extract` reads with, and `plain_text(markup)` turns a title Sphinx

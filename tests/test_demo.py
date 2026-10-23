@@ -573,3 +573,35 @@ class TestInfoDialog:
         dialog = self.dialog(client, name)
 
         assert dialog.find("a", href=reverse("docs:page", kwargs={"path": address}))
+
+    @pytest.fixture
+    def built_staff_guide(self, sphinx_build, monkeypatch):
+        from demo.mounted import staff_guide
+
+        monkeypatch.setattr(
+            staff_guide, "build_dir", sphinx_build(BASE_DIR / "demo" / "staff_guide")
+        )
+
+    def test_the_staff_screen_has_no_dialog_for_an_anonymous_reader(
+        self, client, db, built_staff_guide
+    ) -> None:
+        assert self.dialog(client, "staff") is None
+
+    def test_the_staff_screen_has_no_dialog_for_a_regular_user(
+        self, client, user, built_staff_guide
+    ) -> None:
+        client.force_login(user)
+
+        assert self.dialog(client, "staff") is None
+
+    def test_the_staff_screen_has_a_dialog_for_staff(
+        self, client, db, built_staff_guide
+    ) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        assert self.dialog(client, "staff").select_one("div.mvp-sphinx-content")
+
+    def test_the_moved_screen_renders_without_a_dialog(
+        self, client, db, demo_guide_app
+    ) -> None:
+        assert self.dialog(client, "moved") is None

@@ -1,6 +1,7 @@
 """Page extracts, asserted as a developer would ask for them."""
 
 import json
+import logging
 import shutil
 import sys
 from urllib.parse import urldefrag, urlsplit
@@ -12,8 +13,10 @@ from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.html import conditional_escape
 
+from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.extracts import LinkRewriter
+from tests.factories import UserFactory
 
 
 @pytest.fixture
@@ -130,7 +133,98 @@ class TestExtractContent:
         assert "Written after the example." in str(extract)
 
 
+class TestReaderRule:
+    @pytest.fixture
+    def reader(self, rf):
+        def request_for(user):
+            request = rf.get("/")
+            request.user = user
+            return request
+
+        return request_for
+
+    def test_an_anonymous_reader_gets_no_extract(
+        self, staff_guide_app, reader, caplog
+    ) -> None:
+        assert staff_guide_app.page_extract("backups/", reader(AnonymousUser())) is None
+        assert not caplog.records
+
+    def test_a_regular_user_gets_no_extract(
+        self, staff_guide_app, reader, user, caplog
+    ) -> None:
+        assert staff_guide_app.page_extract("backups/", reader(user)) is None
+        assert not caplog.records
+
+    def test_a_staff_user_gets_the_extract(self, staff_guide_app, reader, db) -> None:
+        extract = staff_guide_app.page_extract(
+            "backups/", reader(UserFactory(is_staff=True))
+        )
+
+        assert extract.title == "Backups"
+        assert extract.url == reverse("staff_guide:page", kwargs={"path": "backups/"})
+
+
 class TestNothingToShow:
+    def warnings_for(self, caplog, address):
+        return [
+            record
+            for record in caplog.records
+            if record.levelno == logging.WARNING
+            and address in record.getMessage()
+            and "docs" in record.getMessage()
+        ]
+
+    def test_a_missing_build_gives_no_extract(
+        self, extracts_app, page_request, tmp_path, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(extracts_app, "build_dir", tmp_path / "not-built")
+
+        assert extracts_app.page_extract("screens/", page_request) is None
+
+    def test_a_missing_page_gives_no_extract_and_a_warning(
+        self, extracts_app, page_request, caplog
+    ) -> None:
+        assert extracts_app.page_extract("no-such-page/", page_request) is None
+        assert self.warnings_for(caplog, "no-such-page/")
+
+    def test_an_address_without_its_trailing_slash_names_no_page(
+        self, extracts_app, page_request
+    ) -> None:
+        assert extracts_app.page_extract("screens", page_request) is None
+
+    def test_an_address_leaving_the_build_gives_no_extract(
+        self, extracts_app, extracts_build, page_request, tmp_path, monkeypatch
+    ) -> None:
+        build = tmp_path / "build"
+        shutil.copytree(extracts_build, build)
+        (tmp_path / "secret.fjson").write_text('{"title": "S", "body": "<p>x</p>"}')
+        monkeypatch.setattr(extracts_app, "build_dir", build)
+
+        assert extracts_app.page_extract("../secret/", page_request) is None
+        assert extracts_app.page_extract("../secret", page_request) is None
+
+    def test_a_page_file_that_is_not_json_gives_no_extract_and_a_warning(
+        self, extracts_app, extracts_build, page_request, tmp_path, monkeypatch, caplog
+    ) -> None:
+        build = tmp_path / "build"
+        shutil.copytree(extracts_build, build)
+        (build / "other.fjson").write_text("{not json")
+        monkeypatch.setattr(extracts_app, "build_dir", build)
+
+        assert extracts_app.page_extract("other/", page_request) is None
+        assert self.warnings_for(caplog, "other/")
+
+    def test_a_page_file_that_cannot_be_read_gives_no_extract_and_a_warning(
+        self, extracts_app, page_request, monkeypatch, caplog
+    ) -> None:
+        def refuse(self, path):
+            raise PermissionError(path)
+
+        monkeypatch.setattr(DocsBuild, "page", refuse)
+
+        assert extracts_app.page_extract("other/", page_request) is None
+        assert self.warnings_for(caplog, "other/")
+
     def test_a_page_holding_only_a_contents_is_a_false_extract(
         self, extracts_app, page_request
     ) -> None:

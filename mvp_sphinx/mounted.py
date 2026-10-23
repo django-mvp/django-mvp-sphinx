@@ -1,5 +1,6 @@
 """The documentation app a host project mounts to serve its docs build."""
 
+import logging
 from typing import Any
 
 from django.core.exceptions import ImproperlyConfigured
@@ -17,6 +18,8 @@ from mvp_sphinx.extracts import LinkRewriter, PageExtract, SectionFinder, plain_
 from mvp_sphinx.menus import DocumentationMenu
 from mvp_sphinx.page_body import BodyRewriter
 from mvp_sphinx.views import PageView, SearchView
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentationApp(MountedApp):
@@ -97,11 +100,20 @@ class DocumentationApp(MountedApp):
             request: The request being served.
 
         Returns:
-            The page's extract, or ``None`` when the page can't be had.
+            The page's extract, or ``None`` when the reader may not read the
+            app, or the build or the page is missing or broken. A page that is
+            missing or can't be read is logged as a warning.
         """
+        if not self.has_permission(request):
+            return None
         page_path = address.partition("#")[0]
-        page = DocsBuild(self.build_dir).page(page_path)
+        try:
+            page = DocsBuild(self.build_dir).page(page_path)
+        except (OSError, ValueError):
+            logger.warning("%s: the page at %r can't be read.", self.namespace, address)
+            return None
         if page is None:
+            logger.warning("%s: no page at %r.", self.namespace, address)
             return None
         body = page.get("body", "")
         found = SectionFinder(body)
