@@ -6,10 +6,16 @@ from mvp.views.account import SignInView
 
 from demo.examples import views as examples
 from demo.mounted import docs, staff_guide
-from demo.views import OverviewView
+from demo import views
 
 urlpatterns = [
-    path("", OverviewView.as_view(), name="overview"),
+    path("", views.OverviewView.as_view(), name="overview"),
+    # Screens whose info dialog holds a page, or a section, of a guide.
+    path("info/whole-page/", views.WholePageView.as_view(), name="info_whole_page"),
+    path("info/section/", views.SectionView.as_view(), name="info_section"),
+    path("info/notices/", views.NoticesView.as_view(), name="info_notices"),
+    path("info/staff/", views.StaffOnlyView.as_view(), name="info_staff"),
+    path("info/moved/", views.MissingPageView.as_view(), name="info_moved"),
     # Pages the guide shows as live examples. They are ordinary pages of the site.
     path("examples/contact/", examples.ContactView.as_view(), name="example_contact"),
     path("examples/status/", examples.StatusView.as_view(), name="example_status"),
