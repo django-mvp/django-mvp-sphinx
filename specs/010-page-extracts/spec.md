@@ -36,14 +36,15 @@ gets no extract. Nobody gets one when the page or the docs build is missing. An 
 draws no info icon, so the host page then renders as if no explanation had been set, and never
 fails.
 
+A developer can also place an extract from a template, with a template tag that names the
+documentation app and the address, without writing a view for it.
+
 This feature builds on the pages served by
 [#4](https://github.com/django-mvp/django-mvp-sphinx/issues/4) and the reader rule from
 [#9](https://github.com/django-mvp/django-mvp-sphinx/issues/9). It leaves out:
 
 - maths and live examples inside an extract, which need scripts and form handling that only the
   documentation app's own pages load
-- a template tag for placing an extract from a template. An extract is a value that a view passes to
-  its template like any other.
 
 ## Clarifications
 
@@ -195,6 +196,37 @@ address, render the view, and follow the button.
 3. **Given** a documentation app mounted under a prefix, **When** an extract's address is read,
    **Then** it includes that prefix, so the link works wherever the host page is.
 
+---
+
+### User Story 5 - A developer places a page from a template (Priority: P3)
+
+A developer wants a section of the user guide on one of their own pages, beside the form it
+explains, rather than in the info dialog. In the page's template they load the package's template
+tags and place the section by naming the documentation app and the section's address. They need
+no view code for it. Where they want the title or a link to the full page as well, they bind the
+extract to a name and read its title and address.
+
+**Why this priority**: A view already gives a developer every extract. A template tag saves them
+writing a view, or a view method, for content that only a template uses.
+
+**Independent Test**: Render a template that places a page and a section with the tag, for readers
+the documentation app's reader rule admits and excludes, and with an address that names no page.
+
+**Acceptance Scenarios**:
+
+1. **Given** a template that places a page with the tag, naming the documentation app by its URL
+   namespace, **When** it renders, **Then** it holds the page's extract content.
+2. **Given** a template that places a section by the page's address and the section's anchor,
+   **When** it renders, **Then** it holds that section's extract content and nothing else of the
+   page.
+3. **Given** a template that binds the extract to a name, **When** it renders, **Then** the name
+   holds the extract, with its title and address.
+4. **Given** a reader the documentation app's reader rule excludes, a missing docs build, or an
+   address that names no page or section, **When** the template renders, **Then** the tag places
+   nothing, and a name it binds holds nothing.
+5. **Given** a namespace under which no documentation app is mounted, or a template rendered without
+   its request, **When** the template renders, **Then** an error names the mistake.
+
 ### Edge Cases
 
 - A page whose body is empty once its title is left out, such as a page holding only a table of
@@ -243,6 +275,11 @@ address, render the view, and follow the button.
 - **FR-012**: An extract of a page holding maths or live examples MUST hold the rest of the page's
   content. (US1)
 - **FR-013**: Using extracts MUST NOT change how the documentation app's own pages are served. (US1)
+- **FR-014**: The package MUST provide a template tag that places the extract of a page or section,
+  given the documentation app's URL namespace and the address, asked for the template's request.
+  It MUST place nothing where FR-008 and FR-009 give no extract, and MUST be able to bind the extract
+  to a name instead of placing it. A namespace under which no documentation app is mounted, and a
+  template rendered without its request, MUST raise an error naming the mistake. (US5)
 
 ### Key Entities
 
@@ -282,5 +319,3 @@ address, render the view, and follow the button.
   the page, and a live example is left out.
 - A section's anchor is the one Sphinx gives its heading, the same anchor a reader follows to reach
   that section in the documentation app.
-- Placing an extract from a template without a view, through a template tag, is not part of this
-  feature.

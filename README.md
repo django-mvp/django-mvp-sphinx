@@ -995,6 +995,42 @@ can route it by that name. A page with nothing to show, such as one holding only
 a table of contents, gives an extract that is false, so `extract or ""` handles
 it the same way. In every case the view renders as if it had set no `page_info`.
 
+#### Placing a page from a template
+
+A template can place a page or a section itself, with no view code. Load the
+package's template tags and name the documentation app by its URL namespace,
+`docs` unless you set another, then the address as `page_extract` takes it:
+
+```django
+{% load mvp_sphinx %}
+
+{% page_extract "docs" "reference/accounts/#sharing" %}
+```
+
+The tag places the extract's content, or nothing at all in every case where
+`page_extract` returns `None` or an extract with nothing to show. The address can
+be a variable from the context as well as a string.
+
+To use the title or the address too, bind the extract to a name with `as`. The
+name holds the extract, or an empty string when there is none, so `{% if %}`
+tells the two apart:
+
+```django
+{% page_extract "docs" "reference/accounts/#sharing" as sharing %}
+{% if sharing %}
+  <h2>{{ sharing.title }}</h2>
+  {{ sharing }}
+  <a href="{{ sharing.url }}">Open the full page</a>
+{% endif %}
+```
+
+The tag asks the documentation app's reader rule about the template's `request`,
+so the template's settings need the `django.template.context_processors.request`
+context processor. A template rendered without
+`request`, and a namespace under which no documentation app is mounted, raise
+`ImproperlyConfigured`: both are mistakes in the code rather than the
+documentation, so they fail where you will see them.
+
 ## Public surface
 
 These are the names a project can use, grouped the way a project meets them.
@@ -1018,6 +1054,13 @@ These are the names a project can use, grouped the way a project meets them.
   `PageExtract`, or `None`. See "Showing a page somewhere else".
 - Its URL names are `<namespace>:front_page`, `<namespace>:page` (which takes
   `path`) and `<namespace>:search`.
+
+### Template tags
+
+- `{% load mvp_sphinx %}` loads them.
+- `{% page_extract namespace address %}` places a page or a section of the
+  documentation app mounted under `namespace`, and `{% page_extract namespace
+  address as name %}` binds it instead. See "Placing a page from a template".
 
 ### Management command
 
