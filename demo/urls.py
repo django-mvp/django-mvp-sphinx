@@ -16,6 +16,8 @@ urlpatterns = [
     path("info/notices/", views.NoticesView.as_view(), name="info_notices"),
     path("info/staff/", views.StaffOnlyView.as_view(), name="info_staff"),
     path("info/moved/", views.MissingPageView.as_view(), name="info_moved"),
+    # A screen whose template places a section of the guide with the template tag.
+    path("in-page/", views.InPageView.as_view(), name="in_page"),
     # Pages the guide shows as live examples. They are ordinary pages of the site.
     path("examples/contact/", examples.ContactView.as_view(), name="example_contact"),
     path("examples/status/", examples.StatusView.as_view(), name="example_status"),

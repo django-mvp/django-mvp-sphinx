@@ -961,8 +961,10 @@ wrote as HTML into text. A project needs to build none of them.
 #### Showing one section
 
 A guide often covers several screens on one page. To show only one of them, add
-the section's anchor to the address, as in `reference/accounts/#sharing`: the
-address a reader follows to reach that section. The extract then holds that
+the section's anchor to the address, as in `reference/accounts#sharing`. The
+trailing slash may be left out of any address, with or without an anchor, so
+`reference/accounts/#sharing`, the address a reader follows to reach that
+section, names the same one. The extract then holds that
 section and its subsections, and nothing before or after them. The section's own
 heading is left out, as the page's is, and becomes the extract's `title`, with
 its text as a reader sees it. The extract's `url` is the page's address with the
@@ -982,8 +984,7 @@ section, and the extract is `None`.
 - The documentation app's reader rule does not admit the request, so a page of
   restricted documentation never reaches a reader through a dialog.
 - The docs build has not been made on this machine yet.
-- The address names no page, or the anchor names no section. An address needs its
-  trailing slash, as it does when a reader requests it, and an address that
+- The address names no page, or the anchor names no section. An address that
   leaves the build, such as one holding `..`, names no page.
 - The page's file can't be read.
 
@@ -994,6 +995,42 @@ from the `logger` of `mvp_sphinx.mounted`, so a project's `LOGGING` setting
 can route it by that name. A page with nothing to show, such as one holding only
 a table of contents, gives an extract that is false, so `extract or ""` handles
 it the same way. In every case the view renders as if it had set no `page_info`.
+
+#### Placing a page from a template
+
+A template can place a page or a section itself, with no view code. Load the
+package's template tags and name the documentation app by its URL namespace,
+`docs` unless you set another, then the address as `page_extract` takes it:
+
+```django
+{% load mvp_sphinx %}
+
+{% page_extract "docs" "reference/accounts#sharing" %}
+```
+
+The tag places the extract's content, or nothing at all in every case where
+`page_extract` returns `None` or an extract with nothing to show. The address can
+be a variable from the context as well as a string.
+
+To use the title or the address too, bind the extract to a name with `as`. The
+name holds the extract, or an empty string when there is none, so `{% if %}`
+tells the two apart:
+
+```django
+{% page_extract "docs" "reference/accounts#sharing" as sharing %}
+{% if sharing %}
+  <h2>{{ sharing.title }}</h2>
+  {{ sharing }}
+  <a href="{{ sharing.url }}">Open the full page</a>
+{% endif %}
+```
+
+The tag asks the documentation app's reader rule about the template's `request`,
+so the template's settings need the `django.template.context_processors.request`
+context processor. A template rendered without
+`request`, and a namespace under which no documentation app is mounted, raise
+`ImproperlyConfigured`: both are mistakes in the code rather than the
+documentation, so they fail where you will see them.
 
 ## Public surface
 
@@ -1018,6 +1055,13 @@ These are the names a project can use, grouped the way a project meets them.
   `PageExtract`, or `None`. See "Showing a page somewhere else".
 - Its URL names are `<namespace>:front_page`, `<namespace>:page` (which takes
   `path`) and `<namespace>:search`.
+
+### Template tags
+
+- `{% load mvp_sphinx %}` loads them.
+- `{% page_extract namespace address %}` places a page or a section of the
+  documentation app mounted under `namespace`, and `{% page_extract namespace
+  address as name %}` binds it instead. See "Placing a page from a template".
 
 ### Management command
 

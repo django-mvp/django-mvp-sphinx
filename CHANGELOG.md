@@ -24,7 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `DocumentationApp.page_extract(address, request)` returns a page of the docs build for use elsewhere on your site, such as a view's `page_info`, so the info dialog can hold the documentation itself. The extract carries the page's content without its title, drawn in the documentation app's styles, with every link and image leading into the documentation app, and its title and address. See "Showing a page somewhere else" in the README.
+- `DocumentationApp.page_extract(address, request)` returns a page of the docs build for use elsewhere on your site, such as a view's `page_info`, so the info dialog can hold the documentation itself. The extract carries the page's content without its title, drawn in the documentation app's styles, with every link and image leading into the documentation app, and its title and address. A section is named by its anchor, as in `reference/accounts#sharing`, and the trailing slash may be left out. See "Showing a page somewhere else" in the README.
+- The `page_extract` template tag places a page or section on any of your pages from its template: `{% load mvp_sphinx %}{% page_extract "docs" "reference/accounts#sharing" %}`. It places nothing for a reader the documentation is closed to, or a page that is missing, and `as extract` binds it so the template can read its title and address. The template needs the `request` context processor. See "Placing a page from a template" in the README.
 
 ### Removed
 
