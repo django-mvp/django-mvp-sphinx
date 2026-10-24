@@ -18,6 +18,15 @@ class OverviewView(MVPTemplateView):
     breadcrumbs = [{"text": "Overview"}]
 
 
+class InPageView(MVPTemplateView):
+    """A screen whose template places a section of the guide in the page itself."""
+
+    template_name = "demo/in_page.html"
+    page_title = _("Searching")
+    page_subtitle = _("A section of the guide, placed in the page by its template")
+    breadcrumbs = [{"text": _("Searching")}]
+
+
 class InfoDialogView(MVPTemplateView):
     """A screen of the site whose info dialog holds a page of the documentation.
 

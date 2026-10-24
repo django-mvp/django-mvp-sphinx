@@ -32,6 +32,11 @@ AppMenu.extend(
                 ]
             ],
         ),
+        MenuItem(
+            name="in_page",
+            view_name="in_page",
+            extra_context={"label": "A section in a page", "icon": "document"},
+        ),
     ]
 )
 
