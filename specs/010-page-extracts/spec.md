@@ -231,8 +231,9 @@ the documentation app's reader rule admits and excludes, and with an address tha
 
 - A page whose body is empty once its title is left out, such as a page holding only a table of
   contents, gives an extract with empty content. An empty `page_info` draws no icon.
-- An address without its trailing slash names no page, as it does when a reader requests it, so it
-  gives no extract.
+- An address without its trailing slash names the page with it, as a reader requesting it is
+  redirected there, so `reference/accounts#sharing` and `reference/accounts/#sharing` name the same
+  section.
 - An address that tries to leave the docs build, such as one containing `..`, gives no extract and
   never reads a file outside the build.
 - A page file that exists but can't be read is a broken docs build, not a missing one. No extract is
@@ -247,7 +248,7 @@ the documentation app's reader rule admits and excludes, and with an address tha
 
 - **FR-001**: The package MUST let a developer ask for the extract of a page of a mounted
   documentation app by naming the app and the page's address below the app's prefix, the address
-  the page is served at. The empty address MUST name the front page. (US1)
+  the page is served at, with or without its trailing slash. The empty address MUST name the front page. (US1)
 - **FR-002**: An extract MUST carry the page's body content as markup ready to place in a template,
   the page's title as plain text, and the page's address in the documentation app, including the
   app's prefix. (US1, US4)

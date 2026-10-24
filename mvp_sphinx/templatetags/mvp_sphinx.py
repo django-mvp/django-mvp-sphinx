@@ -37,7 +37,7 @@ def page_extract(context: Context, namespace: str, address: str) -> PageExtract 
     Example::
 
         {% load mvp_sphinx %}
-        {% page_extract "docs" "reference/accounts/#sharing" %}
+        {% page_extract "docs" "reference/accounts#sharing" %}
     """
     request = context.get("request")
     if request is None:

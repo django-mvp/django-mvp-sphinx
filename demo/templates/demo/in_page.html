@@ -7,7 +7,7 @@
       page_extract template tag. The view has no code for it.
     </c-mvp.text>
   </c-mvp.section>
-  {% page_extract "docs" "first-visit/finding-your-way/#searching-the-guide" as searching %}
+  {% page_extract "docs" "first-visit/finding-your-way#searching-the-guide" as searching %}
   {% if searching %}
     <c-mvp.section :title="searching.title" icon="document">
       {{ searching }}

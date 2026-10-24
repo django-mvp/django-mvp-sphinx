@@ -961,8 +961,10 @@ wrote as HTML into text. A project needs to build none of them.
 #### Showing one section
 
 A guide often covers several screens on one page. To show only one of them, add
-the section's anchor to the address, as in `reference/accounts/#sharing`: the
-address a reader follows to reach that section. The extract then holds that
+the section's anchor to the address, as in `reference/accounts#sharing`. The
+trailing slash may be left out of any address, with or without an anchor, so
+`reference/accounts/#sharing`, the address a reader follows to reach that
+section, names the same one. The extract then holds that
 section and its subsections, and nothing before or after them. The section's own
 heading is left out, as the page's is, and becomes the extract's `title`, with
 its text as a reader sees it. The extract's `url` is the page's address with the
@@ -982,8 +984,7 @@ section, and the extract is `None`.
 - The documentation app's reader rule does not admit the request, so a page of
   restricted documentation never reaches a reader through a dialog.
 - The docs build has not been made on this machine yet.
-- The address names no page, or the anchor names no section. An address needs its
-  trailing slash, as it does when a reader requests it, and an address that
+- The address names no page, or the anchor names no section. An address that
   leaves the build, such as one holding `..`, names no page.
 - The page's file can't be read.
 
@@ -1004,7 +1005,7 @@ package's template tags and name the documentation app by its URL namespace,
 ```django
 {% load mvp_sphinx %}
 
-{% page_extract "docs" "reference/accounts/#sharing" %}
+{% page_extract "docs" "reference/accounts#sharing" %}
 ```
 
 The tag places the extract's content, or nothing at all in every case where
@@ -1016,7 +1017,7 @@ name holds the extract, or an empty string when there is none, so `{% if %}`
 tells the two apart:
 
 ```django
-{% page_extract "docs" "reference/accounts/#sharing" as sharing %}
+{% page_extract "docs" "reference/accounts#sharing" as sharing %}
 {% if sharing %}
   <h2>{{ sharing.title }}</h2>
   {{ sharing }}

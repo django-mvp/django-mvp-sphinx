@@ -96,7 +96,9 @@ class DocumentationApp(MountedApp):
 
         Args:
             address: The page's address below the app's prefix, such as
-                ``"reference/accounts/"``. The empty address is the front page.
+                ``"reference/accounts"``, with a section's anchor after ``#`` or
+                not. The trailing slash may be left out. The empty address is
+                the front page.
             request: The request being served.
 
         Returns:
@@ -108,6 +110,9 @@ class DocumentationApp(MountedApp):
             return None
         page_path, *fragment = address.split("#", 1)
         anchor = fragment[0] if fragment else ""
+        if page_path and not page_path.endswith("/"):
+            # The address a reader without the slash is redirected to.
+            page_path += "/"
         try:
             page = DocsBuild(self.build_dir).page(page_path)
         except (OSError, ValueError):

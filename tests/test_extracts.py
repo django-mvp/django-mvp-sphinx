@@ -247,6 +247,29 @@ class TestSectionFinder:
         assert found.end is None
 
 
+class TestTrailingSlash:
+    def test_an_address_without_its_trailing_slash_names_the_page(
+        self, extracts_app, page_request
+    ) -> None:
+        extract = extracts_app.page_extract("screens", page_request)
+
+        assert extract.url == reverse("docs:page", kwargs={"path": "screens/"})
+
+    def test_a_section_without_the_trailing_slash_names_the_section(
+        self, extracts_app, page_request
+    ) -> None:
+        extract = extracts_app.page_extract("screens#search-filters", page_request)
+
+        assert soup(extract).find(id="details")
+        url = reverse("docs:page", kwargs={"path": "screens/"})
+        assert extract.url == f"{url}#search-filters"
+
+    def test_an_address_with_a_leading_slash_names_no_page(
+        self, extracts_app, page_request
+    ) -> None:
+        assert extracts_app.page_extract("/screens/", page_request) is None
+
+
 class TestExtractAddress:
     @pytest.fixture
     def handbook(self, handbook_app, extracts_build, monkeypatch):
@@ -347,11 +370,6 @@ class TestNothingToShow:
     ) -> None:
         assert extracts_app.page_extract("no-such-page/", page_request) is None
         assert self.warnings_for(caplog, "no-such-page/")
-
-    def test_an_address_without_its_trailing_slash_names_no_page(
-        self, extracts_app, page_request
-    ) -> None:
-        assert extracts_app.page_extract("screens", page_request) is None
 
     def test_an_address_leaving_the_build_gives_no_extract(
         self, extracts_app, extracts_build, page_request, tmp_path, monkeypatch
