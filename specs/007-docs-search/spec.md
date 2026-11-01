@@ -76,7 +76,7 @@ issues:
 ### User Story 1 - Find the pages that mention a word (Priority: P1)
 
 A reader on any page of the documentation opens the search from the top bar, or with Ctrl+K (⌘K on
-a Mac), types a word into it and submits it. A results
+a Mac). The search box opens a quarter of the way down the window, at any width. The reader types a word into it and submits it. A results
 page opens inside the application shell and lists every page of this documentation that contains
 the word, each leading to its page. Several words narrow the list to pages containing all of them.
 When nothing matches, the results page says so and the reader can search again from it.
