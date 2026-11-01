@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.4.1] - 2026-11-01
+
 ### Added
 
 - `DocumentationApp.page_extract(address, request)` returns a page of the docs build for use elsewhere on your site, such as a view's `page_info`, so the info dialog can hold the documentation itself. The extract carries the page's content without its title, drawn in the documentation app's styles, with every link and image leading into the documentation app, and its title and address. A section is named by its anchor, as in `reference/accounts#sharing`, and the trailing slash may be left out. See "Showing a page somewhere else" in the README.
