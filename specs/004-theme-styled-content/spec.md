@@ -244,7 +244,8 @@ site's styling for its kind of content.
 - **FR-004**: Every admonition MUST be presented as an admonition and grouped by meaning:
   informational, helpful, important, cautionary and dangerous. Admonitions sharing a meaning MUST be
   presented alike and different meanings MUST be distinguishable. An admonition kind with no known
-  meaning MUST be presented as informational.
+  meaning MUST be presented as informational. Each admonition's title MUST be preceded by an icon
+  chosen by its kind and drawn in the colour of the admonition's own edge.
 - **FR-005**: "See also" boxes and version notes MUST be presented as distinct from the surrounding
   prose, with deprecation notes carrying the cautionary meaning.
 - **FR-006**: Highlighted code MUST take its colours from the host project's theme.

@@ -27,6 +27,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `DocumentationApp.page_extract(address, request)` returns a page of the docs build for use elsewhere on your site, such as a view's `page_info`, so the info dialog can hold the documentation itself. The extract carries the page's content without its title, drawn in the documentation app's styles, with every link and image leading into the documentation app, and its title and address. A section is named by its anchor, as in `reference/accounts#sharing`, and the trailing slash may be left out. See "Showing a page somewhere else" in the README.
 - The `page_extract` template tag places a page or section on any of your pages from its template: `{% load mvp_sphinx %}{% page_extract "docs" "reference/accounts#sharing" %}`. It places nothing for a reader the documentation is closed to, or a page that is missing, and `as extract` binds it so the template can read its title and address. The template needs the `request` context processor. See "Placing a page from a template" in the README.
 
+### Changed
+
+- The search box now opens a quarter of the way down the window, at any width, instead of in the middle.
+- Contents lists that Sphinx writes into a page (`toctree`) are drawn as a menu: no bullets, a padded row per entry that highlights under the pointer, and each level indented under its parent. Their links are underlined only under the pointer.
+- Admonitions carry an icon before their title, chosen by kind and drawn in the box's own edge colour.
+
+### Fixed
+
+- Lists in page content no longer have a large gap between items. A paragraph inside a list item carried the page's full paragraph margin, so MyST's loose lists spaced every item two lines apart. Items now sit close together in tight and loose lists and at every nesting depth.
+- The gap between an admonition's title and its text is smaller.
+
 ### Removed
 
 - `PageView.plain_text` is gone. A subclass that called it imports `plain_text` from `mvp_sphinx.extracts` instead, which does the same thing.

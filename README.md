@@ -650,6 +650,14 @@ rule beneath it, and entries inside other entries read as inside them. This
 holds for any language Sphinx documents, and it makes no difference whether an
 entry was generated or typed.
 
+The rest of a page's body is styled the same way. Admonitions carry an icon
+before their title, chosen by kind and drawn in the box's own edge colour. A box
+with a title of its own keeps the informational icon. Items in a list sit close
+together, in tight and loose markup and at every depth of nesting. The lists
+Sphinx writes for a `toctree` are drawn as a menu, a row per entry with each
+level indented under its parent. Their links are underlined only under the
+pointer, while links inside a sentence keep their underline.
+
 "On this page" is django-mvp's side panel. On a wide screen the list is a column
 beside the page that sticks under the header. On a narrower screen an
 "On this page" button in the top bar opens it as a drawer, so a reader can
@@ -1152,7 +1160,8 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 - `mvp_sphinx.search_icon` draws the icon-only search button and the search box it
   opens. It takes `action` and `id`.
 - `mvp_sphinx.search_modal` draws the search box as a dialog, closed until a button
-  names its `id`. It takes `action` and `id`.
+  names its `id`. It opens a quarter of the way down the window. It takes `action`
+  and `id`.
 - `mvp_sphinx.live_example` draws one live example, the frame and its source. It
   takes `example`, one `{"example": ...}` part from `LiveExamples.parts`.
 
