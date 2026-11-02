@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import pytest
 from docutils import nodes
 from sphinx import addnodes
+from sphinx.cmd.build import build_main
 
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.navigation import NavigationWriter, write_navigation
@@ -131,6 +132,45 @@ class TestNavigationFile:
         assert not (out / DocsBuild.NAVIGATION_FILE).exists()
 
 
+class TestMenuSettings:
+    @pytest.fixture
+    def entries(self, menu_settings_build) -> list[dict]:
+        contents = (menu_settings_build / DocsBuild.NAVIGATION_FILE).read_text()
+        return json.loads(contents)["groups"][0]["entries"]
+
+    def test_a_page_with_no_settings_is_shown_and_collapses(self, entries) -> None:
+        emptied = entry(entries, "Emptied")
+
+        assert emptied["hidden"] is False
+        assert emptied["style"] == "collapse"
+
+    def test_a_pages_settings_are_read_from_its_metadata(self, entries) -> None:
+        quiet = entry(entries, "Quiet heading")
+
+        assert quiet["hidden"] is True
+        assert quiet["style"] == "group"
+
+    def test_a_setting_is_read_in_any_case(self, entries) -> None:
+        assert entry(entries, "Emptied")["children"][0]["hidden"] is True
+
+    @pytest.mark.parametrize("setting", ["menu_hidden: maybe", "menu_style: tabs"])
+    def test_a_value_it_does_not_know_fails_the_build_naming_the_page(
+        self, setting, tmp_path, capsys
+    ) -> None:
+        source = tmp_path / "source"
+        source.mkdir()
+        (source / "conf.py").write_text('extensions = ["mvp_sphinx.navigation"]')
+        (source / "index.rst").write_text("Home\n====\n\n.. toctree::\n\n   typo\n")
+        (source / "typo.rst").write_text(f":{setting}\n\nTypo\n====\n")
+        out = tmp_path / "build"
+
+        status = build_main(["-b", "json", "-q", str(source), str(out)])
+
+        assert status != 0
+        assert "typo" in capsys.readouterr().err
+        assert not (out / DocsBuild.NAVIGATION_FILE).exists()
+
+
 class TestNavigationWriter:
     # Sphinx 9 stops with a recursion error on a toctree cycle, so no real build
     # reaches the writer with one; a stand-in environment stands for it.
@@ -149,6 +189,7 @@ class TestNavigationWriter:
             env=SimpleNamespace(
                 titles={name: nodes.title(text=name) for name in doctrees},
                 get_doctree=doctrees.get,
+                metadata={name: {} for name in doctrees},
             ),
             builder=SimpleNamespace(get_target_uri=lambda name: f"{name}/"),
             config=SimpleNamespace(root_doc="index"),

@@ -150,6 +150,102 @@ class TestDocumentationMenu:
         assert type(label(item)) is str
 
 
+class TestMenuSettings:
+    @pytest.fixture
+    def menu(self, menu_settings_app, rf):
+        def process(address="/docs/"):
+            return menu_settings_app.menu.process(rf.get(address))
+
+        return process
+
+    def test_a_group_page_is_a_heading_over_its_own_page_and_pages(
+        self, menu, menu_settings_app
+    ) -> None:
+        menu()
+
+        assert type(raw_child(menu_settings_app.menu, "Heading")) is MenuGroup
+        assert outline(child(menu(), "Heading").visible_children) == [
+            "/docs/heading/",
+            "/docs/heading/one/",
+        ]
+
+    def test_a_hidden_page_with_pages_of_its_own_keeps_its_section(
+        self, menu, menu_settings_app
+    ) -> None:
+        quiet = child(menu(), "Quiet")
+
+        assert isinstance(raw_child(menu_settings_app.menu, "Quiet"), MenuCollapse)
+        assert outline(quiet.visible_children) == [
+            "/docs/quiet/one/",
+            "/docs/quiet/two/",
+        ]
+
+    def test_a_hidden_group_page_is_a_heading_over_its_pages_alone(
+        self, menu, menu_settings_app
+    ) -> None:
+        quiet = child(menu(), "Quiet heading")
+
+        raw = raw_child(menu_settings_app.menu, "Quiet heading")
+
+        assert isinstance(raw, MenuGroup)
+        assert not isinstance(raw, MenuCollapse)
+        assert outline(quiet.visible_children) == ["/docs/quiet-heading/one/"]
+
+    def test_a_hidden_page_is_left_out_of_its_section(self, menu) -> None:
+        assert outline(child(menu(), "Ordinary").visible_children) == [
+            "/docs/ordinary/",
+            "/docs/ordinary/kept/",
+        ]
+
+    def test_a_page_whose_pages_are_all_hidden_is_a_link(self, menu) -> None:
+        assert "/docs/emptied/" in outline(menu().visible_children)
+
+    def test_the_settings_on_a_page_without_pages_of_its_own(self, menu) -> None:
+        items = outline(menu().visible_children)
+
+        assert "/docs/shown/" in items
+        assert "/docs/hidden/" not in items
+
+    def test_reading_a_hidden_page_opens_its_section_and_marks_no_entry(
+        self, menu
+    ) -> None:
+        tree = menu("/docs/quiet/")
+
+        assert child(tree, "Quiet").selected
+        assert selected_leaves(tree.visible_children) == []
+
+    def test_a_file_written_before_the_settings_draws_as_it_did(
+        self, menu_settings_app, tmp_path, monkeypatch, rf
+    ) -> None:
+        contents = {
+            "title": "Old",
+            "groups": [
+                {
+                    "caption": "",
+                    "entries": [
+                        {
+                            "title": "Section",
+                            "url": "section/",
+                            "children": [
+                                {"title": "Page", "url": "page/", "children": []}
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
+        (tmp_path / DocsBuild.NAVIGATION_FILE).write_text(json.dumps(contents))
+        monkeypatch.setattr(menu_settings_app, "build_dir", tmp_path)
+
+        tree = menu_settings_app.menu.process(rf.get("/docs/"))
+
+        assert type(raw_child(menu_settings_app.menu, "Section")) is MenuCollapse
+        assert outline(child(tree, "Section").visible_children) == [
+            "/docs/section/",
+            "/docs/page/",
+        ]
+
+
 def selected_leaves(items) -> list[str]:
     """Return the names of the selected links in the processed tree."""
     found = []

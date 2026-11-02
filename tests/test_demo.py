@@ -17,6 +17,7 @@ from mvp.menus import MenuCollapse, MenuGroup
 from demo.mounted import docs
 from demo.settings import BASE_DIR
 from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.menus import HiddenPageCollapse
 from tests.factories import UserFactory
 from tests.test_static.test_content_css import STYLESHEET, Stylesheet
 from tests.test_views import search_dialog
@@ -222,6 +223,23 @@ class TestDemoGuideStates:
         ]
 
         assert len(groups) >= 2
+
+    def test_the_contents_holds_a_page_styled_as_a_group(self, guide_menu) -> None:
+        help_section = next(
+            each
+            for each in branches(guide_menu.visible_children)
+            if each.extra_context["label"] == "Getting help"
+        )
+
+        assert not help_section.extra_context.get("collapsible")
+
+    def test_the_contents_holds_a_section_with_its_own_page_hidden(
+        self, guide_menu
+    ) -> None:
+        assert any(
+            isinstance(each, HiddenPageCollapse)
+            for each in branches(guide_menu.visible_children)
+        )
 
     def test_the_contents_holds_a_collapsible_branch(self, guide_menu) -> None:
         nested = [

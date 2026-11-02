@@ -108,7 +108,8 @@ class DocsBuild:
         Returns:
             The file's ``groups``: each a mapping with a string ``caption`` and
             a list of ``entries``, whose entries carry a string ``title``, a
-            string ``url`` and a list of ``children`` of the same shape.
+            string ``url`` and a list of ``children`` of the same shape. A file
+            written by a recent extension adds ``hidden`` and ``style``.
         """
         data = self.navigation_file()
         groups = data.get("groups") if data is not None else None

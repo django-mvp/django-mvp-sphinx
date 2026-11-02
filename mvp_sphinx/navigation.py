@@ -23,6 +23,7 @@ from typing import Any
 from sphinx import addnodes
 from sphinx.application import Sphinx
 from sphinx.config import ENUM
+from sphinx.errors import SphinxError
 
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
@@ -53,6 +54,28 @@ class NavigationWriter:
         """
         return list(self.env.get_doctree(docname).findall(addnodes.toctree))
 
+    def menu_setting(self, docname: str, name: str, choices: tuple[str, ...]) -> str:
+        """Return one of a page's menu settings, read from its metadata.
+
+        Args:
+            docname: The page's document name.
+            name: The metadata field holding the setting.
+            choices: The values it may take, the default first.
+
+        Returns:
+            The value, in lower case.
+
+        Raises:
+            SphinxError: When the page gives a value that isn't one of ``choices``.
+        """
+        value = str(self.env.metadata[docname].get(name, choices[0])).lower()
+        if value not in choices:
+            raise SphinxError(
+                f"{docname}: {name} is {value!r}, and must be one of "
+                f"{', '.join(choices)}"
+            )
+        return value
+
     def entries(
         self, toctree: addnodes.toctree, path: tuple[str, ...]
     ) -> list[dict[str, Any]]:
@@ -63,13 +86,17 @@ class NavigationWriter:
         the build are left out, and so is a page already on the way down from
         the root, which is what ends a toctree that points back up the tree.
 
+        Each entry carries the page's ``menu_hidden`` and ``menu_style`` metadata,
+        as ``hidden`` and ``style``.
+
         Args:
             toctree: The toctree node to read.
             path: The document names from the root down to the page holding
                 ``toctree``.
 
         Returns:
-            One ``{"title", "url", "children"}`` mapping per entry.
+            One ``{"title", "url", "hidden", "style", "children"}`` mapping per
+            entry.
         """
         entries = []
         for title, ref in toctree["entries"]:
@@ -80,6 +107,11 @@ class NavigationWriter:
                 {
                     "title": title or self.env.titles[ref].astext(),
                     "url": self.builder.get_target_uri(ref),
+                    "hidden": self.menu_setting(ref, "menu_hidden", ("false", "true"))
+                    == "true",
+                    "style": self.menu_setting(
+                        ref, "menu_style", ("collapse", "group")
+                    ),
                     "children": [
                         entry
                         for nested in self.toctrees(ref)

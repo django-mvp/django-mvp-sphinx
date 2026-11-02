@@ -1,0 +1,6 @@
+Emptied
+=======
+
+.. toctree::
+
+   gone

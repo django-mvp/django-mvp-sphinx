@@ -44,3 +44,4 @@ with :doc:`first-visit/index`.
    :hidden:
 
    about
+   help/index

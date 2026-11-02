@@ -76,6 +76,11 @@ def contents_build(sphinx_json_build):
 
 
 @pytest.fixture(scope="session")
+def menu_settings_build(sphinx_json_build):
+    return sphinx_json_build("menu-settings")
+
+
+@pytest.fixture(scope="session")
 def search_build(sphinx_json_build):
     return sphinx_json_build("search")
 
@@ -134,6 +139,14 @@ def contents_app(contents_build, monkeypatch):
     from demo.mounted import docs
 
     monkeypatch.setattr(docs, "build_dir", contents_build)
+    return docs
+
+
+@pytest.fixture
+def menu_settings_app(menu_settings_build, monkeypatch):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", menu_settings_build)
     return docs
 
 

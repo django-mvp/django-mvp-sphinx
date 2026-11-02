@@ -16,15 +16,36 @@ if TYPE_CHECKING:
     from mvp_sphinx.mounted import DocumentationApp
 
 
+class HiddenPageGroup(MenuGroup):
+    """A heading whose own page has no entry, which still opens on that page.
+
+    A menu item holding other items can't have an address of its own, so the
+    section keeps it as ``page_url`` in its ``extra_context``, to stay open for a
+    reader on the hidden page.
+    """
+
+    def process(self, request: "HttpRequest", **kwargs: Any) -> MenuItem:
+        """Also select the section on its own page."""
+        processed = super().process(request, **kwargs)
+        if request.path == self.extra_context["page_url"]:
+            processed.selected = True
+        return processed
+
+
+class HiddenPageCollapse(HiddenPageGroup, MenuCollapse):
+    """A collapsible section whose own page has no entry."""
+
+
 class DocumentationMenu(Menu):
     """The contents of one documentation app, read from its navigation file.
 
     The menu starts with the front page, under its own title, then holds each
     captioned group of the contents as a group and each uncaptioned entry at the
     top level. A page with pages of its own opens as a collapsible group whose
-    first entry is the page itself. Without a usable navigation file it holds
-    the front page alone, and without a title in the file that entry reads
-    "Overview".
+    first entry is the page itself, or as a heading over them when the page's
+    ``menu_style`` is ``group``. A page whose ``menu_hidden`` is set has no entry
+    of its own. Without a usable navigation file the menu holds the front page
+    alone, and without a title in the file that entry reads "Overview".
 
     The menu is rebuilt only when the navigation file, the build directory or the
     app's front page address has changed since the last request.
@@ -77,10 +98,7 @@ class DocumentationMenu(Menu):
         )
         contents: list[MenuItem] = []
         for number, group in enumerate(groups):
-            entries = [
-                self.entry_item(entry, prefix, f"g{number}-{position}")
-                for position, entry in enumerate(group["entries"])
-            ]
+            entries = self.entry_items(group["entries"], prefix, f"g{number}")
             if group["caption"]:
                 contents.append(
                     MenuGroup(
@@ -98,7 +116,30 @@ class DocumentationMenu(Menu):
         self.contents = contents
         self.stamp = stamp
 
-    def entry_item(self, entry: dict[str, Any], prefix: str, name: str) -> MenuItem:
+    def entry_items(
+        self, entries: list[dict[str, Any]], prefix: str, name: str
+    ) -> list[MenuItem]:
+        """Return the menu items for a list of entries of the navigation file.
+
+        Args:
+            entries: The entries, as ``DocsBuild.navigation()`` returns them.
+            prefix: The documentation app's own address, which every entry's
+                address is below.
+            name: The start of each item's name, unique among the lists of
+                entries.
+
+        Returns:
+            One item per entry that has something to show.
+        """
+        items = (
+            self.entry_item(entry, prefix, f"{name}-{position}")
+            for position, entry in enumerate(entries)
+        )
+        return [item for item in items if item is not None]
+
+    def entry_item(
+        self, entry: dict[str, Any], prefix: str, name: str
+    ) -> MenuItem | None:
         """Return the menu item for one entry of the navigation file.
 
         Args:
@@ -108,24 +149,30 @@ class DocumentationMenu(Menu):
             name: The item's name, unique among its siblings.
 
         Returns:
-            A link for a page without pages of its own, otherwise a collapsible
-            group whose first item is the link to the page itself.
+            A link for a page without pages of its own to show, otherwise a
+            section whose first item is the link to the page itself. A section
+            is collapsible unless the page's style is ``group``. A hidden page
+            has no link, and without pages of its own to show has no item. An
+            entry from a file written without these settings is neither.
         """
         url = f"{prefix}{entry['url']}"
-        if not entry["children"]:
+        hidden = entry.get("hidden", False)
+        children = self.entry_items(entry["children"], prefix, name)
+        if not children:
+            if hidden:
+                return None
             return MenuItem(name=name, url=url, extra_context={"label": entry["title"]})
-        return MenuCollapse(
-            name=name,
-            extra_context={"label": entry["title"]},
-            children=[
-                MenuItem(
-                    name=f"{name}-page",
-                    url=url,
-                    extra_context={"label": _("Overview")},
-                ),
-                *(
-                    self.entry_item(child, prefix, f"{name}-{position}")
-                    for position, child in enumerate(entry["children"])
-                ),
-            ],
+        label = entry["title"]
+        group = entry.get("style") == "group"
+        if hidden:
+            return (HiddenPageGroup if group else HiddenPageCollapse)(
+                name=name,
+                extra_context={"label": label, "page_url": url},
+                children=children,
+            )
+        page = MenuItem(
+            name=f"{name}-page", url=url, extra_context={"label": _("Overview")}
+        )
+        return (MenuGroup if group else MenuCollapse)(
+            name=name, extra_context={"label": label}, children=[page, *children]
         )
