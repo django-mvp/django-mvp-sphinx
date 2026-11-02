@@ -288,6 +288,10 @@ Pronouns
 - The front page takes neither setting.
 - Any other value fails the build, naming the page.
 
+In a subclass of `DocumentationMenu`, a section with its own page hidden is a
+`HiddenPageCollapse`, or a `HiddenPageGroup` when it is a heading. They are a
+`MenuCollapse` and a `MenuGroup` that hold no link to the page.
+
 ### Adding your own entries to the sidebar
 
 The contents come from the build, and you can add entries of your own beside
