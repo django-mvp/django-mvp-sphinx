@@ -234,6 +234,8 @@ menu on every page of the docs.
   `navigation.json` written before the extension recorded that title labels it
   "Overview".
 - A page no toctree lists stays out of the sidebar.
+- A page's front matter can change how it appears. See "Choosing how a page
+  appears in the sidebar" below.
 
 Only the JSON builder gets a file, and a build that failed writes nothing.
 
@@ -244,6 +246,47 @@ The extension runs inside your Sphinx build and nowhere else, so the site that
 serves the pages still doesn't need Sphinx. Without the line, or with a
 `navigation.json` that can't be read, the sidebar holds only the front page
 entry and every page is still served.
+
+### Choosing how a page appears in the sidebar
+
+Two settings in a page's front matter change its place in the sidebar. Each is
+read per page, and a page without them gets the defaults.
+
+```yaml
+---
+menu_hidden: true
+menu_style: group
+---
+```
+
+In reStructuredText they are a field list at the top of the file:
+
+```rst
+:menu_hidden: true
+:menu_style: group
+
+Pronouns
+========
+```
+
+| Setting | Values | What it does |
+|---|---|---|
+| `menu_hidden` | `false` (default), `true` | Leaves the page's own entry out of the sidebar |
+| `menu_style` | `collapse` (default), `group` | Draws a page with pages of its own as a collapsible group, or as a heading with its pages directly below it |
+
+- A hidden page is still built and served, and links to it and search results
+  still lead to it.
+- A hidden page with pages of its own keeps its section, under its title, and
+  only the entry for the page goes. A reader on that page finds the section open
+  with nothing marked. Use it where a section only groups pages by theme.
+- A group's heading isn't a link, so its first entry is the page itself, unless
+  that is hidden too.
+- A heading has no visual end, so a page listed after a group reads as part of
+  it. List groups together, or after the pages they follow.
+- `menu_style` does nothing on a page with no pages of its own to show, and a
+  page whose pages are all hidden is a plain link.
+- The front page takes neither setting.
+- Any other value fails the build, naming the page.
 
 ### Adding your own entries to the sidebar
 

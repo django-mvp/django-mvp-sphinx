@@ -123,6 +123,46 @@ check that pages still serve.
 
 ---
 
+### User Story 4 - Choose how a page appears in the sidebar (Priority: P2)
+
+Someone writing the docs decides, in a page's own front matter, how that page appears in the
+sidebar. A page that only groups others thematically can leave its own entry out while its pages
+stay, and a page with pages of its own can be a heading over them rather than a group the reader
+opens.
+
+**Why this priority**: the contents take their shape from the toctrees, and an index page exists
+in every section whether or not it has anything to say. Without this, every section carries an
+entry for a page that may say nothing, and a project wanting a heading has to rebuild the menu in
+its own code.
+
+**Independent Test**: build docs with a page marked hidden, an index page marked hidden and an index
+page styled as a group; open a page of the documentation app and check the sidebar's entries, then
+open the hidden pages directly.
+
+**Acceptance Scenarios**:
+
+1. **Given** a page with `menu_hidden: true` and no pages of its own, **When** a reader opens any
+   page, **Then** it has no entry in the contents, and it is still served at its address.
+2. **Given** a page with `menu_hidden: true` and pages of its own, **When** a reader opens any page,
+   **Then** its section is present under its title, holding those pages and no entry for the page
+   itself.
+3. **Given** a page with `menu_style: group` and pages of its own, **When** a reader opens any page,
+   **Then** the page's title is a heading, with the page itself and its pages listed directly below
+   it.
+4. **Given** a page with neither setting and pages of its own, **When** a reader opens any page,
+   **Then** it appears as a collapsible group, as in User Story 1.
+5. **Given** a page with both `menu_hidden: true` and `menu_style: group`, **When** a reader opens
+   any page, **Then** the page's title is a heading over its pages, with no entry for the page
+   itself.
+6. **Given** a reader on a hidden page that has pages of its own, **When** the page renders, **Then**
+   its section is open and no entry is marked.
+7. **Given** a page whose pages are all hidden, **When** a reader opens any page, **Then** it appears
+   as a plain link.
+8. **Given** a setting with a value it doesn't take, **When** the docs are built, **Then** the build
+   fails, naming the page.
+
+---
+
 ### Edge Cases
 
 - **A page listed by two toctrees.** It appears in both places, and both entries lead to the same
@@ -138,6 +178,10 @@ check that pages still serve.
 - **The documentation app mounted at a different address.** Every entry leads to the page under the
   new address.
 - **A root document with no toctree at all.** The contents holds only the front page's entry.
+- **`menu_style` on a page with no pages of its own to show.** It has no effect.
+- **A section with every page hidden and hidden itself.** It is left out.
+- **The front page.** It takes neither setting. Its entry belongs to the menu, and a project can
+  take it out with the menu's own methods.
 - **A rebuild in progress when a request arrives.** The page is served. The contents may be the old
   or the new tree, never an error.
 
@@ -184,6 +228,10 @@ check that pages still serve.
   apps in one host project never share or mix their contents.
 - **FR-020**: The contents MUST be drawn through the host's django-mvp sidebar menu, not as a
   navigation column inside the page (Article XIII).
+- **FR-021**: A page's `menu_hidden` metadata MUST decide whether it has an entry of its own, and its
+  `menu_style` metadata whether a page with pages of its own is a collapsible group or a heading. A
+  value other than `true` or `false`, or `collapse` or `group`, MUST fail the build. Neither setting
+  changes whether the page is built or served.
 
 ### Traceability
 
