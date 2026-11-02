@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.5.0] - 2026-11-02
+
 ### Added
 
 - A page can choose how it appears in the sidebar from its own front matter. `menu_hidden: true` leaves the page's entry out while the page stays served and its section stays in place, and `menu_style: group` draws a page with pages of its own as a heading over them rather than a collapsible group. Rebuild your docs to use them. Nothing changes for a page without them. See "Choosing how a page appears in the sidebar" in the README.
