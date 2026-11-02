@@ -621,7 +621,7 @@ wheels = [
 
 [[package]]
 name = "django-mvp"
-version = "0.31.0"
+version = "0.32.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "daisy-cotton" },
@@ -634,9 +634,9 @@ dependencies = [
     { name = "django-mvp-forms" },
     { name = "mergedeep" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/77/4d/31d6bf7241a86a90b9bd36a2c20a9e408cea65d083057793fa8084947e00/django_mvp-0.31.0.tar.gz", hash = "sha256:8e227165164c26331566d4e204b3ef680271bcaa1700903ab4a9472c1388c87a", size = 313789, upload-time = "2026-10-22T15:47:18.603Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/fb/0d8f4ad4ec41c8268c0a9bf002867e055fa4f20d984cae8407f15e30042d/django_mvp-0.32.0.tar.gz", hash = "sha256:4722c51e5f0fe238437ca4baa69499755acf538a5a0af65cfa49f0e34fc6fa45", size = 318437, upload-time = "2026-10-28T21:33:21.165Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/11/643b1f322d7ef657fb1227f56106e03c910ee440f7ecf9d47e5f7a39414a/django_mvp-0.31.0-py3-none-any.whl", hash = "sha256:1ff4c0c178477be733c1b5b49041a802a3f724cb6363cd36bd9466334e7a8873", size = 367334, upload-time = "2026-10-22T15:47:16.671Z" },
+    { url = "https://files.pythonhosted.org/packages/ff/9e/3f80d6c141508da801c6fa8e22710e5f69aed57a3a43584c24460f1b292a/django_mvp-0.32.0-py3-none-any.whl", hash = "sha256:de20466a0f5064a95ffd6aa154638f6dd23b39a7ba161260e1091523c7a142b5", size = 375229, upload-time = "2026-10-28T21:33:19.518Z" },
 ]
 
 [[package]]
