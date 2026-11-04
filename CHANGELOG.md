@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.6.0] - 2026-11-04
+
 ### Added
 
 - A documentation app's `build_dir` may be a function of the request that
