@@ -22,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A `DocumentationMenu` subclass that overrides `refresh()` works again. 0.6.0
+  gave `refresh()` a `request` argument, so an override without one failed on
+  every page. `refresh()` takes no argument again, and reads the build
+  directory of the request being processed from the menu's `build_dir`.
+
 ## [v0.6.0] - 2026-11-04
 
 ### Added
