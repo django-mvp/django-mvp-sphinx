@@ -209,6 +209,33 @@ and read the `<meta>` tags in the head of each.
 
 ---
 
+### User Story 6 - A developer serves a build of its own to each site (Priority: P3)
+
+A developer whose one instance serves several sites, each with its own build of the same
+documentation at the same prefix, gives the documentation app a function that chooses the build
+folder for each request, such as from the host name the request came in on. A reader on each site
+reads that site's build, and nothing of another site's.
+
+**Why this priority**: A project with one site, the usual case, never needs it. Without it a
+project serving one build per site has no way to do so, because URL patterns cannot tell hosts
+apart and two apps cannot share a prefix.
+
+**Independent Test**: Give the app a function that returns one build for one host and another for
+any other, then request pages, a file, a search, an extract and the sidebar with each host name.
+
+**Acceptance Scenarios**:
+
+1. **Given** a function that chooses a build for each request, **When** pages are requested on two
+   hosts, **Then** each gets its own build's page, and a page only the other build has is not found.
+2. **Given** the same, **When** an image, a search, a page extract or the sidebar is asked for on
+   each host, **Then** each is read from that host's build, however the requests alternate.
+3. **Given** a function that returns a folder that does not exist, **When** a page is requested,
+   **Then** it is not found, as for any missing build.
+4. **Given** an app whose build is chosen for each request, **When** `build_docs` runs, **Then** the
+   app is left out, and naming it is an error that says why.
+
+---
+
 ### Edge Cases
 
 - A page title containing markup, such as inline code, appears as plain text wherever the page is
@@ -267,11 +294,16 @@ and read the `<meta>` tags in the head of each.
 - **FR-018**: Each served page MUST carry in its head the metadata tags its source gives it, and
   MUST NOT add a viewport tag of its own beside the one the host project's base template sets.
   (US5)
+- **FR-019**: A host project MUST be able to give a documentation app a function of the request in
+  place of its build folder, and each request MUST then be served wholly from the folder the
+  function returns: its page, files, search, page extracts and sidebar. A folder given as before
+  MUST work unchanged. (US6)
 
 ### Key Entities
 
 - **Documentation app**: the mounted app that serves one docs build under one URL prefix. It has a
-  name, a prefix and the location of its docs build.
+  name, a prefix and the location of its docs build, or a function that gives that location for
+  each request.
 - **Docs build**: the directory `sphinx-build -b json` writes. It holds one data file per page,
   plus the images and downloads the pages link to. It is the documentation app's only input.
 - **Page**: one document of the docs build, served at its own address, with a title, a body, its

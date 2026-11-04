@@ -655,6 +655,28 @@ urlpatterns = [
 Add `handbook.menu_item()` to your menu beside `docs.menu_item()` to give each
 its own entry.
 
+### A build for each site
+
+A project that serves several sites from one instance, each with its own build
+of the same documentation at the same prefix, gives `build_dir` a function of the
+request instead of a folder. It returns the folder that request is served from:
+
+```python
+def build_for(request):
+    return settings.BUILD_ROOT / request.get_host() / "json"
+
+
+docs = DocumentationApp(build_dir=build_for)
+```
+
+Each request is served wholly from the folder its function returns: its page,
+the images and downloads, search, page extracts and the sidebar. A folder that
+doesn't exist answers 404 like a missing build. The sidebar is rebuilt whenever a
+request's folder differs from the previous request's, so it always shows the
+contents of the build being read. `build_docs` leaves such an app out, because
+it has no one folder to build into; run `sphinx-build` into each folder the
+function returns. Two builds on one site are still two documentation apps.
+
 ### Addresses and files served
 
 The images and downloads your pages link to (`_images/` and `_downloads/` in
@@ -1100,8 +1122,10 @@ These are the names a project can use, grouped the way a project meets them.
 ### The documentation app
 
 - `mvp_sphinx.mounted.DocumentationApp` serves one docs build under the prefix
-  you mount it at. Its keyword options are `build_dir` (required), `source_dir`,
-  `name`, `icon`, `namespace`, `view_class` and `check`.
+  you mount it at. Its keyword options are `build_dir` (required: a folder, or a
+  function of the request that returns one), `source_dir`, `name`, `icon`,
+  `namespace`, `view_class` and `check`.
+- `build_dir_for(request)` returns the folder that serves `request`.
 - `menu_item()`, inherited from django-mvp's `MountedApp`, returns the entry to
   add to your own menus.
 - `menu` is the app's `DocumentationMenu`, which draws the contents as the app
@@ -1122,7 +1146,8 @@ These are the names a project can use, grouped the way a project meets them.
 
 - `build_docs` runs the Sphinx JSON build from each documentation app's
   `source_dir` into its `build_dir`. It takes the namespaces of the apps to
-  build, and builds every app that has a `source_dir` when given none.
+  build, and builds every app that has a `source_dir` when given none. An app
+  whose `build_dir` is a function is left out, and naming one is an error.
 
 ### Views
 

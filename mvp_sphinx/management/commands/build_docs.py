@@ -77,14 +77,15 @@ class Command(BaseCommand):
 
         Args:
             namespaces: The namespaces asked for, or an empty list for every
-                mounted app that has a ``source_dir``.
+                mounted app that has a ``source_dir`` and one build directory.
 
         Returns:
             The chosen apps, each with a ``source_dir``.
 
         Raises:
             CommandError: A namespace belongs to no mounted documentation app,
-                a named app has no ``source_dir``, or no mounted app has one.
+                a named app has no ``source_dir`` or chooses its build for each
+                request, or no mounted app can be built.
         """
         mounted = {
             mount.app.namespace: mount.app
@@ -99,6 +100,13 @@ class Command(BaseCommand):
             )
         if namespaces:
             apps = [mounted[name] for name in mounted if name in namespaces]
+            chosen = [app.namespace for app in apps if callable(app.build_dir)]
+            if chosen:
+                raise CommandError(
+                    f"{', '.join(chosen)} chooses its build for each request, so "
+                    "there is no one build directory to build into. Run "
+                    "sphinx-build into each directory it chooses."
+                )
             without = [app.namespace for app in apps if app.source_dir is None]
             if without:
                 raise CommandError(
@@ -106,7 +114,11 @@ class Command(BaseCommand):
                     "source directory to its DocumentationApp as source_dir."
                 )
             return apps
-        apps = [app for app in mounted.values() if app.source_dir is not None]
+        apps = [
+            app
+            for app in mounted.values()
+            if app.source_dir is not None and not callable(app.build_dir)
+        ]
         if not apps:
             raise CommandError(
                 "No mounted documentation app has a source_dir. Pass the Sphinx "
