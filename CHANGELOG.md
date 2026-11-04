@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A documentation app's `build_dir` may be a function of the request that
+  returns the build folder, so one instance can serve a different build of the
+  same documentation to each site. Pages, files, search, page extracts and the
+  sidebar all follow the folder chosen for the request. `build_docs` leaves such
+  an app out. A folder given as before works as it always has.
+
 ## [v0.5.0] - 2026-11-02
 
 ### Added

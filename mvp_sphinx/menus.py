@@ -48,7 +48,9 @@ class DocumentationMenu(Menu):
     alone, and without a title in the file that entry reads "Overview".
 
     The menu is rebuilt only when the navigation file, the build directory or the
-    app's front page address has changed since the last request.
+    app's front page address has changed since the last request. An app that
+    chooses its build for each request rebuilds it whenever a request's build
+    differs from the last one's.
 
     A project adds entries of its own with the menu's ``append``, ``extend`` and
     ``insert``. A rebuild replaces only what the navigation file put there. An
@@ -82,14 +84,20 @@ class DocumentationMenu(Menu):
         """Bring the contents up to date, then process it for ``request``."""
         # Replacing the children is not atomic; see docs/adr/0002.
         with self.lock:
-            self.refresh()
+            self.refresh(request)
             return super().process(request, **kwargs)
 
-    def refresh(self) -> None:
-        """Rebuild the menu's items when the navigation file has changed."""
+    def refresh(self, request: "HttpRequest") -> None:
+        """Rebuild the menu's items when the navigation file has changed.
+
+        Args:
+            request: The request being served, which chooses the build when the
+                app's ``build_dir`` is a function.
+        """
         prefix = reverse(self.app.landing)
-        docs_build = DocsBuild(self.app.build_dir)
-        stamp = (self.app.build_dir, prefix, docs_build.navigation_stamp())
+        build_dir = self.app.build_dir_for(request)
+        docs_build = DocsBuild(build_dir)
+        stamp = (build_dir, prefix, docs_build.navigation_stamp())
         if stamp == self.stamp:
             return
         groups = docs_build.navigation() or []

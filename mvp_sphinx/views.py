@@ -34,7 +34,7 @@ class PageView(PageMixin, TemplateView):
     """Render the page a request names, inside the application shell.
 
     The documentation app binds itself through ``as_view(app=...)``, and the
-    view reads the app's ``build_dir`` on every request, so a rebuilt docs build
+    view reads the app's build directory on every request, so a rebuilt docs build
     is served without a restart.
 
     Attributes:
@@ -66,7 +66,7 @@ class PageView(PageMixin, TemplateView):
             Http404: The docs build has no file or page at that address.
             json.JSONDecodeError: A page's file is not valid JSON, a server error.
         """
-        build = DocsBuild(self.app.build_dir)
+        build = DocsBuild(self.app.build_dir_for(request))
         path = kwargs.get("path", "")
         target = build.file(path)
         if target is not None:
@@ -211,7 +211,7 @@ class SearchView(PageMixin, TemplateView):
         Raises:
             Http404: The docs build does not exist, as for every page address.
         """
-        build = DocsBuild(self.app.build_dir)
+        build = DocsBuild(self.app.build_dir_for(request))
         if not build.root.is_dir():
             raise Http404
         self.query = request.GET.get("q", "")
