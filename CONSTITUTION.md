@@ -164,9 +164,11 @@ application. It is not a replacement for everything a Sphinx HTML build does.
 - **A build command is allowed.** A management command that runs the build for
   the host project may be added. It runs Sphinx on demand, never as part of
   serving.
-- **One current build per documentation app.** No versions side by side, no
-  version picker, no translations. A host project that needs two builds mounts
-  two documentation apps.
+- **One current build per request.** A documentation app serves each request
+  wholly from one build. The host project may choose that build for each
+  request, such as one for each site it serves, but the package offers no
+  versions side by side, no version picker and no translations. A host project
+  that needs two builds on one site mounts two documentation apps.
 - **One project's own documentation.** Documentation for other projects, and
   uploading builds through the site, belong to a docs platform, which this is
   not.
@@ -217,4 +219,4 @@ Read at planning and at review; applies to every change.
 
 ---
 
-**Version**: 2.1.0 | **Ratified**: 2026-09-29 | **Last Amended**: 2026-10-12
+**Version**: 2.2.0 | **Ratified**: 2026-09-29 | **Last Amended**: 2026-11-04
