@@ -549,3 +549,22 @@ class TestServingSideImports:
         )
 
         assert result.returncode == 0, result.stderr
+
+
+class TestASubclassThatRefreshes:
+    def test_a_subclass_overriding_refresh_without_arguments_still_draws(
+        self, contents_app, rf, monkeypatch
+    ) -> None:
+        from mvp_sphinx.menus import DocumentationMenu
+
+        class Relabelled(DocumentationMenu):
+            def refresh(self) -> None:
+                super().refresh()
+                self.front_page.extra_context["label"] = "Start here"
+
+        menu = Relabelled("relabelled-menu", app=contents_app)
+
+        processed = menu.process(rf.get("/docs/"))
+
+        assert label(processed.visible_children[0]) == "Start here"
+        assert len(leaves(processed.visible_children)) > 1

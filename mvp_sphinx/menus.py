@@ -75,6 +75,8 @@ class DocumentationMenu(Menu):
         self.contents: list[MenuItem] = []
         self.lock = threading.Lock()
         self.stamp: tuple[Any, ...] | None = None
+        # The build directory of the request being processed, for refresh().
+        self.build_dir: Any = None if callable(app.build_dir) else app.build_dir
 
     def front_page_url(self, request: "HttpRequest | None", **kwargs: Any) -> str:
         """Return the address the app's front page is served at."""
@@ -84,20 +86,19 @@ class DocumentationMenu(Menu):
         """Bring the contents up to date, then process it for ``request``."""
         # Replacing the children is not atomic; see docs/adr/0002.
         with self.lock:
-            self.refresh(request)
+            self.build_dir = self.app.build_dir_for(request)
+            self.refresh()
             return super().process(request, **kwargs)
 
-    def refresh(self, request: "HttpRequest") -> None:
+    def refresh(self) -> None:
         """Rebuild the menu's items when the navigation file has changed.
 
-        Args:
-            request: The request being served, which chooses the build when the
-                app's ``build_dir`` is a function.
+        It reads the build directory of the request being processed, which
+        ``process`` sets in ``build_dir`` before calling it.
         """
         prefix = reverse(self.app.landing)
-        build_dir = self.app.build_dir_for(request)
-        docs_build = DocsBuild(build_dir)
-        stamp = (build_dir, prefix, docs_build.navigation_stamp())
+        docs_build = DocsBuild(self.build_dir)
+        stamp = (self.build_dir, prefix, docs_build.navigation_stamp())
         if stamp == self.stamp:
             return
         groups = docs_build.navigation() or []
