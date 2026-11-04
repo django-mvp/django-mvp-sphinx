@@ -662,19 +662,29 @@ of the same documentation at the same prefix, gives `build_dir` a function of th
 request instead of a folder. It returns the folder that request is served from:
 
 ```python
+BUILDS = {
+    "en.example.com": settings.BASE_DIR / "builds" / "en" / "json",
+    "de.example.com": settings.BASE_DIR / "builds" / "de" / "json",
+}
+
+
 def build_for(request):
-    return settings.BUILD_ROOT / request.get_host() / "json"
+    return BUILDS.get(request.get_host(), BUILDS["en.example.com"])
 
 
 docs = DocumentationApp(build_dir=build_for)
 ```
 
+Choose from folders you know, as here, rather than building a path out of the
+host name: a host header is the reader's to send, and `..` is a valid one when
+`ALLOWED_HOSTS` lets every host in.
+
 Each request is served wholly from the folder its function returns: its page,
 the images and downloads, search, page extracts and the sidebar. A folder that
-doesn't exist answers 404 like a missing build. The sidebar is rebuilt whenever a
-request's folder differs from the previous request's, so it always shows the
+doesn't exist answers 404 like a missing build. The sidebar is rebuilt whenever
+a request's folder differs from the previous request's, so it always shows the
 contents of the build being read. `build_docs` leaves such an app out, because
-it has no one folder to build into; run `sphinx-build` into each folder the
+it has no one folder to build into: run `sphinx-build` into each folder the
 function returns. Two builds on one site are still two documentation apps.
 
 ### Addresses and files served
