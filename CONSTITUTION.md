@@ -81,6 +81,14 @@ with user-facing strings ships a base English catalogue and a `locale/`
 directory so a consuming project can compile or extend the translations. A
 hard-coded user-visible string is a blocking review comment.
 
+This article covers the package only. The `demo/` app is never translated: its
+strings are plain text, and translation markup there (`gettext`, `gettext_lazy`,
+`{% trans %}`, `{% blocktrans %}`, `{% load i18n %}`) is a blocking review
+comment. `makemessages` runs from the `mvp_sphinx/` directory, so the catalogue
+holds the package's strings and never the demo's. The demo may keep
+`LocaleMiddleware` and the `set_language` view so the package's own
+translations can be seen working.
+
 A package with no user-facing strings satisfies this trivially, and should not
 carry an empty `locale/` directory to look as though it does.
 
