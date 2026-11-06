@@ -2,7 +2,6 @@
 
 # MVPTemplateView, not TemplateView: it supplies the page title, subtitle and
 # breadcrumbs the application shell draws around the content.
-from django.utils.translation import gettext_lazy as _
 from mvp.views import MVPTemplateView
 
 from demo.mounted import docs, staff_guide
@@ -22,9 +21,9 @@ class InPageView(MVPTemplateView):
     """A screen whose template places a section of the guide in the page itself."""
 
     template_name = "demo/in_page.html"
-    page_title = _("Searching")
-    page_subtitle = _("A section of the guide, placed in the page by its template")
-    breadcrumbs = [{"text": _("Searching")}]
+    page_title = "Searching"
+    page_subtitle = "A section of the guide, placed in the page by its template"
+    breadcrumbs = [{"text": "Searching"}]
 
 
 class InfoDialogView(MVPTemplateView):
@@ -58,7 +57,7 @@ class InfoDialogView(MVPTemplateView):
             return []
         return [
             {
-                "text": _("Open the full page"),
+                "text": "Open the full page",
                 "href": extract.url,
                 "icon": "document",
                 "variant": "primary",
@@ -73,16 +72,16 @@ class InfoDialogView(MVPTemplateView):
 
     def get_breadcrumbs(self):
         """Return the trail: the info dialogs, then this screen."""
-        return [{"text": _("Info dialogs")}, {"text": self.get_page_title()}]
+        return [{"text": "Info dialogs"}, {"text": self.get_page_title()}]
 
 
 class WholePageView(InfoDialogView):
     """The info dialog holds a whole page of the guide."""
 
-    page_title = _("Getting around")
-    page_subtitle = _("The info dialog holds a whole page of the guide")
+    page_title = "Getting around"
+    page_subtitle = "The info dialog holds a whole page of the guide"
     address = "first-visit/finding-your-way/"
-    intro = _(
+    intro = (
         "This screen stands in for one of your own. Its explanation is the guide's "
         "page on finding your way, shown whole in the info dialog."
     )
@@ -91,10 +90,10 @@ class WholePageView(InfoDialogView):
 class SectionView(InfoDialogView):
     """The info dialog holds one section of a page."""
 
-    page_title = _("Search")
-    page_subtitle = _("The info dialog holds one section of a page")
+    page_title = "Search"
+    page_subtitle = "The info dialog holds one section of a page"
     address = "first-visit/finding-your-way/#searching-the-guide"
-    intro = _(
+    intro = (
         "The guide covers searching in one section of a longer page. The info dialog "
         "holds that section and nothing else."
     )
@@ -103,10 +102,10 @@ class SectionView(InfoDialogView):
 class NoticesView(InfoDialogView):
     """The info dialog holds a page of notices, tables and a picture."""
 
-    page_title = _("Notices")
-    page_subtitle = _("Notices, tables and a picture in the info dialog")
+    page_title = "Notices"
+    page_subtitle = "Notices, tables and a picture in the info dialog"
     address = "reference/notices/"
-    intro = _(
+    intro = (
         "The guide's page of notices has every kind of notice, a picture and a "
         "table, so this dialog shows how each looks outside the guide."
     )
@@ -115,11 +114,11 @@ class NoticesView(InfoDialogView):
 class StaffOnlyView(InfoDialogView):
     """The info dialog holds a page of the staff guide, for staff only."""
 
-    page_title = _("Staff accounts")
-    page_subtitle = _("A page of the staff guide, shown to staff only")
+    page_title = "Staff accounts"
+    page_subtitle = "A page of the staff guide, shown to staff only"
     app = staff_guide
     address = "accounts/"
-    intro = _(
+    intro = (
         "The explanation comes from the staff guide, which only staff may read. "
         "Signed in as staff, the info icon is beside the title. Anyone else sees "
         "no icon at all."
@@ -129,10 +128,10 @@ class StaffOnlyView(InfoDialogView):
 class MissingPageView(InfoDialogView):
     """The info dialog names a page the guide doesn't have."""
 
-    page_title = _("A moved page")
-    page_subtitle = _("The guide has no page at the address this screen names")
+    page_title = "A moved page"
+    page_subtitle = "The guide has no page at the address this screen names"
     address = "first-visit/a-page-that-moved/"
-    intro = _(
+    intro = (
         "This screen asks for a page the guide doesn't have, as if it had been "
         "moved. There is no info icon, the screen works as usual, and the server "
         "log has a warning naming the address."
