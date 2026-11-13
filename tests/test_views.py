@@ -667,9 +667,9 @@ class TestContentsInTheSidebar:
         soup = BeautifulSoup(client.get("/docs/chain/two/").content, "html.parser")
         contents = soup.find("nav", attrs={"aria-label": str(contents_app.name)})
 
-        assert [
-            link["href"] for link in contents.select("[aria-current=page]")
-        ] == ["/docs/chain/two/"]
+        assert [link["href"] for link in contents.select("[aria-current=page]")] == [
+            "/docs/chain/two/"
+        ]
 
     def test_entries_on_the_way_are_open_and_the_rest_closed(
         self, client, db, contents_app

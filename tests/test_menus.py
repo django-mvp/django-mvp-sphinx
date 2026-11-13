@@ -142,7 +142,11 @@ class TestDocumentationMenu:
         assert [
             (each.extra_context["page_url"], len(each.pages))
             for each in every_entry([one])
-        ] == [("/docs/chain/one/", 1), ("/docs/chain/two/", 1), ("/docs/chain/three/", 0)]
+        ] == [
+            ("/docs/chain/one/", 1),
+            ("/docs/chain/two/", 1),
+            ("/docs/chain/three/", 0),
+        ]
 
     def test_an_entry_fetches_its_pages_from_the_apps_contents_address(
         self, contents_app, processed
@@ -199,7 +203,9 @@ class TestDocumentationMenu:
         assert "/docs/chain/two/" not in leaves(processed("/docs/").visible_children)
 
     def test_a_deep_page_draws_every_entry_on_its_way(self, processed) -> None:
-        one = child(child(processed("/docs/chain/three/"), "Getting started"), "Chain one")
+        one = child(
+            child(processed("/docs/chain/three/"), "Getting started"), "Chain one"
+        )
 
         assert outline([one]) == [
             ["/docs/chain/one/", [["/docs/chain/two/", ["/docs/chain/three/"]]]]
@@ -259,9 +265,7 @@ class TestMenuSettings:
     ) -> None:
         quiet = child(menu("/docs/quiet/one/"), "Quiet")
 
-        assert outline([quiet]) == [
-            ["Quiet", ["/docs/quiet/one/", "/docs/quiet/two/"]]
-        ]
+        assert outline([quiet]) == [["Quiet", ["/docs/quiet/one/", "/docs/quiet/two/"]]]
         assert quiet.extra_context["branch"]
 
     def test_a_hidden_group_page_is_a_section_without_a_link_in_the_group_style(
@@ -336,18 +340,16 @@ class TestCurrentPage:
 
         assert marked(tree) == ["g0-2-0-0"]
 
-    def test_every_item_holding_the_page_is_open_and_no_other(
-        self, processed
-    ) -> None:
+    def test_every_item_holding_the_page_is_open_and_no_other(self, processed) -> None:
         tree = processed("/docs/chain/three/").visible_children
 
         assert opened(tree) == {"g0", "g0-2", "g0-2-0"}
 
-    def test_a_page_with_pages_of_its_own_is_marked_and_open(
-        self, processed
-    ) -> None:
+    def test_a_page_with_pages_of_its_own_is_marked_and_open(self, processed) -> None:
         tree = processed("/docs/chain/one/").visible_children
-        one = child(child(processed("/docs/chain/one/"), "Getting started"), "Chain one")
+        one = child(
+            child(processed("/docs/chain/one/"), "Getting started"), "Chain one"
+        )
 
         assert marked(tree) == ["g0-2"]
         assert opened(tree) == {"g0", "g0-2"}

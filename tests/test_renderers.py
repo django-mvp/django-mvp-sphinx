@@ -27,9 +27,9 @@ class TestSidebarRenderer:
     def test_any_other_item_is_drawn_by_django_mvps_templates(self) -> None:
         item = MenuItem(name="home", url="/", parent=None)
 
-        assert SidebarRenderer().get_template(item) == MvpSidebarRenderer().get_template(
+        assert SidebarRenderer().get_template(
             item
-        )
+        ) == MvpSidebarRenderer().get_template(item)
 
     def test_it_brings_the_contents_script_and_styles(self) -> None:
         media = str(SidebarRenderer().media)
@@ -88,8 +88,12 @@ class TestSidebarRenderer:
         }
 
     @pytest.mark.parametrize("address", ["/docs/", "/docs/chain/three/"])
-    def test_the_request_is_in_the_entrys_context(self, contents_app, rf, address) -> None:
+    def test_the_request_is_in_the_entrys_context(
+        self, contents_app, rf, address
+    ) -> None:
         request = rf.get(address)
-        item = contents_app.menu.process(request).visible_children[1].visible_children[0]
+        item = (
+            contents_app.menu.process(request).visible_children[1].visible_children[0]
+        )
 
         assert SidebarRenderer().get_context_data(item)["request"] is request

@@ -179,9 +179,7 @@ def guide_menu(demo_guide_app, rf):
 
 @pytest.fixture
 def guide_responses(guide_menu, client, db):
-    return {
-        address: client.get(address) for address in leaves(guide_menu.children)
-    }
+    return {address: client.get(address) for address in leaves(guide_menu.children)}
 
 
 @pytest.fixture
@@ -225,9 +223,7 @@ class TestDemoGuideStates:
 
     def test_the_contents_holds_two_or_more_captioned_groups(self, guide_menu) -> None:
         groups = [
-            each
-            for each in entries(guide_menu.children)
-            if isinstance(each, MenuGroup)
+            each for each in entries(guide_menu.children) if isinstance(each, MenuGroup)
         ]
 
         assert len(groups) >= 2

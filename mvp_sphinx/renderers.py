@@ -34,7 +34,8 @@ class SidebarRenderer(MvpSidebarRenderer):
         """Return the contents' entry template for a page of the contents."""
         if isinstance(item, ContentsEntry):
             return "mvp_sphinx/contents/entry.html"
-        return super().get_template(item)
+        template: str = super().get_template(item)
+        return template
 
     def get_context_data(self, item: MenuItem, **kwargs: Any) -> dict[str, Any]:
         """Add the request, which a project's own entry template may read."""

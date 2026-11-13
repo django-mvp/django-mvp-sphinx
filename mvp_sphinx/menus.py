@@ -1,8 +1,8 @@
 """The contents of a docs build, as the menu its documentation app draws."""
 
 import threading
-from urllib.parse import urlencode
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlencode
 
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -15,11 +15,6 @@ if TYPE_CHECKING:
     from django.http import HttpRequest
 
     from mvp_sphinx.mounted import DocumentationApp
-
-
-def address_of(path: str) -> str:
-    """Return ``path`` without its trailing slash, for comparing two addresses."""
-    return path.rstrip("/") or "/"
 
 
 class ContentsEntry(MenuItem):
@@ -52,26 +47,45 @@ class ContentsEntry(MenuItem):
         for page in self.pages:
             # A menu item with no parent joins the root menu; these belong here.
             page.parent = None
-        self.addresses = {address_of(self.extra_context["page_url"])}.union(
-            *(page.addresses for page in self.pages)
-        )
+        self.addresses: set[str] = {
+            self.normalized(self.extra_context["page_url"])
+        }.union(*(page.addresses for page in self.pages))
+
+    @staticmethod
+    def normalized(path: str) -> str:
+        """Return ``path`` without its trailing slash, to compare two addresses.
+
+        Args:
+            path: An address on the site.
+
+        Returns:
+            The address, ``/`` for the site's root.
+        """
+        return path.rstrip("/") or "/"
 
     def process(self, request: "HttpRequest", **kwargs: Any) -> MenuItem:
         """Select the entry on the way to the page being read, and open it there.
 
         Off that way, the processed entry holds no pages, so the sidebar draws
         the entry alone.
+
+        Args:
+            request: The request being served.
+            **kwargs: What processing a menu item takes.
+
+        Returns:
+            The processed entry.
         """
         processed = super().process(request, **kwargs)
         if not processed.visible:
             return processed
-        here = address_of(request.path)
+        here = self.normalized(request.path)
         on_path = here in self.addresses
         processed.selected = on_path
         processed.pages = self.branch(request, **kwargs) if on_path else []
         processed.extra_context = {
             **processed.extra_context,
-            "current": here == address_of(self.extra_context["page_url"]),
+            "current": here == self.normalized(self.extra_context["page_url"]),
             "branch": bool(self.pages),
             "open": on_path and bool(self.pages),
         }

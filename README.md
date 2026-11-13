@@ -256,7 +256,7 @@ The sidebar always draws the entries your front page's toctrees list. Below
 those, it draws only the entries on the way to the page being read, open, with
 the page marked. Any other entry keeps its toggle, and the first time a reader
 opens it the sidebar fetches its pages from the documentation app's
-`contents/` address and opens them in place. So the sidebar stays the same size
+`contents/` address, which its `BranchView` answers, and opens them in place. So the sidebar stays the same size
 however many pages the docs have, on the pages of the docs and on every other
 page that draws their contents. The page being read is scrolled into the middle
 of the sidebar when the page loads, and when the sidebar opens on a phone.

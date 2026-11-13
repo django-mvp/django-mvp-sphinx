@@ -12,10 +12,10 @@ from django.http import (
     HttpResponsePermanentRedirect,
 )
 from django.http.response import HttpResponseBase
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
-from django.shortcuts import render
 from django.views import View
 from django.views.generic import TemplateView
 from flex_menu.renderers import get_renderer
