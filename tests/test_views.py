@@ -15,6 +15,7 @@ from django.templatetags.static import static
 from django.test import Client
 from django.urls import reverse
 from django_cotton.utils import render_component
+from mvp.config import MVP_CONFIG
 
 from mvp_sphinx.page_body import BodyRewriter
 from tests.conftest import DEMO_GUIDE, SPHINX_SOURCES
@@ -987,6 +988,7 @@ def is_labelled(form) -> bool:
     return form.find("label", attrs={"for": field.get("id")}) is not None
 
 
+@pytest.mark.usefixtures("without_site_search")
 class TestSearchForm:
     @pytest.mark.parametrize("path", SEARCH_PAGES)
     def test_every_page_of_the_app_offers_a_search_of_the_app(
@@ -1027,6 +1029,72 @@ class TestSearchForm:
         assert form["action"] == "/manuals/admin/search/"
 
 
+def site_search_dialog(response):
+    """The dialog of django-mvp's site search, when the page has it."""
+    return BeautifulSoup(response.content, "html.parser").find(
+        "dialog", id="mvp-search"
+    )
+
+
+def results_under(response, prefix) -> list[str]:
+    """The links in the site search's results that lead below ``prefix``."""
+    main = BeautifulSoup(response.content, "html.parser").find("main")
+    return [
+        link["href"]
+        for link in main.find_all("a", href=True)
+        if link["href"].startswith(prefix)
+    ]
+
+
+class TestTheSiteSearchTakesOver:
+    def test_a_page_has_the_sites_search_in_place_of_its_own(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get("/docs/")
+
+        assert search_dialog(response) is None
+        assert site_search_dialog(response) is not None
+
+    def test_an_app_the_site_search_leaves_out_keeps_its_own(
+        self, client, db, search_app, handbook_app, monkeypatch
+    ) -> None:
+        monkeypatch.setitem(MVP_CONFIG["search"], "kinds", [handbook_app.search_kind])
+
+        assert search_dialog(client.get("/docs/")) is not None
+        assert search_dialog(client.get("/manuals/admin/")) is None
+
+    def test_a_site_without_the_site_search_keeps_its_own(
+        self, client, db, search_app, without_site_search
+    ) -> None:
+        response = client.get("/docs/")
+
+        assert search_dialog(response) is not None
+        assert site_search_dialog(response) is None
+
+    def test_the_site_search_lists_the_pages_holding_a_word(
+        self, client, db, search_app
+    ) -> None:
+        response = client.get(reverse("mvp-search"), {"q": "quetzal"})
+
+        assert results_under(response, "/docs/") == ["/docs/lanterns/"]
+
+    def test_an_app_the_reader_may_not_read_is_not_listed(
+        self, client, db, staff_guide_app
+    ) -> None:
+        response = client.get(reverse("mvp-search"), {"q": "backups"})
+
+        assert not results_under(response, "/staff-guide/")
+
+    def test_an_app_the_reader_may_read_is_listed(
+        self, client, db, staff_guide_app
+    ) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        response = client.get(reverse("mvp-search"), {"q": "backups"})
+
+        assert results_under(response, "/staff-guide/")
+
+
 class TestSearchToggles:
     @pytest.mark.parametrize("component", ["search-toggle", "search-icon"])
     def test_a_toggle_opens_the_dialog_it_names(self, rf, component) -> None:
@@ -1047,6 +1115,7 @@ class TestSearchToggles:
         assert is_labelled(form)
 
 
+@pytest.mark.usefixtures("without_site_search")
 class TestSearchResults:
     def test_a_word_lists_the_pages_holding_it_inside_the_shell(
         self, client, db, search_app

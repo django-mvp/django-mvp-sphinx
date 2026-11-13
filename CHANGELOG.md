@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Each documentation app is a kind of result in django-mvp's site search, named `mvp_sphinx-` and the app's namespace. Each result says where its page sits in the contents, such as "Guides · Installation". A reader the app turns away finds none of its pages. See "In the site's search" in the README.
+
+### Changed
+
+- Where the top bar holds django-mvp's site search and that search finds an app's pages, the app's own search button gives way to it, including a button a project put in the `mvp_sphinx.search_toggle` block. A site without the site's search keeps the app's button as before.
+- Needs django-mvp 0.35.0 or later.
+
 ## [v0.7.0] - 2026-11-13
 
 ### Added

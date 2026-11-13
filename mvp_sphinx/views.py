@@ -101,9 +101,13 @@ class PageView(PageMixin, TemplateView):
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add the app's search address, the page's metadata, headings and neighbours."""
+        """Add the app's search address and whether the site's search stands in.
+
+        Also adds the page's metadata, headings and neighbours.
+        """
         context = super().get_context_data(**kwargs)
         context["search_url"] = reverse(f"{self.app.namespace}:search")
+        context["site_search"] = self.app.in_site_search()
         context["meta_tags"] = self.get_meta_tags()
         context["headings"] = self.get_headings()
         context["previous_page"] = self.get_neighbour("prev")
@@ -236,17 +240,13 @@ class SearchView(PageMixin, TemplateView):
             The page's address under the documentation app, and ``#`` with the
             section's anchor when the result names one.
         """
-        namespace = self.app.namespace
-        if result["path"]:
-            address = reverse(f"{namespace}:page", kwargs={"path": result["path"]})
-        else:
-            address = reverse(f"{namespace}:front_page")
-        return f"{address}#{result['anchor']}" if result["anchor"] else address
+        return self.app.address(result["path"], result["anchor"])
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add the address of the app's search, which the form submits to."""
+        """Add the app's search address and whether the site's search stands in."""
         context = super().get_context_data(**kwargs)
         context["search_url"] = reverse(f"{self.app.namespace}:search")
+        context["site_search"] = self.app.in_site_search()
         return context
 
     def get_page_title(self) -> str:

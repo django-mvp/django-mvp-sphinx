@@ -6,7 +6,8 @@
 
 **Status**: Draft
 
-**Serves**: G6 · **Roadmap**: R6 · **Issue**: [#10](https://github.com/django-mvp/django-mvp-sphinx/issues/10)
+**Serves**: G6 · **Roadmap**: R6 · **Issue**: [#10](https://github.com/django-mvp/django-mvp-sphinx/issues/10),
+[#127](https://github.com/django-mvp/django-mvp-sphinx/issues/127)
 
 **Input**: "Once a user guide grows past a handful of pages, readers expect to type a word and find
 the page that covers it. The documentation should be searchable from within its own pages. It
@@ -21,6 +22,11 @@ come before pages that only mention the words in passing. A search covers the pa
 documentation app and nothing else: never the host project's own pages or data, and never another
 documentation app's pages.
 
+Where the host project has django-mvp's search for the whole site, the documentation is one kind of
+result in it. Each documentation app's pages are found there as its own search finds them, each
+result saying where its page sits in the contents, and the site's search takes the place of the
+app's own search button.
+
 Search reads what the docs build already contains. It needs nothing extra from the host project's
 Sphinx configuration, it never needs Sphinx installed where the site runs, and it works with
 JavaScript turned off.
@@ -31,7 +37,8 @@ issues:
 
 - the contents in the app sidebar ([#5](https://github.com/django-mvp/django-mvp-sphinx/issues/5))
 - who may read the documentation ([#9](https://github.com/django-mvp/django-mvp-sphinx/issues/9))
-- searching the host project's own content, which is out of scope for this package
+- searching the host project's own content, which is django-mvp's site search and out of scope
+  for this package
 
 ## Clarifications
 
@@ -71,6 +78,22 @@ issues:
   drawn from one base template that holds the button in a block of its own, and the project
   overrides that template to swap or move it. Integrated into FR-016, FR-017 and User Story 4.
 
+### Session 2026-11-13
+
+- Q: How does the documentation take part in django-mvp's search for the whole site? → A: Each
+  documentation app is one kind of result in it, registered by this package when the app is
+  created. A site that lists its kinds in django-mvp's settings searches the documentation only
+  when it lists the app's kind. Integrated into FR-018 and User Story 5.
+- Q: What does a result in the site's search say about where its page is? → A: Where it sits in the
+  contents: the caption of its part of the contents and the titles of the pages above it, two at
+  most and the outermost first, joined with " · ", such as "Guides · Installation". A page with
+  nothing above it names the documentation app. Integrated into FR-019.
+- Q: Does the app keep its own search button where the site has its search? → A: No. Where the top
+  bar holds the site's search and that search finds the app's pages, the app's button gives way to
+  it. A site without the site's search, or one whose search leaves the app out, keeps the app's
+  button. The app's results page stays at its address either way. Integrated into FR-001, FR-020
+  and User Story 5.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Find the pages that mention a word (Priority: P1)
@@ -90,8 +113,9 @@ page of the app.
 
 **Acceptance Scenarios**:
 
-1. **Given** any page of a documentation app, **When** it renders, **Then** it offers a button that
-   opens a search of that documentation app, which submits to that app's results page.
+1. **Given** any page of a documentation app on a site whose top bar has no search of its own that
+   finds the app's pages, **When** it renders, **Then** it offers a button that opens a search of
+   that documentation app, which submits to that app's results page.
 2. **Given** a word that appears in exactly one page's text, **When** a reader searches for it,
    **Then** the results list that page, and only that page.
 3. **Given** a word that appears in several pages, **When** a reader searches for it, **Then** every
@@ -207,6 +231,40 @@ button in place of the default one, then place a button with a second dialog els
 
 ---
 
+### User Story 5 - Find the documentation from the site's search (Priority: P3)
+
+A reader of a site that has django-mvp's search for the whole site types a word into the search in
+the top bar. The documentation's pages that hold it are listed beside the site's other results, as
+one group per documentation app, each result saying where its page sits in the contents. On the
+documentation's own pages the top bar holds that same search, not a second one.
+
+**Why this priority**: The documentation's own search already finds its pages. This matters once a
+site has a search of its own, where two search buttons on one page would have the reader guess
+which finds what.
+
+**Independent Test**: Mount two documentation apps and django-mvp's search with its widget in the
+top bar, then search for a word one app's pages hold, and open a page of each app.
+
+**Acceptance Scenarios**:
+
+1. **Given** a site with django-mvp's search and a documentation app, **When** a reader searches the
+   site for a word a page of the app holds, **Then** that page is listed in the app's group, leading
+   to the page, or to the section whose heading holds the word.
+2. **Given** a page placed in a captioned part of the contents, below other pages, **When** it is
+   listed in the site's search, **Then** its where line names the caption and the page above it,
+   two titles at most, the outermost first.
+3. **Given** a page with nothing above it in the contents, **When** it is listed in the site's
+   search, **Then** its where line names the documentation app.
+4. **Given** a documentation app whose reader rule turns a reader away, **When** that reader
+   searches the site, **Then** none of the app's pages is listed.
+5. **Given** a site whose top bar holds django-mvp's search and whose search uses a documentation
+   app's kind, **When** a page of that app renders, **Then** it shows the site's search and not the
+   app's own button, whatever the project put in its search button block.
+6. **Given** a site whose search names its kinds without the app's, **When** a page of the app
+   renders, **Then** the app keeps its own button.
+
+---
+
 ### Edge Cases
 
 - A search much longer than any sensible query is still answered, without a server error. Words
@@ -224,8 +282,8 @@ button in place of the default one, then place a button with a second dialog els
 ### Functional Requirements
 
 - **FR-001**: Every page served by a documentation app MUST offer a button that opens a search of
-  that documentation app, and the host project's pages outside the documentation app MUST NOT gain
-  one. (US1)
+  that documentation app, unless the site's search stands in for it (FR-020), and the host project's
+  pages outside the documentation app MUST NOT gain one. (US1, US5)
 - **FR-002**: A search MUST lead to a results page at an address of the documentation app that
   carries the search's words, rendered inside the host project's application shell, so the same
   address shows the same search and results again. (US1)
@@ -269,6 +327,16 @@ button in place of the default one, then place a button with a second dialog els
   that is only an icon, each opening a dialog it names, so two buttons on one page open their own
   dialogs. (US4)
 
+- **FR-018**: Every documentation app MUST be a kind of result in django-mvp's site search, named
+  after the app's namespace, with the app's name and icon, finding the pages its own search finds in
+  the same order, and none for a reader the app's reader rule turns away. (US5)
+- **FR-019**: Each of the app's results in the site's search MUST carry a where line naming the
+  caption and the titles above its page in the contents, at most two and the outermost first, joined
+  with " · ", or the app's name when nothing is above the page. (US5)
+- **FR-020**: Where the top bar holds django-mvp's site search and that search uses the app's kind,
+  the app's pages MUST NOT draw the app's own search button block. Otherwise they MUST draw it. The
+  app's results page MUST stay at its address either way. (US5)
+
 ### Key Entities
 
 - **Search**: the words a reader submits, scoped to one documentation app.
@@ -276,6 +344,8 @@ button in place of the default one, then place a button with a second dialog els
   in its titles, headings and text. It is the search's only input.
 - **Result**: one page of the documentation app that matches a search. It has the page's title, its
   address (or the address of the matching section), and a passage of its text.
+- **Site search**: django-mvp's search for the whole site, in which each documentation app is one
+  kind of result.
 - **Results page**: the documentation app's page that shows a search and its results, served inside
   the application shell at an address that carries the search's words.
 

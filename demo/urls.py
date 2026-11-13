@@ -26,6 +26,8 @@ urlpatterns = [
     path("examples/broken/", examples.BrokenView.as_view(), name="example_broken"),
     mount("docs/", docs),
     mount("staff-guide/", staff_guide),
+    # The site's search, which searches both documentation apps.
+    path("search/", include("mvp.search.urls")),
     # The shell's sign-in page, ahead of the include, which has none of its own.
     path("accounts/login/", SignInView.as_view(), name="account_login"),
     # The application shell's sign-out and account routes.
