@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.8.0] - 2026-11-13
+
 ### Added
 
 - Each documentation app is a kind of result in django-mvp's site search, named `mvp_sphinx-` and the app's namespace. Each result says where its page sits in the contents, such as "Guides · Installation". A reader the app turns away finds none of its pages. See "In the site's search" in the README.
