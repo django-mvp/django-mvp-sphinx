@@ -136,6 +136,15 @@ MVP_CONFIG = {
         "sidebar": {
             "title": "django-mvp-sphinx",
         },
+        # The site's search, in place of each documentation app's own: the
+        # documentation apps are kinds of result in it.
+        "navbar": {
+            "end": [
+                "mvp.actions.search",
+                "mvp.actions.theme-controller",
+                "mvp.actions.login",
+            ],
+        },
     },
     "theme": {
         # Several to switch between, so what this package renders can be looked

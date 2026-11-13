@@ -26,10 +26,11 @@ any part of the trail to go up a level.
 Searching the guide
 -------------------
 
-Every page of the guide has a search button at the right of the top bar. Press
-it, or press Ctrl+K (⌘K on a Mac), type a word and press Enter: the results list
-the pages that hold it, each with a short passage around the word. Searching
-covers the guide only, not the other pages of the site.
+The search at the right of the top bar searches the whole site, this guide
+included. Press it, or press Ctrl+K (⌘K on a Mac), and type a word: the pages of
+the guide that hold it are listed under the guide's name, each with the part of
+the guide it sits in and a short passage around the word. Press Enter to see
+every result on a page of its own.
 
 On this page
 ------------

@@ -122,6 +122,30 @@ class DocsBuild:
             return groups
         return None
 
+    def trails(self) -> dict[str, list[str]]:
+        """Return the titles above each page in the contents, by its address.
+
+        A page's trail is the caption of the part of the contents it is in, when
+        that part has one, then the title of each entry above it, outermost
+        first, as the contents give them. A page the contents list twice keeps
+        the trail of the place nearest the top.
+
+        Returns:
+            For each address the contents list, its trail. Empty when the
+            navigation file is unusable.
+        """
+        trails: dict[str, list[str]] = {}
+        pending = [
+            (group["entries"], [group["caption"]] if group["caption"] else [])
+            for group in self.navigation() or []
+        ]
+        while pending:
+            entries, above = pending.pop(0)
+            for entry in entries:
+                trails.setdefault(entry["url"], above)
+                pending.append((entry["children"], [*above, entry["title"]]))
+        return trails
+
     def front_page_title(self) -> str | None:
         """Return the front page's title as the navigation file holds it.
 

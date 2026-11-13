@@ -3,7 +3,8 @@
   The base of every page a documentation app draws. A project replaces or moves
   the search toggle by overriding this template, extending it, and filling the
   mvp_sphinx.search_toggle block (or emptying it and placing a toggle in
-  another block of the shell).
+  another block of the shell). Where the site's own search finds the app's
+  pages, the block is left out and the site's search stands in for it.
 {% endcomment %}
 {% load static %}
 {% block styles %}
@@ -12,9 +13,11 @@
 {% endblock styles %}
 {% block app.navbar.end %}
   {{ block.super }}
-  {% block mvp_sphinx.search_toggle %}
-    <c-mvp_sphinx.search_toggle :action="search_url" />
-  {% endblock mvp_sphinx.search_toggle %}
+  {% if not site_search %}
+    {% block mvp_sphinx.search_toggle %}
+      <c-mvp_sphinx.search_toggle :action="search_url" />
+    {% endblock mvp_sphinx.search_toggle %}
+  {% endif %}
 {% endblock app.navbar.end %}
 {% block extra_js %}
   {{ block.super }}

@@ -20,9 +20,13 @@ from flex_menu.checks import (
     user_is_authenticated,
 )
 from mvp.menus import AppMenu
+from mvp.search import Result, registered
+from mvp.search.registry import default_registry
 from sphinx.cmd.build import build_main
 
+from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.mounted import DocumentationApp
+from mvp_sphinx.search import DocsSearch
 from tests.factories import UserFactory
 from tests.urls_quickstart import docs as quickstart_docs
 
@@ -827,3 +831,103 @@ class TestTheBuildCommandWithABuildChosenPerRequest:
 class TestABuildChosenPerRequestIsAccepted:
     def test_an_app_takes_a_function_as_its_build_dir(self, tmp_path) -> None:
         DocumentationApp(build_dir=lambda request: tmp_path, namespace="chosen")
+
+
+def site_search(app, query, request) -> list[Result]:
+    """What the site's search finds in ``app`` for ``query``."""
+    return list(default_registry.kinds[app.search_kind].find(query, request))
+
+
+class TestSiteSearchKind:
+    def test_each_documentation_app_is_a_kind_of_the_site_search(
+        self, docs_app, staff_guide_app, handbook_app
+    ) -> None:
+        kinds = {kind.name: kind for kind in registered()}
+
+        for app in (docs_app, staff_guide_app, handbook_app):
+            kind = kinds[f"mvp_sphinx-{app.namespace}"]
+            assert app.search_kind == kind.name
+            assert str(kind.label) == str(app.name)
+            assert kind.icon == app.icon
+
+    def test_a_second_app_under_a_namespace_already_searched_is_accepted(
+        self, tmp_path
+    ) -> None:
+        count = len(registered())
+
+        DocumentationApp(build_dir=tmp_path)
+
+        assert len(registered()) == count
+
+    def test_a_word_finds_the_page_holding_it(self, rf, search_app, search_build):
+        found = DocsSearch(DocsBuild(search_build)).results("quetzal")
+
+        [result] = site_search(search_app, "quetzal", rf.get("/"))
+
+        assert result.title == found[0]["title"]
+        assert result.url == "/docs/lanterns/"
+        assert result.passage == found[0]["passage"]
+
+    def test_a_word_in_a_section_heading_leads_to_the_section(
+        self, rf, search_app
+    ) -> None:
+        [result] = site_search(search_app, "gasket", rf.get("/"))
+
+        assert result.url == "/docs/sections/#gasket"
+
+    def test_a_result_leads_to_its_page_under_its_own_app(
+        self, rf, handbook_app
+    ) -> None:
+        results = site_search(handbook_app, "backups", rf.get("/"))
+
+        assert results
+        assert all(result.url.startswith("/manuals/admin/") for result in results)
+
+    @pytest.mark.parametrize(
+        ("query", "where"),
+        [
+            # A page in a captioned part of the contents.
+            ("install", "Getting started"),
+            # Two titles at most, the outermost first.
+            ("last", "Getting started · Chain one"),
+        ],
+    )
+    def test_where_names_the_titles_above_the_page_in_the_contents(
+        self, rf, contents_app, query, where
+    ) -> None:
+        # The page titled with the word comes first.
+        result = site_search(contents_app, query, rf.get("/"))[0]
+
+        assert result.where == where
+
+    @pytest.mark.parametrize("query", ["standalone", "front"])
+    def test_where_names_the_app_for_a_page_with_nothing_above_it(
+        self, rf, contents_app, query
+    ) -> None:
+        result = site_search(contents_app, query, rf.get("/"))[0]
+
+        assert result.where == str(contents_app.name)
+
+    def test_a_reader_the_app_refuses_finds_nothing(self, rf, staff_guide_app) -> None:
+        request = rf.get("/")
+        request.user = AnonymousUser()
+
+        assert site_search(staff_guide_app, "backups", request) == []
+
+    def test_a_reader_the_app_admits_finds_its_pages(
+        self, rf, db, staff_guide_app
+    ) -> None:
+        request = rf.get("/")
+        request.user = UserFactory(is_staff=True)
+
+        assert site_search(staff_guide_app, "backups", request)
+
+    def test_a_build_that_does_not_exist_finds_nothing(
+        self, rf, docs_app, monkeypatch, tmp_path
+    ) -> None:
+        monkeypatch.setattr(docs_app, "build_dir", tmp_path / "not-built-yet")
+
+        assert site_search(docs_app, "quetzal", rf.get("/")) == []
+
+    def test_an_app_the_request_has_not_mounted_finds_nothing(self, rf) -> None:
+        assert site_search(quickstart_docs, "install", rf.get("/")) == []

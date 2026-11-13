@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from django.urls import reverse
+from mvp.config import MVP_CONFIG
 from sphinx.cmd.build import build_main
 
 from tests.factories import GroupFactory, UserFactory
@@ -222,3 +223,12 @@ def metadata_app(metadata_build, monkeypatch):
 
     monkeypatch.setattr(docs, "build_dir", metadata_build)
     return docs
+
+
+@pytest.fixture
+def without_site_search(monkeypatch):
+    # A site that has not put django-mvp's site search in its navbar.
+    navbar = MVP_CONFIG["layout"]["navbar"]
+    monkeypatch.setitem(
+        navbar, "end", [name for name in navbar["end"] if name != "mvp.actions.search"]
+    )

@@ -20,7 +20,7 @@ from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.menus import ContentsEntry
 from tests.factories import UserFactory
 from tests.test_static.test_content_css import STYLESHEET, Stylesheet
-from tests.test_views import search_dialog
+from tests.test_views import results_under, search_dialog, site_search_dialog
 
 
 class TestOverviewPage:
@@ -45,23 +45,43 @@ class TestDocumentationEntry:
 
 
 class TestDocumentationSearch:
-    def test_the_front_page_offers_the_search(
+    def test_the_front_page_offers_the_sites_search(
         self, client, db, sphinx_build, monkeypatch
     ) -> None:
         monkeypatch.setattr(docs, "build_dir", sphinx_build(BASE_DIR / "demo" / "docs"))
 
-        form = search_dialog(client.get("/docs/"))
+        response = client.get("/docs/")
 
-        assert form["action"] == reverse("docs:search")
+        assert search_dialog(response) is None
+        assert site_search_dialog(response) is not None
 
-    def test_the_staff_guide_offers_a_search_of_the_staff_guide(
+    def test_the_staff_guide_offers_the_sites_search(
         self, client, db, staff_guide_app
+    ) -> None:
+        client.force_login(UserFactory(is_staff=True))
+
+        response = client.get("/staff-guide/")
+
+        assert search_dialog(response) is None
+        assert site_search_dialog(response) is not None
+
+    def test_without_the_sites_search_the_staff_guide_offers_its_own(
+        self, client, db, staff_guide_app, without_site_search
     ) -> None:
         client.force_login(UserFactory(is_staff=True))
 
         form = search_dialog(client.get("/staff-guide/"))
 
         assert form["action"] == reverse("staff_guide:search")
+
+    def test_the_sites_search_finds_the_guides_pages(
+        self, client, db, sphinx_build, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(docs, "build_dir", sphinx_build(BASE_DIR / "demo" / "docs"))
+
+        response = client.get(reverse("mvp-search"), {"q": "signing"})
+
+        assert "/docs/first-visit/signing-in/" in results_under(response, "/docs/")
 
 
 class TestStaffGuideEntry:

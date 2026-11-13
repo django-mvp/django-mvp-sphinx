@@ -38,7 +38,7 @@ the site beats the one that copies a Sphinx theme.
 
 - Python 3.12 or later.
 - Django 5.2, 6.0 or 6.1.
-- [django-mvp](https://github.com/django-mvp/django-mvp) 0.30.1 or later and
+- [django-mvp](https://github.com/django-mvp/django-mvp) 0.35.0 or later and
   [django-flex-menus](https://github.com/django-mvp/django-flex-menus) 0.4.5 or later.
 
 ## Quickstart
@@ -448,6 +448,59 @@ else.
 The search data is read on each search, so a rebuild is searchable straight away.
 A build without it still serves its pages, and the results page says search is
 unavailable.
+
+#### In the site's search
+
+django-mvp has a search for the whole site, which lists what it finds grouped by
+kind. Every documentation app is one of those kinds. Creating the app registers
+it under the name `mvp_sphinx-` followed by the app's namespace, so the default
+app is `mvp_sphinx-docs`, with the app's `name` as its label and its `icon`.
+Mount the site's search and put it in the top bar, as django-mvp's
+[search guide](https://github.com/django-mvp/django-mvp/blob/main/docs/developer/search.md)
+describes:
+
+```python
+# urls.py
+urlpatterns = [
+    mount("docs/", docs),
+    path("search/", include("mvp.search.urls")),
+]
+
+# settings.py
+MVP_CONFIG = {
+    "layout": {"navbar": {"end": ["mvp.actions.search", "mvp.actions.login"]}},
+}
+```
+
+The site's search then finds the documentation's pages as the app's own search
+does, in the same order and with the same passages. Each result names where its
+page sits in the contents: the caption of its part of the contents and the pages
+above it, two at most and the outermost first, such as "Guides · Installation".
+A page with nothing above it names the app instead. A reader the app's `check`
+turns away finds none of its pages.
+
+A site that names its kinds in `MVP_CONFIG["search"]["kinds"]` searches the
+documentation only when that list names the app's kind. A site that leaves the
+list empty searches every documentation app.
+
+Where the top bar holds the site's search and the site's search uses the app's
+kind, the app's own search button gives way to it: the `mvp_sphinx.search_toggle`
+block is left out, whatever a project has put in it. A site without the site's
+search, or one whose search leaves the app out, keeps the app's own button. The
+app's `search/` address keeps working either way, so a docs link to Sphinx's
+search page still lands on a search. A project that moved its button into another
+block of the shell can test `site_search`, which is true when the site's search
+stands in:
+
+```django
+{% block app.navbar.center %}
+  {% if not site_search %}<c-mvp_sphinx.search_icon :action="search_url" />{% endif %}
+{% endblock app.navbar.center %}
+```
+
+The app is created when your project loads it. Create it in a module your
+project imports at start-up, such as the one that builds its menu entry, so the
+kind is registered before Django runs its checks.
 
 #### Choosing the search button and where it sits
 
@@ -1200,6 +1253,12 @@ These are the names a project can use, grouped the way a project meets them.
   `PageExtract`, or `None`. See "Showing a page somewhere else".
 - Its URL names are `<namespace>:front_page`, `<namespace>:page` (which takes
   `path`) and `<namespace>:search`.
+- `address(path, anchor="")` returns the address of a page of the app, at a
+  section when `anchor` is given. `path` is the page's address below the app's
+  prefix, `""` for the front page.
+- `search_kind` is the name of the app's kind in django-mvp's site search, and
+  `in_site_search()` says whether the site's search stands in for the app's own.
+  See "In the site's search".
 
 ### Template tags
 
@@ -1233,7 +1292,8 @@ For a custom view or template:
   an image or download under `_images/` or `_downloads/` or `None`, and
   `navigation()` returns the entries of `navigation.json` or `None`,
   `front_page_title()` returns the root document's title it records or `None`,
-  and `navigation_file()` returns the whole file or `None`.
+  `navigation_file()` returns the whole file or `None`, and `trails()` returns
+  the titles above each page in the contents, by the page's address.
 - `mvp_sphinx.menus.DocumentationMenu` turns a build's navigation file into the
   sidebar menu. `front_page` is the front page's entry, `front_page_url(request)`
   is the address it links to, and `contents` lists the entries the last rebuild
@@ -1254,6 +1314,10 @@ For a custom view or template:
   `results(query)` lists the pages that hold every word of `query`, best match
   first, each with its `title`, `path`, `anchor` and `passage`, or returns `None`
   when the build has no usable search data.
+- `mvp_sphinx.mounted.DocumentationPages(namespace)` is the function the site's
+  search calls for the documentation app mounted under `namespace`. Called with
+  the query and the request, it returns django-mvp `Result`s. Each app registers
+  its own, so a project never builds one.
 - `mvp_sphinx.search.PageText`, through `PageText.text(markup)`, gives the text a
   reader sees in a page body, with its whitespace collapsed.
 - `mvp_sphinx.examples.LiveExamples`, through `LiveExamples.parts(body)`, splits a
@@ -1268,17 +1332,17 @@ For a custom view or template:
 - `mvp_sphinx/base.html` is the base of `page.html` and `search.html`. It extends
   your `base.html`, links the two stylesheets in `styles`, puts the search button
   in the top bar in the `mvp_sphinx.search_toggle` block, and loads the shortcut
-  script in `extra_js`.
+  script in `extra_js`. It leaves that block out when `site_search` is true.
 - `mvp_sphinx/page.html` draws a page. It receives `body`, `body_parts`,
   `has_examples`, `meta_tags`, `headings`, `previous_page`, `next_page`,
-  `search_url` and `page_data`. It has the `title`, `head`, `styles` and
+  `search_url`, `site_search` and `page_data`. It has the `title`, `head`, `styles` and
   `content` blocks, writes `meta_tags` at the end of `head`, and holds the page's
   body in an element with the `mvp-sphinx-content` class.
 - `mvp_sphinx/example.html` is the base for a page of your site that a documentation
   page shows as a live example. It extends your `base.html`, draws no shell, and has
   the `content` block.
-- `mvp_sphinx/search.html` draws the results. It receives `query`, `results` and
-  `search_url`, and has the `title` and `content` blocks. `results` is `None` when
+- `mvp_sphinx/search.html` draws the results. It receives `query`, `results`,
+  `search_url` and `site_search`, and has the `title` and `content` blocks. `results` is `None` when
   the build has no search data, and otherwise a list of the pages found, each with
   its `title`, `passage` and `href`.
 
@@ -1315,8 +1379,10 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 
 ### Settings
 
-There are none. The package reads no Django setting, and everything is configured
-on the `DocumentationApp`.
+The package has no setting of its own, and everything is configured on the
+`DocumentationApp`. It reads two of django-mvp's: `MVP_CONFIG["layout"]["navbar"]["end"]`
+and `MVP_CONFIG["search"]["kinds"]`, to decide whether the site's search stands in
+for an app's own. See "In the site's search".
 
 Anything not listed here is internal and may change without notice.
 
@@ -1363,6 +1429,9 @@ reload, with no restart. Until a build exists, every address under `/docs/` answ
 - `regular.user@example.com` is signed in but not staff.
 - `staff.user@example.com` is staff.
 - `super.user@example.com` is a superuser, and staff too.
+
+The search in the top bar is django-mvp's search for the whole site, with each
+guide as a kind of result in it, at <http://127.0.0.1:8000/search/>.
 
 Only the staff and superuser accounts can open the staff guide at
 <http://127.0.0.1:8000/staff-guide/>. Everyone else is asked to sign in or is shown
