@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.7.0] - 2026-11-13
+
 ### Added
 
 - A project can add something to every entry of the contents, such as a count of the pages below it or a tick on a page the reader has finished. Override `mvp_sphinx/contents/entry.html`, extend the package's, and fill its `mvp_sphinx.entry_end` block, which can read the entry's navigation data and the request. See "Adding something to each entry" in the README.
