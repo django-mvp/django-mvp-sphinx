@@ -1,0 +1,8 @@
+{% load flex_menu %}
+{% comment %}
+  The pages under one entry of the contents, fetched when a reader opens the
+  entry in the sidebar.
+{% endcomment %}
+{% for page in pages %}
+  {% render_item page renderer=renderer %}
+{% endfor %}

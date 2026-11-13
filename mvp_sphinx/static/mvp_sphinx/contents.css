@@ -1,0 +1,31 @@
+/* The sidebar's contents: an entry, the toggle that opens its pages, and the
+   pages it opens. */
+
+.mvp-sphinx-entry { position: relative; }
+.mvp-sphinx-entry > a,
+.mvp-sphinx-entry > .mvp-sphinx-entry-heading { display: flex; align-items: center; gap: 0.5rem; }
+.mvp-sphinx-entry-parent > a,
+.mvp-sphinx-entry-parent > .mvp-sphinx-entry-heading { padding-inline-end: 2.25rem; }
+.mvp-sphinx-entry-title { flex: 1 1 auto; min-width: 0; }
+.mvp-sphinx-on-path { font-weight: 600; }
+.mvp-sphinx-entry-group > a .mvp-sphinx-entry-title,
+.mvp-sphinx-entry-group > .mvp-sphinx-entry-heading .mvp-sphinx-entry-title {
+  font-weight: 700; letter-spacing: 0.02em;
+}
+
+.mvp-sphinx-toggle {
+  position: absolute; inset-inline-end: 0.25rem; top: 0.3rem;
+  color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+}
+.mvp-sphinx-toggle > * { transition: transform 150ms ease; }
+.mvp-sphinx-toggle[aria-expanded="true"] > * { transform: rotate(90deg); }
+.mvp-sphinx-toggle[aria-busy="true"] { opacity: 0.5; }
+.mvp-sphinx-branch[hidden] { display: none; }
+
+/* The sidebar is narrow: titles wrap instead of widening the list. */
+.menu:has(> .mvp-sphinx-entry),
+.mvp-sphinx-entry,
+.mvp-sphinx-branch { min-width: 0; max-width: 100%; white-space: normal; }
+.mvp-sphinx-entry > a,
+.mvp-sphinx-entry > .mvp-sphinx-entry-heading { min-width: 0; line-height: 1.3; white-space: normal; }
+.mvp-sphinx-branch { margin-inline-start: 0.6rem; padding-inline-start: 0.4rem; }

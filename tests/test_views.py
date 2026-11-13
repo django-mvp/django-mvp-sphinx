@@ -609,23 +609,112 @@ class TestHeadingLinks:
         assert links["#term-widget"]["aria-label"].endswith("widget")
 
 
+TOP_ENTRIES = {
+    f"/docs/{address}"
+    for address in (
+        "",
+        "install/",
+        "explicit/",
+        "chain/one/",
+        "markup/",
+        "shared/",
+        "standalone/",
+        "reference/api/",
+        "hidden-page/",
+    )
+}
+
+
+def toggles(response) -> dict[str, dict[str, str]]:
+    """Return each toggle in the contents by its entry's address, with its state."""
+    soup = BeautifulSoup(response.content, "html.parser")
+    return {
+        toggle.find_previous_sibling("a")["href"]: {
+            "expanded": toggle["aria-expanded"],
+            "branch": toggle["data-mvp-sphinx-branch"],
+            "list_hidden": toggle.find_next_sibling("ul").has_attr("hidden"),
+        }
+        for toggle in soup.select("[data-mvp-sphinx-branch]")
+    }
+
+
 class TestContentsInTheSidebar:
-    def test_every_link_answers_and_together_they_reach_every_listed_page(
+    def test_a_page_at_the_top_draws_the_top_entries_alone(
         self, client, db, contents_app
     ) -> None:
         links = contents_links(client.get("/docs/"), contents_app)
 
-        assert {*links} == CONTENTS_PAGES
-        for link in links:
-            assert client.get(link).status_code == 200
+        assert {*links} == TOP_ENTRIES
 
-    @pytest.mark.parametrize("address", ["", "chain/three/", "reference/api/"])
-    def test_any_page_draws_the_whole_contents(
-        self, client, db, contents_app, address
+    @pytest.mark.parametrize(
+        ("address", "drawn"),
+        [
+            ("chain/one/", {"/docs/chain/two/"}),
+            ("chain/two/", {"/docs/chain/two/", "/docs/chain/three/"}),
+            ("chain/three/", {"/docs/chain/two/", "/docs/chain/three/"}),
+        ],
+    )
+    def test_a_deep_page_draws_the_entries_on_its_way_as_well(
+        self, client, db, contents_app, address, drawn
     ) -> None:
         links = contents_links(client.get(f"/docs/{address}"), contents_app)
 
-        assert {*links} == CONTENTS_PAGES
+        assert {*links} == TOP_ENTRIES | drawn
+
+    def test_the_page_being_read_is_the_only_current_entry(
+        self, client, db, contents_app
+    ) -> None:
+        soup = BeautifulSoup(client.get("/docs/chain/two/").content, "html.parser")
+        contents = soup.find("nav", attrs={"aria-label": str(contents_app.name)})
+
+        assert [link["href"] for link in contents.select("[aria-current=page]")] == [
+            "/docs/chain/two/"
+        ]
+
+    def test_entries_on_the_way_are_open_and_the_rest_closed(
+        self, client, db, contents_app
+    ) -> None:
+        found = toggles(client.get("/docs/chain/two/"))
+
+        assert {
+            address: (state["expanded"], state["list_hidden"])
+            for address, state in found.items()
+        } == {
+            "/docs/chain/one/": ("true", False),
+            "/docs/chain/two/": ("true", False),
+        }
+
+    def test_a_closed_entry_keeps_its_toggle_and_draws_none_of_its_pages(
+        self, client, db, contents_app
+    ) -> None:
+        found = toggles(client.get("/docs/install/"))
+
+        assert found == {
+            "/docs/chain/one/": {
+                "expanded": "false",
+                "branch": "/docs/contents/?entry=chain%2Fone%2F",
+                "list_hidden": True,
+            }
+        }
+
+    def test_every_link_answers_and_with_the_branches_they_reach_every_page(
+        self, client, db, contents_app
+    ) -> None:
+        response = client.get("/docs/")
+        links = set(contents_links(response, contents_app))
+        branches = [state["branch"] for state in toggles(response).values()]
+        while branches:
+            fetched = client.get(branches.pop())
+            soup = BeautifulSoup(fetched.content, "html.parser")
+            links |= {link["href"] for link in soup.find_all("a")}
+            branches += [
+                toggle["data-mvp-sphinx-branch"]
+                for toggle in soup.select("[data-mvp-sphinx-branch]")
+            ]
+
+        assert links == CONTENTS_PAGES
+        for link in links:
+            assert client.get(link).status_code == 200
 
     def test_a_title_with_markup_characters_is_escaped(
         self, client, db, contents_app
@@ -669,7 +758,32 @@ class TestContentsInTheSidebar:
 
         links = contents_links(client.get("/docs/chain/two/"), contents_app)
 
-        assert {*links} == CONTENTS_PAGES
+        assert {*links} == TOP_ENTRIES | {"/docs/chain/two/", "/docs/chain/three/"}
+
+
+class TestContentsBranch:
+    def test_an_entry_answers_with_its_pages_each_closed(
+        self, client, db, contents_app
+    ) -> None:
+        response = client.get("/docs/contents/?entry=chain/one/")
+
+        soup = BeautifulSoup(response.content, "html.parser")
+        assert response.status_code == 200
+        assert [link["href"] for link in soup.find_all("a")] == ["/docs/chain/two/"]
+        assert toggles(response)["/docs/chain/two/"]["expanded"] == "false"
+
+    @pytest.mark.parametrize("entry", ["", "install/", "nowhere/"])
+    def test_an_address_with_no_pages_under_it_is_not_found(
+        self, client, db, contents_app, entry
+    ) -> None:
+        assert client.get(f"/docs/contents/?entry={entry}").status_code == 404
+
+    def test_a_reader_the_app_refuses_is_sent_to_sign_in(
+        self, client, db, staff_guide_app
+    ) -> None:
+        response = client.get("/staff-guide/contents/?entry=admin/")
+
+        assert response.status_code == 302
 
 
 class TestRebuiltContents:
@@ -804,7 +918,7 @@ class TestContentsUnavailable:
         fixed = contents_links(client.get("/docs/"), contents_app)
 
         assert (broken, fixed) == (["/docs/"], full)
-        assert {*full} == CONTENTS_PAGES
+        assert {*full} == TOP_ENTRIES
 
 
 SEARCH_PAGES = [

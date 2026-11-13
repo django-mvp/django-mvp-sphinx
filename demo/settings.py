@@ -105,11 +105,12 @@ LOGOUT_REDIRECT_URL = "/"
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["daisyui"]
 CRISPY_TEMPLATE_PACK = "daisyui"
 
-# Which class draws the sidebar tree declared in demo/menus.py, and which draws
-# the dock shown below the sidebar breakpoint.
+# Which class draws the sidebar tree declared in demo/menus.py and the
+# documentation's contents, and which draws the dock shown below the sidebar
+# breakpoint.
 FLEX_MENUS = {
     "renderers": {
-        "sidebar": "mvp.renderers.SidebarRenderer",
+        "sidebar": "mvp_sphinx.renderers.SidebarRenderer",
         "dock": "mvp.renderers.MobileFooterNavRenderer",
     },
     "log_url_failures": DEBUG,

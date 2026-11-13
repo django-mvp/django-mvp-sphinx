@@ -81,6 +81,21 @@ INSTALLED_APPS = [
 ]
 ```
 
+and name its renderer as the sidebar's, in place of django-mvp's:
+
+```python
+FLEX_MENUS = {
+    "renderers": {
+        # ...
+        "sidebar": "mvp_sphinx.renderers.SidebarRenderer",
+    },
+}
+```
+
+It draws every menu exactly as django-mvp's does, and draws the contents' entries
+with the toggles that open them. The project won't start with another sidebar
+renderer, unless it is a subclass of this one.
+
 ### 2. Add the Sphinx line
 
 Add the package's extension to your Sphinx project's `docs/conf.py`:
@@ -228,14 +243,23 @@ menu on every page of the docs.
 
 - Each captioned toctree on your front page becomes a group named by its
   caption. An uncaptioned toctree puts its pages at the top level.
-- A page with pages of its own opens as a group, and its first entry is the
-  page itself.
+- Every page is an entry that leads to it. A page with pages of its own has a
+  toggle beside its entry that opens them below it.
 - The front page has its own entry at the top, under its own title. A
   `navigation.json` written before the extension recorded that title labels it
   "Overview".
 - A page no toctree lists stays out of the sidebar.
 - A page's front matter can change how it appears. See "Choosing how a page
   appears in the sidebar" below.
+
+The sidebar always draws the entries your front page's toctrees list. Below
+those, it draws only the entries on the way to the page being read, open, with
+the page marked. Any other entry keeps its toggle, and the first time a reader
+opens it the sidebar fetches its pages from the documentation app's
+`contents/` address, which its `BranchView` answers, and opens them in place. So the sidebar stays the same size
+however many pages the docs have, on the pages of the docs and on every other
+page that draws their contents. The page being read is scrolled into the middle
+of the sidebar when the page loads, and when the sidebar opens on a phone.
 
 Only the JSON builder gets a file, and a build that failed writes nothing.
 
@@ -246,6 +270,9 @@ The extension runs inside your Sphinx build and nowhere else, so the site that
 serves the pages still doesn't need Sphinx. Without the line, or with a
 `navigation.json` that can't be read, the sidebar holds only the front page
 entry and every page is still served.
+
+The `contents/` address belongs to the documentation app, like `search/`, so a
+page your docs build at `contents/` is not served there.
 
 ### Choosing how a page appears in the sidebar
 
@@ -271,26 +298,55 @@ Pronouns
 
 | Setting | Values | What it does |
 |---|---|---|
-| `menu_hidden` | `false` (default), `true` | Leaves the page's own entry out of the sidebar |
-| `menu_style` | `collapse` (default), `group` | Draws a page with pages of its own as a collapsible group, or as a heading with its pages directly below it |
+| `menu_hidden` | `false` (default), `true` | Leaves the link to the page out of the sidebar |
+| `menu_style` | `collapse` (default), `group` | Draws a page with pages of its own in bold, as a heading over them |
 
 - A hidden page is still built and served, and links to it and search results
   still lead to it.
-- A hidden page with pages of its own keeps its section, under its title, and
-  only the entry for the page goes. A reader on that page finds the section open
-  with nothing marked. Use it where a section only groups pages by theme.
-- A group's heading isn't a link, so its first entry is the page itself, unless
-  that is hidden too.
-- A heading has no visual end, so a page listed after a group reads as part of
-  it. List groups together, or after the pages they follow.
+- A hidden page with pages of its own keeps its entry and its toggle, under its
+  title, and only the link to the page goes. A reader on that page finds its
+  pages open with nothing marked. Use it where a section only groups pages by
+  theme.
+- A group's pages open and close like any other entry's, and are drawn on the
+  way to the page being read.
 - `menu_style` does nothing on a page with no pages of its own to show, and a
   page whose pages are all hidden is a plain link.
 - The front page takes neither setting.
 - Any other value fails the build, naming the page.
 
-In a subclass of `DocumentationMenu`, a section with its own page hidden is a
-`HiddenPageCollapse`, or a `HiddenPageGroup` when it is a heading. They are a
-`MenuCollapse` and a `MenuGroup` that hold no link to the page.
+### Adding something to each entry
+
+A project can add something of its own to every entry of the contents, such as
+a count of the pages below it or a tick on a page the reader has finished.
+Override the entry's template, `mvp_sphinx/contents/entry.html`, in your own
+templates folder, extend the package's, and fill the `mvp_sphinx.entry_end`
+block:
+
+```django
+{# yourproject/templates/mvp_sphinx/contents/entry.html #}
+{% extends "mvp_sphinx/contents/entry.html" %}
+{% block mvp_sphinx.entry_end %}
+  {% if entry.children %}
+    <span class="badge badge-sm">{{ entry.children|length }}</span>
+  {% endif %}
+{% endblock mvp_sphinx.entry_end %}
+```
+
+The block sits after the entry's title, inside its link. It is drawn for every
+entry, on every page and in every branch the sidebar fetches, and it can read:
+
+| Name | What it holds |
+|---|---|
+| `entry` | The page's mapping from `navigation.json`: its `title`, its `url` below the app's address, `hidden`, `style`, and its `children`, the pages below it in the same form, all of them, open or not |
+| `page_url` | The page's full address |
+| `url` | The address the entry links to, empty for a hidden page |
+| `label` | The entry's title |
+| `current` | True on the page itself |
+| `selected` | True on the way to the page being read, the page included |
+| `open` | True when the entry's pages are drawn open |
+| `request` | The request the sidebar is drawn for, so `request.user` tells you who is reading |
+
+Keep it cheap: it runs once for every entry drawn.
 
 ### Adding your own entries to the sidebar
 

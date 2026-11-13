@@ -22,6 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A project can add something to every entry of the contents, such as a count of the pages below it or a tick on a page the reader has finished. Override `mvp_sphinx/contents/entry.html`, extend the package's, and fill its `mvp_sphinx.entry_end` block, which can read the entry's navigation data and the request. See "Adding something to each entry" in the README.
+
+### Changed
+
+- **Name the package's sidebar renderer in your settings**: `FLEX_MENUS["renderers"]["sidebar"] = "mvp_sphinx.renderers.SidebarRenderer"`. It draws every menu as django-mvp's renderer does, and the project won't start with another sidebar renderer unless it is a subclass of this one.
+- The sidebar no longer draws every page of the docs on every page of your site. It draws the entries your front page's toctrees list, and below them only the entries on the way to the page being read. Any other entry keeps a toggle, and its pages are fetched from the documentation app's `contents/` address the first time a reader opens it. The page being read is scrolled into the middle of the sidebar.
+- A page with pages of its own is one entry that links to the page, with a toggle beside it, instead of a collapsible group whose first item is the page. `menu_style: group` draws that entry as a heading, and its pages open and close like any other entry's.
+- `contents/` under the documentation app is the address the sidebar fetches branches from, so a page your docs build at `contents/` is no longer served there.
+
+### Removed
+
+- `HiddenPageGroup` and `HiddenPageCollapse` are gone. Every page of the contents is now a `ContentsEntry`, and one whose page is hidden has no address of its own.
+
 ## [v0.6.1] - 2026-11-04
 
 ### Fixed

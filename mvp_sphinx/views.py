@@ -1,4 +1,4 @@
-"""The view that renders a page of the docs build."""
+"""The views that render a page of the docs build, its search and its contents."""
 
 import mimetypes
 from typing import TYPE_CHECKING, Any
@@ -12,10 +12,13 @@ from django.http import (
     HttpResponsePermanentRedirect,
 )
 from django.http.response import HttpResponseBase
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
+from django.views import View
 from django.views.generic import TemplateView
+from flex_menu.renderers import get_renderer
 from mvp.views.base import PageMixin
 
 from mvp_sphinx.docs_build import DocsBuild
@@ -266,3 +269,40 @@ class SearchView(PageMixin, TemplateView):
             },
             {"text": _("Search")},
         ]
+
+
+class BranchView(View):
+    """Answer with the pages under one entry of the contents, as sidebar markup.
+
+    The sidebar asks for it the first time a reader opens an entry whose pages
+    were not drawn with the page. The entry is named by its page address below
+    the app's prefix, in the ``entry`` query parameter.
+
+    Attributes:
+        app: The documentation app this view answers for.
+    """
+
+    app: "DocumentationApp" = None  # type: ignore[assignment]
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Draw the entry's pages, each with its own pages closed.
+
+        Args:
+            request: The request being served.
+            *args: Positional URL arguments, unused.
+            **kwargs: URL arguments, unused.
+
+        Returns:
+            The entries' markup, drawn by the project's sidebar renderer.
+
+        Raises:
+            Http404: No entry with pages of its own has that address.
+        """
+        pages = self.app.menu.branch(request, request.GET.get("entry", ""))
+        if pages is None:
+            raise Http404
+        return render(
+            request,
+            "mvp_sphinx/contents/branch.html",
+            {"pages": pages, "renderer": get_renderer("sidebar")},
+        )

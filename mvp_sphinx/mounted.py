@@ -17,7 +17,7 @@ from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.extracts import LinkRewriter, PageExtract, SectionFinder, plain_text
 from mvp_sphinx.menus import DocumentationMenu
 from mvp_sphinx.page_body import BodyRewriter
-from mvp_sphinx.views import PageView, SearchView
+from mvp_sphinx.views import BranchView, PageView, SearchView
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +87,7 @@ class DocumentationApp(MountedApp):
             [
                 path("", view, name="front_page"),
                 path("search/", SearchView.as_view(app=self), name="search"),
+                path("contents/", BranchView.as_view(app=self), name="branch"),
                 path("<path:path>", view, name="page"),
             ],
             self.namespace,
