@@ -1,0 +1,42 @@
+{% load i18n flex_menu %}
+{% comment %}
+  One page of the contents, drawn by mvp_sphinx.renderers.SidebarRenderer: a
+  link to the page, then, for a page with pages of its own, a toggle and the
+  list it opens. The list holds the pages only on the way to the page being
+  read. Anywhere else it is empty and hidden, and the toggle fetches it from
+  the entry's branch_url the first time it opens.
+
+  A project puts something of its own in each entry, such as a count or a tick,
+  by overriding this template, extending it, and filling the
+  mvp_sphinx.entry_end block, which sits after the title, inside the link
+  (or the heading of a hidden page). The
+  block sees the processed menu item as item, and its label, url, page_url,
+  style, current, branch, open, request, and entry, the navigation file's
+  mapping for the page with the pages under it.
+{% endcomment %}
+<li class="mvp-sphinx-entry{% if style == "group" %} mvp-sphinx-entry-group{% endif %}{% if branch %} mvp-sphinx-entry-parent{% endif %}">
+  {% if url %}
+    <a href="{{ url }}"
+       {% if current %}class="menu-active" aria-current="page"{% elif selected %}class="mvp-sphinx-on-path"{% endif %}>
+  {% else %}
+    <span class="mvp-sphinx-entry-heading{% if selected %} mvp-sphinx-on-path{% endif %}">
+  {% endif %}
+      <span class="mvp-sphinx-entry-title">{{ label }}</span>
+      {% block mvp_sphinx.entry_end %}
+      {% endblock mvp_sphinx.entry_end %}
+  {% if url %}</a>{% else %}</span>{% endif %}
+  {% if branch %}
+    <button type="button"
+            class="btn btn-ghost btn-xs btn-square mvp-sphinx-toggle"
+            data-mvp-sphinx-branch="{{ branch_url }}"
+            aria-expanded="{% if open %}true{% else %}false{% endif %}"
+            aria-label="{% blocktranslate with title=label %}Show the pages in {{ title }}{% endblocktranslate %}">
+      <c-icon name="chevron-right" aria-hidden="true" />
+    </button>
+    <ul class="mvp-sphinx-branch"{% if not open %} hidden{% endif %}>
+      {% for page in item.pages %}
+        {% render_item page renderer=renderer %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+</li>

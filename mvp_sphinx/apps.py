@@ -17,3 +17,11 @@ class MvpSphinxConfig(AppConfig):
     label = "mvp_sphinx"
     verbose_name = _("Sphinx")
     default_auto_field = "django.db.models.BigAutoField"
+
+    def ready(self) -> None:
+        """Register the package's checks."""
+        from django.core import checks
+
+        from mvp_sphinx.checks import check_sidebar_renderer
+
+        checks.register(check_sidebar_renderer)

@@ -12,12 +12,12 @@ import pytest
 from bs4 import BeautifulSoup
 from django.templatetags.static import static
 from django.urls import reverse
-from mvp.menus import MenuCollapse, MenuGroup
+from mvp.menus import MenuGroup
 
 from demo.mounted import docs
 from demo.settings import BASE_DIR
 from mvp_sphinx.docs_build import DocsBuild
-from mvp_sphinx.menus import HiddenPageCollapse
+from mvp_sphinx.menus import ContentsEntry
 from tests.factories import UserFactory
 from tests.test_static.test_content_css import STYLESHEET, Stylesheet
 from tests.test_views import search_dialog
@@ -106,19 +106,25 @@ class TestDemoGuide:
         assert (out / DocsBuild.NAVIGATION_FILE).is_file()
 
 
+def entries(items) -> list:
+    """Every item below ``items``, the pages under each entry of the contents too."""
+    found = []
+    for item in items:
+        below = item.pages if isinstance(item, ContentsEntry) else item.children
+        found += [item, *entries(below)]
+    return found
+
+
 def leaves(items) -> list[str]:
-    found = []
-    for item in items:
-        found += leaves(item.visible_children) if item.is_parent else [item.url]
-    return found
-
-
-def branches(items) -> list:
-    found = []
-    for item in items:
-        if item.is_parent:
-            found += [item, *branches(item.visible_children)]
-    return found
+    """The address of every page the contents links to, the front page first."""
+    return [
+        "/docs/",
+        *(
+            each.extra_context["page_url"]
+            for each in entries(items)
+            if isinstance(each, ContentsEntry) and each.has_url
+        ),
+    ]
 
 
 def admonition_classes(pages) -> set[str]:
@@ -166,13 +172,15 @@ def shown_examples(soup: BeautifulSoup) -> list:
 
 @pytest.fixture
 def guide_menu(demo_guide_app, rf):
-    return demo_guide_app.menu.process(rf.get("/docs/"))
+    # Processing brings the menu up to date with the build.
+    demo_guide_app.menu.process(rf.get("/docs/"))
+    return demo_guide_app.menu
 
 
 @pytest.fixture
 def guide_responses(guide_menu, client, db):
     return {
-        address: client.get(address) for address in leaves(guide_menu.visible_children)
+        address: client.get(address) for address in leaves(guide_menu.children)
     }
 
 
@@ -218,7 +226,7 @@ class TestDemoGuideStates:
     def test_the_contents_holds_two_or_more_captioned_groups(self, guide_menu) -> None:
         groups = [
             each
-            for each in branches(guide_menu.visible_children)
+            for each in entries(guide_menu.children)
             if isinstance(each, MenuGroup)
         ]
 
@@ -227,25 +235,25 @@ class TestDemoGuideStates:
     def test_the_contents_holds_a_page_styled_as_a_group(self, guide_menu) -> None:
         help_section = next(
             each
-            for each in branches(guide_menu.visible_children)
+            for each in entries(guide_menu.children)
             if each.extra_context["label"] == "Getting help"
         )
 
-        assert not help_section.extra_context.get("collapsible")
+        assert help_section.extra_context["style"] == "group"
 
     def test_the_contents_holds_a_section_with_its_own_page_hidden(
         self, guide_menu
     ) -> None:
         assert any(
-            isinstance(each, HiddenPageCollapse)
-            for each in branches(guide_menu.visible_children)
+            isinstance(each, ContentsEntry) and each.pages and not each.has_url
+            for each in entries(guide_menu.children)
         )
 
-    def test_the_contents_holds_a_collapsible_branch(self, guide_menu) -> None:
+    def test_the_contents_holds_a_page_with_pages_of_its_own(self, guide_menu) -> None:
         nested = [
             each
-            for each in branches(guide_menu.visible_children)
-            if isinstance(each, MenuCollapse)
+            for each in entries(guide_menu.children)
+            if isinstance(each, ContentsEntry) and each.pages and each.has_url
         ]
 
         assert nested

@@ -9,36 +9,75 @@ from pathlib import Path
 
 import pytest
 from flex_menu import MenuItem
-from mvp.menus import MenuCollapse, MenuGroup
+from mvp.menus import MenuGroup
 
 from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.menus import ContentsEntry
 
 
 def label(item) -> str:
     return item.extra_context["label"]
 
 
+def below(item) -> list:
+    """Return the processed items drawn under ``item``."""
+    return item.pages if isinstance(item, ContentsEntry) else item.visible_children
+
+
 def outline(items) -> list:
-    """Reduce processed items to their address, or their label and outline."""
-    return [
-        [label(item), outline(item.visible_children)] if item.is_parent else item.url
-        for item in items
-    ]
+    """Reduce processed items to their address, or label, and what is drawn below."""
+    found = []
+    for item in items:
+        name = item.url or label(item)
+        found.append([name, outline(below(item))] if below(item) else name)
+    return found
 
 
 def leaves(items) -> list[str]:
+    """Return every address the processed items draw a link to, in order."""
     found = []
     for item in items:
-        found += leaves(item.visible_children) if item.is_parent else [item.url]
+        found += [item.url] if item.url else []
+        found += leaves(below(item))
+    return found
+
+
+def every_entry(items) -> list:
+    """Return every unprocessed entry of the contents, the pages under each too."""
+    found = []
+    for item in items:
+        under = item.pages if isinstance(item, ContentsEntry) else item.children
+        found += [item, *every_entry(under)]
     return found
 
 
 def child(item, text):
-    return next(each for each in item.visible_children if label(each) == text)
+    return next(each for each in below(item) if label(each) == text)
 
 
 def raw_child(item, text):
     return next(each for each in item.children if label(each) == text)
+
+
+def marked(items) -> list[str]:
+    """Return the names of the links marked as the page being read."""
+    found = []
+    for item in items:
+        current = item.extra_context.get("current", item.selected and not below(item))
+        if item.url and current:
+            found.append(item.name)
+        found += marked(below(item))
+    return found
+
+
+def opened(items) -> set[str]:
+    """Return the names of the items on the way to the page, the page itself not."""
+    found = set()
+    for item in items:
+        if item.selected and below(item):
+            found.add(item.name)
+        found |= opened(below(item))
+    return found
 
 
 @pytest.fixture
@@ -72,7 +111,7 @@ class TestDocumentationMenu:
     ) -> None:
         top = processed().visible_children[1:]
 
-        assert [each.url if not each.is_parent else label(each) for each in top] == [
+        assert [each.url or label(each) for each in top] == [
             "Getting started",
             "/docs/standalone/",
             "Reference",
@@ -93,23 +132,28 @@ class TestDocumentationMenu:
             "Shared page",
         ]
 
-    def test_a_page_with_children_is_a_collapsible_group_opening_on_its_own_page(
-        self, processed, contents_app
+    def test_every_page_is_an_entry_linking_to_it_with_its_pages_under_it(
+        self, contents_app, processed
     ) -> None:
-        one = child(child(processed(), "Getting started"), "Chain one")
-        raw = raw_child(contents_app.menu, "Getting started")
+        processed()
+        one = raw_child(raw_child(contents_app.menu, "Getting started"), "Chain one")
 
-        assert type(raw_child(raw, "Chain one")) is MenuCollapse
-        assert outline(one.visible_children) == [
-            "/docs/chain/one/",
-            [
-                label(one.visible_children[1]),
-                ["/docs/chain/two/", "/docs/chain/three/"],
-            ],
-        ]
+        assert type(one) is ContentsEntry
+        assert [
+            (each.extra_context["page_url"], len(each.pages))
+            for each in every_entry([one])
+        ] == [("/docs/chain/one/", 1), ("/docs/chain/two/", 1), ("/docs/chain/three/", 0)]
 
-    def test_every_leaf_is_the_mount_prefix_plus_the_entrys_address(
-        self, processed, contents_build
+    def test_an_entry_fetches_its_pages_from_the_apps_contents_address(
+        self, contents_app, processed
+    ) -> None:
+        processed()
+        one = raw_child(raw_child(contents_app.menu, "Getting started"), "Chain one")
+
+        assert one.extra_context["branch_url"] == "/docs/contents/?entry=chain%2Fone%2F"
+
+    def test_every_page_is_the_mount_prefix_plus_the_entrys_address(
+        self, processed, contents_app, contents_build
     ) -> None:
         def addresses(entries):
             for entry in entries:
@@ -121,33 +165,77 @@ class TestDocumentationMenu:
             for group in DocsBuild(contents_build).navigation()
             for url in addresses(group["entries"])
         }
+        processed()
 
-        assert set(leaves(processed().visible_children)) == {
-            "/docs/",
-            *(f"/docs/{url}" for url in listed),
-        }
+        assert {
+            each.extra_context["page_url"]
+            for each in every_entry(contents_app.menu.contents)
+            if isinstance(each, ContentsEntry)
+        } == {f"/docs/{url}" for url in listed}
 
-    def test_every_leaf_sits_under_the_prefix_a_second_app_is_mounted_at(
+    def test_every_link_sits_under_the_prefix_a_second_app_is_mounted_at(
         self, handbook_app, contents_build, monkeypatch, rf
     ) -> None:
         monkeypatch.setattr(handbook_app, "build_dir", contents_build)
 
-        menu = handbook_app.menu.process(rf.get("/manuals/admin/"))
+        menu = handbook_app.menu.process(rf.get("/manuals/admin/chain/three/"))
 
         assert all(
             url.startswith("/manuals/admin/") for url in leaves(menu.visible_children)
         )
 
-    def test_the_tree_is_the_same_for_different_page_requests(self, processed) -> None:
-        on_front_page = outline(processed("/docs/").visible_children)
-        on_a_deep_page = outline(processed("/docs/chain/two/").visible_children)
+    def test_the_top_entries_are_the_same_on_every_page(self, processed) -> None:
+        def top(tree):
+            return [
+                [each.url or label(each), [e.url for e in each.visible_children]]
+                for each in tree.visible_children
+            ]
 
-        assert on_front_page == on_a_deep_page
+        assert top(processed("/docs/")) == top(processed("/docs/chain/three/"))
+
+    def test_a_page_at_the_top_draws_no_page_below_the_top_entries(
+        self, processed
+    ) -> None:
+        assert "/docs/chain/two/" not in leaves(processed("/docs/").visible_children)
+
+    def test_a_deep_page_draws_every_entry_on_its_way(self, processed) -> None:
+        one = child(child(processed("/docs/chain/three/"), "Getting started"), "Chain one")
+
+        assert outline([one]) == [
+            ["/docs/chain/one/", [["/docs/chain/two/", ["/docs/chain/three/"]]]]
+        ]
+
+    def test_a_page_outside_the_documentation_draws_the_top_entries_alone(
+        self, processed
+    ) -> None:
+        assert set(leaves(processed("/").visible_children)) == set(
+            leaves(processed("/docs/").visible_children)
+        )
 
     def test_a_label_with_markup_characters_is_a_plain_string(self, processed) -> None:
         item = child(child(processed(), "Getting started"), "Fish <b>& chips</b>")
 
         assert type(label(item)) is str
+
+
+class TestBranch:
+    def test_an_entry_gives_its_pages_each_closed(self, contents_app, rf) -> None:
+        pages = contents_app.menu.branch(rf.get("/docs/contents/"), "chain/one/")
+
+        assert [(each.url, each.pages) for each in pages] == [("/docs/chain/two/", [])]
+        assert pages[0].extra_context["branch"]
+        assert not pages[0].extra_context["open"]
+
+    def test_an_entry_listed_below_the_top_is_found(self, contents_app, rf) -> None:
+        pages = contents_app.menu.branch(rf.get("/docs/contents/"), "chain/two/")
+
+        assert [each.url for each in pages] == ["/docs/chain/three/"]
+
+    @pytest.mark.parametrize("address", ["", "install/", "chain/three/", "nowhere/"])
+    def test_an_address_with_no_pages_under_it_gives_none(
+        self, contents_app, rf, address
+    ) -> None:
+        assert contents_app.menu.branch(rf.get("/docs/contents/"), address) is None
 
 
 class TestMenuSettings:
@@ -158,47 +246,42 @@ class TestMenuSettings:
 
         return process
 
-    def test_a_group_page_is_a_heading_over_its_own_page_and_pages(
+    def test_a_group_page_is_an_entry_in_the_group_style(
         self, menu, menu_settings_app
     ) -> None:
-        menu()
+        heading = child(menu("/docs/heading/one/"), "Heading")
 
-        assert type(raw_child(menu_settings_app.menu, "Heading")) is MenuGroup
-        assert outline(child(menu(), "Heading").visible_children) == [
-            "/docs/heading/",
-            "/docs/heading/one/",
+        assert heading.extra_context["style"] == "group"
+        assert outline([heading]) == [["/docs/heading/", ["/docs/heading/one/"]]]
+
+    def test_a_hidden_page_with_pages_of_its_own_keeps_its_section_without_a_link(
+        self, menu
+    ) -> None:
+        quiet = child(menu("/docs/quiet/one/"), "Quiet")
+
+        assert outline([quiet]) == [
+            ["Quiet", ["/docs/quiet/one/", "/docs/quiet/two/"]]
         ]
+        assert quiet.extra_context["branch"]
 
-    def test_a_hidden_page_with_pages_of_its_own_keeps_its_section(
-        self, menu, menu_settings_app
+    def test_a_hidden_group_page_is_a_section_without_a_link_in_the_group_style(
+        self, menu
     ) -> None:
-        quiet = child(menu(), "Quiet")
+        quiet = child(menu("/docs/quiet-heading/one/"), "Quiet heading")
 
-        assert isinstance(raw_child(menu_settings_app.menu, "Quiet"), MenuCollapse)
-        assert outline(quiet.visible_children) == [
-            "/docs/quiet/one/",
-            "/docs/quiet/two/",
-        ]
-
-    def test_a_hidden_group_page_is_a_heading_over_its_pages_alone(
-        self, menu, menu_settings_app
-    ) -> None:
-        quiet = child(menu(), "Quiet heading")
-
-        raw = raw_child(menu_settings_app.menu, "Quiet heading")
-
-        assert isinstance(raw, MenuGroup)
-        assert not isinstance(raw, MenuCollapse)
-        assert outline(quiet.visible_children) == ["/docs/quiet-heading/one/"]
+        assert quiet.extra_context["style"] == "group"
+        assert outline([quiet]) == [["Quiet heading", ["/docs/quiet-heading/one/"]]]
 
     def test_a_hidden_page_is_left_out_of_its_section(self, menu) -> None:
-        assert outline(child(menu(), "Ordinary").visible_children) == [
-            "/docs/ordinary/",
-            "/docs/ordinary/kept/",
-        ]
+        ordinary = child(menu("/docs/ordinary/"), "Ordinary")
+
+        assert outline([ordinary]) == [["/docs/ordinary/", ["/docs/ordinary/kept/"]]]
 
     def test_a_page_whose_pages_are_all_hidden_is_a_link(self, menu) -> None:
-        assert "/docs/emptied/" in outline(menu().visible_children)
+        emptied = child(menu("/docs/emptied/"), "Emptied")
+
+        assert outline([emptied]) == ["/docs/emptied/"]
+        assert not emptied.extra_context["branch"]
 
     def test_the_settings_on_a_page_without_pages_of_its_own(self, menu) -> None:
         items = outline(menu().visible_children)
@@ -211,8 +294,8 @@ class TestMenuSettings:
     ) -> None:
         tree = menu("/docs/quiet/")
 
-        assert child(tree, "Quiet").selected
-        assert selected_leaves(tree.visible_children) == []
+        assert child(tree, "Quiet").extra_context["open"]
+        assert marked(tree.visible_children) == []
 
     def test_a_file_written_before_the_settings_draws_as_it_did(
         self, menu_settings_app, tmp_path, monkeypatch, rf
@@ -237,95 +320,74 @@ class TestMenuSettings:
         (tmp_path / DocsBuild.NAVIGATION_FILE).write_text(json.dumps(contents))
         monkeypatch.setattr(menu_settings_app, "build_dir", tmp_path)
 
-        tree = menu_settings_app.menu.process(rf.get("/docs/"))
+        tree = menu_settings_app.menu.process(rf.get("/docs/page/"))
 
-        assert type(raw_child(menu_settings_app.menu, "Section")) is MenuCollapse
-        assert outline(child(tree, "Section").visible_children) == [
-            "/docs/section/",
-            "/docs/page/",
+        assert outline([child(tree, "Section")]) == [
+            ["/docs/section/", ["/docs/page/"]]
         ]
-
-
-def selected_leaves(items) -> list[str]:
-    """Return the names of the selected links in the processed tree."""
-    found = []
-    for item in items:
-        if item.is_parent:
-            found += selected_leaves(item.visible_children)
-        elif item.selected:
-            found.append(item.name)
-    return found
-
-
-def selected_groups(items) -> set[str]:
-    """Return the names of the selected groups in the processed tree."""
-    found = set()
-    for item in items:
-        if item.is_parent:
-            if item.selected:
-                found.add(item.name)
-            found |= selected_groups(item.visible_children)
-    return found
+        assert child(tree, "Section").extra_context["style"] == "collapse"
 
 
 class TestCurrentPage:
-    def test_a_page_nested_in_two_groups_is_the_only_selected_link(
+    def test_a_page_nested_in_two_entries_is_the_only_marked_link(
         self, processed
     ) -> None:
         tree = processed("/docs/chain/three/").visible_children
 
-        assert selected_leaves(tree) == ["g0-2-0-0"]
+        assert marked(tree) == ["g0-2-0-0"]
 
-    def test_every_group_holding_the_page_is_selected_and_no_other(
+    def test_every_item_holding_the_page_is_open_and_no_other(
         self, processed
     ) -> None:
         tree = processed("/docs/chain/three/").visible_children
 
-        assert selected_groups(tree) == {"g0", "g0-2", "g0-2-0"}
+        assert opened(tree) == {"g0", "g0-2", "g0-2-0"}
 
-    def test_the_link_to_a_page_with_pages_of_its_own_is_the_selected_link(
+    def test_a_page_with_pages_of_its_own_is_marked_and_open(
         self, processed
     ) -> None:
         tree = processed("/docs/chain/one/").visible_children
+        one = child(child(processed("/docs/chain/one/"), "Getting started"), "Chain one")
 
-        assert selected_leaves(tree) == ["g0-2-page"]
-        assert selected_groups(tree) == {"g0", "g0-2"}
+        assert marked(tree) == ["g0-2"]
+        assert opened(tree) == {"g0", "g0-2"}
+        assert one.extra_context["open"]
 
-    def test_the_front_page_entry_is_the_only_selected_item_on_the_front_page(
+    def test_the_front_page_entry_is_the_only_marked_item_on_the_front_page(
         self, processed
     ) -> None:
         tree = processed("/docs/").visible_children
 
-        assert selected_leaves(tree) == ["front-page"]
-        assert selected_groups(tree) == set()
+        assert marked(tree) == ["front-page"]
+        assert opened(tree) == set()
 
-    def test_a_page_listed_twice_is_selected_at_both_places(self, processed) -> None:
+    def test_a_page_listed_twice_is_marked_at_both_places(self, processed) -> None:
         tree = processed("/docs/shared/").visible_children
 
-        assert sorted(selected_leaves(tree)) == ["g0-4", "g2-1"]
-        assert selected_groups(tree) == {"g0", "g2"}
+        assert sorted(marked(tree)) == ["g0-4", "g2-1"]
+        assert opened(tree) == {"g0", "g2"}
 
-    def test_a_page_at_the_top_level_is_selected_without_any_group(
+    def test_a_page_at_the_top_level_is_marked_without_any_group(
         self, processed
     ) -> None:
         tree = processed("/docs/standalone/").visible_children
 
-        assert selected_leaves(tree) == ["g1-0"]
-        assert selected_groups(tree) == set()
+        assert marked(tree) == ["g1-0"]
+        assert opened(tree) == set()
 
-    def test_a_page_no_toctree_lists_selects_nothing_and_draws_the_full_contents(
+    def test_a_page_no_toctree_lists_marks_nothing_and_draws_the_top_entries(
         self, processed
     ) -> None:
         tree = processed("/docs/orphan/").visible_children
 
-        assert selected_leaves(tree) == []
-        assert selected_groups(tree) == set()
-        assert outline(tree) == outline(processed("/docs/").visible_children)
+        assert marked(tree) == []
+        assert opened(tree) == set()
+        assert outline(tree) == outline(processed("/").visible_children)
 
-    def test_a_request_with_a_query_selects_the_same_link(self, processed) -> None:
+    def test_a_request_with_a_query_marks_the_same_link(self, processed) -> None:
         tree = processed("/docs/chain/three/?q=a#top").visible_children
 
-        assert selected_leaves(tree) == ["g0-2-0-0"]
+        assert marked(tree) == ["g0-2-0-0"]
 
 
 @pytest.fixture
@@ -388,7 +450,7 @@ class TestRefresh:
         self, processed, replaceable, reads
     ) -> None:
         first = processed()
-        second = processed("/docs/chain/two/")
+        second = processed("/docs/install/")
 
         assert len(reads) == 1
         assert outline(first.visible_children) == outline(second.visible_children)
