@@ -116,14 +116,14 @@
   :scope :where(*) + :where(
       .admonition, div[class*="highlight-"], .literal-block-wrapper,
       .mvp-sphinx-scroll, figure, .sd-container-fluid, .sd-card, details,
-      .sd-tab-set, aside.topic, blockquote.highlights, div.math, dl:has(> dt.sig-object),
+      .sd-tab-set, aside.topic, aside.sidebar, blockquote.highlights, div.math, dl:has(> dt.sig-object),
       blockquote.epigraph, blockquote.pull-quote, .versionadded, .versionchanged,
       div.deprecated, .versionremoved
     ),
   :scope :where(
       .admonition, div[class*="highlight-"], .literal-block-wrapper,
       .mvp-sphinx-scroll, figure, .sd-container-fluid, .sd-card, details,
-      .sd-tab-set, aside.topic, blockquote.highlights, div.math, dl:has(> dt.sig-object),
+      .sd-tab-set, aside.topic, aside.sidebar, blockquote.highlights, div.math, dl:has(> dt.sig-object),
       blockquote.epigraph, blockquote.pull-quote, .versionadded, .versionchanged,
       div.deprecated, .versionremoved
     ) + :where(*) {
@@ -709,7 +709,9 @@
     float: inline-end;
     clear: inline-end;
     width: min(42%, 17rem);
-    margin: 0.25rem 0 1rem 1.75rem;
+    /* The same gap above as the paragraph it floats beside, so their tops
+       line up. */
+    margin: var(--ms-flow-box) 0 1rem 1.75rem;
     padding: 1rem 1.125rem;
     border: var(--ms-border) solid var(--ms-rule);
     border-radius: var(--radius-box, 0.5rem);
@@ -717,10 +719,6 @@
     box-shadow: var(--ms-shadow);
     font-size: 0.875rem;
     line-height: 1.6;
-  }
-
-  :scope aside.sidebar + * {
-    margin-top: 0;
   }
 
   @container mvp-sphinx (max-width: 32rem) {
@@ -1047,8 +1045,12 @@
     outline-offset: 2px;
   }
 
+  /* A table is as wide as its content needs, and never narrower than the
+     column. Text in a cell wraps at a readable width, so a table with many
+     columns scrolls rather than squeezing each one to a word per line. */
   :scope table {
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
     line-height: 1.55;
@@ -1111,6 +1113,10 @@
   :scope :is(th, td) code .pre {
     overflow-wrap: normal;
     white-space: nowrap;
+  }
+
+  :scope :is(th, td) > :is(p, ul, ol, div) {
+    max-width: 22rem;
   }
 
   :scope :is(th, td) > * + * {
