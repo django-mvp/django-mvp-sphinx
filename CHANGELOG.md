@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.9.0] - 2026-11-14
+
 ### Changed
 
 - Pages are drawn from daisyUI's own components and your theme's colours, radii and border width, instead of Tailwind's prose styles. Admonitions are soft alerts, code blocks sit on the theme's neutral colour, tables sit in a bordered box, and the space between headings, paragraphs and lists follows one rhythm, with more space above a heading than below it. What MyST and sphinx-design write into a page is styled too. See "How pages look and the page template" in the README.
