@@ -14,11 +14,11 @@
 }
 
 /* When the page's headings list sits beside the text, it sits right beside
-   it: the text column keeps its reading width and the room left over goes
-   past the list, not between the two. */
+   it. The text column keeps its reading width, and the pair is centred in
+   the room the shell gives the page, as the shell centres every page. */
 .mvp-page-layout:has(.mvp-sphinx-column) {
   --mvp-page-layout-columns: minmax(0, 44rem) auto;
-  justify-content: start;
+  justify-content: center;
 }
 
 /* Everything else is scoped to the page body. It stops at a live example's
