@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Pages are drawn from daisyUI's own components and your theme's colours, radii and border width, instead of Tailwind's prose styles. Admonitions are soft alerts, code blocks sit on the theme's neutral colour, tables sit in a bordered box, and the space between headings, paragraphs and lists follows one rhythm, with more space above a heading than below it. What MyST and sphinx-design write into a page is styled too. See "How pages look and the page template" in the README.
+- A page sits in django-mvp's `medium` container with its text held to about 75 characters a line, and "On this page" is a column beside it from 1024 pixels wide instead of 1280.
+- Live examples on the package's own page are stacked, frame above source, because the text column never has the 64rem side by side needs. A project that overrides `mvp_sphinx/page.html` with a wider column still gets them side by side.
+- The stylesheet uses CSS `@scope`, which needs Chrome 118, Firefox 146 or Safari 17.4 or later. In an older browser a page keeps the shell's own styles and none of the package's.
+- The element holding the page body no longer needs the `prose` class. If you override `mvp_sphinx/page.html` and kept it, you can remove it.
+
 ## [v0.8.0] - 2026-11-13
 
 ### Added

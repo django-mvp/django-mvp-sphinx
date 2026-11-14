@@ -67,7 +67,9 @@ include = ["/mvp_sphinx", "/README.md", "/LICENSE"]
 # pytest, pytest-django, pytest-xdist, factory-boy, coverage and django-stubs.
 dev = [
     "mvp-shared[dev,test]",
+    "myst-parser>=5.2.0",
     "sphinx>=8.1",
+    "sphinx-design>=0.8.0",
 ]
 
 [tool.uv.sources]

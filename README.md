@@ -828,23 +828,60 @@ django-mvp's own, so a page follows the light and dark themes and any theme your
 project defines. The package's base template, `mvp_sphinx/base.html`, links a
 stylesheet, served like the rest of your static files, and only pages the
 documentation app renders load it: `mvp_sphinx/content.css` styles what Sphinx
-writes into the page. Sphinx's own stylesheets are never used.
+writes into the page. Sphinx's own stylesheets are never used. The stylesheet
+uses CSS `@scope`, which needs Chrome 118, Firefox 146 or Safari 17.4 or later.
+An older browser shows the page's text with the shell's own styles and none of
+the package's.
+
+A page sits in django-mvp's `medium` container, centred, with "On this page"
+beside it from 1024 pixels wide. Its text keeps to about 75 characters a line at
+any width. The spacing between blocks follows one rhythm, and a heading has more
+space above it than below, so it reads as the start of what follows it.
+
+Each kind of element is drawn the way daisyUI draws its nearest component, from
+your theme's colours, corner radii and border width:
+
+- **Admonitions** are soft alerts: a tinted box with an icon and a title in the
+  colour of what it means. A note is information, a tip or a hint is helpful, a
+  warning, caution or attention is cautionary, a danger or an error is dangerous.
+  `seealso` and `todo` have colours of their own, and a box with a title of its
+  own reads as information. A box inside another keeps its own colour.
+- **Version notes** (`versionadded`, `versionchanged`, `deprecated` and
+  `versionremoved`) are a thin line in the colour of the change.
+- **Code blocks** sit on the theme's neutral colour, in every theme, like daisyUI's
+  mockup-code. A caption becomes the block's title bar. Line numbers, picked-out
+  lines, console prompts and diffs are drawn, and a long line scrolls inside its
+  block.
+- **Tables** sit in a bordered box that scrolls on its own when the table is too
+  wide for the page. Text in a cell wraps at a readable width, so a table with
+  many columns scrolls rather than squeezing each one.
+- **Keys** written with `:kbd:` look like daisyUI's `kbd`, and `:guilabel:` and
+  `:menuselection:` stand out as what the reader looks for on screen.
+- **Lists** keep items of one line close together and space items of several
+  paragraphs further apart. The lists Sphinx writes for a `toctree` are drawn as
+  a menu, a row per entry with each level indented under its parent.
+- **Sidebars** float beside the text that refers to them, and sit above it once
+  the column is too narrow for both. Topics, rubrics, quotes, epigraphs, pull
+  quotes, line blocks, figures, footnotes, citations and maths are styled too.
 
 Reference entries, the documented functions, classes and other objects that
 `autodoc` writes and that you write by hand with directives such as
 `.. py:function::`, are styled from the same theme with nothing to configure.
-Each signature sits in a bar in the code colours, its description hangs from a
-rule beneath it, and entries inside other entries read as inside them. This
-holds for any language Sphinx documents, and it makes no difference whether an
-entry was generated or typed.
+Each signature sits on a raised strip with an edge in the primary colour, its
+description hangs from a rule beneath it, and entries inside other entries read
+as inside them. This holds for any language Sphinx documents, and it makes no
+difference whether an entry was generated or typed.
 
-The rest of a page's body is styled the same way. Admonitions carry an icon
-before their title, chosen by kind and drawn in the box's own edge colour. A box
-with a title of its own keeps the informational icon. Items in a list sit close
-together, in tight and loose markup and at every depth of nesting. The lists
-Sphinx writes for a `toctree` are drawn as a menu, a row per entry with each
-level indented under its parent. Their links are underlined only under the
-pointer, while links inside a sentence keep their underline.
+Pages written in Markdown with [MyST](https://myst-parser.readthedocs.io/) are
+styled the same way, with what MyST adds on top: task lists, definition and field
+lists, strikethrough and text given a class with inline attributes, such as
+`[highlighted words]{.mark}`. So is what
+[sphinx-design](https://sphinx-design.readthedocs.io/) writes: grids and cards,
+tabs, dropdowns, badges and buttons, drawn as daisyUI's card, tabs, collapse,
+badge and btn. A grid's columns follow the width of the text, not the window.
+
+The demo project's user guide has a page showing every one of these, written in
+MyST: "Kitchen sink", at `/docs/kitchen-sink/`.
 
 "On this page" is django-mvp's side panel. On a wide screen the list is a column
 beside the page that sticks under the header. On a narrower screen an
@@ -954,9 +991,11 @@ load nothing new.
 #### Side by side or stacked
 
 An example puts its source beside the frame when it has room for both, and under
-the frame when it doesn't. The room is the width the example has on the page, so
-an example in a page with the sidebar and the "On this page" list open can stack
-in a wide window.
+the frame when it doesn't. The room is the width the example has on the page,
+and side by side needs 64rem. The package's own page keeps its text to a
+reading width well under that, so there every example is stacked. A project
+whose `mvp_sphinx/page.html` gives the page a wider column, such as django-mvp's
+`wide` container, gets examples side by side where they have the room.
 
 To have the source under the frame at every width, add `:layout: stacked`:
 

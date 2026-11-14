@@ -34,6 +34,12 @@ with :doc:`first-visit/index`.
    reference/who-sees-what-when-they-sign-in-and-why-the-sidebar-differs
 
 .. toctree::
+   :caption: Page styles
+   :hidden:
+
+   kitchen-sink
+
+.. toctree::
    :caption: Live examples
    :hidden:
 
