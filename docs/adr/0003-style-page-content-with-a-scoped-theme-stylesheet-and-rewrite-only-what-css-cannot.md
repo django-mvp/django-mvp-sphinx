@@ -1,6 +1,8 @@
 # ADR 0003 — Style page content with one scoped stylesheet built from the theme, and rewrite the body only for what CSS cannot do
 
-**Status:** accepted
+**Status:** superseded by 0008
+
+Replaced by [ADR 0008](0008-draw-page-content-from-daisyui-tokens-in-an-scope-block.md), which draws page content without Tailwind's prose styles in one `@scope` block and keeps the body rewrite described here.
 
 ## Decision
 

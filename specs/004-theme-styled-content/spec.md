@@ -237,12 +237,14 @@ site's styling for its kind of content.
 
 - **FR-001**: The ordinary text of every page a documentation app serves (headings, paragraphs,
   lists, block quotes, links and inline code) MUST be presented with the host project's styling for
-  that kind of content.
+  that kind of content. This holds for pages written in Markdown with MyST, including what MyST adds
+  (task lists, definition and field lists, strikethrough, inline attributes), and for what
+  sphinx-design writes (grids, cards, tabs, dropdowns, badges and buttons).
 - **FR-002**: Every colour this package applies to page content MUST be taken from the host
   project's django-mvp theme. The package MUST define no colour of its own.
 - **FR-003**: Pages MUST NOT load any stylesheet from the docs build or from a Sphinx theme.
 - **FR-004**: Every admonition MUST be presented as an admonition and grouped by meaning:
-  informational, helpful, important, cautionary and dangerous. Admonitions sharing a meaning MUST be
+  informational, helpful, important, cautionary, dangerous, related ("See also") and to do. Admonitions sharing a meaning MUST be
   presented alike and different meanings MUST be distinguishable. An admonition kind with no known
   meaning MUST be presented as informational. Each admonition's title MUST be preceded by an icon
   chosen by its kind and drawn in the colour of the admonition's own edge.
@@ -296,8 +298,8 @@ site's styling for its kind of content.
   it contains.
 - **SC-004**: Every section heading's link can be reached with the keyboard alone, and opening its
   address shows that heading in view on the first try.
-- **SC-005**: Every text and background pair this package creates inside admonitions and
-  highlighted code measures at least 4.5:1 in django-mvp's default light and dark themes.
+- **SC-005**: Every text and background pair this package creates inside admonitions, version
+  notes, reference signatures and highlighted code measures at least 4.5:1 in django-mvp's default light and dark themes.
 - **SC-006**: A host project that serves its docs with #4 gets all of the styling above with zero
   additional adoption steps.
 

@@ -210,8 +210,7 @@ class DocumentationApp(MountedApp):
             if "html" in part
         )
         content = format_html(
-            '<link rel="stylesheet" href="{}">'
-            '<div class="prose mvp-sphinx-content">{}</div>',
+            '<link rel="stylesheet" href="{}"><div class="mvp-sphinx-content">{}</div>',
             static("mvp_sphinx/content.css"),
             mark_safe(kept),  # noqa: S308 the host's own docs build
         )

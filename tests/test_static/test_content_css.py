@@ -33,14 +33,48 @@ class Stylesheet:
 
     @classmethod
     def scan(cls, text: str) -> list[tuple[str, dict[str, str]]]:
-        """Return (selector, declarations) for every rule, flattening @media."""
+        """Return (selector, declarations) for every rule.
+
+        @media, @supports and @container are flattened. The rules inside an
+        @scope block are returned with the scope's root written into each
+        selector, which is what the browser matches them against.
+        """
         rules = []
         for prelude, body in cls.blocks(text):
-            if prelude.startswith("@media") or prelude.startswith("@supports"):
+            if prelude.startswith(("@media", "@supports", "@container")):
                 rules.extend(cls.scan(body))
+            elif prelude.startswith("@scope"):
+                root = re.match(r"@scope\s*\(([^)]*)\)", prelude).group(1).strip()
+                rules.extend(
+                    (cls.rooted(selector, root), declared)
+                    for selector, declared in cls.scan(body)
+                )
             elif not prelude.startswith("@"):
                 rules.append((prelude, cls.declarations(body)))
         return rules
+
+    @classmethod
+    def rooted(cls, prelude: str, root: str) -> str:
+        """Write an @scope block's root into each selector of a rule inside it."""
+        return ", ".join(
+            selector.replace(":scope", root, 1)
+            if selector.startswith(":scope")
+            else f"{root} {selector}"
+            for selector in cls.selectors(prelude)
+        )
+
+    @staticmethod
+    def selectors(prelude: str) -> list[str]:
+        """Split a selector list at the commas outside brackets."""
+        found, depth, current = [], 0, ""
+        for character in prelude:
+            depth += {"(": 1, ")": -1}.get(character, 0)
+            if character == "," and depth == 0:
+                found.append(current.strip())
+                current = ""
+            else:
+                current += character
+        return [*found, current.strip()]
 
     @staticmethod
     def blocks(text: str) -> list[tuple[str, str]]:
@@ -205,9 +239,9 @@ class TestContentStylesheet:
 
     def test_every_selector_is_scoped_to_the_page_content(self, stylesheet) -> None:
         selectors = [
-            selector.strip()
+            selector
             for prelude, declared in stylesheet.rules
-            for selector in prelude.split(",")
+            for selector in Stylesheet.selectors(prelude)
         ]
 
         assert selectors
@@ -252,6 +286,54 @@ class TestContentStylesheet:
             surface
             for surface in surfaces
             if ColourMath.contrast(muted, ColourMath.resolve(surface, own, colours))
+            < MINIMUM_CONTRAST
+        ]
+        assert unreadable == []
+
+    @pytest.mark.parametrize("theme", THEMES)
+    def test_every_admonition_title_is_readable_on_its_own_background(
+        self, stylesheet, theme
+    ) -> None:
+        own, colours = stylesheet.properties(), ColourMath.theme(theme)
+        titles = [
+            name
+            for name in own
+            if name.startswith("--mvp-sphinx-admonition-") and name.endswith("-title")
+        ]
+
+        assert titles
+        unreadable = [
+            name
+            for name in titles
+            if ColourMath.contrast(
+                ColourMath.resolve(f"var({name})", own, colours),
+                ColourMath.resolve(
+                    f"var({name.removesuffix('-title')}-bg)", own, colours
+                ),
+            )
+            < MINIMUM_CONTRAST
+        ]
+        assert unreadable == []
+
+    @pytest.mark.parametrize("theme", THEMES)
+    def test_every_version_label_is_readable_on_the_page(
+        self, stylesheet, theme
+    ) -> None:
+        own, colours = stylesheet.properties(), ColourMath.theme(theme)
+        labels = [
+            name
+            for name in own
+            if name.startswith("--mvp-sphinx-version-") and name.endswith("-text")
+        ]
+
+        assert labels
+        unreadable = [
+            (name, surface)
+            for name in labels
+            for surface in ("--color-base-100", "--color-base-200")
+            if ColourMath.contrast(
+                ColourMath.resolve(f"var({name})", own, colours), colours[surface]
+            )
             < MINIMUM_CONTRAST
         ]
         assert unreadable == []
@@ -415,11 +497,11 @@ class TestReferenceStylesheet:
         ]
 
     @pytest.mark.parametrize("theme", THEMES)
-    def test_signature_text_is_readable_on_the_code_background(
+    def test_signature_text_is_readable_on_the_signature_background(
         self, stylesheet, theme
     ) -> None:
         own, colours = stylesheet.properties(), ColourMath.theme(theme)
-        background = ColourMath.resolve("var(--mvp-sphinx-code-bg)", own, colours)
+        background = ColourMath.resolve("var(--mvp-sphinx-signature-bg)", own, colours)
 
         rules = self.colours(stylesheet, "sig-object")
         unreadable = [
