@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.9.1] - 2026-11-15
+
 ### Fixed
 - The text of an outlined badge or button is easier to read. It was a light mix of its colour that could fall below WCAG's 4.5:1 contrast on the page, as a primary badge did in a light theme with an orange primary. It now mixes its colour with the text colour half and half, as a notice's title does.
 
