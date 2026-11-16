@@ -932,6 +932,34 @@ caller of its own does the same:
 {% endblock styles %}
 ```
 
+### Sphinx extensions with their own CSS or JavaScript
+
+Some Sphinx extensions only work with a stylesheet or a script of their own: a
+diagram extension that draws in the browser, a copy button for code blocks, an
+interactive plot. In an ordinary HTML build Sphinx adds those files to every page.
+A JSON build leaves them out, and the package serves only its own stylesheet, so
+the extension's markup reaches the page with nothing to style or run it.
+
+The package styles what Sphinx and the extensions most MyST guides use write
+(see above), and loads nothing for any other extension. A project that uses one
+adds its files itself, by overriding `mvp_sphinx/page.html` and extending its
+`styles` or `extra_js` block. To load a script only on the pages that need it, test
+`body`, which holds the page's markup:
+
+```django
+{% extends "mvp_sphinx/page.html" %}
+{% load static %}
+{% block extra_js %}
+  {{ block.super }}
+  {% if 'class="mermaid"' in body %}
+    <script src="{% static 'yourproject/diagrams.js' %}" defer></script>
+  {% endif %}
+{% endblock extra_js %}
+```
+
+Serve the extension's files from your own static files rather than a CDN, so the
+page doesn't depend on another site being reachable.
+
 ### Maths
 
 Notation written with the `math` role or directive is typeset by
