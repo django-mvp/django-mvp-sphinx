@@ -36,6 +36,8 @@ def sphinx_json_build(tmp_path_factory):
             [
                 "-b",
                 "json",
+                "-D",
+                "html_theme=daisyui",
                 "-q",
                 "-w",
                 str(warnings),
@@ -54,7 +56,9 @@ def sphinx_json_build(tmp_path_factory):
 def sphinx_build(tmp_path):
     def build(source, builder="json"):
         out = tmp_path / f"{builder}-build"
-        status = build_main(["-b", builder, "-q", str(source), str(out)])
+        status = build_main(
+            ["-b", builder, "-D", "html_theme=daisyui", "-q", str(source), str(out)]
+        )
         assert status == 0
         return out
 

@@ -20,6 +20,7 @@ dependencies = [
     "django-flex-menus>=0.4.5",
     "django-mvp>=0.35.0",
     "snowballstemmer>=2.2",
+    "sphinx-daisyui>=0.2.0",
 ]
 keywords = ["django", "django-mvp", "cotton"]
 classifiers = [

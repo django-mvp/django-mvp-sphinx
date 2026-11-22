@@ -6,7 +6,7 @@
 <section aria-labelledby="{{ example.id }}-title"
          data-layout="{{ example.layout }}"
          class="mvp-sphinx-example my-6 border border-base-300 rounded-box overflow-hidden">
-  <div class="flex flex-wrap items-center gap-2 px-4 py-2 bg-base-200 border-b border-base-300">
+  <div class="daisy-sphinx-escape flex flex-wrap items-center gap-2 px-4 py-2 bg-base-200 border-b border-base-300">
     <p id="{{ example.id }}-title" class="font-medium">
       {% if example.title %}
         {{ example.title }}
@@ -24,7 +24,7 @@
     {% endif %}
   </div>
   <div class="mvp-sphinx-example-panes grid">
-    <div class="mvp-sphinx-example-pane min-w-0">
+    <div class="mvp-sphinx-example-pane daisy-sphinx-escape min-w-0">
       {% if example.available %}
         <div class="mvp-sphinx-example-holder skeleton rounded-none">
           <iframe src="{{ example.address }}"

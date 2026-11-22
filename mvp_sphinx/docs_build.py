@@ -17,6 +17,7 @@ class DocsBuild:
     """
 
     FILE_FOLDERS = ("_images", "_downloads")
+    THEME_STYLESHEET = "_static/styles/sphinx-daisyui-content.css"
     NAVIGATION_FILE = "navigation.json"
 
     def __init__(self, root: str | Path) -> None:
@@ -59,10 +60,11 @@ class DocsBuild:
         return None
 
     def file(self, path: str) -> Path | None:
-        """Return the image or download served at ``path``, or ``None``.
+        """Return the image, download or theme stylesheet at ``path``, or ``None``.
 
-        Only ``_images/`` and ``_downloads/`` are ever files: the page data,
-        search index, sources, static files and pickles beside them never are.
+        Only ``_images/`` and ``_downloads/`` are ever files, and the one
+        stylesheet sphinx-daisyui writes for page bodies: the page data, search
+        index, sources, other static files and pickles beside them never are.
         The target must resolve inside its own folder, so ``_images/../x`` and a
         symlink pointing out of the folder are absent.
 
@@ -71,8 +73,10 @@ class DocsBuild:
 
         Returns:
             The file's resolved path, or ``None`` when ``path`` is not a file
-            inside one of the two folders.
+            inside one of the two folders or the theme's stylesheet.
         """
+        if path == self.THEME_STYLESHEET:
+            return self.contained_file(path, within="_static")
         folder = path.split("/", 1)[0]
         if folder not in self.FILE_FOLDERS or not self.is_canonical(path):
             return None

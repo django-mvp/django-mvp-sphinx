@@ -115,9 +115,12 @@ class TestExtractContent:
         extract = extracts_app.page_extract("screens/", page_request)
 
         page = soup(extract)
-        assert page.select_one("div.mvp-sphinx-content")
-        stylesheet = page.find("link", rel="stylesheet")
-        assert stylesheet["href"] == static("mvp_sphinx/content.css")
+        assert page.select_one("div.daisy-sphinx-content")
+        stylesheets = [link["href"] for link in page.find_all("link", rel="stylesheet")]
+        assert stylesheets == [
+            "/docs/_static/styles/sphinx-daisyui-content.css",
+            static("mvp_sphinx/page.css"),
+        ]
 
     def test_maths_is_left_as_written(self, extracts_app, page_request) -> None:
         extract = extracts_app.page_extract("screens/", page_request)

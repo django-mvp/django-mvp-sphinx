@@ -19,7 +19,6 @@ from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.extracts import LinkRewriter, PageExtract, SectionFinder, plain_text
 from mvp_sphinx.menus import DocumentationMenu
-from mvp_sphinx.page_body import BodyRewriter
 from mvp_sphinx.search import DocsSearch
 from mvp_sphinx.views import BranchView, PageView, SearchView
 
@@ -143,6 +142,32 @@ class DocumentationApp(MountedApp):
             address = reverse(f"{self.namespace}:front_page")
         return f"{address}#{anchor}" if anchor else address
 
+    def theme_stylesheet(self, build: DocsBuild) -> str:
+        """Return the address of the page-body stylesheet the build holds.
+
+        Args:
+            build: The docs build being served.
+
+        Returns:
+            The address of the stylesheet sphinx-daisyui writes into a build,
+            or an empty string when the build was made with another theme.
+        """
+        if build.file(DocsBuild.THEME_STYLESHEET) is None:
+            return ""
+        return self.address(DocsBuild.THEME_STYLESHEET)
+
+    def theme_stylesheet_link(self, build: DocsBuild) -> str:
+        """Return the ``<link>`` to the build's page-body stylesheet, if it has one.
+
+        Args:
+            build: The docs build being served.
+
+        Returns:
+            The tag, or an empty string when the build has no such stylesheet.
+        """
+        href = self.theme_stylesheet(build)
+        return format_html('<link rel="stylesheet" href="{}">', href) if href else ""
+
     def build_dir_for(self, request: HttpRequest) -> Any:
         """Return the build directory that serves ``request``.
 
@@ -180,7 +205,8 @@ class DocumentationApp(MountedApp):
             # The address a reader without the slash is redirected to.
             page_path += "/"
         try:
-            page = DocsBuild(self.build_dir_for(request)).page(page_path)
+            build = DocsBuild(self.build_dir_for(request))
+            page = build.page(page_path)
         except (OSError, ValueError):
             logger.warning("%s: the page at %r can't be read.", self.namespace, address)
             return None
@@ -202,16 +228,16 @@ class DocumentationApp(MountedApp):
             markup = body[: found.heading_start] + body[found.start :]
         page_url = self.address(page_path)
         linked = LinkRewriter.rewrite(markup, page_url)
-        rewritten = BodyRewriter.parse(linked).splice()
         # Live examples need the documentation app's own page around them.
         kept = "".join(
             str(part["html"])
-            for part in LiveExamples.parts(rewritten)
+            for part in LiveExamples.parts(linked)
             if "html" in part
         )
         content = format_html(
-            '<link rel="stylesheet" href="{}"><div class="mvp-sphinx-content">{}</div>',
-            static("mvp_sphinx/content.css"),
+            '{}<link rel="stylesheet" href="{}"><div class="daisy-sphinx-content">{}</div>',
+            self.theme_stylesheet_link(build),
+            static("mvp_sphinx/page.css"),
             mark_safe(kept),  # noqa: S308 the host's own docs build
         )
         if anchor:

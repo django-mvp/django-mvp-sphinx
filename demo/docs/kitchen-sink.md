@@ -151,9 +151,9 @@ A line block keeps its line breaks, for an address or a verse:
 | Exampletown
 ```
 
-## Notices
+## Admonitions
 
-A notice sets something apart from the text around it. Each kind has its own colour and
+An admonition sets something apart from the text around it. Each kind has its own colour and
 icon, so you can tell what it means before you read it.
 
 ```{note}
@@ -169,7 +169,7 @@ A hint looks like a tip, and means the same.
 ```
 
 ```{important}
-An important notice asks you to read it before going on.
+An important admonition asks you to read it before going on.
 ```
 
 ```{warning}
@@ -181,7 +181,7 @@ A caution looks like a warning, and means the same.
 ```
 
 ```{attention}
-An attention notice looks like a warning too.
+An attention admonition looks like a warning too.
 ```
 
 ```{danger}
@@ -192,12 +192,12 @@ A danger is the strongest: it says something cannot be undone.
 An error looks like a danger.
 ```
 
-:::{admonition} A notice with a title of its own
-A titled notice names no kind, so it reads as information. It can hold anything a page
+:::{admonition} An admonition with a title of its own
+A titled admonition names no kind, so it reads as information. It can hold anything a page
 can: a second paragraph, a list, or code.
 
-- a list inside a notice
-- keeps the notice's spacing
+- a list inside an admonition
+- keeps the admonition's spacing
 
 ```python
 print("and code")
@@ -205,7 +205,7 @@ print("and code")
 :::
 
 :::{warning}
-A notice can hold another, and each keeps its own meaning.
+An admonition can hold another, and each keeps its own meaning.
 
 ```{tip}
 A tip inside a warning.
@@ -217,7 +217,7 @@ A tip inside a warning.
 ```
 
 ```{todo}
-A to-do notice marks something the authors still have to write.
+A to-do admonition marks something the authors still have to write.
 ```
 
 When something changed, a version note says in which version:
@@ -541,7 +541,7 @@ A short list can run in columns:
 * Text
 * Lists
 * Quotes
-* Notices
+* Admonitions
 * Asides
 * Code
 * Tables

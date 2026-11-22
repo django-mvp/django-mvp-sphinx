@@ -47,8 +47,10 @@ constitution and the prototype this package grew from. Longer rationale is in `d
 
 - **Q: A docs build ships Sphinx's own stylesheets, including the one that colours highlighted
   code. Are they used?**
-  A: No. A Sphinx stylesheet carries fixed colours and a Sphinx theme's look, which Article XIII
-  rules out. The pages never load them, and highlighted code takes its colours from the theme like
+  A: No, with one exception. A Sphinx stylesheet carries fixed colours and a Sphinx theme's look,
+  which Article XIII rules out, so the pages never load them. The exception is the page-body
+  stylesheet of the sphinx-daisyui theme, which reads only daisyUI's tokens and is written into
+  every build made with that theme. Highlighted code takes its colours from the theme like
   everything else. Recorded as FR-003 and FR-006.
 
 - **Q: Colours taken from the theme are only as readable as the combinations this package makes
@@ -122,7 +124,8 @@ contrast requirement.
 **Acceptance Scenarios**:
 
 1. **Given** a page with a highlighted code block, **When** a reader opens it, **Then** the code is
-   highlighted with colours taken from the site's theme and no Sphinx stylesheet is loaded.
+   highlighted with colours taken from the site's theme and no Sphinx stylesheet is loaded other
+   than the page-body stylesheet of the sphinx-daisyui theme.
 2. **Given** a highlighted code block, **When** the reader switches between light and dark themes,
    **Then** the highlighting follows the theme.
 3. **Given** a code block with a caption, line numbers or emphasised lines, **When** a reader
@@ -242,7 +245,9 @@ site's styling for its kind of content.
   sphinx-design writes (grids, cards, tabs, dropdowns, badges and buttons).
 - **FR-002**: Every colour this package applies to page content MUST be taken from the host
   project's django-mvp theme. The package MUST define no colour of its own.
-- **FR-003**: Pages MUST NOT load any stylesheet from the docs build or from a Sphinx theme.
+- **FR-003**: Pages MUST NOT load any stylesheet from the docs build or from a Sphinx theme,
+  except the page-body stylesheet that the sphinx-daisyui theme writes into a build
+  (`_static/styles/sphinx-daisyui-content.css`).
 - **FR-004**: Every admonition MUST be presented as an admonition and grouped by meaning:
   informational, helpful, important, cautionary, dangerous, related ("See also") and to do. Admonitions sharing a meaning MUST be
   presented alike and different meanings MUST be distinguishable. An admonition kind with no known

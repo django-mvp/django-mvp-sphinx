@@ -40,6 +40,26 @@ class TestBuildDocs:
 
         assert DocsBuild(apps["staff_guide"].build_dir).navigation() is not None
 
+    def test_a_build_uses_the_daisyui_theme_by_default(self, apps) -> None:
+        call_command("build_docs", "staff_guide", verbosity=0)
+
+        written = apps["staff_guide"].build_dir / DocsBuild.THEME_STYLESHEET
+        assert written.is_file()
+
+    def test_a_conf_that_names_a_theme_keeps_it(
+        self, apps, monkeypatch, tmp_path
+    ) -> None:
+        source = tmp_path / "own-theme"
+        source.mkdir()
+        (source / "conf.py").write_text('project = "Own"\nhtml_theme = "basic"\n')
+        (source / "index.rst").write_text("Own\n===\n")
+        monkeypatch.setattr(docs, "source_dir", source)
+
+        call_command("build_docs", "docs", verbosity=0)
+
+        assert front_page(apps["docs"]) is not None
+        assert not (apps["docs"].build_dir / DocsBuild.THEME_STYLESHEET).exists()
+
     def test_an_app_without_a_source_dir_is_left_alone(self, apps) -> None:
         call_command("build_docs", verbosity=0)
 

@@ -1,0 +1,8 @@
+/* What a docs page tells sphinx-daisyui's page-body stylesheet about the shell
+   it sits in. Link it after that stylesheet: the surface below is declared on
+   the same element as the theme's own, and the later rule wins. */
+.daisy-sphinx-content {
+  --daisy-sphinx-max-width: 40rem;
+  --daisy-sphinx-page-bg: var(--color-base-200);
+  --daisy-sphinx-surface: color-mix(in oklab, var(--color-base-content) 6%, var(--color-base-200));
+}

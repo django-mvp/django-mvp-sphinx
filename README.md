@@ -96,12 +96,13 @@ It draws every menu exactly as django-mvp's does, and draws the contents' entrie
 with the toggles that open them. The project won't start with another sidebar
 renderer, unless it is a subclass of this one.
 
-### 2. Add the Sphinx line
+### 2. Set up Sphinx
 
-Add the package's extension to your Sphinx project's `docs/conf.py`:
+Add the package's extension and the theme to your Sphinx project's `docs/conf.py`:
 
 ```python
 extensions = ["mvp_sphinx.navigation"]
+html_theme = "daisyui"
 ```
 
 If `conf.py` already lists extensions, add this one to the list.
@@ -109,15 +110,20 @@ If `conf.py` already lists extensions, add this one to the list.
 The extension writes the contents the sidebar shows. Without it the sidebar holds
 only the front page's entry, and every page is still served.
 
+The `daisyui` theme comes from [sphinx-daisyui](https://pypi.org/project/sphinx-daisyui/),
+which this package installs. It draws the page body, and its stylesheet is what
+styles the pages (see "How pages look and the page template"). A project whose
+`conf.py` names another theme still builds and is served, but its pages come
+without that styling.
+
 ### 3. Build the docs
 
 ```bash
 sphinx-build -b json docs docs/_build/json
 ```
 
-Sphinx is needed where you run that command and nowhere else. The site that
-serves the pages reads the files the build left behind, never imports Sphinx and
-never starts a build, so Sphinx can stay out of your production requirements.
+The site that serves the pages reads the files the build left behind, never
+imports Sphinx and never starts a build.
 
 The output folder is yours to choose. A build made by a CI step, or one kept
 outside your project, works the same way once step 4 points at it. Until a build
@@ -213,7 +219,9 @@ python manage.py build_docs
 ```
 
 That runs Sphinx's JSON build from `source_dir` into `build_dir`, as
-`sphinx-build -b json` would, so the build lands where the app already reads it. With no arguments the command builds every
+`sphinx-build -b json` would, so the build lands where the app already reads it.
+It builds with the `daisyui` theme unless the source's `conf.py` assigns
+`html_theme` itself. With no arguments the command builds every
 mounted documentation app that has a `source_dir`, in the order they are mounted,
 and leaves the others alone. Name one or more apps by `namespace` to build only
 those:
@@ -825,18 +833,23 @@ drawn, subclass `PageView` and pass it to your app as `view_class`.
 
 Pages take your site's theme with nothing to configure: the colours are
 django-mvp's own, so a page follows the light and dark themes and any theme your
-project defines. The package's base template, `mvp_sphinx/base.html`, links a
-stylesheet, served like the rest of your static files, and only pages the
-documentation app renders load it: `mvp_sphinx/content.css` styles what Sphinx
-writes into the page. Sphinx's own stylesheets are never used. The stylesheet
-uses CSS `@scope`, which needs Chrome 118, Firefox 146 or Safari 17.4 or later.
-An older browser shows the page's text with the shell's own styles and none of
-the package's.
+project defines. The styles come from sphinx-daisyui. Every build made with its
+`daisyui` theme writes the page-body stylesheet,
+`_static/styles/sphinx-daisyui-content.css`, and the page template links that one
+file. It is served from the build, the way images and downloads are, and no other
+file of `_static/` is. The package's own `mvp_sphinx/page.css` follows it and sets
+the reading width to 40rem and the surfaces to django-mvp's `base-200` page.
+Sphinx's own stylesheets are never used, and a build made with another theme has
+no such file, so its pages link none. The stylesheet uses CSS `@scope`, which
+needs Chrome 118, Firefox 146 or Safari 17.4 or later. An older browser shows the
+page's text with the shell's own styles and none of the theme's.
+
+sphinx-design's and sphinx-copybutton's own stylesheets are still yours to load if
+you use them. The stylesheet draws footnote labels with daisyUI's `label`
+component, which django-mvp's stylesheet already holds.
 
 A page sits in django-mvp's `medium` container, centred, with "On this page"
-beside it from 1024 pixels wide. Its text keeps to about 75 characters a line at
-any width. The spacing between blocks follows one rhythm, and a heading has more
-space above it than below, so it reads as the start of what follows it.
+beside it from 1024 pixels wide.
 
 Each kind of element is drawn the way daisyUI draws its nearest component, from
 your theme's colours, corner radii and border width:
@@ -894,34 +907,22 @@ A heading you follow a link to lands below the header at whatever height it is,
 because django-mvp measures the header and leaves that much room above the
 linked heading.
 
-Before a page is rendered, `BodyRewriter` adds what a stylesheet cannot. It
-wraps each table in a scrolling region that takes keyboard focus and is named by
-the table's caption, or "Table" when it has none, so a table wider than the
-page scrolls sideways for a reader using only a keyboard and a screen reader
-announces what the region holds. An equation set out on its own line gets the
-same treatment, named "Equation" or, when it is numbered, "Equation (1)", so a
-wide equation can be scrolled from the keyboard before and after it is typeset;
-its number stays outside the region. It also names each heading link (the ¶ Sphinx
-puts beside a section heading, a glossary term or a caption) with the link's own
-title and the heading's text, such as "Link to this heading: Installing", so a
-screen reader tells one link from the next. A reference entry's link is named by
-the entry and not by its whole signature, such as "Link to this definition:
-demo.links.page_address", so a page of entries reads as a list of names.
-Everything else in the body reaches the page exactly as Sphinx wrote it.
-`PageView` applies it and hands the result to the template as `body`, so a
-`PageView` subclass gets it too; to use it elsewhere, call
-`BodyRewriter.rewrite(markup)`.
+A page body reaches the page exactly as Sphinx wrote it. With the `daisyui` theme
+that already holds what a stylesheet cannot add: each table and each equation set
+out on its own line sits in a scrolling region that takes keyboard focus and has a
+name, and each heading link (the ¶ Sphinx puts beside a section heading, a
+glossary term or a caption) is named for a screen reader by its title and the text
+it belongs to. `PageView` hands the body to the template as `body`.
 
 If you override `mvp_sphinx/page.html`, keep `{{ block.super }}` in its `styles`
-block so both stylesheets still reach the page, and in its `head` block if you
-override that, so the page's metadata does, render `{{ body }}` rather than
-`{{ page_data.body }}` so your override keeps the rewrite, and keep the
-`mvp-sphinx-content` class on the element that holds it, because every rule in
-`content.css` is scoped to that class. An override of the `content` block also
-takes over drawing "On this page" and the previous and next links, which the page
-gets as `headings`, `previous_page` and `next_page`. `BodyRewriter.rewrite` returns
-a plain string; `PageView` marks it safe because the docs build is your own, and a
-caller of its own does the same:
+block so the theme's stylesheet and the package's settings still reach the page,
+and in its `head` block if you override that, so the page's metadata does. Render
+`{{ body }}`, and keep the `daisy-sphinx-content` class on the element that holds
+it, because every rule in the theme's stylesheet is scoped to that class. Markup
+of your own inside it, which the stylesheet should leave alone, takes the
+`daisy-sphinx-escape` class. An override of the `content` block also takes over
+drawing "On this page" and the previous and next links, which the page gets as
+`headings`, `previous_page` and `next_page`:
 
 ```django
 {% extends "mvp_sphinx/page.html" %}
@@ -1370,13 +1371,7 @@ For a custom view or template:
   tag.
 - `mvp_sphinx.headings.PageHeadings`, through `PageHeadings.from_toc(toc)`, turns a
   page's `toc` value into nested headings.
-- `mvp_sphinx.page_body.BodyRewriter`, through `BodyRewriter.rewrite(markup)`,
-  names table regions, equation regions and heading links in a page body.
-  `BodyRewriter.parse(markup)` returns the parser itself: `splice()` gives the
-  same rewritten body, and `has_maths` says whether the body holds maths.
-  `mvp_sphinx.page_body.Equation` is the parser's own record of where one
-  equation's number and notation sit while it reads, and nothing a project needs
-  to build.
+- `mvp_sphinx.page_body.has_maths(markup)` says whether a page body holds maths.
 - `mvp_sphinx.search.DocsSearch(build)`, given a `DocsBuild`, searches it.
   `results(query)` lists the pages that hold every word of `query`, best match
   first, each with its `title`, `path`, `anchor` and `passage`, or returns `None`
@@ -1397,14 +1392,14 @@ For a custom view or template:
 ### Templates a project may override
 
 - `mvp_sphinx/base.html` is the base of `page.html` and `search.html`. It extends
-  your `base.html`, links the two stylesheets in `styles`, puts the search button
+  your `base.html`, puts the search button
   in the top bar in the `mvp_sphinx.search_toggle` block, and loads the shortcut
   script in `extra_js`. It leaves that block out when `site_search` is true.
 - `mvp_sphinx/page.html` draws a page. It receives `body`, `body_parts`,
   `has_examples`, `meta_tags`, `headings`, `previous_page`, `next_page`,
   `search_url`, `site_search` and `page_data`. It has the `title`, `head`, `styles` and
   `content` blocks, writes `meta_tags` at the end of `head`, and holds the page's
-  body in an element with the `mvp-sphinx-content` class.
+  body in an element with the `daisy-sphinx-content` class.
 - `mvp_sphinx/example.html` is the base for a page of your site that a documentation
   page shows as a live example. It extends your `base.html`, draws no shell, and has
   the `content` block.
@@ -1436,7 +1431,9 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 
 ### Static files
 
-- `mvp_sphinx/content.css` is the stylesheet page content uses.
+- `mvp_sphinx/page.css` sets the reading width and surfaces that sphinx-daisyui's
+  page-body stylesheet takes from its host. Every page of a documentation app
+  loads it, after the theme's stylesheet.
 - `mvp_sphinx/maths.js` holds the settings for the maths typesetting. A page
   with maths loads it before the library.
 - `mvp_sphinx/search.js` opens the search box with Ctrl+K, or ⌘K on a Mac. Every

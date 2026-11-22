@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 project = "django-mvp-sphinx demo"
+html_theme = "daisyui"
 extensions = [
     "mvp_sphinx.navigation",
     "myst_parser",

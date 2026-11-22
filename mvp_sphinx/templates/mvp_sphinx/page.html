@@ -11,6 +11,8 @@
 {% endblock head %}
 {% block styles %}
   {{ block.super }}
+  {% if theme_stylesheet %}<link rel="stylesheet" href="{{ theme_stylesheet }}">{% endif %}
+  <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
   {% if has_examples %}<link rel="stylesheet" href="{% static 'mvp_sphinx/example.css' %}">{% endif %}
 {% endblock styles %}
 {% block app.navbar.end %}
@@ -25,7 +27,7 @@
     <c-mvp.container width="medium">
       <c-mvp.page.layout>
         <div class="min-w-0 w-full">
-          <article class="mvp-sphinx-content">
+          <article class="daisy-sphinx-content">
             {% for part in body_parts %}
               {% if part.example %}
                 <c-mvp_sphinx.live_example :example="part.example" />
