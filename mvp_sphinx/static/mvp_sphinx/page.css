@@ -1,8 +1,11 @@
 /* What a docs page tells sphinx-daisyui's page-body stylesheet about the shell
-   it sits in. Link it after that stylesheet: the surface below is declared on
-   the same element as the theme's own, and the later rule wins. */
-.daisy-sphinx-content {
-  --daisy-sphinx-max-width: 40rem;
-  --daisy-sphinx-page-bg: var(--color-base-200);
-  --daisy-sphinx-surface: color-mix(in oklab, var(--color-base-content) 6%, var(--color-base-200));
+   it sits in. The surface is declared in the theme's own @scope block, and a
+   rule in a scope beats one outside it, so this is written in the same block
+   and linked after the theme's stylesheet to win the tie. */
+@scope (.daisy-sphinx-content) {
+  :scope {
+    --daisy-sphinx-max-width: 40rem;
+    --daisy-sphinx-page-bg: var(--color-base-200);
+    --daisy-sphinx-surface: color-mix(in oklab, var(--color-base-content) 6%, var(--color-base-200));
+  }
 }

@@ -49,7 +49,9 @@ class TestMathsSettings:
     def test_only_elements_sphinx_marked_as_maths_are_scanned(
         self, settings, reference_build
     ) -> None:
-        scanned = re.search(r'elements\s*:\s*\["\.([\w-]+)"\]', settings)
+        scanned = re.search(
+            r'elements\s*:\s*\["\.([\w-]+):not\(:has\(\.\1\)\)"\]', settings
+        )
         processed = re.search(r'processHtmlClass\s*:\s*"([^"]+)"', settings)
         page = json.loads((reference_build / "maths.fjson").read_text())
         body = BeautifulSoup(page["body"], "html.parser")

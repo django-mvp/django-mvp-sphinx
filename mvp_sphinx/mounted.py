@@ -230,9 +230,7 @@ class DocumentationApp(MountedApp):
         linked = LinkRewriter.rewrite(markup, page_url)
         # Live examples need the documentation app's own page around them.
         kept = "".join(
-            str(part["html"])
-            for part in LiveExamples.parts(linked)
-            if "html" in part
+            str(part["html"]) for part in LiveExamples.parts(linked) if "html" in part
         )
         content = format_html(
             '{}<link rel="stylesheet" href="{}"><div class="daisy-sphinx-content">{}</div>',

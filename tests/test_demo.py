@@ -307,7 +307,8 @@ class TestDemoGuideStates:
 
     def test_a_table_sits_in_the_scroll_region(self, guide_pages) -> None:
         assert any(
-            soup.select("div.daisy-sphinx-scroll table") for soup in guide_pages.values()
+            soup.select("div.daisy-sphinx-scroll table")
+            for soup in guide_pages.values()
         )
 
     def test_an_image_is_served_as_an_image(self, guide_pages, client) -> None:
