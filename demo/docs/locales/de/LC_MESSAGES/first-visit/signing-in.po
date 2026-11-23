@@ -45,7 +45,7 @@ msgid ""
 "Choose **Log in** at the bottom of the sidebar. It is the button above the "
 "theme control."
 msgstr ""
-"Wählen Sie **Log in** unten in der Seitenleiste. Es ist die Schaltfläche "
+"Wählen Sie **Anmelden** unten in der Seitenleiste. Es ist die Schaltfläche "
 "über der Farbschema-Auswahl."
 
 #: ../../first-visit/signing-in.rst:14
@@ -66,7 +66,7 @@ msgid ""
 "choose **Log out**."
 msgstr ""
 "Zum Abmelden öffnen Sie das Menü unter Ihrem Namen unten in der Seitenleiste"
-" und wählen **Log out**."
+" und wählen **Abmelden**."
 
 #: ../../first-visit/signing-in.rst:22
 msgid "Which account to use"
