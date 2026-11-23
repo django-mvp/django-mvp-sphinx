@@ -1,7 +1,6 @@
 """The contents of a docs build, as the menu its documentation app draws."""
 
 import threading
-from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlencode
 
@@ -147,9 +146,7 @@ class DocumentationMenu(Menu):
         self.lock = threading.Lock()
         self.stamp: tuple[Any, ...] | None = None
         # The build directory of the request being processed, for refresh().
-        self.build_dir: Any = (
-            None if callable(app.build_dir) or isinstance(app.build_dir, Mapping) else app.build_dir
-        )
+        self.build_dir: Any = None if callable(app.build_dir) else app.build_dir
 
     def front_page_url(self, request: "HttpRequest | None", **kwargs: Any) -> str:
         """Return the address the app's front page is served at."""

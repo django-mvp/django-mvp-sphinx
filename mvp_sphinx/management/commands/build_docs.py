@@ -1,18 +1,21 @@
 """Management command that runs the Sphinx build for the project's documentation apps."""
 
-import ast
 import subprocess
 import sys
 from importlib.util import find_spec
 from pathlib import Path
 from typing import Any
 
-from collections.abc import Mapping
-
 from django.core.management.base import BaseCommand, CommandError, CommandParser
-from django.utils.translation import to_language, to_locale
+from django.utils.translation import to_language
 from mvp.mounted import MountedApp
 
+from mvp_sphinx.languages import (
+    conf_assignments,
+    site_languages,
+    source_language,
+    translations,
+)
 from mvp_sphinx.mounted import DocumentationApp
 
 
@@ -57,15 +60,7 @@ class Command(BaseCommand):
         quiet = options["verbosity"] == 0
         built = 0
         for app in apps:
-            if isinstance(app.build_dir, Mapping):
-                # One build per language, each in the language Sphinx knows it by.
-                targets = [
-                    (to_locale(to_language(str(code))), directory)
-                    for code, directory in app.build_dir.items()
-                ]
-            else:
-                targets = [(None, app.build_dir)]
-            for language, build_dir in targets:
+            for language, build_dir in self.language_builds(app, quiet):
                 if not quiet:
                     into = f" in {language}" if language else ""
                     self.stdout.write(
@@ -97,6 +92,44 @@ class Command(BaseCommand):
         if not quiet:
             self.stdout.write(self.style.SUCCESS(f"Built {built} docs build(s)."))
 
+    def language_builds(
+        self, app: DocumentationApp, quiet: bool
+    ) -> list[tuple[str | None, Path]]:
+        """Return each language to build an app in, with the folder it goes to.
+
+        A source with no translations is built once, straight into
+        ``build_dir``. A translated one is built in the language it is
+        written in and in every translated language the project's
+        ``LANGUAGES`` holds, each into a folder of ``build_dir`` named for the
+        language as Sphinx names it. A translation the project doesn't offer
+        is skipped.
+
+        Args:
+            app: The documentation app to build.
+            quiet: Whether to leave out the line naming skipped translations.
+
+        Returns:
+            Pairs of a Sphinx language code, or ``None`` for the one build, and
+            the folder to build into.
+        """
+        translated = translations(app.source_dir)
+        if not translated:
+            return [(None, Path(app.build_dir))]
+        offered = site_languages()
+        source = source_language(app.source_dir)
+        languages = [source] + [
+            code
+            for code in translated
+            if code != source and to_language(code) in offered
+        ]
+        skipped = [code for code in translated if code not in languages]
+        if skipped and not quiet:
+            self.stdout.write(
+                f"Skipping {app.namespace} in {', '.join(skipped)}: "
+                "not in the project's LANGUAGES."
+            )
+        return [(code, Path(app.build_dir) / code) for code in languages]
+
     def theme_arguments(self, source_dir: Path) -> list[str]:
         """Return the Sphinx option that sets the default theme, if one is needed.
 
@@ -107,17 +140,7 @@ class Command(BaseCommand):
             ``-D html_theme=daisyui``, or nothing when ``conf.py`` assigns
             ``html_theme`` itself, so the project's own choice stands.
         """
-        try:
-            tree = ast.parse((Path(source_dir) / "conf.py").read_text(encoding="utf-8"))
-        except (OSError, SyntaxError, ValueError):
-            return []
-        names = {
-            target.id
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Assign)
-            for target in node.targets
-            if isinstance(target, ast.Name)
-        }
+        names = conf_assignments(source_dir)
         if "html_theme" in names:
             return []
         return ["-D", f"html_theme={self.DEFAULT_THEME}"]
