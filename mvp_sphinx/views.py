@@ -26,7 +26,7 @@ from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.extracts import plain_text
 from mvp_sphinx.headings import PageHeadings
 from mvp_sphinx.meta_tags import MetaTags
-from mvp_sphinx.page_body import BodyRewriter
+from mvp_sphinx.page_body import has_maths
 from mvp_sphinx.search import DocsSearch
 
 if TYPE_CHECKING:
@@ -87,14 +87,15 @@ class PageView(PageMixin, TemplateView):
             raise Http404
         self.page_data = page
         # The body is the host's own docs build, trusted as it always was.
-        rewritten = BodyRewriter.parse(page.get("body", ""))
-        body = mark_safe(rewritten.splice())  # noqa: S308
+        markup = page.get("body", "")
+        body = mark_safe(markup)  # noqa: S308
         body_parts = LiveExamples.parts(body)
         return self.render_to_response(
             self.get_context_data(
                 page_data=page,
                 body=body,
-                has_maths=rewritten.has_maths,
+                has_maths=has_maths(markup),
+                theme_stylesheet=self.app.theme_stylesheet(build),
                 body_parts=body_parts,
                 has_examples=any("example" in part for part in body_parts),
             )

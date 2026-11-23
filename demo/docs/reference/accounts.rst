@@ -15,19 +15,19 @@ Run it again at any time: it resets each account to this state.
      - Sees the guide you are reading
    * - ``regular.user@example.com``
      - ``password``
-     - A :term:`regular account`, signed in but not staff
+     - A regular account, signed in but not staff
      - No
      - No: shown the forbidden page
      - Yes
    * - ``staff.user@example.com``
      - ``password``
-     - A :term:`staff account`
+     - A staff account
      - Yes
      - Yes
      - Yes
    * - ``super.user@example.com``
      - ``password``
-     - The :term:`superuser account`, which is also staff
+     - The superuser account, which is also staff
      - Yes
      - Yes
      - Yes

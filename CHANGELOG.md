@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Pages are styled by the `daisyui` theme from sphinx-daisyui, which this package now depends on (0.2.0 or later). Every build made with that theme writes `_static/styles/sphinx-daisyui-content.css`, the page template links it, and the package serves that one file from the build. `build_docs` and the demo build with the theme by default, and a `conf.py` that sets `html_theme` itself keeps its choice, though pages of a build made with another theme come without the styles. Add `html_theme = "daisyui"` to the `conf.py` of a project you build yourself. If you override `mvp_sphinx/page.html`, the element that holds the body now carries `daisy-sphinx-content` instead of `mvp-sphinx-content`, and your own markup inside it that the styles should leave alone takes `daisy-sphinx-escape`.
+- Lists are more compact, with items a few pixels apart.
+- The text of a page is the theme's width, 46rem (736 pixels), where it was 40rem and, beside "On this page", 632 pixels. To change it, set `--daisy-sphinx-max-width` in your own stylesheet. The page's container follows it.
+- A contents list written into a page, such as a `toctree`, is drawn as a menu again, with a toggle that opens and closes the pages under each entry. The toggles did nothing.
+
+### Removed
+- The demo's "How long a page takes to read" page, its glossary and its page of notices. The package never calculated a reading time itself. The page only held the sums behind one, and the demo's kitchen sink now covers maths, glossaries and admonitions. MyST records a word count for each page it reads, which is where a reading time would come from.
+- `mvp_sphinx/content.css`, and `BodyRewriter` and `Equation` in `mvp_sphinx.page_body`. The theme's markup carries the scrolling regions around tables and equations and the names of heading links that `BodyRewriter` added. `mvp_sphinx.page_body.has_maths(markup)` stays. The heading link of an entry is named by the entry's own name, so two methods with the same name on one page share a link name.
+
 ## [v0.9.1] - 2026-11-15
 
 ### Fixed

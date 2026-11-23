@@ -7,10 +7,6 @@
   pages, the block is left out and the site's search stands in for it.
 {% endcomment %}
 {% load static %}
-{% block styles %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static 'mvp_sphinx/content.css' %}">
-{% endblock styles %}
 {% block app.navbar.end %}
   {{ block.super }}
   {% if not site_search %}

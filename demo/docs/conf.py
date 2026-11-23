@@ -5,8 +5,11 @@ from pathlib import Path
 
 # The link helpers page documents demo/links.py, so the build has to import it.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+# The kitchen sink documents a small module that lives with the guide.
+sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 
 project = "django-mvp-sphinx demo"
+html_theme = "daisyui"
 extensions = [
     "mvp_sphinx.navigation",
     "myst_parser",

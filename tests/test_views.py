@@ -17,7 +17,6 @@ from django.urls import reverse
 from django_cotton.utils import render_component
 from mvp.config import MVP_CONFIG
 
-from mvp_sphinx.page_body import BodyRewriter
 from tests.conftest import DEMO_GUIDE, SPHINX_SOURCES
 from tests.factories import UserFactory
 from tests.test_live_example import write_source
@@ -270,7 +269,7 @@ class TestFiles:
             ".doctrees/environment.pickle",
         ],
     )
-    def test_nothing_but_images_and_downloads_is_served_as_a_file(
+    def test_nothing_but_images_downloads_and_the_theme_stylesheet_is_a_file(
         self, client, db, guide_build, address
     ) -> None:
         response = client.get(f"/docs/{address}")
@@ -502,112 +501,65 @@ class TestPageMetadata:
 
 
 class TestContentStyling:
-    STYLESHEET = "mvp_sphinx/content.css"
+    THEME = "/docs/_static/styles/sphinx-daisyui-content.css"
+    SETTINGS = "mvp_sphinx/page.css"
 
-    def test_a_docs_page_links_the_packages_stylesheet(self, client, db) -> None:
-        response = client.get("/docs/content/")
-
-        assert static(self.STYLESHEET) in linked_stylesheets(response)
-
-    def test_the_hosts_own_pages_do_not_link_the_stylesheet(self, client, db) -> None:
-        response = client.get(reverse("overview"))
-
-        assert static(self.STYLESHEET) not in linked_stylesheets(response)
-
-    def test_no_stylesheet_from_the_docs_build_is_linked(self, client, db) -> None:
-        response = client.get("/docs/content/")
-
-        assert not [s for s in linked_stylesheets(response) if "_static" in s]
-
-
-class TestWideContent:
-    def test_every_table_of_a_page_is_in_a_focusable_named_region(
+    def test_a_docs_page_links_the_themes_stylesheet_then_the_settings(
         self, client, db
     ) -> None:
-        response = client.get("/docs/content/")
+        sheets = linked_stylesheets(client.get("/docs/content/"))
 
-        body = response.content.decode()
-        regions = re.findall(r'<div [^>]*role="region"[^>]*>', body)
-        assert len(regions) == body.count("<table") == 3
-        assert all('tabindex="0"' in tag and "aria-label=" in tag for tag in regions)
+        assert sheets.index(self.THEME) < sheets.index(static(self.SETTINGS))
 
-    def test_a_captioned_table_is_named_by_its_caption(self, client, db) -> None:
-        response = client.get("/docs/content/")
-
-        assert 'aria-label="Release schedule"' in response.content.decode()
-
-    def test_every_equation_of_a_page_holds_one_focusable_named_region(
-        self, client, db, reference_app
+    def test_the_themes_stylesheet_is_served_from_the_build(
+        self, client, db, guide_build
     ) -> None:
-        response = client.get("/docs/maths/")
+        response = client.get(self.THEME)
 
-        soup = BeautifulSoup(response.content.decode(), "html.parser")
-        equations = soup.select("div.math")
-        assert len(equations) == 3
-        for equation in equations:
-            regions = equation.select('[role="region"]')
-            assert len(regions) == 1
-            assert regions[0]["tabindex"] == "0"
-            assert regions[0]["aria-label"]
-            assert regions[0].find_parent("div", class_="math") is equation
+        assert response.status_code == 200
+        assert response["Content-Type"] == "text/css"
+        served = b"".join(response.streaming_content)
+        written = guide_build / "_static" / "styles" / "sphinx-daisyui-content.css"
+        assert served == written.read_bytes()
 
+    def test_the_hosts_own_pages_do_not_link_the_stylesheets(self, client, db) -> None:
+        sheets = linked_stylesheets(client.get(reverse("overview")))
 
-class TestHeadingLinks:
-    HEADING_LINK = re.compile(
-        r"<(?:h[1-6]|dt)\b[^>]*>"
-        r"(?P<held>(?:(?!<h[1-6]\b|<dt\b|<a\b[^>]*headerlink).)*?)"
-        r"<a\b(?P<attributes>[^>]*\bheaderlink\b[^>]*)>",
-        re.S,
-    )
+        assert self.THEME not in sheets
+        assert static(self.SETTINGS) not in sheets
 
-    def page(self, client) -> str:
-        return client.get("/docs/content/").content.decode()
-
-    def links(self, body: str) -> list[tuple[str, dict[str, str]]]:
-        return [
-            (
-                re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", "", match["held"]))),
-                dict(re.findall(r'([\w-]+)="([^"]*)"', match["attributes"])),
-            )
-            for match in self.HEADING_LINK.finditer(body)
-        ]
-
-    def test_every_heading_link_of_a_page_is_named_by_its_headings_text(
+    def test_no_other_stylesheet_from_the_docs_build_is_linked(
         self, client, db
     ) -> None:
-        links = self.links(self.page(client))
+        sheets = linked_stylesheets(client.get("/docs/content/"))
 
-        assert len(links) >= 5
-        for text, attributes in links:
-            assert unescape(attributes["aria-label"]).endswith(text.strip())
+        assert [s for s in sheets if "_static" in s] == [self.THEME]
 
-    def test_a_heading_link_leads_to_an_anchor_on_the_page(self, client, db) -> None:
-        body = self.page(client)
-
-        for link in self.links(body):
-            attributes = link[1]
-            assert attributes["href"].startswith("#")
-            assert f'id="{attributes["href"][1:]}"' in body
-
-    def test_no_two_heading_links_of_a_page_share_a_name(self, client, db) -> None:
-        names = [
-            attributes["aria-label"]
-            for text, attributes in self.links(self.page(client))
-        ]
-
-        assert len(names) == len(set(names))
-
-    def test_the_link_of_a_heading_with_code_and_an_ampersand_is_named_by_them(
+    def test_a_page_loads_the_script_that_opens_its_contents_lists(
         self, client, db
     ) -> None:
-        names = [unescape(a["aria-label"]) for _, a in self.links(self.page(client))]
+        body = client.get("/docs/content/").content.decode()
 
-        assert any(name.endswith("Using run() & friends") for name in names)
+        assert static("mvp_sphinx/toctree.js") in body
 
-    def test_a_glossary_terms_link_is_named_by_the_term(self, client, db) -> None:
-        links = {a["href"]: a for _, a in self.links(self.page(client))}
+    def test_the_pages_container_is_the_one_the_stylesheet_sizes(
+        self, client, db
+    ) -> None:
+        page = BeautifulSoup(client.get("/docs/content/").content, "html.parser")
 
-        assert links["#term-widget"]["aria-label"].endswith("widget")
+        assert page.select_one("article.daisy-sphinx-content").find_parent(
+            class_="mvp-sphinx-page"
+        )
+
+    def test_a_build_made_with_another_theme_links_no_theme_stylesheet(
+        self, client, db, guide_build
+    ) -> None:
+        (guide_build / "_static" / "styles" / "sphinx-daisyui-content.css").unlink()
+
+        sheets = linked_stylesheets(client.get("/docs/content/"))
+
+        assert not [s for s in sheets if "_static" in s]
+        assert static(self.SETTINGS) in sheets
 
 
 TOP_ENTRIES = {
@@ -1807,18 +1759,6 @@ class TestEntryLinks:
             link = each.select_one("a.headerlink")
             assert link["href"] == f"#{each['id']}"
 
-    def test_every_entry_link_has_a_name(self, page) -> None:
-        links = [each.select_one("a.headerlink") for each in page.select("dt[id]")]
-
-        assert links
-        assert all(link["aria-label"] for link in links)
-
-    def test_no_two_heading_links_of_the_page_share_a_name(self, page) -> None:
-        names = [link["aria-label"] for link in page.select("a.headerlink")]
-
-        assert len(names) > len(page.select("dt.sig-object[id]"))
-        assert len(names) == len(set(names))
-
     def test_a_reference_in_a_description_leads_to_an_entry_on_the_page(
         self, page
     ) -> None:
@@ -1906,7 +1846,11 @@ class TestMaths:
         response = client.get("/docs/maths/")
 
         soup = BeautifulSoup(response.content.decode(), "html.parser")
-        holders = [m for m in soup.select(".math") if notation in m.get_text()]
+        holders = [
+            m
+            for m in soup.select(".math")
+            if notation in m.get_text() and not m.select(".math")
+        ]
         assert len(holders) == 1
 
     @pytest.mark.parametrize("place", PLACES)
@@ -2068,11 +2012,11 @@ class TestLiveExamples:
         assert stylesheet in linked_stylesheets(client.get("/docs/single/"))
         assert stylesheet not in linked_stylesheets(client.get("/docs/plain/"))
 
-    def test_a_page_with_no_example_has_the_rewritten_body_as_its_article(
+    def test_a_page_with_no_example_has_the_body_as_its_article(
         self, client, db, examples_app, examples_build
     ) -> None:
         page = json.loads((examples_build / "plain.fjson").read_text())
-        rewritten = BodyRewriter.parse(page["body"]).splice()
+        rewritten = page["body"]
 
         content = client.get("/docs/plain/").content.decode()
 

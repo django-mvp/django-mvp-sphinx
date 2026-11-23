@@ -30,19 +30,6 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-#: page_body.py:227
-msgid "Equation"
-msgstr ""
-
-#: page_body.py:229
-#, python-format
-msgid "Equation %(number)s"
-msgstr ""
-
-#: page_body.py:348
-msgid "Table"
-msgstr ""
-
 #: templates/cotton/mvp_sphinx/live_example.html:14
 #: templates/cotton/mvp_sphinx/live_example.html:32
 msgid "Live example"

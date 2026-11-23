@@ -345,7 +345,7 @@ each link leads where it should.
 - **FR-021**: Any transition used to reveal an entry's link MUST be suppressed when the reader has
   asked for reduced motion.
 - **FR-022**: Pages MUST continue to load no stylesheet from the docs build or from a Sphinx
-  theme.
+  theme, except the page-body stylesheet that the sphinx-daisyui theme writes into a build.
 
 ### Key Entities
 

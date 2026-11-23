@@ -1,8 +1,10 @@
 """Management command that runs the Sphinx build for the project's documentation apps."""
 
+import ast
 import subprocess
 import sys
 from importlib.util import find_spec
+from pathlib import Path
 from typing import Any
 
 from django.core.management.base import BaseCommand, CommandError, CommandParser
@@ -16,8 +18,12 @@ class Command(BaseCommand):
 
     The command runs ``sphinx-build -b json`` from an app's ``source_dir`` into
     its ``build_dir``, as a process of its own. Nothing here imports Sphinx, so
-    the site that serves the pages still needs none.
+    the site that serves the pages still needs none. It builds with the
+    ``daisyui`` theme from sphinx-daisyui, unless the source's ``conf.py``
+    assigns ``html_theme`` itself.
     """
+
+    DEFAULT_THEME = "daisyui"
 
     help = (
         "Build the Sphinx documentation of the project's documentation apps: "
@@ -59,6 +65,7 @@ class Command(BaseCommand):
                     "sphinx",
                     "-b",
                     "json",
+                    *self.theme_arguments(app.source_dir),
                     *(["-q"] if quiet else []),
                     str(app.source_dir),
                     str(app.build_dir),
@@ -71,6 +78,31 @@ class Command(BaseCommand):
                 )
         if not quiet:
             self.stdout.write(self.style.SUCCESS(f"Built {len(apps)} docs build(s)."))
+
+    def theme_arguments(self, source_dir: Path) -> list[str]:
+        """Return the Sphinx option that sets the default theme, if one is needed.
+
+        Args:
+            source_dir: The Sphinx source directory, holding ``conf.py``.
+
+        Returns:
+            ``-D html_theme=daisyui``, or nothing when ``conf.py`` assigns
+            ``html_theme`` itself, so the project's own choice stands.
+        """
+        try:
+            tree = ast.parse((Path(source_dir) / "conf.py").read_text(encoding="utf-8"))
+        except (OSError, SyntaxError, ValueError):
+            return []
+        names = {
+            target.id
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Assign)
+            for target in node.targets
+            if isinstance(target, ast.Name)
+        }
+        if "html_theme" in names:
+            return []
+        return ["-D", f"html_theme={self.DEFAULT_THEME}"]
 
     def apps_to_build(self, namespaces: list[str]) -> list[DocumentationApp]:
         """Return the documentation apps to build, in the order they are mounted.

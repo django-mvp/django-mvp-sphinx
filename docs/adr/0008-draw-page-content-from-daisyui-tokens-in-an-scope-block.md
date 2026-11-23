@@ -1,6 +1,9 @@
 # ADR 0008 — Draw page content from daisyUI's tokens in one `@scope` block, without Tailwind's prose styles
 
-**Status:** accepted
+**Status:** superseded by 0009
+
+Replaced by [ADR 0009](0009-draw-page-content-with-the-sphinx-daisyui-theme.md), which takes the
+page-body stylesheet and the markup it styles from the sphinx-daisyui theme.
 
 Replaces [ADR 0003](0003-style-page-content-with-a-scoped-theme-stylesheet-and-rewrite-only-what-css-cannot.md),
 whose rewrite of the page body stands unchanged here.

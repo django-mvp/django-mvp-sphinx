@@ -8,7 +8,6 @@ import pytest
 from bs4 import BeautifulSoup
 
 import mvp_sphinx
-from tests.test_static.test_content_css import STYLESHEET, Stylesheet
 
 PACKAGE = Path(mvp_sphinx.__file__).parent
 SETTINGS_FILE = PACKAGE / "static" / "mvp_sphinx" / "maths.js"
@@ -20,7 +19,7 @@ COLOUR_VALUE = re.compile(
     re.IGNORECASE,
 )
 COLOUR_SETTING = re.compile(r'\bcolor\s*:\s*"([^"]*)"')
-CUSTOM_PROPERTY = re.compile(r"^var\((--mvp-sphinx-[\w-]+)\)$")
+THEME_COLOUR = re.compile(r"^var\(--color-[\w-]+\)$")
 
 
 @pytest.fixture(scope="module")
@@ -29,18 +28,11 @@ def settings() -> str:
 
 
 class TestMathsSettings:
-    def test_every_colour_named_is_a_property_the_stylesheet_defines(
-        self, settings
-    ) -> None:
-        defined = Stylesheet(STYLESHEET.read_text()).properties()
-
+    def test_every_colour_named_is_a_theme_colour(self, settings) -> None:
         named = COLOUR_SETTING.findall(settings)
+
         assert named
-        assert [
-            value
-            for value in named
-            if not (match := CUSTOM_PROPERTY.match(value)) or match[1] not in defined
-        ] == []
+        assert [value for value in named if not THEME_COLOUR.match(value)] == []
 
     def test_no_colour_is_written_as_a_literal(self, settings) -> None:
         literals = [
@@ -57,7 +49,9 @@ class TestMathsSettings:
     def test_only_elements_sphinx_marked_as_maths_are_scanned(
         self, settings, reference_build
     ) -> None:
-        scanned = re.search(r'elements\s*:\s*\["\.([\w-]+)"\]', settings)
+        scanned = re.search(
+            r'elements\s*:\s*\["\.([\w-]+):not\(:has\(\.\1\)\)"\]', settings
+        )
         processed = re.search(r'processHtmlClass\s*:\s*"([^"]+)"', settings)
         page = json.loads((reference_build / "maths.fjson").read_text())
         body = BeautifulSoup(page["body"], "html.parser")
@@ -83,4 +77,3 @@ class TestMathsSettings:
         assert re.search(
             rf'class="[^"]*\b{re.escape(ignored[1])}\b', PAGE_TEMPLATE.read_text()
         )
-        assert f".{ignored[1]}" in STYLESHEET.read_text()

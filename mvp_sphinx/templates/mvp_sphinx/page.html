@@ -11,6 +11,8 @@
 {% endblock head %}
 {% block styles %}
   {{ block.super }}
+  {% if theme_stylesheet %}<link rel="stylesheet" href="{{ theme_stylesheet }}">{% endif %}
+  <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
   {% if has_examples %}<link rel="stylesheet" href="{% static 'mvp_sphinx/example.css' %}">{% endif %}
 {% endblock styles %}
 {% block app.navbar.end %}
@@ -22,10 +24,10 @@
 {% endblock app.navbar.end %}
 {% block content %}
   <c-mvp.page>
-    <c-mvp.container width="medium">
+    <c-mvp.container width="full" class="mvp-sphinx-page">
       <c-mvp.page.layout>
         <div class="min-w-0 w-full">
-          <article class="mvp-sphinx-content">
+          <article class="daisy-sphinx-content">
             {% for part in body_parts %}
               {% if part.example %}
                 <c-mvp_sphinx.live_example :example="part.example" />
@@ -47,6 +49,7 @@
 {% endblock content %}
 {% block extra_js %}
   {{ block.super }}
+  <script src="{% static 'mvp_sphinx/toctree.js' %}" defer></script>
   {% if has_maths %}
     <script src="{% static 'mvp_sphinx/maths.js' %}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>

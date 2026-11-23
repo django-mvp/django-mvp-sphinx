@@ -19,7 +19,6 @@ from demo.settings import BASE_DIR
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.menus import ContentsEntry
 from tests.factories import UserFactory
-from tests.test_static.test_content_css import STYLESHEET, Stylesheet
 from tests.test_views import results_under, search_dialog, site_search_dialog
 
 
@@ -217,7 +216,7 @@ def link_helpers(guide_pages):
 
 @pytest.fixture
 def maths_page(guide_pages):
-    return guide_pages["/docs/reference/reading-time/"]
+    return guide_pages["/docs/kitchen-sink/media/"]
 
 
 def description(page, entry_id):
@@ -308,7 +307,8 @@ class TestDemoGuideStates:
 
     def test_a_table_sits_in_the_scroll_region(self, guide_pages) -> None:
         assert any(
-            soup.select("div.mvp-sphinx-scroll table") for soup in guide_pages.values()
+            soup.select("div.daisy-sphinx-scroll table")
+            for soup in guide_pages.values()
         )
 
     def test_an_image_is_served_as_an_image(self, guide_pages, client) -> None:
@@ -391,15 +391,17 @@ class TestDemoGuideStates:
 
         assert entry.select_one("div.deprecated")
 
-    def test_the_page_links_the_packages_stylesheet_and_none_from_the_build(
+    def test_the_page_links_the_themes_stylesheet_then_the_packages_settings(
         self, link_helpers
     ) -> None:
         sheets = [
             link["href"] for link in link_helpers.select('link[rel="stylesheet"]')
         ]
 
-        assert static("mvp_sphinx/content.css") in sheets
-        assert not [each for each in sheets if "_static" in each]
+        theme = "/docs/_static/styles/sphinx-daisyui-content.css"
+        assert theme in sheets
+        assert sheets.index(theme) < sheets.index(static("mvp_sphinx/page.css"))
+        assert [each for each in sheets if "_static" in each] == [theme]
 
     def test_a_source_link_leads_to_a_page_of_the_app(
         self, link_helpers, client
@@ -426,22 +428,17 @@ class TestDemoGuideStates:
     def test_the_summary_table_sits_in_a_scroll_region(self, link_helpers) -> None:
         table = link_helpers.select_one("table.autosummary")
 
-        region = table.find_parent("div", class_="mvp-sphinx-scroll")
+        region = table.find_parent("div", class_="daisy-sphinx-scroll")
         assert region["role"] == "region"
         assert region["tabindex"] == "0"
 
-    def test_a_deprecation_in_an_entry_is_one_the_stylesheet_draws(
+    def test_a_deprecation_in_an_entry_is_one_the_theme_draws(
         self, link_helpers
     ) -> None:
         entry = description(link_helpers, "demo.links.old_address")
-        selectors = " ".join(
-            selector for selector, declared in Stylesheet(STYLESHEET.read_text()).rules
-        )
 
         notice = entry.select_one("div.deprecated")
         assert notice.select_one(".versionmodified")
-        for hook in ("div.deprecated", r"\.versionmodified"):
-            assert re.search(rf"{hook}(?![\w-])", selectors)
 
     def test_the_maths_page_loads_the_settings_then_the_library(
         self, maths_page
@@ -457,7 +454,7 @@ class TestDemoGuideStates:
     ) -> None:
         equations = maths_page.select("article div.math[id]")
 
-        assert len(equations) >= 2
+        assert equations
         for equation in equations:
             regions = equation.select('[role="region"]')
             assert len(regions) == 1
@@ -573,13 +570,13 @@ class TestInfoDialog:
         page = BeautifulSoup(response.content, "html.parser")
         return page.find(id="pageInfoModal")
 
-    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    @pytest.mark.parametrize("name", ["whole_page", "admonitions"])
     def test_the_dialog_holds_the_extract_of_the_page(
         self, client, db, demo_guide_app, rf, name
     ) -> None:
         address = {
             "whole_page": "first-visit/finding-your-way/",
-            "notices": "reference/notices/",
+            "admonitions": "kitchen-sink/admonitions/",
         }[name]
         request = rf.get("/")
         request.user = UserFactory.build()
@@ -588,28 +585,27 @@ class TestInfoDialog:
         dialog = self.dialog(client, name)
 
         wanted = BeautifulSoup(str(extract), "html.parser")
-        assert dialog.select_one("div.mvp-sphinx-content")
+        assert dialog.select_one("div.daisy-sphinx-content")
         for tag, attribute in [("a", "href"), ("img", "src")]:
             assert [
                 each[attribute]
-                for each in dialog.select(f".mvp-sphinx-content {tag}[{attribute}]")
+                for each in dialog.select(f".daisy-sphinx-content {tag}[{attribute}]")
             ] == [each[attribute] for each in wanted.select(f"{tag}[{attribute}]")]
 
-    def test_the_notices_page_shows_its_notices_and_its_picture(
+    def test_the_admonitions_page_shows_its_admonitions(
         self, client, db, demo_guide_app
     ) -> None:
-        dialog = self.dialog(client, "notices")
+        dialog = self.dialog(client, "admonitions")
 
-        assert dialog.select(".mvp-sphinx-content div.admonition")
-        assert dialog.select(".mvp-sphinx-content img")
+        assert dialog.select(".daisy-sphinx-content div.admonition")
 
-    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    @pytest.mark.parametrize("name", ["whole_page", "admonitions"])
     def test_the_dialog_offers_the_full_page(
         self, client, db, demo_guide_app, name
     ) -> None:
         address = {
             "whole_page": "first-visit/finding-your-way/",
-            "notices": "reference/notices/",
+            "admonitions": "kitchen-sink/admonitions/",
         }[name]
 
         dialog = self.dialog(client, name)
@@ -641,7 +637,7 @@ class TestInfoDialog:
     ) -> None:
         client.force_login(UserFactory(is_staff=True))
 
-        assert self.dialog(client, "staff").select_one("div.mvp-sphinx-content")
+        assert self.dialog(client, "staff").select_one("div.daisy-sphinx-content")
 
     def test_the_moved_screen_renders_without_a_dialog(
         self, client, db, demo_guide_app
@@ -653,10 +649,10 @@ class TestInfoDialog:
     ) -> None:
         dialog = self.dialog(client, "section")
 
-        assert dialog.select_one(".mvp-sphinx-content")
+        assert dialog.select_one(".daisy-sphinx-content")
         assert not dialog.find(id="the-sidebar")
         assert not dialog.find(id="on-this-page")
-        assert not dialog.select(".mvp-sphinx-content h2")
+        assert not dialog.select(".daisy-sphinx-content h2")
 
     def test_the_section_screen_offers_the_page_at_that_section(
         self, client, db, demo_guide_app
@@ -666,7 +662,7 @@ class TestInfoDialog:
         buttons = [
             link
             for link in dialog.find_all("a", href=True)
-            if not link.find_parent(class_="mvp-sphinx-content")
+            if not link.find_parent(class_="daisy-sphinx-content")
         ]
         assert [link["href"] for link in buttons] == [
             "/docs/first-visit/finding-your-way/#searching-the-guide"

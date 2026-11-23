@@ -82,7 +82,9 @@ docs = DocumentationApp(build_dir=..., check=user_is_authenticated)
 
 # a rule of the host's own: a group, a permission, or any function of the request
 docs = DocumentationApp(build_dir=..., check=user_in_any_group("Support"))
-docs = DocumentationApp(build_dir=..., check=user_has_any_permission("support.view_ticket"))
+docs = DocumentationApp(
+    build_dir=..., check=user_has_any_permission("support.view_ticket")
+)
 
 
 def staff_only(request):

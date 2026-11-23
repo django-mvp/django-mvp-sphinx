@@ -11,9 +11,9 @@ Who can open it
 Only staff accounts can. What happens to everyone else depends on who they are:
 
 * Someone who has not signed in is asked to sign in.
-* Someone signed in with a :term:`regular account` is shown the site's forbidden
+* Someone signed in with a regular account is shown the site's forbidden
   page.
-* Someone signed in with a :term:`staff account` or the :term:`superuser account`
+* Someone signed in with a staff account or the superuser account
   reads it.
 
 The sidebar follows the same rule. The staff guide's entry appears only while
