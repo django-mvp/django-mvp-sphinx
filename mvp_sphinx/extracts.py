@@ -60,8 +60,8 @@ class SectionFinder(HTMLParser):
 
     The section is the first one in the body when no anchor is given, otherwise
     the one whose ``id`` is the anchor. Its content is everything inside it after
-    its first heading, so its subsections come with it. Offsets are counted as
-    ``BodyRewriter`` counts them, so they index the body as written.
+    its first heading, so its subsections come with it. Offsets index the body as
+    written.
 
     Attributes:
         heading_start: The offset of the start tag of the section's heading, or
