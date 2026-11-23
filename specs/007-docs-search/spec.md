@@ -370,7 +370,7 @@ top bar, then search for a word one app's pages hold, and open a page of each ap
 - The docs build is the same `sphinx-build -b json` output served by
   [#4](https://github.com/django-mvp/django-mvp-sphinx/issues/4), and Sphinx writes its search data
   into that build by default. Search needs no configuration beyond what #4 needs.
-- One docs build per documentation app, in one language. Searching across versions or translations
+- Search covers the one build serving the request. Searching across versions or languages
   is out of scope (CONSTITUTION.md Article XII).
 - User guides this package serves run to tens or a few hundred pages. All results are shown on one
   results page, without paging through them.

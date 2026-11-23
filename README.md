@@ -28,8 +28,8 @@ It serves a Sphinx JSON build (`sphinx-build -b json`). Serving never needs
 Sphinx installed and never starts a build: the build is a file the project
 produces before a request arrives, however it already does that. The package
 adds a management command that runs the build when you ask for it. It does not
-host documentation for several projects, keep old versions, or manage
-translations.
+host documentation for several projects, keep old versions, or run the
+translation workflow.
 
 When two designs conflict, the one that makes the docs look like the rest of
 the site beats the one that copies a Sphinx theme.

@@ -339,5 +339,5 @@ any other, then request pages, a file, a search, an extract and the sidebar with
 - The app sidebar's contents, On this page, and previous and next links belong to #5 and #6. On
   documentation pages the sidebar shows whatever the application shell shows for a mounted app with
   no contents of its own.
-- One current build per documentation app. Versions and translations are out of scope
-  (CONSTITUTION.md Article XII).
+- One current build per documentation app. Versions are out of scope, and serving one
+  build for each language is not part of this spec (CONSTITUTION.md Article XII).
