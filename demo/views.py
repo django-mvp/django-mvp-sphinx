@@ -99,15 +99,15 @@ class SectionView(InfoDialogView):
     )
 
 
-class NoticesView(InfoDialogView):
-    """The info dialog holds a page of notices, tables and a picture."""
+class AdmonitionsView(InfoDialogView):
+    """The info dialog holds the kitchen sink's page of admonitions."""
 
-    page_title = "Notices"
-    page_subtitle = "Notices, tables and a picture in the info dialog"
-    address = "reference/notices/"
+    page_title = "Admonitions"
+    page_subtitle = "Every kind of admonition in the info dialog"
+    address = "kitchen-sink/admonitions/"
     intro = (
-        "The guide's page of notices has every kind of notice, a picture and a "
-        "table, so this dialog shows how each looks outside the guide."
+        "The kitchen sink's page of admonitions has every kind, so this dialog "
+        "shows how each looks outside the guide."
     )
 
 

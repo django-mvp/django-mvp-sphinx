@@ -56,5 +56,4 @@ same in each.
 
 .. seealso::
 
-   :ref:`signing-in`, for the button beside the theme control, and the
-   :term:`sidebar` in the glossary.
+   :ref:`signing-in`, for the button beside the theme control.

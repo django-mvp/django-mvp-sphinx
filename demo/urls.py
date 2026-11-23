@@ -13,7 +13,7 @@ urlpatterns = [
     # Screens whose info dialog holds a page, or a section, of a guide.
     path("info/whole-page/", views.WholePageView.as_view(), name="info_whole_page"),
     path("info/section/", views.SectionView.as_view(), name="info_section"),
-    path("info/notices/", views.NoticesView.as_view(), name="info_notices"),
+    path("info/admonitions/", views.AdmonitionsView.as_view(), name="info_admonitions"),
     path("info/staff/", views.StaffOnlyView.as_view(), name="info_staff"),
     path("info/moved/", views.MissingPageView.as_view(), name="info_moved"),
     # A screen whose template places a section of the guide with the template tag.

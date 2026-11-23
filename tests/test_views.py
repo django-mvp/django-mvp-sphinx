@@ -535,6 +535,22 @@ class TestContentStyling:
 
         assert [s for s in sheets if "_static" in s] == [self.THEME]
 
+    def test_a_page_loads_the_script_that_opens_its_contents_lists(
+        self, client, db
+    ) -> None:
+        body = client.get("/docs/content/").content.decode()
+
+        assert static("mvp_sphinx/toctree.js") in body
+
+    def test_the_pages_container_is_the_one_the_stylesheet_sizes(
+        self, client, db
+    ) -> None:
+        page = BeautifulSoup(client.get("/docs/content/").content, "html.parser")
+
+        assert page.select_one("article.daisy-sphinx-content").find_parent(
+            class_="mvp-sphinx-page"
+        )
+
     def test_a_build_made_with_another_theme_links_no_theme_stylesheet(
         self, client, db, guide_build
     ) -> None:

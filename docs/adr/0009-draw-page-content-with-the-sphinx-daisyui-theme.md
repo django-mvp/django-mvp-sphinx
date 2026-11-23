@@ -19,10 +19,11 @@ links that one file, and `DocsBuild.file` serves that one path from the build, t
 downloads are served. No other file of `_static/` is served. A build made with another theme has
 no such file, so its pages link none and a project that chose that theme draws its own pages.
 
-The package ships `mvp_sphinx/static/mvp_sphinx/page.css`, which sets the three properties the
-theme lets a host set: the reading width (`--daisy-sphinx-max-width`, 40rem), the surface the page
-sits on (`--daisy-sphinx-page-bg`, django-mvp's `base-200`) and the sunken surface
-(`--daisy-sphinx-surface`). It is linked after the theme's file because the last is declared on
+The package ships `mvp_sphinx/static/mvp_sphinx/page.css`, which sets two of the properties the
+theme lets a host set: the surface the page sits on (`--daisy-sphinx-page-bg`, django-mvp's
+`base-200`) and the sunken surface (`--daisy-sphinx-surface`). The reading width stays the theme's
+`--daisy-sphinx-max-width` and a project sets it in its own stylesheet. The page's container is
+sized from that property, so it carries the "On this page" column beside a text of any width. It is linked after the theme's file because the last is declared on
 the same element as the theme's own. The page body sits in an element with the
 `daisy-sphinx-content` class, and the package's own markup inside it, a live example's title bar
 and running pane, carries `daisy-sphinx-escape` so the theme's rules stop short of it.

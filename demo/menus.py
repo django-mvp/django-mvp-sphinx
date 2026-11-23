@@ -26,7 +26,7 @@ AppMenu.extend(
                 for name, label in [
                     ("whole_page", "A whole page"),
                     ("section", "One section"),
-                    ("notices", "Notices and pictures"),
+                    ("admonitions", "Admonitions"),
                     ("staff", "Staff only"),
                     ("moved", "A moved page"),
                 ]

@@ -838,7 +838,7 @@ project defines. The styles come from sphinx-daisyui. Every build made with its
 `_static/styles/sphinx-daisyui-content.css`, and the page template links that one
 file. It is served from the build, the way images and downloads are, and no other
 file of `_static/` is. The package's own `mvp_sphinx/page.css` follows it and sets
-the reading width to 40rem and the surfaces to django-mvp's `base-200` page.
+the surfaces to django-mvp's `base-200` page.
 Sphinx's own stylesheets are never used, and a build made with another theme has
 no such file, so its pages link none. The stylesheet uses CSS `@scope`, which
 needs Chrome 118, Firefox 146 or Safari 17.4 or later. An older browser shows the
@@ -848,8 +848,17 @@ sphinx-design's and sphinx-copybutton's own stylesheets are still yours to load 
 you use them. The stylesheet draws footnote labels with daisyUI's `label`
 component, which django-mvp's stylesheet already holds.
 
-A page sits in django-mvp's `medium` container, centred, with "On this page"
-beside it from 1024 pixels wide.
+A page is centred, with "On this page" beside it from 1024 pixels wide. The text
+is as wide as the theme's: 46rem, which is 736 pixels. To change it, set the
+theme's `--daisy-sphinx-max-width` in your own stylesheet, on `:root` or on any
+element around the page, not on the element that holds the body. The page's
+container grows and shrinks with it, so the "On this page" column keeps its place:
+
+```css
+:root {
+  --daisy-sphinx-max-width: 60rem;
+}
+```
 
 Each kind of element is drawn the way daisyUI draws its nearest component, from
 your theme's colours, corner radii and border width:

@@ -23,7 +23,7 @@ not-found page, the same as any other address under ``/docs/`` with nothing behi
 it.
 
 Pictures and files the guide links to, such as the picture on
-:doc:`notices` and the accounts file on :doc:`accounts`, have addresses under
+:doc:`/kitchen-sink/media` and the accounts file on :doc:`accounts`, have addresses under
 ``/docs/`` as well. They are served by the same guide, so a link to one works for
 anyone who can open the guide.
 

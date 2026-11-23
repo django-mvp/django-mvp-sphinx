@@ -216,7 +216,7 @@ def link_helpers(guide_pages):
 
 @pytest.fixture
 def maths_page(guide_pages):
-    return guide_pages["/docs/reference/reading-time/"]
+    return guide_pages["/docs/kitchen-sink/media/"]
 
 
 def description(page, entry_id):
@@ -454,7 +454,7 @@ class TestDemoGuideStates:
     ) -> None:
         equations = maths_page.select("article div.math[id]")
 
-        assert len(equations) >= 2
+        assert equations
         for equation in equations:
             regions = equation.select('[role="region"]')
             assert len(regions) == 1
@@ -570,13 +570,13 @@ class TestInfoDialog:
         page = BeautifulSoup(response.content, "html.parser")
         return page.find(id="pageInfoModal")
 
-    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    @pytest.mark.parametrize("name", ["whole_page", "admonitions"])
     def test_the_dialog_holds_the_extract_of_the_page(
         self, client, db, demo_guide_app, rf, name
     ) -> None:
         address = {
             "whole_page": "first-visit/finding-your-way/",
-            "notices": "reference/notices/",
+            "admonitions": "kitchen-sink/admonitions/",
         }[name]
         request = rf.get("/")
         request.user = UserFactory.build()
@@ -592,21 +592,20 @@ class TestInfoDialog:
                 for each in dialog.select(f".daisy-sphinx-content {tag}[{attribute}]")
             ] == [each[attribute] for each in wanted.select(f"{tag}[{attribute}]")]
 
-    def test_the_notices_page_shows_its_notices_and_its_picture(
+    def test_the_admonitions_page_shows_its_admonitions(
         self, client, db, demo_guide_app
     ) -> None:
-        dialog = self.dialog(client, "notices")
+        dialog = self.dialog(client, "admonitions")
 
         assert dialog.select(".daisy-sphinx-content div.admonition")
-        assert dialog.select(".daisy-sphinx-content img")
 
-    @pytest.mark.parametrize("name", ["whole_page", "notices"])
+    @pytest.mark.parametrize("name", ["whole_page", "admonitions"])
     def test_the_dialog_offers_the_full_page(
         self, client, db, demo_guide_app, name
     ) -> None:
         address = {
             "whole_page": "first-visit/finding-your-way/",
-            "notices": "reference/notices/",
+            "admonitions": "kitchen-sink/admonitions/",
         }[name]
 
         dialog = self.dialog(client, name)
