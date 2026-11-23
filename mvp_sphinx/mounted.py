@@ -1,14 +1,17 @@
 """The documentation app a host project mounts to serve its docs build."""
 
 import logging
+from collections.abc import Mapping
 from typing import Any
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import get_language, to_language
 from django.utils.translation import gettext_lazy as _
 from mvp.config import MVP_CONFIG
 from mvp.mounted import MountedApp
@@ -48,7 +51,11 @@ class DocumentationApp(MountedApp):
             also be a function of the request that returns the directory, for
             a project that serves a build of its own to each site: every
             request is then served wholly from the build chosen for it, its
-            pages, files, search, extracts and sidebar alike.
+            pages, files, search, extracts and sidebar alike. Or it may be a
+            mapping of language codes to directories, one build for each
+            language the documentation is translated into: each request is
+            served from the build for Django's active language, falling back
+            to its base language, then to ``LANGUAGE_CODE``.
         source_dir: The Sphinx source directory the build is made from, the one
             that holds ``conf.py``. Only the ``build_docs`` management command
             reads it, to build from it into ``build_dir``. Serving never does,
@@ -178,9 +185,44 @@ class DocumentationApp(MountedApp):
             ``build_dir``, or what it returns for ``request`` when it is a
             function.
         """
+        if isinstance(self.build_dir, Mapping):
+            return self.build_dir[self.build_language(get_language())]
         if callable(self.build_dir):
             return self.build_dir(request)
         return self.build_dir
+
+    def build_languages(self) -> dict[str, str]:
+        """Return the languages ``build_dir`` has a build for, as Django names them.
+
+        Returns:
+            Each language code in Django's form (``pt-br``), mapped to the key
+            ``build_dir`` gives it, which may be in Sphinx's form (``pt_BR``).
+        """
+        return {to_language(str(key)): key for key in self.build_dir}
+
+    def build_language(self, language: str | None) -> str:
+        """Return the ``build_dir`` key that serves a reader of ``language``.
+
+        Tried in turn: the language itself (``de-at``), its base language
+        (``de``), then the same two for ``LANGUAGE_CODE``. When none has a
+        build, the first build is served.
+
+        Args:
+            language: Django's active language, or ``None`` when translation
+                is turned off.
+
+        Returns:
+            The key of the build to serve.
+        """
+        languages = self.build_languages()
+        for code in (language, settings.LANGUAGE_CODE):
+            if not code:
+                continue
+            code = to_language(code)
+            for candidate in (code, code.partition("-")[0]):
+                if candidate in languages:
+                    return languages[candidate]
+        return next(iter(self.build_dir))
 
     def page_extract(self, address: str, request: HttpRequest) -> PageExtract | None:
         """Return a page of the docs build, for use outside the documentation app.

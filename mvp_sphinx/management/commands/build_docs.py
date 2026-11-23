@@ -7,7 +7,10 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Any
 
+from collections.abc import Mapping
+
 from django.core.management.base import BaseCommand, CommandError, CommandParser
+from django.utils.translation import to_language, to_locale
 from mvp.mounted import MountedApp
 
 from mvp_sphinx.mounted import DocumentationApp
@@ -52,32 +55,47 @@ class Command(BaseCommand):
             )
 
         quiet = options["verbosity"] == 0
+        built = 0
         for app in apps:
-            if not quiet:
-                self.stdout.write(f"Building {app.namespace} from {app.source_dir}")
-                self.stdout.flush()
-            # Sphinx runs as its own process, as it does from a shell, so this
-            # one never imports it. Both paths are the project's own settings.
-            status = subprocess.run(  # noqa: S603
-                [
-                    sys.executable,
-                    "-m",
-                    "sphinx",
-                    "-b",
-                    "json",
-                    *self.theme_arguments(app.source_dir),
-                    *(["-q"] if quiet else []),
-                    str(app.source_dir),
-                    str(app.build_dir),
-                ],
-                check=False,
-            ).returncode
-            if status != 0:
-                raise CommandError(
-                    f'Sphinx could not build "{app.namespace}" from {app.source_dir}.'
-                )
+            if isinstance(app.build_dir, Mapping):
+                # One build per language, each in the language Sphinx knows it by.
+                targets = [
+                    (to_locale(to_language(str(code))), directory)
+                    for code, directory in app.build_dir.items()
+                ]
+            else:
+                targets = [(None, app.build_dir)]
+            for language, build_dir in targets:
+                if not quiet:
+                    into = f" in {language}" if language else ""
+                    self.stdout.write(
+                        f"Building {app.namespace}{into} from {app.source_dir}"
+                    )
+                    self.stdout.flush()
+                # Sphinx runs as its own process, as it does from a shell, so this
+                # one never imports it. Both paths are the project's own settings.
+                status = subprocess.run(  # noqa: S603
+                    [
+                        sys.executable,
+                        "-m",
+                        "sphinx",
+                        "-b",
+                        "json",
+                        *self.theme_arguments(app.source_dir),
+                        *(["-D", f"language={language}"] if language else []),
+                        *(["-q"] if quiet else []),
+                        str(app.source_dir),
+                        str(build_dir),
+                    ],
+                    check=False,
+                ).returncode
+                if status != 0:
+                    raise CommandError(
+                        f'Sphinx could not build "{app.namespace}" from {app.source_dir}.'
+                    )
+                built += 1
         if not quiet:
-            self.stdout.write(self.style.SUCCESS(f"Built {len(apps)} docs build(s)."))
+            self.stdout.write(self.style.SUCCESS(f"Built {built} docs build(s)."))
 
     def theme_arguments(self, source_dir: Path) -> list[str]:
         """Return the Sphinx option that sets the default theme, if one is needed.

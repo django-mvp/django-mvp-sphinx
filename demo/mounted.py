@@ -6,7 +6,11 @@ from demo.settings import BASE_DIR
 from mvp_sphinx.mounted import DocumentationApp
 
 docs = DocumentationApp(
-    build_dir=BASE_DIR / "demo" / "docs" / "_build" / "json",
+    # One build for each language the guide is translated into.
+    build_dir={
+        "en": BASE_DIR / "demo" / "docs" / "_build" / "en" / "json",
+        "de": BASE_DIR / "demo" / "docs" / "_build" / "de" / "json",
+    },
     source_dir=BASE_DIR / "demo" / "docs",
 )
 staff_guide = DocumentationApp(

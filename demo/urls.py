@@ -28,6 +28,8 @@ urlpatterns = [
     mount("staff-guide/", staff_guide),
     # The site's search, which searches both documentation apps.
     path("search/", include("mvp.search.urls")),
+    # Django's set_language view, which the navbar's language switcher posts to.
+    path("i18n/", include("django.conf.urls.i18n")),
     # The shell's sign-in page, ahead of the include, which has none of its own.
     path("accounts/login/", SignInView.as_view(), name="account_login"),
     # The application shell's sign-out and account routes.

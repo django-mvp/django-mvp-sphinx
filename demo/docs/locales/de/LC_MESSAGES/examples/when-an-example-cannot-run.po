@@ -1,0 +1,68 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../examples/when-an-example-cannot-run.rst:2
+msgid "When an example cannot run"
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:4
+msgid ""
+"An example is a page of the site, and pages come and go. This page shows "
+"what you see when one is slow, missing, closed to you, or broken. In "
+"every case the source is still here to read."
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:9
+msgid "A slow example"
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:11
+msgid "This one takes three seconds to answer. Its place is held while you wait."
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:19
+msgid "An example that is gone"
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:21
+msgid "The site no longer has a page at the address this one names."
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:29
+msgid "An example for staff only"
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:31
+msgid ""
+"Only staff accounts may open this one. Signed out, you are asked to sign "
+"in. Signed in without a staff account, you are told you may not see it. "
+"Sign in as ``staff.user@example.com`` to see it run."
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:42
+msgid "An example that fails"
+msgstr ""
+
+#: ../../examples/when-an-example-cannot-run.rst:44
+msgid "This one raises an error every time. The rest of this page is unaffected."
+msgstr ""
+

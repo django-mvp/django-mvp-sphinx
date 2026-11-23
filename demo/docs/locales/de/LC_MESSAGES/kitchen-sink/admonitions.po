@@ -1,0 +1,104 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/admonitions.md:1
+msgid "Admonitions"
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:3
+msgid ""
+"Each kind of admonition takes its colour from the theme: information, "
+"help, caution and danger."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:6
+msgid "A note adds something the reader may want to know."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:10
+msgid "A tip helps the reader do something better."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:14
+msgid "A hint points at the answer without giving it away."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:18
+msgid "Something the reader mustn't miss."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:22
+msgid ""
+"[daisyUI's alert component](https://daisyui.com/components/alert/), which"
+" these are drawn like."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:26
+msgid "Attention asks the reader to stop and read."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:30
+msgid "A caution warns of something that can go wrong."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:34
+msgid ""
+"A warning, with `inline code` and a [link](https://daisyui.com), and a "
+"list:"
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:36
+msgid "first item"
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:37
+msgid "second item"
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:41
+msgid "Danger: this deletes data."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:45
+msgid "Something has gone wrong."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:48
+msgid "An admonition with its own title"
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:49
+msgid "A generic admonition, with a title of its own."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:52
+msgid "Todo"
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:53
+msgid "A to-do item, shown because `todo_include_todos` is on."
+msgstr ""
+
+#: ../../kitchen-sink/admonitions.md:57
+msgid "An admonition holding a code block:"
+msgstr ""
+

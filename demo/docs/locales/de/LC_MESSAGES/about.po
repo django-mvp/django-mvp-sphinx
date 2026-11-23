@@ -1,0 +1,40 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../about.rst:2
+msgid "About this guide"
+msgstr ""
+
+#: ../../about.rst:4
+msgid ""
+"This guide describes the demo site, for the people using it. It is not "
+"about the package behind it: what the package does, and how a project "
+"uses it, is told in its `README <https://github.com/django-mvp/django-"
+"mvp-sphinx#readme>`_."
+msgstr ""
+
+#: ../../about.rst:8
+msgid ""
+"It is the one page in the sidebar that belongs to no caption, which keeps"
+" it at the top level, below the groups."
+msgstr ""
+
