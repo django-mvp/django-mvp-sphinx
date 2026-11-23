@@ -159,6 +159,9 @@ DEP004 = ["sphinx"]
 # The live-example directive runs in that same build, where Sphinx has already
 # installed docutils and Pygments.
 DEP003 = ["docutils", "pygments"]
+# The daisyui theme is named by html_theme in the host's conf.py and loaded by
+# Sphinx through its entry point, so no module of this package imports it.
+DEP002 = ["sphinx-daisyui"]
 
 [tool.forge.docs]
 # The extension's functions and class, and the directive it registers, are
