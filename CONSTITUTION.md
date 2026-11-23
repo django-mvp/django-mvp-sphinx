@@ -176,9 +176,17 @@ application. It is not a replacement for everything a Sphinx HTML build does.
   serving.
 - **One current build per request.** A documentation app serves each request
   wholly from one build. The host project may choose that build for each
-  request, such as one for each site it serves, but the package offers no
-  versions side by side, no version picker and no translations. A host project
-  that needs two builds on one site mounts two documentation apps.
+  request, such as one for each site it serves. The package offers no versions
+  side by side and no version picker. A host project that needs two builds on
+  one site mounts two documentation apps.
+- **Translated documentation follows Django's language.** A host project may
+  give a documentation app one build for each language its documentation is
+  translated into. Each request is served from the build for Django's active
+  language, falling back to that language's base language and then to
+  `LANGUAGE_CODE`. The package never translates: extracting messages, keeping
+  the catalogues and building each language stay with the host project and
+  Sphinx. It adds no language switcher, because the reader's language is the
+  one Django has already chosen.
 - **One project's own documentation.** Documentation for other projects, and
   uploading builds through the site, belong to a docs platform, which this is
   not.
@@ -229,4 +237,4 @@ Read at planning and at review; applies to every change.
 
 ---
 
-**Version**: 2.2.1 | **Ratified**: 2026-09-29 | **Last Amended**: 2026-11-11
+**Version**: 3.0.0 | **Ratified**: 2026-09-29 | **Last Amended**: 2026-11-23
