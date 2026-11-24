@@ -76,6 +76,75 @@ Commit `100e9c9` and the ones after it. The language folders replaced a
 `demo/mounted.py` is as on main: one `build_dir`. No new screens. The look is
 unchanged.
 
+## The features
+
+One feature, because it gives a developer one new way to work: **serve
+documentation translated with Sphinx in the reader's Django language.**
+
+- Who can newly do what: a developer with Sphinx translations runs `build_docs`
+  and the docs app serves each reader the build for Django's active language,
+  with no configuration of the package's own. A reader sees the docs in the
+  language they already use for the site.
+- Screens on the prototype (port 8039), with the language set to Deutsch by the
+  navbar globe or the browser's language:
+  - http://devserver:8039/docs/ (front page and sidebar captions)
+  - http://devserver:8039/docs/first-visit/signing-in/ (a translated page)
+  - http://devserver:8039/docs/reference/accounts/ (an untranslated page in the German build)
+  - http://devserver:8039/docs/search/?q=Konten (German stemming)
+  - http://devserver:8039/info/whole-page/ and http://devserver:8039/info/section/ (page extracts)
+  - Italiano: English docs, because the guide has no Italian translation.
+- Models: none.
+- Depends on: Constitution Article XII as amended on 2026-11-23 (main).
+- Owns the items under "Faked or skipped" except the navbar overflow.
+
+**Resolve work, separate from the feature:**
+
+- At 390 px with German active, the navbar is 26 px too wide: the "On this
+  page" toggle's text and the sign-in button don't fit beside each other. Any
+  long translation of either label does the same, so the toggle needs to fit at
+  phone width whatever the language.
+
+## The shared pieces
+
+- Reading `conf.py` with `ast`: `build_docs.theme_arguments` already did it for
+  `html_theme`. The prototype moved it into `mvp_sphinx/languages.py`
+  (`conf_assignments`, `conf_value`) and both callers use it. The rebuild keeps
+  one reader for `conf.py` settings.
+- Choosing the build for a request: `DocumentationApp.build_dir_for` is the one
+  place every reader of a build goes through (`views.py`, `menus.py`,
+  `mounted.py` page extracts, `DocumentationPages` search). The language choice
+  lives there and nowhere else.
+- Language code conversion: Django's `to_language` / `to_locale`. Nothing
+  custom.
+
+## Duplication to remove
+
+- `menus.py` sets `build_dir` to `None` for a callable `build_dir` and refreshes
+  per request. With language folders a plain path can also serve several
+  builds, so the menu should key its cached contents by the build folder it was
+  given, for every form of `build_dir`. That removes the special case and the
+  rebuild-on-every-language-change.
+
+## The look
+
+Nothing visible was added. The pages, sidebar, search and info dialogs are
+main's. The demo shows django-mvp's own language switcher
+(`mvp.actions.language-switcher`) in its navbar, which is configuration in
+`demo/settings.py`, not a component of this package. Parity check: the screens
+above in German and English at 390 and 1280 px look the same as main's English
+pages apart from the language.
+
+## The data model
+
+None. Builds are files on disk.
+
+## What it replaces
+
+- The README section "A build for each site" stays: choosing a build by host is
+  still the callable form of `build_dir`. The README's opening, which says the
+  package doesn't run the translation workflow, stays true.
+- Nothing is removed.
+
 ## Faked or skipped
 
 - No tests, no README section, no changelog.
@@ -85,8 +154,6 @@ unchanged.
 - The package's own strings ("On this page", "Link to this heading", search
   labels) have no German catalogue. Article VIII asks for a `locale/` the host can
   extend. Only English ships.
-- `<html lang="en">` is hard-coded in django-mvp's base template, so a German page
-  is announced as English. It needs fixing in django-mvp.
 - At 390 px in German the navbar overflows by 26 px. "On this page" and
   django-mvp's "Anmelden" sign-in button don't fit beside each other.
 - The staff guide stays single-language.
@@ -104,3 +171,4 @@ unchanged.
 - 2026-11-23 Sam: a `build_dir` per language is too much configuration. One
   `build_dir`, the languages are Django's `LANGUAGES`, and `build_docs` builds
   whichever of them the docs have translations for.
+- 2026-11-24 Sam: round 2 is what he wants. Ready to hand over.
