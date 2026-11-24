@@ -154,9 +154,7 @@ class TestBreadcrumbs:
         soup = BeautifulSoup(client.get(address).content, "html.parser")
         return soup.select_one("article").find_previous("nav", class_="breadcrumbs")
 
-    def test_the_front_pages_trail_is_the_apps_name(
-        self, client, db, docs_app
-    ) -> None:
+    def test_the_front_pages_trail_is_the_apps_name(self, client, db, docs_app) -> None:
         crumbs = client.get("/docs/").context["breadcrumbs"]
 
         assert [(str(c["text"]), c.get("href")) for c in crumbs] == [
@@ -210,7 +208,9 @@ class TestEditLink:
 
         link = self.link(client, "/docs/section/nested/page/")
 
-        assert link["href"] == "https://example.com/edit/main/docs/section/nested/page.rst"
+        assert (
+            link["href"] == "https://example.com/edit/main/docs/section/nested/page.rst"
+        )
 
     def test_the_front_page_links_to_its_source_file(
         self, client, db, docs_app, monkeypatch

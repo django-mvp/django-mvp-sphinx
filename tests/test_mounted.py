@@ -59,7 +59,9 @@ class TestEditAddress:
         )
 
     def test_a_source_name_is_quoted_for_an_address(self, tmp_path) -> None:
-        app = DocumentationApp(build_dir=tmp_path, edit_url="https://example.com/{path}")
+        app = DocumentationApp(
+            build_dir=tmp_path, edit_url="https://example.com/{path}"
+        )
 
         assert app.edit_address("guide/first steps.md") == (
             "https://example.com/guide/first%20steps.md"
@@ -69,7 +71,9 @@ class TestEditAddress:
         assert DocumentationApp(build_dir=tmp_path).edit_address("index.rst") == ""
 
     def test_there_is_no_address_without_a_source(self, tmp_path) -> None:
-        app = DocumentationApp(build_dir=tmp_path, edit_url="https://example.com/{path}")
+        app = DocumentationApp(
+            build_dir=tmp_path, edit_url="https://example.com/{path}"
+        )
 
         assert app.edit_address("") == ""
 
