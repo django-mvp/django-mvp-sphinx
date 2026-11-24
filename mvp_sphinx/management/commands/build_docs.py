@@ -1,6 +1,5 @@
 """Management command that runs the Sphinx build for the project's documentation apps."""
 
-import ast
 import subprocess
 import sys
 from importlib.util import find_spec
@@ -10,6 +9,7 @@ from typing import Any
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from mvp.mounted import MountedApp
 
+from mvp_sphinx.languages import conf_assignments
 from mvp_sphinx.mounted import DocumentationApp
 
 
@@ -89,17 +89,7 @@ class Command(BaseCommand):
             ``-D html_theme=daisyui``, or nothing when ``conf.py`` assigns
             ``html_theme`` itself, so the project's own choice stands.
         """
-        try:
-            tree = ast.parse((Path(source_dir) / "conf.py").read_text(encoding="utf-8"))
-        except (OSError, SyntaxError, ValueError):
-            return []
-        names = {
-            target.id
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Assign)
-            for target in node.targets
-            if isinstance(target, ast.Name)
-        }
+        names = conf_assignments(source_dir)
         if "html_theme" in names:
             return []
         return ["-D", f"html_theme={self.DEFAULT_THEME}"]

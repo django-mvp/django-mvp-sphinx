@@ -25,3 +25,32 @@ describes.
 - **The package's own strings are not yet translated.** With German active, the front page still
   carries the English "Link to this heading" label, and `mvp_sphinx/locale/` holds only `en`. This
   is the gap FR-013 closes, as `PROTOTYPE.md` records.
+
+## Planning notes, answered
+
+Run on 2026-11-24 against main at `e7b3da7` and the prototype branch.
+
+- **Reading `conf.py` with `ast`. Adopted.** One reader, in `mvp_sphinx/languages.py`:
+  `conf_assignments` and `conf_value`. `build_docs.theme_arguments` and the language lookups both
+  call it.
+- **Choosing the build for a request. Adopted.** `DocumentationApp.build_dir_for` is the one place
+  that calls `languages.build_for`. Every reader of a build already goes through it: `views.py` (two
+  places), `mounted.py` (`DocumentationPages` search and `page_extract`), `menus.py`.
+- **Language code conversion. Adopted.** Django's `to_language`, nothing custom.
+- **Per-build menu cache. Adopted**, see `plan.md`, "The menu".
+
+## What already exists
+
+- Reading `conf.py` settings: this repo, `build_docs.theme_arguments` (moves, not rewritten).
+- Choosing and listing language builds: new code, small. Django has no concept of a build folder,
+  and the prototype's `BuildLanguages` class and its lock and `st_mtime` cache are dropped for plain
+  functions, because DocsBuild already reads the build from disk on every request (ADR 0001).
+- Matching `pt_BR` with `pt-br`: Django, `to_language`.
+- Reading the active language: Django, `get_language`.
+- The German catalogue: Django's `makemessages` and `compilemessages`, from `mvp_sphinx/`
+  (Constitution Article VIII). The check that it is complete uses Babel, which Sphinx already
+  installs.
+- Per-language Sphinx builds: Sphinx itself, `-D language=<code>`. Catalogue compiling:
+  Sphinx's `gettext_auto_build`.
+- The cache of the menu's contents per build folder: this repo, `DocumentationMenu.refresh` already
+  holds one build's contents. It holds a dict of them.

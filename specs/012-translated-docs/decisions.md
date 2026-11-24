@@ -69,3 +69,33 @@ and treated as confirmed. Every place it fills a gap is one of the decisions abo
 the spec's Assumptions.
 
 **ADR:** none.
+
+## D8. The layout listing is plain functions that read the disk on every call
+
+The prototype listed a build directory's language folders through a class with a lock and a cache
+keyed on the directory's modification time. A build that writes into a language folder does not
+change the directory's modification time, so the cache could miss a language that is being built
+for the first time. The documentation app already reads the build from disk on every request
+(ADR 0001), and listing a handful of folders costs less than any of those reads. `languages.py`
+holds functions only, with no cache and no lock.
+
+**ADR:** none. Local to this feature.
+
+## D9. `build_docs` clears only what belongs to the layout it is not writing
+
+When it writes language folders it removes the single build (every child of `build_dir`, when
+`globalcontext.json` is in `build_dir`) and any language build folder that is not in the new set,
+so a language dropped from `LANGUAGES` stops being served. When it writes a single build it
+removes every language build folder. A `build_dir` holding neither is left as it is, so a
+`build_dir` pointed at an unrelated folder loses nothing.
+
+**ADR:** none. Local to this feature.
+
+## D10. The build is made directly, not dispatched
+
+Nine tasks in two stories, each small, each building on the one before it in the same few files.
+A dispatch's brief and receipts would cost more than the tasks do. This session already runs on
+the Sonnet tier the pipeline dispatches implementation to, so the cost tier the rule protects is
+the one used. The design review and the code review are Opus dispatches as usual.
+
+**ADR:** none.
