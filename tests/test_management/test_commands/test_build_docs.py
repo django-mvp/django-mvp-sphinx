@@ -267,3 +267,72 @@ class TestTranslatedBuilds:
 
         assert folders(app.build_dir) == ["de", "en"]
         assert (staff_guide.build_dir / DocsBuild.CONTEXT_FILE).exists()
+
+
+def old_build(directory, *extra):
+    for name in [DocsBuild.CONTEXT_FILE, "index.fjson", "_static/old.css", *extra]:
+        path = directory / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("old")
+
+
+def build(languages=None):
+    with override_settings(LANGUAGES=languages or LANGUAGES):
+        call_command("build_docs", "docs", verbosity=0)
+
+
+class TestClearingTheOtherLayout:
+    def test_a_single_build_gives_way_to_language_folders(self, tiny) -> None:
+        app = tiny(["de"])
+        old_build(app.build_dir, ".doctrees/environment.pickle")
+
+        build()
+
+        assert sorted(child.name for child in app.build_dir.iterdir()) == ["de", "en"]
+
+    def test_language_folders_give_way_to_a_single_build(self, tiny) -> None:
+        app = tiny([])
+        old_build(app.build_dir / "de")
+        old_build(app.build_dir / "en")
+
+        build()
+
+        assert folders(app.build_dir) == []
+        assert not (app.build_dir / "de").exists()
+        assert (app.build_dir / DocsBuild.CONTEXT_FILE).exists()
+
+    def test_a_language_the_site_stopped_offering_is_removed(self, tiny) -> None:
+        app = tiny(["de"])
+        old_build(app.build_dir / "fr")
+
+        build()
+
+        assert folders(app.build_dir) == ["de", "en"]
+
+    def test_the_folders_it_rebuilds_are_kept_for_an_incremental_build(
+        self, tiny
+    ) -> None:
+        app = tiny(["de"])
+        old_build(app.build_dir / "de", ".doctrees/environment.pickle")
+
+        build()
+
+        assert (app.build_dir / "de" / ".doctrees" / "environment.pickle").exists()
+
+    def test_a_build_dir_holding_no_build_loses_nothing(self, tiny) -> None:
+        app = tiny(["de"])
+        (app.build_dir / "other").mkdir(parents=True)
+        (app.build_dir / "notes.txt").write_text("keep")
+
+        build()
+
+        assert (app.build_dir / "other").is_dir()
+        assert (app.build_dir / "notes.txt").read_text() == "keep"
+
+    def test_a_folder_that_is_not_a_build_survives_a_single_build(self, tiny) -> None:
+        app = tiny([])
+        (app.build_dir / "other").mkdir(parents=True)
+
+        build()
+
+        assert (app.build_dir / "other").is_dir()

@@ -1,5 +1,6 @@
 """Management command that runs the Sphinx build for the project's documentation apps."""
 
+import shutil
 import subprocess
 import sys
 from importlib.util import find_spec
@@ -10,6 +11,7 @@ from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.utils.translation import to_language
 from mvp.mounted import MountedApp
 
+from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.languages import (
     conf_assignments,
     site_languages,
@@ -60,7 +62,11 @@ class Command(BaseCommand):
         quiet = options["verbosity"] == 0
         built = 0
         for app in apps:
-            for language, build_dir in self.language_builds(app, quiet):
+            builds = self.language_builds(app, quiet)
+            self.clear_other_layout(
+                Path(app.build_dir), [folder for _, folder in builds]
+            )
+            for language, build_dir in builds:
                 if not quiet:
                     into = f" in {language}" if language else ""
                     self.stdout.write(
@@ -132,6 +138,36 @@ class Command(BaseCommand):
                 "not in the project's LANGUAGES."
             )
         return [(code, Path(app.build_dir) / code) for code in languages]
+
+    def clear_other_layout(self, build_dir: Path, written: list[Path]) -> None:
+        """Remove from ``build_dir`` what belongs to the layout it is not writing.
+
+        A build that is about to be written into language folders removes the
+        single build ``build_dir`` holds, and any language folder it is not
+        about to write, so a language the project dropped stops being served.
+        A single build removes every language folder. The folders about to be
+        rebuilt stay, because Sphinx's incremental build reuses them. A
+        ``build_dir`` holding no build is left as it is.
+
+        Args:
+            build_dir: The documentation app's build directory.
+            written: The folders the builds are about to write into.
+        """
+        if not build_dir.is_dir():
+            return
+        own_build = (build_dir / DocsBuild.CONTEXT_FILE).exists()
+        writing_languages = build_dir not in written
+        for child in sorted(build_dir.iterdir()):
+            if child in written:
+                continue
+            language_build = (
+                child.is_dir() and (child / DocsBuild.CONTEXT_FILE).exists()
+            )
+            if language_build or (own_build and writing_languages):
+                if child.is_dir():
+                    shutil.rmtree(child)
+                else:
+                    child.unlink()
 
     def theme_arguments(self, source_dir: Path) -> list[str]:
         """Return the Sphinx option that sets the default theme, if one is needed.
