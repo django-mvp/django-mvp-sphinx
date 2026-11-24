@@ -60,4 +60,3 @@ msgstr ""
 #: ../../examples/a-working-form.rst:36
 msgid "Using one example never changes the other."
 msgstr ""
-

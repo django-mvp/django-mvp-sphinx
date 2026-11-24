@@ -146,4 +146,3 @@ msgstr ""
 #: ../../first-visit/finding-your-way.rst:59
 msgid ":ref:`signing-in`, for the button beside the theme control."
 msgstr ":ref:`signing-in`, zur Schaltfläche neben der Farbschema-Auswahl."
-

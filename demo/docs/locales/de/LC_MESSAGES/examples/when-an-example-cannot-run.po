@@ -65,4 +65,3 @@ msgstr ""
 #: ../../examples/when-an-example-cannot-run.rst:44
 msgid "This one raises an error every time. The rest of this page is unaffected."
 msgstr ""
-

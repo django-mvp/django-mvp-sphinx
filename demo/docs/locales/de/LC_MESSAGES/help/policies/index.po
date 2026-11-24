@@ -29,4 +29,3 @@ msgid ""
 "This page has no entry of its own in the sidebar, and the pages below it "
 "do."
 msgstr ""
-

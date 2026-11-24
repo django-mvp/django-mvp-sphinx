@@ -101,4 +101,3 @@ msgstr ""
 #: ../../kitchen-sink/admonitions.md:57
 msgid "An admonition holding a code block:"
 msgstr ""
-

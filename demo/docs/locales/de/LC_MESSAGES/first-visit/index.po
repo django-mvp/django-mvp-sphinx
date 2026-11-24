@@ -32,4 +32,3 @@ msgstr ""
 "Zwei kurze Seiten führen Sie von der Startseite zu den Seiten, die Sie lesen"
 " können. Lesen Sie sie der Reihe nach oder springen Sie direkt zu der, die "
 "Sie brauchen."
-

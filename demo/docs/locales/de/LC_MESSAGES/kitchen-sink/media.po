@@ -64,4 +64,3 @@ msgstr ""
 #: ../../kitchen-sink/media.md:25
 msgid "The theme's logo for dark mode"
 msgstr ""
-

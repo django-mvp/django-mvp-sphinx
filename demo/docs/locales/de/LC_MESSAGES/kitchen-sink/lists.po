@@ -153,4 +153,3 @@ msgstr ""
 #: ../../kitchen-sink/lists.md:47
 msgid "MIT"
 msgstr ""
-

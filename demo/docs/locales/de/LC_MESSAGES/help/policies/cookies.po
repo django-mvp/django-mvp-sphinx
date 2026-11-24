@@ -27,4 +27,3 @@ msgstr ""
 #: ../../help/policies/cookies.rst:4
 msgid "The demo site sets the cookies it needs to keep you signed in."
 msgstr ""
-

@@ -295,4 +295,3 @@ msgstr ""
 #: ../../kitchen-sink/tables.md:52
 msgid "Cells may span columns."
 msgstr ""
-

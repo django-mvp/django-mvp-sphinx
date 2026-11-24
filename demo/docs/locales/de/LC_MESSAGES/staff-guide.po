@@ -101,4 +101,3 @@ msgstr ""
 #: ../../staff-guide.rst:45
 msgid "The staff guide's entry in the sidebar, shown to staff accounts only."
 msgstr ""
-

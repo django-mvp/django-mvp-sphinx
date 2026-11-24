@@ -40,4 +40,3 @@ msgstr ""
 #: ../../kitchen-sink/deeper/second/index.md:9
 msgid "Its second section"
 msgstr ""
-

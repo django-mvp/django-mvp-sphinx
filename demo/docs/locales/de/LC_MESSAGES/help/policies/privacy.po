@@ -27,4 +27,3 @@ msgstr ""
 #: ../../help/policies/privacy.rst:4
 msgid "The demo site keeps your account and nothing else."
 msgstr ""
-

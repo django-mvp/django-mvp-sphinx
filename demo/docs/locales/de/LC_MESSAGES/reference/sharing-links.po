@@ -196,4 +196,3 @@ msgid ""
 "the second follows the first in the sidebar. When it does not, send both "
 "addresses, each with a word about why."
 msgstr ""
-

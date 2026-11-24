@@ -30,4 +30,3 @@ msgid ""
 "drawn: the first two levels open, the rest behind a toggle, as the "
 "sidebar does it."
 msgstr ""
-

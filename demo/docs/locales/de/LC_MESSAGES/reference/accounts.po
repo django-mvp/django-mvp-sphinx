@@ -194,4 +194,3 @@ msgid ""
 "Running ``seed_demo`` prints one line per account, then a last line. The "
 "first run says *created*, and later runs say *updated*:"
 msgstr ""
-

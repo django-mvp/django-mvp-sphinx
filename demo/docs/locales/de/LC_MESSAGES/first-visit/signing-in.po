@@ -107,4 +107,3 @@ msgstr ""
 #: ../../first-visit/signing-in.rst:40
 msgid "Next, :doc:`finding-your-way`."
 msgstr "Weiter mit :doc:`finding-your-way`."
-

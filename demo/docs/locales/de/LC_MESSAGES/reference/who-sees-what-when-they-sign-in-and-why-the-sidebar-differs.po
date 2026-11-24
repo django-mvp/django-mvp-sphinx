@@ -62,4 +62,3 @@ msgid ""
 "not. The breadcrumbs, the search button, the previous and next links and "
 "the *On this page* panel do not depend on who you are."
 msgstr ""
-

@@ -261,4 +261,3 @@ msgstr ""
 #: demo.links.old_address:3 of
 msgid "Use :func:`page_address`, which also takes a heading."
 msgstr ""
-

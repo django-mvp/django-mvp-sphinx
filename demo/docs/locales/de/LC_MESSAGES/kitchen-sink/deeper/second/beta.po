@@ -40,4 +40,3 @@ msgstr ""
 #: ../../kitchen-sink/deeper/second/beta.md:9
 msgid "Part two"
 msgstr ""
-

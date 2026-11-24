@@ -54,4 +54,3 @@ msgstr ""
 #: ../../kitchen-sink/code.md:82
 msgid "A literal include"
 msgstr ""
-

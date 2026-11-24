@@ -199,4 +199,3 @@ msgstr ""
 #: ../../kitchen-sink/api.rst:36
 msgid "The themes offered to the reader."
 msgstr ""
-

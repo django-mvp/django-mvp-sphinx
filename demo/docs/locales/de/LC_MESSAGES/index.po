@@ -73,4 +73,3 @@ msgstr ""
 "nur für eines: das Handbuch für Mitarbeitende, das für Mitarbeiterkonten "
 "gedacht ist. Wenn Sie neu hier sind, beginnen Sie mit :doc:`first-"
 "visit/index`."
-

@@ -35,4 +35,3 @@ msgstr ""
 #: ../../kitchen-sink/deeper/deepest/another-leaf.md:7
 msgid "Text."
 msgstr ""
-

@@ -212,4 +212,3 @@ msgstr ""
 #: ../../kitchen-sink/typography.rst:111
 msgid "Robert Bringhurst, *The Elements of Typographic Style*, 2004."
 msgstr ""
-
