@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.11.0] - 2026-11-24
+
 ### Added
 - A page can link to its source for editing. Give `DocumentationApp` an `edit_url` with `{path}` where the page's source file goes, such as `https://github.com/your-org/your-project/edit/main/docs/{path}`, and every page made from a source file shows an "Edit this page" pencil at the end of the row above its title, opening the source in a new tab. There is no link unless you set one.
 - "On this page" marks the heading being read as the reader scrolls, with `aria-current="location"` on its link, in the column and in the panel alike.
