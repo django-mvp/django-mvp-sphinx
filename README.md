@@ -238,8 +238,9 @@ stops the ones after it. `--verbosity 0` prints warnings and errors only.
 Sphinx has to be installed where you run the command, exactly as for
 `sphinx-build`. Nothing else changes: the site still never imports Sphinx and
 never starts a build to answer a request, so a page is only ever as new as the
-last build you ran. `source_dir` is read by this command and nothing else, and an
-app without one is served as before.
+last build you ran. `source_dir` is read by this command and, when the app serves
+language builds, for the language `conf.py` says the documentation is written in. An app
+without one is served as before, and takes the source language to be English.
 
 ### The contents in the sidebar
 
@@ -865,10 +866,10 @@ address with an `#anchor` reaches the same section in every language.
 A folder of builds is read from disk on every request, so adding a language needs a
 rebuild and no restart. A `build_dir` that holds its own `globalcontext.json` is a single
 build and is served as it is, whatever the active language. A function for `build_dir`
-chooses the build itself and gets no language choice from the package. The command
-removes the folders of a layout it no longer writes before it builds, so changing from one
-build to several, or back, leaves no old pages. A build that fails after that leaves
-nothing to serve until it is built again.
+chooses the build itself and gets no language choice from the package. Once
+every build of a run has succeeded, the command removes the folders of a layout it no
+longer writes, so changing from one build to several, or back, leaves no old pages. A
+build that fails leaves what was being served as it was.
 
 The package's own strings, have a German
 catalogue, and a project overrides it with its own `locale` folder ahead of the package's

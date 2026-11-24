@@ -222,9 +222,10 @@ check which build each is served from.
 - **FR-004**: `build_docs` MUST skip a translation whose language is not in `LANGUAGES`, and MUST
   report each documentation app's skipped languages in one line, unless run quietly. (US1)
 - **FR-005**: For documentation with no translations, `build_docs` MUST build straight into
-  `build_dir`, as before this feature. Before building, `build_docs` MUST remove from `build_dir`
+  `build_dir`, as before this feature. Once every build of the run has succeeded, `build_docs` MUST remove from `build_dir`
   whatever belongs to the layout it is not writing: a single build when it writes language folders,
-  and the language folders when it writes a single build. (US1)
+  and the language folders when it writes a single build. A run in which a build fails MUST leave
+  the layout that was being served as it was. (US1)
 - **FR-006**: Languages MUST be matched between Sphinx's form and Django's form using Django's own
   conversion, so that Sphinx's `pt_BR` and Django's `pt-br` are the same language. (US1)
 - **FR-007**: When `build_dir` holds a build of its own, the documentation app MUST serve it for
@@ -275,7 +276,8 @@ check which build each is served from.
   for every page the documentation holds.
 - **SC-004**: A link to a section of a page by its anchor reaches the same section in every language
   build.
-- **SC-005**: After any rebuild, `build_dir` holds only the layout the latest `build_docs` wrote.
+- **SC-005**: After any successful rebuild, `build_dir` holds only the layout the latest `build_docs`
+  wrote. After a failed one, the layout that was served before it is still served.
 - **SC-006**: Documentation with no translations builds and serves exactly as before: the existing
   tests pass unchanged.
 

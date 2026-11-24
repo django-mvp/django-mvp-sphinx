@@ -54,7 +54,7 @@ class SphinxSource:
             return {}
         return {
             target.id: node.value
-            for node in ast.walk(tree)
+            for node in tree.body
             if isinstance(node, ast.Assign)
             for target in node.targets
             if isinstance(target, ast.Name)
@@ -132,9 +132,9 @@ class LanguageBuilds:
     def is_language_build(folder: Path) -> bool:
         """Say whether a folder is a build of one language of the documentation.
 
-        It holds a build and is named for a language Django knows or the
-        project offers, so a build of something else kept beside them isn't
-        taken for one.
+        It holds a build and is named for a language Django knows, a region of
+        one (``en_US``) or the project offers, so a build of something else
+        kept beside them isn't taken for one.
 
         Args:
             folder: A folder of the build directory.
@@ -142,12 +142,14 @@ class LanguageBuilds:
         Returns:
             Whether the folder is a language build.
         """
+        language = to_language(folder.name)
         return (
             folder.is_dir()
             and (folder / DocsBuild.CONTEXT_FILE).exists()
             and (
-                to_language(folder.name) in LANG_INFO
-                or to_language(folder.name) in site_languages()
+                language in LANG_INFO
+                or language.partition("-")[0] in LANG_INFO
+                or language in site_languages()
             )
         )
 

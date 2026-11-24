@@ -102,14 +102,18 @@ the one used. The design review and the code review are Opus dispatches as usual
 
 **ADR:** none. A process choice for this feature only, with no consequence for the code.
 
-## D11. `build_docs` clears the other layout before it builds, as FR-005 says
+## D11. `build_docs` clears the other layout once every build has succeeded
 
-The design review noted that a build which fails after the clearing leaves the app with no build,
-where clearing after the last build succeeds would keep the old one. FR-005 says "before building"
-and the specification is approved, so the order stays and the window is recorded here and in the
-README. Reported to the orchestrator as a possible change to the specification.
+The design review noted that clearing before building leaves the app with nothing to serve when a
+build then fails. FR-005 and SC-005 were changed with the specification gate's approval: the other
+layout is removed only after every build of the run has succeeded, and a failed run leaves the
+layout that was being served. While the new builds run, a single build in `build_dir` keeps being
+served, and language folders keep being served until a single build is written. One thing is
+removed earlier: a folder standing where a language build is about to be written, with no build in
+it, when `build_dir` holds a single build. That is a section of the old build named like a
+language, and its pages would otherwise be read as pages of the new language build.
 
-**ADR:** none. Local to this feature: it follows the specification and is recorded in the README.
+**ADR:** none. Local to this feature: it is the behaviour of one command, kept in the README.
 
 ## D12. Design review findings, how each was answered
 
@@ -138,3 +142,16 @@ README. Reported to the orchestrator as a possible change to the specification.
   `source_dir` is absent (SC-003). The command's builder is named `planned_builds`.
 
 **ADR:** none. The findings are each local to this feature, and the one lasting rule, two classes without a cache, is D8.
+
+## D13. Review findings, how each was answered
+
+- A source written in a regional language (`en_US`) is a language build: a folder is one when it
+  holds a build and is named for a language Django knows, the base of one, or one the project
+  offers. The source language's folder is therefore served and cleared like any other.
+- `SphinxSource` reads only the top-level assignments of `conf.py`, so a local variable in a
+  function never overrides a setting.
+- A section of an old single build named like a language does not survive the switch (D11).
+- The README says serving reads the source language from `source_dir`.
+- `DocsSearch.CONTEXT_FILE` is removed, and the search reads `DocsBuild.CONTEXT_FILE`.
+
+**ADR:** none. Each is local to this feature.

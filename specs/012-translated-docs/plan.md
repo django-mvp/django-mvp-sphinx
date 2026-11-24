@@ -65,12 +65,14 @@ menu caches per build folder, and `build_docs` clears the layout it no longer wr
 - `planned_builds(app, quiet)` (as the prototype's, with the source language's catalogues left out): `[(None, build_dir)]` without translations,
   otherwise the source language and every translation in `LANGUAGES`, each `(code, build_dir /
   code)`, with `-D language=<code>`. Skipped translations are reported in one line unless quiet.
-- `clear_other_layout(build_dir, folders)`, called before each app builds: when writing language
+- `clear_other_layout(build_dir, folders)`, called after every build of an app has succeeded: when writing language
   folders, remove each child of `build_dir` that belongs to a single build (all children when
   `globalcontext.json` is in `build_dir`) and each language build folder (`is_language_build`)
   that is not in the new set; when writing a single build, remove every language build folder.
   A symlinked folder is unlinked, never followed. A
-  `build_dir` holding neither is not touched.
+  `build_dir` holding neither is not touched. `remove_leftovers(folders)` runs before the builds and
+  removes a folder where a language build will go when `build_dir` holds a single build and the
+  folder holds none (D11).
 
 ## The menu
 

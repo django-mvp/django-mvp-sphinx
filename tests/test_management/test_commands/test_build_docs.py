@@ -359,3 +359,48 @@ class TestClearingTheOtherLayout:
 
         assert not (app.build_dir / "de").exists()
         assert (elsewhere / DocsBuild.CONTEXT_FILE).exists()
+
+
+class TestAFailedBuildKeepsWhatWasServed:
+    def test_a_failed_translated_build_keeps_the_single_build(self, tiny) -> None:
+        app = tiny(["de"], conf='extensions = ["no_such_extension"]\n')
+        old_build(app.build_dir)
+
+        with pytest.raises(CommandError):
+            build()
+
+        assert (app.build_dir / DocsBuild.CONTEXT_FILE).read_text() == "old"
+        assert (app.build_dir / "index.fjson").read_text() == "old"
+
+    def test_a_failed_single_build_keeps_the_language_folders(self, tiny) -> None:
+        app = tiny([], conf='extensions = ["no_such_extension"]\n')
+        old_build(app.build_dir / "de")
+        old_build(app.build_dir / "en")
+
+        with pytest.raises(CommandError):
+            build()
+
+        assert folders(app.build_dir) == ["de", "en"]
+
+
+class TestLeftoversOfTheOldLayout:
+    def test_a_section_of_the_old_build_named_like_a_language_goes(self, tiny) -> None:
+        app = tiny(["de"])
+        old_build(app.build_dir)
+        (app.build_dir / "de").mkdir()
+        (app.build_dir / "de" / "old.fjson").write_text("old")
+
+        build()
+
+        assert not (app.build_dir / "de" / "old.fjson").exists()
+        assert (app.build_dir / "de" / DocsBuild.CONTEXT_FILE).exists()
+
+    def test_the_source_language_folder_of_a_region_goes_with_its_translations(
+        self, tiny
+    ) -> None:
+        app = tiny([], conf='language = "en_US"\n')
+        old_build(app.build_dir / "en_US")
+
+        build()
+
+        assert not (app.build_dir / "en_US").exists()

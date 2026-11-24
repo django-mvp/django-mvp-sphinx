@@ -27,7 +27,6 @@ class DocsSearch:
 
     SEARCH_DATA_FILE = "searchindex.json"
     LANGUAGE_DATA_FILE = "_static/language_data.js"
-    CONTEXT_FILE = DocsBuild.CONTEXT_FILE
     WORD_LIMIT = 20
     PASSAGE_LENGTH = 240
     # Sphinx 9 stems English with the english algorithm, Sphinx 8 with porter.
@@ -164,7 +163,7 @@ class DocsSearch:
         A build that names no language is English, as it is to Sphinx. A
         language Sphinx has no stemmer for gets none.
         """
-        context = self.read_json(self.CONTEXT_FILE)
+        context = self.read_json(DocsBuild.CONTEXT_FILE)
         language = context.get("language") if isinstance(context, dict) else None
         code = language.lower() if isinstance(language, str) and language else "en"
         names = self.ALGORITHMS.get(code) or self.ALGORITHMS.get(

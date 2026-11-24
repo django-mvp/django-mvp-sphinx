@@ -58,9 +58,8 @@ class Command(BaseCommand):
         built = 0
         for app in apps:
             builds = self.planned_builds(app, quiet)
-            self.clear_other_layout(
-                Path(app.build_dir), [folder for _, folder in builds]
-            )
+            written = [folder for _, folder in builds]
+            self.remove_leftovers(written)
             for language, build_dir in builds:
                 if not quiet:
                     into = f" in {language}" if language else ""
@@ -91,6 +90,8 @@ class Command(BaseCommand):
                         f"from {app.source_dir}."
                     )
                 built += 1
+            # Only now, with every build made, so a failed run keeps what was served.
+            self.clear_other_layout(Path(app.build_dir), written)
         if not quiet:
             self.stdout.write(self.style.SUCCESS(f"Built {built} docs build(s)."))
 
@@ -130,6 +131,26 @@ class Command(BaseCommand):
                 "not in the project's LANGUAGES."
             )
         return [(code, Path(app.build_dir) / code) for code in languages]
+
+    def remove_leftovers(self, written: list[Path]) -> None:
+        """Remove what stands where a language build is about to be written.
+
+        A folder of the old layout that is no language build, such as a section
+        of a single build named like a language, would otherwise be read as
+        pages of the new one.
+
+        Args:
+            written: The folders the builds are about to write into.
+        """
+        for folder in written:
+            if folder.is_symlink():
+                folder.unlink()
+            elif (
+                folder.is_dir()
+                and (folder.parent / DocsBuild.CONTEXT_FILE).exists()
+                and not (folder / DocsBuild.CONTEXT_FILE).exists()
+            ):
+                shutil.rmtree(folder)
 
     def clear_other_layout(self, build_dir: Path, written: list[Path]) -> None:
         """Remove from ``build_dir`` what belongs to the layout it is not writing.

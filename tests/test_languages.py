@@ -1,6 +1,7 @@
 """The languages a docs source is translated into, and the build a reader gets."""
 
 import pytest
+from django.test import override_settings
 
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.languages import LanguageBuilds, SphinxSource, site_languages
@@ -38,6 +39,14 @@ class TestConf:
         source = make_source(tmp_path / "docs", 'project = "Docs"\nhtml_theme = "x"\n')
 
         assert set(SphinxSource(source).assignments()) == {"project", "html_theme"}
+
+    def test_only_top_level_assignments_are_read(self, tmp_path) -> None:
+        source = make_source(
+            tmp_path / "docs",
+            'language = "de"\n\n\ndef setup(app):\n    language = app.config.language\n',
+        )
+
+        assert SphinxSource(source).language == "de"
 
     @pytest.mark.parametrize("conf", [None, "language = (\n"])
     def test_a_conf_that_cannot_be_read_assigns_nothing(self, tmp_path, conf) -> None:
@@ -204,6 +213,30 @@ class TestLanguageBuilds:
         make_builds(tmp_path, "en")
 
         assert list(LanguageBuilds(tmp_path).builds()) == ["de", "en"]
+
+
+class TestRegionalSourceLanguage:
+    @pytest.fixture(autouse=True)
+    def site(self, settings):
+        settings.LANGUAGE_CODE = "en-us"
+        settings.LANGUAGES = [("en", "English"), ("de", "German")]
+
+    def test_a_build_named_for_a_region_is_a_language_build(self, tmp_path) -> None:
+        make_builds(tmp_path, "en_US", "de")
+
+        assert set(LanguageBuilds(tmp_path).builds()) == {"en-us", "de"}
+
+    def test_a_reader_of_the_source_language_is_served_its_build(
+        self, tmp_path
+    ) -> None:
+        build_dir = make_builds(tmp_path / "build", "en_US", "de")
+        source = make_source(tmp_path / "docs", 'language = "en_US"\n')
+        settings_code = "fr"
+
+        with override_settings(LANGUAGE_CODE=settings_code):
+            served = LanguageBuilds(build_dir).build_for("it", source)
+
+        assert served == build_dir / "en_US"
 
 
 class TestBuildFor:
