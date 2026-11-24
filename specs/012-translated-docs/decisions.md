@@ -32,7 +32,7 @@ Sphinx lets an author keep catalogues for the source language, for corrections. 
 translation would build the source language twice. It is built once, as the source, as on the
 prototype.
 
-**ADR:** none.
+**ADR:** none. Local to this feature: it settles what a catalogue means for one command.
 
 ## D4. The fallback order
 
@@ -41,7 +41,7 @@ This is Django's own order for message catalogues with the source language added
 reader is never left without a build. A missing translation of one page is not a case, because a
 language build always holds every page (untranslated paragraphs stay in the source language).
 
-**ADR:** none.
+**ADR:** none. Local to this feature: the order is written in the specification (FR-008) and the README, and nothing else depends on it.
 
 ## D5. `build_docs` clears the layout it no longer writes
 
@@ -51,7 +51,7 @@ stale. The command removes only what belongs to the other layout: the single bui
 writes language folders, the language folders when it writes a single build. It never removes the
 language folders it is about to rebuild, because Sphinx's incremental build reuses them.
 
-**ADR:** none.
+**ADR:** none. Local to this feature: it is the behaviour of one command, kept in the README.
 
 ## D6. German first for the package's own strings
 
@@ -59,7 +59,7 @@ Article VIII asks for a `locale/` a host project can extend. The package ships E
 German catalogue is added because the demo's documentation is translated into German, so the demo
 shows the whole page in one language. Other languages are catalogues added later.
 
-**ADR:** none.
+**ADR:** none. Local to this feature: the catalogue is a file a project can override, so the choice binds no one.
 
 ## D7. The issue is accepted without a grilling round
 
@@ -68,7 +68,7 @@ recorded. The interpretation in the spec's overview was written from the issue a
 and treated as confirmed. Every place it fills a gap is one of the decisions above or a line under
 the spec's Assumptions.
 
-**ADR:** none.
+**ADR:** none. A process choice for this feature only, with no consequence for the code.
 
 ## D8. The layout listing reads the disk on every call, in two small classes
 
@@ -100,7 +100,7 @@ A dispatch's brief and receipts would cost more than the tasks do. This session 
 the Sonnet tier the pipeline dispatches implementation to, so the cost tier the rule protects is
 the one used. The design review and the code review are Opus dispatches as usual.
 
-**ADR:** none.
+**ADR:** none. A process choice for this feature only, with no consequence for the code.
 
 ## D11. `build_docs` clears the other layout before it builds, as FR-005 says
 
@@ -109,7 +109,7 @@ where clearing after the last build succeeds would keep the old one. FR-005 says
 and the specification is approved, so the order stays and the window is recorded here and in the
 README. Reported to the orchestrator as a possible change to the specification.
 
-**ADR:** none.
+**ADR:** none. Local to this feature: it follows the specification and is recorded in the README.
 
 ## D12. Design review findings, how each was answered
 
@@ -137,4 +137,4 @@ README. Reported to the orchestrator as a possible change to the specification.
 - `build_for` ends at the first build when the source language has none, so a reader is served where
   `source_dir` is absent (SC-003). The command's builder is named `planned_builds`.
 
-**ADR:** none.
+**ADR:** none. The findings are each local to this feature, and the one lasting rule, two classes without a cache, is D8.
