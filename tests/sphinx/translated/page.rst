@@ -6,8 +6,6 @@ Cats are welcome here.
 .. image:: pixel.png
    :alt: A single pixel
 
-.. _searching:
-
 Searching the guide
 -------------------
 

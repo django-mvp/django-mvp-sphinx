@@ -1,6 +1,8 @@
 """Fixtures shared across the test suite."""
 
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -131,8 +133,13 @@ def translated_build(tmp_path_factory):
     # A copy, because Sphinx compiles each catalogue next to its .po file.
     source = shutil.copytree(SPHINX_SOURCES / "translated", root / "source")
     for language in ["en", "de", "pt_BR"]:
-        status = build_main(
+        # One process for each language, as build_docs runs them: Sphinx keeps
+        # the first language's catalogues for the life of a process.
+        subprocess.run(  # noqa: S603 - fixed arguments
             [
+                sys.executable,
+                "-m",
+                "sphinx",
                 "-b",
                 "json",
                 "-D",
@@ -142,9 +149,9 @@ def translated_build(tmp_path_factory):
                 "-q",
                 str(source),
                 str(root / "build" / language),
-            ]
+            ],
+            check=True,
         )
-        assert status == 0
     return root / "build"
 
 

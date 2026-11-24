@@ -336,3 +336,26 @@ class TestClearingTheOtherLayout:
         build()
 
         assert (app.build_dir / "other").is_dir()
+
+    def test_a_build_of_something_else_beside_the_languages_is_kept(self, tiny) -> None:
+        app = tiny(["de"])
+        old_build(app.build_dir / "de")
+        old_build(app.build_dir / "api")
+
+        build()
+
+        assert (app.build_dir / "api" / DocsBuild.CONTEXT_FILE).exists()
+
+    def test_a_linked_language_folder_is_unlinked_and_its_target_kept(
+        self, tiny, tmp_path
+    ) -> None:
+        app = tiny([])
+        elsewhere = tmp_path / "elsewhere"
+        old_build(elsewhere)
+        app.build_dir.mkdir()
+        (app.build_dir / "de").symlink_to(elsewhere)
+
+        build()
+
+        assert not (app.build_dir / "de").exists()
+        assert (elsewhere / DocsBuild.CONTEXT_FILE).exists()

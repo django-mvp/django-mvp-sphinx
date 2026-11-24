@@ -12,12 +12,7 @@ from django.utils.translation import to_language
 from mvp.mounted import MountedApp
 
 from mvp_sphinx.docs_build import DocsBuild
-from mvp_sphinx.languages import (
-    conf_assignments,
-    site_languages,
-    source_language,
-    translations,
-)
+from mvp_sphinx.languages import LanguageBuilds, SphinxSource, site_languages
 from mvp_sphinx.mounted import DocumentationApp
 
 
@@ -62,7 +57,7 @@ class Command(BaseCommand):
         quiet = options["verbosity"] == 0
         built = 0
         for app in apps:
-            builds = self.language_builds(app, quiet)
+            builds = self.planned_builds(app, quiet)
             self.clear_other_layout(
                 Path(app.build_dir), [folder for _, folder in builds]
             )
@@ -98,7 +93,7 @@ class Command(BaseCommand):
         if not quiet:
             self.stdout.write(self.style.SUCCESS(f"Built {built} docs build(s)."))
 
-    def language_builds(
+    def planned_builds(
         self, app: DocumentationApp, quiet: bool
     ) -> list[tuple[str | None, Path]]:
         """Return each language to build an app in, with the folder it goes to.
@@ -119,16 +114,12 @@ class Command(BaseCommand):
             Pairs of a Sphinx language code, or ``None`` for the one build, and
             the folder to build into.
         """
-        source = source_language(app.source_dir)
-        translated = [
-            code
-            for code in translations(app.source_dir)
-            if to_language(code) != to_language(source)
-        ]
+        source = SphinxSource(app.source_dir)
+        translated = source.translations()
         if not translated:
             return [(None, Path(app.build_dir))]
         offered = site_languages()
-        languages = [source] + [
+        languages = [source.language] + [
             code for code in translated if to_language(code) in offered
         ]
         skipped = [code for code in translated if code not in languages]
@@ -160,11 +151,10 @@ class Command(BaseCommand):
         for child in sorted(build_dir.iterdir()):
             if child in written:
                 continue
-            language_build = (
-                child.is_dir() and (child / DocsBuild.CONTEXT_FILE).exists()
-            )
-            if language_build or (own_build and writing_languages):
-                if child.is_dir():
+            if LanguageBuilds.is_language_build(child) or (
+                own_build and writing_languages
+            ):
+                if child.is_dir() and not child.is_symlink():
                     shutil.rmtree(child)
                 else:
                     child.unlink()
@@ -179,7 +169,7 @@ class Command(BaseCommand):
             ``-D html_theme=daisyui``, or nothing when ``conf.py`` assigns
             ``html_theme`` itself, so the project's own choice stands.
         """
-        names = conf_assignments(source_dir)
+        names = SphinxSource(source_dir).assignments()
         if "html_theme" in names:
             return []
         return ["-D", f"html_theme={self.DEFAULT_THEME}"]

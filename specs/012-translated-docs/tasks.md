@@ -72,7 +72,7 @@ English reaches the right build).
 
 ## User Story 2 — A reader reads the documentation in the language they use for the site (P1)
 
-Issue: #157. Delivers FR-008, FR-009, FR-013; SC-002 – SC-004.
+Issue: #157. Delivers FR-009, FR-013 (FR-008's order lands in T004); SC-002 – SC-004.
 
 - [ ] T007 [US2] The package's own strings in German
 - [ ] T008 [US2] Every part of the app follows the language
@@ -80,9 +80,9 @@ Issue: #157. Delivers FR-008, FR-009, FR-013; SC-002 – SC-004.
 
 ### T007 — The package's own strings in German
 
-**Files**: `mvp_sphinx/locale/de/LC_MESSAGES/django.po`, `django.mo`, `tests/test_locale.py`
+**Files**: `mvp_sphinx/locale/de/LC_MESSAGES/django.po`, `django.mo`, `tests/test_locale.py`, `pyproject.toml`, `uv.lock`
 
-Plan, *The package's own strings*. Tests: `TestGermanCatalogue` (every message translated, the
+Plan, *The package's own strings*. `babel` joins the dev group and `tests/test_locale.py` the conformance list of tests that do not mirror a module. Tests: `TestGermanCatalogue` (the message ids match the English catalogue, each is translated, the
 `.mo` matches the `.po`), and a project's `LOCALE_PATHS` translation wins over the package's.
 
 ### T008 — Every part of the app follows the language
@@ -90,7 +90,7 @@ Plan, *The package's own strings*. Tests: `TestGermanCatalogue` (every message t
 **Files**: `tests/test_mounted.py`, `tests/test_views.py`, `tests/test_search.py`, `tests/test_extracts.py`
 
 Spec US2 scenarios 1 to 6 and 11. Tests: pages, files (image and download), search (German
-stemming finds the page and the English reader does not), the extract, an anchor reaching the same
+stemming finds the page and the English reader does not), the extract, the contents branch address and the site search kind in German, an anchor reaching the same
 section in each language, an untranslated paragraph kept in the source language, the language
 changed between two requests.
 

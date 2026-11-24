@@ -1,7 +1,9 @@
 """DocumentationApp is a mounted app that serves one docs build."""
 
+import os
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import quote, urljoin
@@ -1024,14 +1026,27 @@ class TestPagesFollowTheLanguage:
 
         assert served_title(client, "de") == built_title(translated_build, "pt_BR")
 
-    def test_a_reader_is_served_without_sphinx_installed(
-        self, client, db, translated_app, translated_build, monkeypatch
+    def test_a_reader_is_served_when_sphinx_cannot_be_imported(
+        self, translated_app, translated_build
     ) -> None:
-        for name in [
-            name
-            for name in sys.modules
-            if name == "sphinx" or name.startswith("sphinx.")
-        ]:
-            monkeypatch.setitem(sys.modules, name, None)
+        code = (
+            "import sys; sys.modules['sphinx'] = None; "
+            "import django; django.setup(); "
+            "from django.test import RequestFactory; "
+            "from django.utils import translation; "
+            "from demo.mounted import docs; "
+            f"docs.build_dir = r'{translated_build}'; "
+            "translation.activate('de'); "
+            "print(docs.build_dir_for(RequestFactory().get('/docs/')).name)"
+        )
 
-        assert served_title(client, "de") == built_title(translated_build, "de")
+        result = subprocess.run(  # noqa: S603 - fixed arguments
+            [sys.executable, "-c", code],
+            cwd=Path(__file__).parent.parent,
+            env={**os.environ, "DJANGO_SETTINGS_MODULE": "tests.settings"},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        assert result.stdout.strip() == "de", result.stderr

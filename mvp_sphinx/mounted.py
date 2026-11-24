@@ -20,7 +20,7 @@ from mvp.search.registry import default_registry
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.extracts import LinkRewriter, PageExtract, SectionFinder, plain_text
-from mvp_sphinx.languages import build_for
+from mvp_sphinx.languages import LanguageBuilds
 from mvp_sphinx.menus import DocumentationMenu
 from mvp_sphinx.search import DocsSearch
 from mvp_sphinx.views import BranchView, PageView, SearchView
@@ -207,7 +207,7 @@ class DocumentationApp(MountedApp):
         """
         if callable(self.build_dir):
             return self.build_dir(request)
-        return build_for(self.build_dir, get_language(), self.source_dir)
+        return LanguageBuilds(self.build_dir).build_for(get_language(), self.source_dir)
 
     def page_extract(self, address: str, request: HttpRequest) -> PageExtract | None:
         """Return a page of the docs build, for use outside the documentation app.

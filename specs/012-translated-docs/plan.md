@@ -19,12 +19,12 @@ menu caches per build folder, and `build_docs` clears the layout it no longer wr
 - Python 3.13, Django 6.x, django-mvp as locked. No new runtime dependency.
 - Serving never imports Sphinx (Article XII): `languages.py` imports Django and the standard
   library only. Tests build their docs with Sphinx, as every test module does.
-- Files: `mvp_sphinx/languages.py` (new), `mvp_sphinx/mounted.py`, `mvp_sphinx/menus.py`,
+- Files: `mvp_sphinx/languages.py` (new), `mvp_sphinx/docs_build.py` (one constant), `mvp_sphinx/mounted.py`, `mvp_sphinx/menus.py`,
   `mvp_sphinx/management/commands/build_docs.py`, `mvp_sphinx/locale/de/LC_MESSAGES/django.po` and
   `.mo` (new), `tests/test_languages.py` (new), `tests/test_menus.py`, `tests/test_mounted.py`,
   `tests/test_management/test_commands/test_build_docs.py`, `tests/sphinx/translated/` (new
   fixture), `tests/conftest.py`, `tests/test_demo.py`, `demo/settings.py`, `demo/urls.py`,
-  `demo/docs/conf.py`, `demo/docs/locales/de/**.po`, `README.md`, `CHANGELOG.md`, `CONTEXT.md`.
+  `demo/docs/conf.py`, `demo/docs/locales/de/**.po`, `README.md`, `CHANGELOG.md`, `CONTEXT.md`, `pyproject.toml` (babel in the dev group, one conformance entry), `tests/test_locale.py`, `tests/test_views.py`, `tests/test_search.py`, `tests/test_extracts.py`.
 
 ## Constitution Check
 
@@ -33,40 +33,43 @@ menu caches per build folder, and `build_docs` clears the layout it no longer wr
 - **VIII Translation.** The package's strings get a German catalogue under `locale/`. The demo
   carries no translation markup: its settings gain `LANGUAGES`, `LocaleMiddleware` and the
   language switcher only. Pass.
+- **VII Dependencies.** `babel` joins the dev group, for the catalogue test. Pass.
+- **X Cohesion.** Two classes, no module-level functions but `site_languages`. Pass.
 - **Testing standard.** Tests assert which build serves a request, files on disk, ids and anchors
   and returned objects. No wording, no layout. A German word is used only as search input, which
   is data. Pass.
 
 ## The language module
 
-`mvp_sphinx/languages.py`, functions only:
+`mvp_sphinx/languages.py`, two classes with no cache and no lock (Article X, decisions D8):
 
-- `conf_assignments(source_dir)` and `conf_value(source_dir, name, default)`: `ast` over `conf.py`.
-  `build_docs.theme_arguments` calls `conf_assignments`.
-- `source_language(source_dir)`: `conf_value(..., "language", None)` or `"en"`; `"en"` when
-  `source_dir` is `None`. Read on every call (it runs only on the last fallback step).
-- `translations(source_dir)`: the language codes under `locale_dirs` (default `["locales"]`) with
-  a `<code>/LC_MESSAGES` holding a `.po`, as Sphinx names them, sorted.
+- `SphinxSource(source_dir)`: `assignments()` and `value(name, default)` read `conf.py` with `ast`
+  (`build_docs.theme_arguments` uses `assignments`), `language` is `conf.py`'s `language` or `"en"`,
+  and `translations()` lists the codes under `locale_dirs` (default `["locales"]`) with a
+  `<code>/LC_MESSAGES` holding a `.po`, sorted, leaving out the source language. A `None`
+  `source_dir` reads as an empty `conf.py`.
+- `LanguageBuilds(build_dir)`: `is_language_build(folder)` is true for a folder holding
+  `globalcontext.json` and named for a language Django knows (`LANG_INFO`) or the project offers.
+  `builds()` is `{}` when `build_dir` is missing or holds `globalcontext.json`, otherwise
+  `{to_language(folder.name): folder}`. `build_for(language, source_dir)` is the first of the
+  language, its base, `LANGUAGE_CODE`, its base, the source language, then the first build,
+  looked up among the builds and never joined to the path. `build_dir` itself when there are
+  none.
 - `site_languages()`: `{to_language(code) for code, _ in settings.LANGUAGES}`.
-- `language_builds(build_dir)`: `{}` when `build_dir` is missing or holds `globalcontext.json`,
-  otherwise `{to_language(folder.name): folder}` for each folder holding `globalcontext.json`.
-  Read from disk on every call.
-- `build_for(build_dir, language, source_dir)`: the first of language, its base, `LANGUAGE_CODE`,
-  its base, `source_language`, then the first build. `build_dir` itself when there are no language
-  builds.
 
 `DocumentationApp.build_dir_for` returns `build_dir(request)` for a function, otherwise
-`build_for(self.build_dir, get_language(), self.source_dir)`.
+`LanguageBuilds(self.build_dir).build_for(get_language(), self.source_dir)`.
 
 ## `build_docs`
 
-- `language_builds(app, quiet)` (as the prototype): `[(None, build_dir)]` without translations,
+- `planned_builds(app, quiet)` (as the prototype's, with the source language's catalogues left out): `[(None, build_dir)]` without translations,
   otherwise the source language and every translation in `LANGUAGES`, each `(code, build_dir /
   code)`, with `-D language=<code>`. Skipped translations are reported in one line unless quiet.
 - `clear_other_layout(build_dir, folders)`, called before each app builds: when writing language
   folders, remove each child of `build_dir` that belongs to a single build (all children when
-  `globalcontext.json` is in `build_dir`) and each language build folder that is not in the new
-  set; when writing a single build, remove every child folder holding `globalcontext.json`. A
+  `globalcontext.json` is in `build_dir`) and each language build folder (`is_language_build`)
+  that is not in the new set; when writing a single build, remove every language build folder.
+  A symlinked folder is unlinked, never followed. A
   `build_dir` holding neither is not touched.
 
 ## The menu
@@ -80,8 +83,9 @@ are not the ones already installed. The `callable(app.build_dir)` special case i
 ## The package's own strings
 
 `makemessages -l de` from `mvp_sphinx/`, German filled in, `.mo` compiled and committed beside it
-so a host gets it with no step. A test reads both with Babel: every message the English catalogue
-holds has a German translation, and the `.mo` holds the same translations as the `.po`.
+so a host gets it with no step. A test reads both with Babel (added to the dev group): the German catalogue holds the same
+message ids as the English one, each with a translation, and the `.mo` holds the same translations
+as the `.po`.
 
 ## The demo
 
@@ -92,15 +96,15 @@ catalogues, as they are. Sphinx compiles `.mo` files at build time, so no `.mo` 
 
 ## Fixtures and tests
 
-`tests/sphinx/translated/`: a three-page source with `locales/de` and `locales/pt_BR` catalogues
+`tests/sphinx/translated/`: a three-page source (built one process for each language, because Sphinx keeps the first language's catalogues for the life of a process) with `locales/de` and `locales/pt_BR` catalogues
 (one page untranslated in German), an image, a download and a heading anchor, plus a catalogue for
 `fr` and a source-language catalogue. `tests/conftest.py` builds it per language into one build
 folder, session scoped (the layout `build_docs` writes), and a fixture to switch the active
 language.
 
-- `tests/test_languages.py`: `TestConf`, `TestTranslations`, `TestLanguageBuilds`, `TestBuildFor`
-  (fallback order, `pt-br`, `de-at`, `LANGUAGE_CODE`, source language, no language builds,
-  Sphinx not importable).
+- `tests/test_languages.py`: `TestConf`, `TestSourceLanguage`, `TestTranslations`, `TestLanguageBuilds`, `TestBuildFor`
+  (fallback order with each step on its own `LANGUAGE_CODE`, `pt-br`, `de-at`, no language builds)
+  and a subprocess test that serves with Sphinx blocked.
 - `tests/test_management/test_commands/test_build_docs.py`: `TestTranslatedBuilds` (real Sphinx
   runs through `call_command`), `TestClearingTheOtherLayout`.
 - `tests/test_mounted.py` and `tests/test_menus.py`: pages, files, search, extracts and sidebar from

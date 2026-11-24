@@ -54,3 +54,4 @@ Run on 2026-11-24 against main at `e7b3da7` and the prototype branch.
   Sphinx's `gettext_auto_build`.
 - The cache of the menu's contents per build folder: this repo, `DocumentationMenu.refresh` already
   holds one build's contents. It holds a dict of them.
+- Clearing the layout a rebuild no longer writes: the standard library, `shutil.rmtree`.

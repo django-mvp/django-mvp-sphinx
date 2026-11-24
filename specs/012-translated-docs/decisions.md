@@ -70,14 +70,16 @@ the spec's Assumptions.
 
 **ADR:** none.
 
-## D8. The layout listing is plain functions that read the disk on every call
+## D8. The layout listing reads the disk on every call, in two small classes
 
 The prototype listed a build directory's language folders through a class with a lock and a cache
 keyed on the directory's modification time. A build that writes into a language folder does not
 change the directory's modification time, so the cache could miss a language that is being built
 for the first time. The documentation app already reads the build from disk on every request
 (ADR 0001), and listing a handful of folders costs less than any of those reads. `languages.py`
-holds functions only, with no cache and no lock.
+holds two classes with no cache and no lock: `SphinxSource` (what `conf.py` says, and the
+translations) and `LanguageBuilds` (a build directory's language folders and the choice among them).
+Article X puts functions sharing a subject on a class, which the design review pointed out.
 
 **ADR:** none. Local to this feature.
 
@@ -97,5 +99,42 @@ Nine tasks in two stories, each small, each building on the one before it in the
 A dispatch's brief and receipts would cost more than the tasks do. This session already runs on
 the Sonnet tier the pipeline dispatches implementation to, so the cost tier the rule protects is
 the one used. The design review and the code review are Opus dispatches as usual.
+
+**ADR:** none.
+
+## D11. `build_docs` clears the other layout before it builds, as FR-005 says
+
+The design review noted that a build which fails after the clearing leaves the app with no build,
+where clearing after the last build succeeds would keep the old one. FR-005 says "before building"
+and the specification is approved, so the order stays and the window is recorded here and in the
+README. Reported to the orchestrator as a possible change to the specification.
+
+**ADR:** none.
+
+## D12. Design review findings, how each was answered
+
+- Verified high: Sphinx keeps the first language's catalogues for the life of a process, so the
+  fixture's builds run in one process each, as `build_docs` runs them. Done in T002 and `conftest.py`.
+- Verified high: Article X, two classes. Done, see D8.
+- Medium: source-language catalogues alone leave the documentation untranslated, so it builds
+  straight into `build_dir`. `SphinxSource.translations` leaves the source language out. Tested.
+- Medium: one rule for a language folder on both sides, `LanguageBuilds.is_language_build`: it holds
+  a build and is named for a language Django knows or the project offers. A build of something else
+  beside the languages is neither served nor removed. Tested.
+- Medium: the fallback steps are each tested with their own `LANGUAGE_CODE`. Done.
+- Likely: the fixture's section title is translated and the section has no explicit label, so the
+  anchor test proves the anchor does not follow the translation. The page with an untranslated
+  paragraph holds a translated one too. Done.
+- Low: a symlinked language folder is unlinked, not followed. Done. A `source_dir` inside `build_dir`
+  is not guarded: a project that does that has pointed the build over its source and `build_docs`
+  already fails on it.
+- Low: a `None` language falls to `LANGUAGE_CODE`. Tested.
+- Low: the German catalogue test also checks the message ids match the English catalogue, and
+  `babel` joins the dev dependencies with it (Article VII). `tests/test_locale.py` joins the
+  conformance list of tests that do not mirror a module.
+- Low: the without-Sphinx test runs in a subprocess with Sphinx blocked, as the menu's does.
+- Low: T008 adds the contents branch address and the site search kind.
+- `build_for` ends at the first build when the source language has none, so a reader is served where
+  `source_dir` is absent (SC-003). The command's builder is named `planned_builds`.
 
 **ADR:** none.
