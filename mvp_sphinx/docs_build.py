@@ -19,6 +19,8 @@ class DocsBuild:
     FILE_FOLDERS = ("_images", "_downloads")
     THEME_STYLESHEET = "_static/styles/sphinx-daisyui-content.css"
     NAVIGATION_FILE = "navigation.json"
+    #: The file every Sphinx JSON build writes, so a folder holding it is a build.
+    CONTEXT_FILE = "globalcontext.json"
 
     def __init__(self, root: str | Path) -> None:
         self.root = Path(root).resolve()

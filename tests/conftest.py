@@ -1,5 +1,8 @@
 """Fixtures shared across the test suite."""
 
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -121,6 +124,51 @@ def demo_guide_build(tmp_path_factory):
     status = build_main(["-b", "json", "-q", "-W", str(DEMO_GUIDE), str(out)])
     assert status == 0
     return out
+
+
+@pytest.fixture(scope="session")
+def translated_build(tmp_path_factory):
+    # The layout build_docs writes: one build in a folder named for each language.
+    root = tmp_path_factory.mktemp("translated-build")
+    # A copy, because Sphinx compiles each catalogue next to its .po file.
+    source = shutil.copytree(SPHINX_SOURCES / "translated", root / "source")
+    for language in ["en", "de", "pt_BR"]:
+        # One process for each language, as build_docs runs them: Sphinx keeps
+        # the first language's catalogues for the life of a process.
+        subprocess.run(  # noqa: S603 - fixed arguments
+            [
+                sys.executable,
+                "-m",
+                "sphinx",
+                "-b",
+                "json",
+                "-D",
+                "html_theme=daisyui",
+                "-D",
+                f"language={language}",
+                "-q",
+                str(source),
+                str(root / "build" / language),
+            ],
+            check=True,
+        )
+    return root / "build"
+
+
+@pytest.fixture
+def translated_app(translated_build, monkeypatch, settings):
+    from demo.mounted import docs
+
+    monkeypatch.setattr(docs, "build_dir", translated_build)
+    monkeypatch.setattr(docs, "source_dir", SPHINX_SOURCES / "translated")
+    settings.LANGUAGES = [
+        ("en", "English"),
+        ("de", "German"),
+        ("pt-br", "Brazilian Portuguese"),
+        ("it", "Italian"),
+    ]
+    settings.LANGUAGE_CODE = "en"
+    return docs
 
 
 @pytest.fixture

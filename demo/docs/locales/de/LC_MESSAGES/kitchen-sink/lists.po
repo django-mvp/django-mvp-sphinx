@@ -1,0 +1,155 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/lists.md:1
+msgid "Lists"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:3
+msgid "Bulleted"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:5
+msgid "One-line items sit close together."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:6
+msgid "Like this."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:7
+msgid "And this."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:9
+msgid "Numbered, with paragraphs"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:11
+msgid "Install the theme."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:13
+msgid "Use pip, uv or Poetry, whichever your project uses."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:15
+msgid "Set `html_theme = \"daisyui\"` in `conf.py`."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:17
+msgid "Build the documentation."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:19
+msgid "Nested"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:21
+msgid "Get started"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:22
+msgid "Install"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:23
+msgid "Choose a theme"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:24
+msgid "Light colours"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:25
+msgid "Dark colours"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:26
+msgid "Configure"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:28
+msgid "Tasks"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:30
+msgid "Navbar and sidebar"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:31
+msgid "Search as you type"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:32
+msgid "Translations of the theme's own text"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:34
+msgid "Definitions"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:36
+msgid "Light theme"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:37
+msgid "The daisyUI theme used in light mode."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:39
+msgid "Dark theme"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:40
+msgid ""
+"The daisyUI theme used in dark mode. It is chosen when the reader's "
+"system asks for dark mode, or when they pick dark in the menu."
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:43
+msgid "Fields"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:45
+msgid "Author"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:45
+msgid "Sam Jennings"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:46
+msgid "Version"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:46
+msgid "0.1.0"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:47
+msgid "Licence"
+msgstr ""
+
+#: ../../kitchen-sink/lists.md:47
+msgid "MIT"
+msgstr ""

@@ -1,7 +1,10 @@
 """DocumentationApp is a mounted app that serves one docs build."""
 
+import os
 import re
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 from urllib.parse import quote, urljoin
 
@@ -14,6 +17,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.shortcuts import resolve_url
 from django.urls import reverse
+from django.utils import translation
 from flex_menu.checks import (
     user_has_any_permission,
     user_in_any_group,
@@ -109,7 +113,8 @@ def sign_in_address(address: str) -> str:
 def body(response) -> bytes:
     if response.streaming:
         return b"".join(response.streaming_content)
-    return response.content
+    # The language switcher's form holds a token that is masked anew each time.
+    return re.sub(rb'name="csrfmiddlewaretoken" value="[^"]*"', b"", response.content)
 
 
 def asset_addresses(client, guide_build) -> list[str]:
@@ -961,3 +966,279 @@ class TestSiteSearchKind:
 
     def test_an_app_the_request_has_not_mounted_finds_nothing(self, rf) -> None:
         assert site_search(quickstart_docs, "install", rf.get("/")) == []
+
+
+def served_title(client, language, address="/docs/"):
+    response = client.get(address, headers={"Accept-Language": language})
+    assert response.status_code == 200
+    return response.context["page_data"]["title"]
+
+
+def built_title(translated_build, folder, path=""):
+    return DocsBuild(translated_build / folder).page(path)["title"]
+
+
+class TestPagesFollowTheLanguage:
+    def test_a_german_reader_is_served_the_german_build(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        assert served_title(client, "de") == built_title(translated_build, "de")
+
+    def test_an_english_reader_is_served_the_english_build(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        assert served_title(client, "en") == built_title(translated_build, "en")
+
+    def test_a_regional_reader_is_served_the_build_of_that_region(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        assert served_title(client, "pt-br") == built_title(translated_build, "pt_BR")
+
+    def test_a_page_the_translation_left_alone_is_served_in_the_german_build(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        title = served_title(client, "de", "/docs/untranslated/")
+
+        assert title == built_title(translated_build, "de", "untranslated/")
+
+    def test_the_layout_is_read_on_every_request(
+        self, client, db, translated_app, translated_build, tmp_path, monkeypatch
+    ) -> None:
+        shutil.copytree(translated_build / "en", tmp_path / "build" / "en")
+        monkeypatch.setattr(translated_app, "build_dir", tmp_path / "build")
+        assert served_title(client, "de") == built_title(translated_build, "en")
+
+        shutil.copytree(translated_build / "de", tmp_path / "build" / "de")
+
+        assert served_title(client, "de") == built_title(translated_build, "de")
+
+    def test_a_build_dir_holding_a_build_of_its_own_serves_it_in_every_language(
+        self, client, db, translated_app, translated_build, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(translated_app, "build_dir", translated_build / "de")
+
+        assert served_title(client, "en") == built_title(translated_build, "de")
+
+    def test_a_function_build_dir_is_not_given_a_language_choice(
+        self, client, db, translated_app, translated_build, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(
+            translated_app, "build_dir", lambda request: translated_build / "pt_BR"
+        )
+
+        assert served_title(client, "de") == built_title(translated_build, "pt_BR")
+
+    def test_a_reader_is_served_when_sphinx_cannot_be_imported(
+        self, translated_app, translated_build
+    ) -> None:
+        code = (
+            "import sys; sys.modules['sphinx'] = None; "
+            "import django; django.setup(); "
+            "from django.test import RequestFactory; "
+            "from django.utils import translation; "
+            "from demo.mounted import docs; "
+            f"docs.build_dir = r'{translated_build}'; "
+            "translation.activate('de'); "
+            "print(docs.build_dir_for(RequestFactory().get('/docs/')).name)"
+        )
+
+        result = subprocess.run(  # noqa: S603 - fixed arguments
+            [sys.executable, "-c", code],
+            cwd=Path(__file__).parent.parent,
+            env={**os.environ, "DJANGO_SETTINGS_MODULE": "tests.settings"},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        assert result.stdout.strip() == "de", result.stderr
+
+
+@pytest.fixture
+def nested_app(tmp_path, monkeypatch, settings):
+    """A guide whose front page lists a page that lists a page, in two languages."""
+    from demo.mounted import docs
+
+    source = tmp_path / "source"
+    (source / "locales" / "de" / "LC_MESSAGES").mkdir(parents=True)
+    (source / "conf.py").write_text(
+        'extensions = ["mvp_sphinx.navigation"]\nlocale_dirs = ["locales"]\n'
+        "gettext_compact = False\n"
+    )
+    (source / "index.rst").write_text("Home\n====\n\n.. toctree::\n\n   parent\n")
+    (source / "parent.rst").write_text("Parent\n======\n\n.. toctree::\n\n   child\n")
+    (source / "child.rst").write_text("Child\n=====\n\nText.\n")
+    (source / "locales" / "de" / "LC_MESSAGES" / "child.po").write_text(
+        'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n'
+        '"Language: de\\n"\n\nmsgid "Child"\nmsgstr "Kind"\n'
+    )
+    for language in ("en", "de"):
+        subprocess.run(  # noqa: S603 - fixed arguments
+            [
+                *(sys.executable, "-m", "sphinx", "-b", "json", "-q"),
+                *("-D", f"language={language}"),
+                str(source),
+                str(tmp_path / "build" / language),
+            ],
+            check=True,
+        )
+    monkeypatch.setattr(docs, "build_dir", tmp_path / "build")
+    monkeypatch.setattr(docs, "source_dir", source)
+    settings.LANGUAGES = [("en", "English"), ("de", "German")]
+    settings.LANGUAGE_CODE = "en"
+    return docs
+
+
+def hrefs_under(response, prefix: str) -> list[str]:
+    main = BeautifulSoup(response.content, "html.parser").find("main")
+    return [
+        a["href"] for a in main.find_all("a", href=True) if a["href"].startswith(prefix)
+    ]
+
+
+def get_as(client, language: str, address: str, **query):
+    return client.get(address, query, headers={"Accept-Language": language})
+
+
+class TestEveryPartFollowsTheLanguage:
+    def test_the_page_of_each_language_holds_its_own_text(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        for language, folder in (("de", "de"), ("en", "en")):
+            built = DocsBuild(translated_build / folder).page("page/")["body"]
+            served = get_as(client, language, "/docs/page/").context["page_data"]
+
+            assert served["body"] == built
+
+    def test_the_two_languages_hold_different_text(
+        self, client, db, translated_app
+    ) -> None:
+        german = get_as(client, "de", "/docs/page/").context["page_data"]["body"]
+        english = get_as(client, "en", "/docs/page/").context["page_data"]["body"]
+
+        assert german != english
+
+    def test_an_image_and_a_download_are_served_in_each_language(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        for language in ("de", "en"):
+            html = get_as(client, language, "/docs/page/").content.decode()
+            files = [
+                urljoin("/docs/page/", re.search(pattern, html).group(1))
+                for pattern in (
+                    r'src="([^"]*_images/[^"]+)"',
+                    r'href="([^"]*_downloads/[^"]+)"',
+                )
+            ]
+
+            statuses = [
+                get_as(client, language, address).status_code for address in files
+            ]
+
+            assert statuses == [200, 200]
+
+    def test_a_german_search_stems_the_german_words(
+        self, client, db, translated_app
+    ) -> None:
+        # "Katze" is the singular of the "Katzen" the German page holds.
+        response = get_as(client, "de", "/docs/search/", q="Katze")
+
+        assert hrefs_under(response, "/docs/page/") != []
+
+    def test_an_english_reader_does_not_find_the_german_words(
+        self, client, db, translated_app
+    ) -> None:
+        response = get_as(client, "en", "/docs/search/", q="Katzen")
+
+        assert hrefs_under(response, "/docs/page/") == []
+
+    def test_an_english_search_finds_the_english_page(
+        self, client, db, translated_app
+    ) -> None:
+        response = get_as(client, "en", "/docs/search/", q="cats")
+
+        assert hrefs_under(response, "/docs/page/") != []
+
+    def test_the_sites_search_follows_the_language(
+        self, client, db, translated_app
+    ) -> None:
+        kind = translated_app.search_kind
+        german = get_as(client, "de", "/search/", q="Katze", kind=kind)
+        english = get_as(client, "en", "/search/", q="Katze", kind=kind)
+
+        assert hrefs_under(german, "/docs/page/") != []
+        assert hrefs_under(english, "/docs/page/") == []
+
+    def test_an_extract_is_read_from_the_readers_build(
+        self, rf, translated_app, translated_build
+    ) -> None:
+        def extract(language):
+            request = rf.get("/", headers={"Accept-Language": language})
+            request.user = AnonymousUser()
+            with translation.override(language):
+                return translated_app.page_extract("page/", request)
+
+        assert extract("de").content != extract("en").content
+
+    def test_the_branch_view_lists_the_pages_of_the_readers_build(
+        self, client, db, nested_app
+    ) -> None:
+        german = get_as(client, "de", "/docs/contents/", entry="parent/")
+        english = get_as(client, "en", "/docs/contents/", entry="parent/")
+
+        assert ("Kind" in german.content.decode()) is True
+        assert "Kind" not in english.content.decode()
+        assert "Child" in english.content.decode()
+
+    def test_an_anchor_reaches_the_same_section_in_each_language(
+        self, client, db, translated_app
+    ) -> None:
+        def anchors(language):
+            body = get_as(client, language, "/docs/page/").context["page_data"]["body"]
+            return re.findall(r'id="([^"]+)"', body)
+
+        assert anchors("de") == anchors("en")
+
+    def test_a_paragraph_the_catalogue_leaves_out_stays_in_english(
+        self, client, db, translated_app
+    ) -> None:
+        body = get_as(client, "de", "/docs/page/").context["page_data"]["body"]
+
+        assert "This paragraph is not translated yet." in body
+
+    def test_the_language_can_change_between_two_requests(
+        self, client, db, translated_app
+    ) -> None:
+        titles = [
+            get_as(client, language, "/docs/").context["page_data"]["title"]
+            for language in ("de", "en", "de")
+        ]
+
+        assert titles[0] == titles[2] != titles[1]
+
+
+class TestFallbackThroughTheClient:
+    def test_a_regional_reader_gets_the_language_without_the_region(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        title = get_as(client, "de-at", "/docs/").context["page_data"]["title"]
+
+        assert title == built_title(translated_build, "de")
+
+    def test_a_reader_with_no_build_gets_the_projects_language_code(
+        self, client, db, translated_app, translated_build, settings
+    ) -> None:
+        settings.LANGUAGE_CODE = "de"
+
+        title = get_as(client, "it", "/docs/").context["page_data"]["title"]
+
+        assert title == built_title(translated_build, "de")
+
+    def test_a_reader_with_no_build_and_no_matching_code_gets_the_source_language(
+        self, client, db, translated_app, translated_build, settings
+    ) -> None:
+        settings.LANGUAGE_CODE = "it"
+
+        title = get_as(client, "it", "/docs/").context["page_data"]["title"]
+
+        assert title == built_title(translated_build, "en")

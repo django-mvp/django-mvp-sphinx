@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: pt_BR\n"
+
+msgid "Welcome"
+msgstr "Bem-vindo"
+
+msgid "The front page."
+msgstr "A página inicial."

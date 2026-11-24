@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - A page can link to its source for editing. Give `DocumentationApp` an `edit_url` with `{path}` where the page's source file goes, such as `https://github.com/your-org/your-project/edit/main/docs/{path}`, and every page made from a source file shows an "Edit this page" pencil at the end of the row above its title, opening the source in a new tab. There is no link unless you set one.
 - "On this page" marks the heading being read as the reader scrolls, with `aria-current="location"` on its link, in the column and in the panel alike.
+- Documentation in the reader's language. A source with gettext catalogues for languages the site offers is built once for each of them by `build_docs`, each into its own folder of `build_dir`, and every request is served from the build for Django's active language. A reader whose language has no build gets the language without its region, then `LANGUAGE_CODE`, then the source language. `build_docs` removes the folders of the layout it no longer writes, so rebuilding a single-language build into several languages, or back, leaves no old pages. A source with no catalogues builds and is served as before. See "Documentation in the reader's language" in the README.
+- A German catalogue for the package's own strings.
+- The demo's guide is translated into German, with a language switcher in the navbar.
 
 ### Changed
 - django-mvp 0.37.0 or later is required, for its breadcrumbs component. django-mvp 0.36.0 asks for a user model with `mvp.models.PreferencesMixin`, `object_preferences` in `INSTALLED_APPS` and `mvp.middleware.PreferencesMiddleware` below `AuthenticationMiddleware`, as django-mvp's changelog describes. The demo now has a user model of its own for this.

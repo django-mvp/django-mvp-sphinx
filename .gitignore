@@ -65,3 +65,6 @@ env.bak/
 venv.bak/
 
 dist
+
+# The guide's compiled catalogues, which Sphinx writes beside the translations.
+demo/docs/locales/**/*.mo

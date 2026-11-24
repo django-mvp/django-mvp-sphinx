@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../examples/a-working-form.rst:2
+msgid "A working form"
+msgstr ""
+
+#: ../../examples/a-working-form.rst:4
+msgid ""
+"Some things are easier to try than to read about. This page shows two "
+"pages of the site running right here, each beside the code that makes it."
+msgstr ""
+
+#: ../../examples/a-working-form.rst:8
+msgid "The contact form"
+msgstr ""
+
+#: ../../examples/a-working-form.rst:10
+msgid ""
+"Fill the form in and send it. Leave a field empty first, or write a very "
+"short message, to see what the site says. Nothing you send goes anywhere."
+msgstr ""
+
+#: ../../examples/a-working-form.rst:20
+msgid ""
+"\"Start again\" puts the form back to how it was when you opened this "
+"page. \"Open on its own\" takes you to the form at its own address."
+msgstr ""
+
+#: ../../examples/a-working-form.rst:24
+msgid "An order's status"
+msgstr ""
+
+#: ../../examples/a-working-form.rst:26
+msgid ""
+"An example doesn't need a form. This one is a page that only shows "
+"something, and its source is the part of one template that draws it. It "
+"is stacked, with its source under the page, however wide the screen."
+msgstr ""
+
+#: ../../examples/a-working-form.rst:36
+msgid "Using one example never changes the other."
+msgstr ""

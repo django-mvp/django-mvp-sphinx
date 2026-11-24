@@ -1,0 +1,263 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../reference/link-helpers.rst:2
+msgid "Link helpers"
+msgstr ""
+
+#: ../../reference/link-helpers.rst:6
+msgid ""
+"The demo ships a small Python module, ``demo.links``, for building the "
+"addresses this guide describes on :doc:`sharing-links`. This page lists "
+"everything in it. It is written for whoever looks after the site, and you"
+" do not need any of it to read the guide."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1
+msgid ""
+":py:obj:`page_address <demo.links.page_address>`\\ \\(path\\[\\, "
+"heading\\]\\)"
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1
+#: demo.links.page_address:1 of
+msgid "Return the address of a page of the guide."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1
+msgid ""
+":py:obj:`check_address <demo.links.check_address>`\\ \\(address\\, "
+"\\*\\[\\, host\\, scheme\\, ...\\]\\)"
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1
+#: demo.links.check_address:1 of
+msgid "Say whether an address would be asked for with the settings given."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1
+msgid ":py:obj:`SharedLink <demo.links.SharedLink>`\\ \\(address\\[\\, note\\]\\)"
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1 demo.links.SharedLink:1
+#: of
+msgid "A link to a page of the guide, ready to send to someone."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1
+msgid ":py:obj:`NotAGuideAddress <demo.links.NotAGuideAddress>`"
+msgstr ""
+
+#: ../../reference/link-helpers.rst:17:<autosummary>:1
+#: demo.links.NotAGuideAddress:1 of
+msgid "Raised when an address does not belong to the guide."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:19
+msgid "Building an address"
+msgstr ""
+
+#: ../../reference/link-helpers.rst
+msgid "Parameters"
+msgstr ""
+
+#: demo.links.page_address:3 of
+msgid ""
+"The page's place in the sidebar, such as ``first-visit/signing-in``. "
+"Leading and trailing slashes are ignored."
+msgstr ""
+
+#: demo.links.page_address:6 of
+msgid "The name of a heading on the page, to open the page at that heading."
+msgstr ""
+
+#: ../../reference/link-helpers.rst
+msgid "Returns"
+msgstr ""
+
+#: demo.links.page_address:9 of
+msgid ""
+"The address, ending in a slash, with the heading after a ``#`` when one "
+"was given."
+msgstr ""
+
+#: ../../reference/link-helpers.rst
+msgid "Raises"
+msgstr ""
+
+#: demo.links.page_address:12 of
+msgid "The path is empty."
+msgstr ""
+
+#: demo.links.GUIDE_PREFIX:1 of
+msgid "The prefix every address of the guide starts with."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:26
+msgid "Checking an address"
+msgstr ""
+
+#: demo.links.check_address:3 of
+msgid ""
+"The demo makes no request. This only checks that the address belongs to "
+"the guide and that the settings make sense together."
+msgstr ""
+
+#: demo.links.check_address:6 of
+msgid "The address to check, as :func:`page_address` returns it."
+msgstr ""
+
+#: demo.links.check_address:7 of
+msgid "The host the site answers on."
+msgstr ""
+
+#: demo.links.check_address:8 of
+msgid "``http`` or ``https``."
+msgstr ""
+
+#: demo.links.check_address:9 of
+msgid ""
+"Whether an address without its closing slash is followed to the one with "
+"it."
+msgstr ""
+
+#: demo.links.check_address:11 of
+msgid "How many seconds to wait for an answer."
+msgstr ""
+
+#: demo.links.check_address:12 of
+msgid "Extra headers to send."
+msgstr ""
+
+#: demo.links.check_address:13 of
+msgid "The statuses that count as the page being there."
+msgstr ""
+
+#: demo.links.check_address:15 of
+msgid "``True`` when the address is one of the guide's."
+msgstr ""
+
+#: demo.links.check_address:17 of
+msgid "The address is outside the guide."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:35
+msgid "Links to send"
+msgstr ""
+
+#: demo.links.SharedLink:3 of
+msgid ""
+"Build one with :meth:`to_page`, or directly when the address is already "
+"known."
+msgstr ""
+
+#: demo.links.SharedLink:6 demo.links.SharedLink.address:1 of
+msgid "The address the link opens."
+msgstr ""
+
+#: demo.links.SharedLink:7 of
+msgid "A word about why the link is being sent."
+msgstr ""
+
+#: demo.links.SharedLink.note:1 of
+msgid "A word about why the link is being sent. Empty when there is none."
+msgstr ""
+
+#: demo.links.SharedLink.to_page:1 of
+msgid "Return a link to a page, optionally at one of its headings."
+msgstr ""
+
+#: demo.links.SharedLink.to_page:3 of
+msgid "The page's place in the sidebar."
+msgstr ""
+
+#: demo.links.SharedLink.to_page:4 of
+msgid "The name of a heading on the page."
+msgstr ""
+
+#: demo.links.SharedLink.to_page:6 of
+msgid "The link, with no note."
+msgstr ""
+
+#: demo.links.SharedLink.opens_at_heading:1 of
+msgid "Whether the link opens the page at a heading and not at its top."
+msgstr ""
+
+#: demo.links.SharedLink.with_note:1 of
+msgid "Return the same link carrying a note."
+msgstr ""
+
+#: demo.links.SharedLink.with_note:3 of
+msgid "The note to send with the link."
+msgstr ""
+
+#: demo.links.SharedLink.with_note:5 of
+msgid "A new link. This one is unchanged."
+msgstr ""
+
+#: demo.links.SharedLink.as_message:1 of
+msgid "Return the link as text to paste into a message."
+msgstr ""
+
+#: demo.links.SharedLink.as_message:3 of
+msgid "The note, when there is one, then the address on a line of its own."
+msgstr ""
+
+#: demo.links.SharedLink.as_message:7 of
+msgid "Example"
+msgstr ""
+
+#: demo.links.SharedLink.Reader:1 of
+msgid "Who a link is being sent to, which decides what they will see."
+msgstr ""
+
+#: demo.links.SharedLink.Reader.is_staff:1 of
+msgid "Whether the reader has a staff account."
+msgstr ""
+
+#: demo.links.SharedLink.Reader.can_open:1 of
+msgid "Say whether this reader can open an address."
+msgstr ""
+
+#: demo.links.SharedLink.Reader.can_open:3 of
+msgid "The address to open."
+msgstr ""
+
+#: demo.links.SharedLink.Reader.can_open:5 of
+msgid ""
+"``False`` for an address of the staff guide when the reader is not staff,"
+" ``True`` otherwise."
+msgstr ""
+
+#: ../../reference/link-helpers.rst:42
+msgid "Older helpers"
+msgstr ""
+
+#: demo.links.old_address:1 of
+msgid ""
+"Return a page's address in the form the guide used before headings had "
+"links."
+msgstr ""
+
+#: demo.links.old_address:3 of
+msgid "Use :func:`page_address`, which also takes a heading."
+msgstr ""

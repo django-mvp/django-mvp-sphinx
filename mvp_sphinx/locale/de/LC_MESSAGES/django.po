@@ -1,0 +1,118 @@
+# German translation of the strings django-mvp-sphinx shows itself.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-13 14:58+0100\n"
+"PO-Revision-Date: 2026-11-24 12:00+0100\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps.py:18
+msgid "Sphinx"
+msgstr "Sphinx"
+
+#: menus.py:129 menus.py:188
+msgid "Overview"
+msgstr "Überblick"
+
+#: mounted.py:71
+msgid "Documentation"
+msgstr "Dokumentation"
+
+#: templates/cotton/mvp_sphinx/live_example.html:14
+#: templates/cotton/mvp_sphinx/live_example.html:32
+msgid "Live example"
+msgstr "Live-Beispiel"
+
+#: templates/cotton/mvp_sphinx/live_example.html:21
+msgid "Start again"
+msgstr "Neu starten"
+
+#: templates/cotton/mvp_sphinx/live_example.html:22
+msgid "Open on its own"
+msgstr "Einzeln öffnen"
+
+#: templates/cotton/mvp_sphinx/live_example.html:39
+msgid "This example isn't available on this site. Its source is still shown."
+msgstr "Dieses Beispiel ist auf dieser Website nicht verfügbar. Der Quelltext wird trotzdem angezeigt."
+
+#: templates/cotton/mvp_sphinx/live_example.html:52
+msgid "Source files"
+msgstr "Quelldateien"
+
+#: templates/cotton/mvp_sphinx/on_this_page.html:6
+#: templates/mvp_sphinx/page.html:19
+msgid "On this page"
+msgstr "Auf dieser Seite"
+
+#: templates/cotton/mvp_sphinx/page_links.html:8
+msgid "Previous and next page"
+msgstr "Vorherige und nächste Seite"
+
+#: templates/cotton/mvp_sphinx/page_links.html:14
+msgid "Previous"
+msgstr "Zurück"
+
+#: templates/cotton/mvp_sphinx/page_links.html:22
+msgid "Next"
+msgstr "Weiter"
+
+#: templates/cotton/mvp_sphinx/search_form.html:10
+#: templates/cotton/mvp_sphinx/search_icon.html:12
+#: templates/cotton/mvp_sphinx/search_modal.html:11
+#: templates/cotton/mvp_sphinx/search_modal.html:15
+#: templates/cotton/mvp_sphinx/search_toggle.html:11
+msgid "Search this documentation"
+msgstr "Diese Dokumentation durchsuchen"
+
+#: templates/cotton/mvp_sphinx/search_form.html:13
+#: templates/cotton/mvp_sphinx/search_form.html:19
+#: templates/cotton/mvp_sphinx/search_modal.html:19
+#: templates/cotton/mvp_sphinx/search_modal.html:26
+#: templates/mvp_sphinx/search.html:9 views.py:256 views.py:270
+msgid "Search"
+msgstr "Suchen"
+
+#: templates/cotton/mvp_sphinx/search_modal.html:23
+msgid "Search the documentation…"
+msgstr "Die Dokumentation durchsuchen …"
+
+#: templates/cotton/mvp_sphinx/search_toggle.html:16
+msgid "Search the docs"
+msgstr "Die Dokumentation durchsuchen"
+
+#: templates/mvp_sphinx/contents/entry.html:33
+#, python-format
+msgid "Show the pages in %(title)s"
+msgstr "Seiten in %(title)s anzeigen"
+
+#: templates/mvp_sphinx/search.html:12
+msgid "Search is unavailable for this documentation."
+msgstr "Die Suche ist für diese Dokumentation nicht verfügbar."
+
+#: templates/mvp_sphinx/search.html:16
+#, python-format
+msgid "%(counter)s page found"
+msgid_plural "%(counter)s pages found"
+msgstr[0] "%(counter)s Seite gefunden"
+msgstr[1] "%(counter)s Seiten gefunden"
+
+#: templates/mvp_sphinx/search.html:28
+msgid "Nothing matched your search."
+msgstr "Nichts passt zu Ihrer Suche."
+
+#: views.py:255
+#, python-format
+msgid "Search: %(query)s"
+msgstr "Suche: %(query)s"
+
+#: templates/cotton/mvp_sphinx/edit_link.html:7
+msgid "Edit this page"
+msgstr "Diese Seite bearbeiten"

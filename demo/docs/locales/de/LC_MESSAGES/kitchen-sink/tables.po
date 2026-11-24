@@ -1,0 +1,297 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/tables.md:1
+msgid "Tables"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:3
+msgid ""
+"A table sits in a bordered box that scrolls sideways when it is wider "
+"than the page."
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Theme"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Mode"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Primary"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Rounded"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "light"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Light"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Indigo"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5 ../../kitchen-sink/tables.md:32
+msgid "Yes"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "dark"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Dark"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "corporate"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Blue"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Slightly"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "business"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "retro"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:5
+msgid "Red"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:13
+msgid "A list table with a stub column"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:17
+msgid "Option"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:18
+msgid "Navbar"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:19
+msgid "Sidebar"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:20
+msgid "Footer"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:21
+msgid "Logo for each mode"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:22
+msgid "`logo.image_light`, `logo.image_dark`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:23
+msgid "`logo.image_light`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:24 ../../kitchen-sink/tables.md:28
+#: ../../kitchen-sink/tables.md:31
+msgid "No"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:25
+msgid "Edit link"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:26
+msgid "`use_edit_page_button`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:27
+msgid "`secondary_sidebar_items`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:29
+msgid "Version switcher"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:30
+msgid "`switcher`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:35
+msgid "A wide table"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:37
+msgid "Name"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:37
+msgid "Type"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:37
+msgid "Default"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:37
+msgid "Since"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:37
+msgid "Description"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:37
+msgid "Example"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:37
+msgid "`light_theme`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:39 ../../kitchen-sink/tables.md:40
+msgid "`str`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:39
+msgid "`\"light\"`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:39 ../../kitchen-sink/tables.md:40
+#: ../../kitchen-sink/tables.md:41 ../../kitchen-sink/tables.md:42
+msgid "0.1"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:39
+msgid "The daisyUI theme for light mode, by name"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:39
+msgid "`\"corporate\"`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:39
+msgid "`dark_theme`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:40
+msgid "`\"dark\"`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:40
+msgid "The daisyUI theme for dark mode, by name"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:40
+msgid "`\"business\"`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:40
+msgid "`theme_picker`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:41
+msgid "`bool` or `list`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:41
+msgid "`False`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:41
+msgid "Offers themes to the reader in the navbar menu"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:41
+msgid "`[\"nord\", \"dracula\"]`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:41
+msgid "`navigation_depth`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:42
+msgid "`int`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:42
+msgid "`4`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:42
+msgid "How many levels of pages the sidebar holds"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:42
+msgid "`3`"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:44
+msgid "A grid table"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:48
+msgid "Header 1"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:48
+msgid "Header 2"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:48
+msgid "Header 3"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:50
+msgid "body row 1"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:50
+msgid "column 2"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:50
+msgid "column 3"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:52
+msgid "body row 2"
+msgstr ""
+
+#: ../../kitchen-sink/tables.md:52
+msgid "Cells may span columns."
+msgstr ""

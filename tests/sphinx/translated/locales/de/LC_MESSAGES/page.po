@@ -1,0 +1,16 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+
+msgid "Pages"
+msgstr "Seiten"
+
+msgid "Cats are welcome here."
+msgstr "Katzen sind hier willkommen."
+
+msgid "Searching the guide"
+msgstr "Die Anleitung durchsuchen"
+
+msgid "Type a word into the search box."
+msgstr "Geben Sie ein Wort in das Suchfeld ein."

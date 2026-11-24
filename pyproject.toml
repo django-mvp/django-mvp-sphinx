@@ -67,6 +67,7 @@ include = ["/mvp_sphinx", "/README.md", "/LICENSE"]
 # way runs one version of each tool. Ships ruff, mypy, deptry, pre-commit,
 # pytest, pytest-django, pytest-xdist, factory-boy, coverage and django-stubs.
 dev = [
+    "babel>=2.18.0",
     "mvp-shared[dev,test]",
     "myst-parser>=5.2.0",
     "sphinx>=8.1",
@@ -82,7 +83,7 @@ build-backend = "hatchling.build"
 
 # The stylesheet tests read a static asset, which has no module to mirror.
 [tool.forge.conformance]
-non-mirror-paths = ["tests/test_static/"]
+non-mirror-paths = ["tests/test_static/", "tests/test_locale.py"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
@@ -166,5 +167,11 @@ DEP002 = ["sphinx-daisyui"]
 [tool.forge.docs]
 # The extension's functions and class, and the directive it registers, are
 # Sphinx's to call, not a host's. Their one public surface is the module name a
-# host lists in conf.py, which the README quotes.
-exempt-paths = ["mvp_sphinx/navigation.py", "mvp_sphinx/live_example.py"]
+# host lists in conf.py, which the README quotes. The language module is the
+# package's own reading of those catalogues and builds, which the README
+# describes as the feature it serves.
+exempt-paths = [
+    "mvp_sphinx/navigation.py",
+    "mvp_sphinx/live_example.py",
+    "mvp_sphinx/languages.py",
+]

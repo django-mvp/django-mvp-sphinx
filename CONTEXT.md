@@ -24,6 +24,12 @@ and serving a page never runs Sphinx.
 _Avoid_: output, site, HTML build (Sphinx's HTML builder is a different
 builder, and its output is not what this package reads).
 
+**Language build**:
+A docs build for one language, in its own folder of the documentation app's
+`build_dir`, named for the language. The app serves each request from the one
+for Django's active language, or the nearest it has.
+_Avoid_: translation (a translation is the catalogue the build is made from).
+
 **Documentation app**:
 The mounted app that serves one docs build under one URL prefix, with the
 contents in the app sidebar. A host project serving two docs builds mounts two

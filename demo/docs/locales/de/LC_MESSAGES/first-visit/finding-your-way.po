@@ -1,0 +1,148 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../first-visit/finding-your-way.rst:2
+msgid "Finding your way"
+msgstr "Sich zurechtfinden"
+
+#: ../../first-visit/finding-your-way.rst:4
+msgid ""
+"Every page of the demo has the same frame, so once you know where things are"
+" you know where they are everywhere."
+msgstr ""
+"Jede Seite der Demo hat denselben Rahmen. Wenn Sie also wissen, wo etwas "
+"ist, wissen Sie es überall."
+
+#: ../../first-visit/finding-your-way.rst:8
+msgid "The sidebar"
+msgstr "Die Seitenleiste"
+
+#: ../../first-visit/finding-your-way.rst:10
+msgid ""
+"The sidebar on the left lists the pages of the site: the overview, this "
+"guide and, for staff, the staff guide. Inside this guide it also lists every"
+" page, in the order they are meant to be read, starting with the guide's "
+"front page under its own title. Captions such as *Using the site* and "
+"*Reference* group them. A page with pages of its own, like :doc:`index`, "
+"opens as a group: its first entry is the page itself, and the pages below it"
+" follow."
+msgstr ""
+"Die Seitenleiste links listet die Seiten der Website auf: die Übersicht, "
+"dieses Handbuch und, für Mitarbeitende, das Handbuch für Mitarbeitende. "
+"Innerhalb dieses Handbuchs listet sie außerdem jede Seite in der "
+"Reihenfolge, in der sie gelesen werden soll, beginnend mit der Startseite "
+"des Handbuchs unter ihrem eigenen Titel. Überschriften wie *Die Website "
+"benutzen* und *Nachschlagen* gruppieren sie. Eine Seite mit eigenen "
+"Unterseiten, wie :doc:`index`, öffnet sich als Gruppe: Ihr erster Eintrag "
+"ist die Seite selbst, die Seiten darunter folgen."
+
+#: ../../first-visit/finding-your-way.rst:17
+msgid ""
+"On a narrow screen the sidebar folds away. A button in the top bar opens it "
+"again."
+msgstr ""
+"Auf einem schmalen Bildschirm klappt die Seitenleiste ein. Eine Schaltfläche"
+" in der oberen Leiste öffnet sie wieder."
+
+#: ../../first-visit/finding-your-way.rst:20
+msgid "Breadcrumbs"
+msgstr "Brotkrumen"
+
+#: ../../first-visit/finding-your-way.rst:22
+msgid ""
+"Above each page's title a trail shows where you are. On a page inside a "
+"group it starts at the name of the guide and passes through each page above "
+"this one. Follow any part of the trail to go up a level."
+msgstr ""
+"Über dem Titel jeder Seite zeigt eine Spur, wo Sie sind. Auf einer Seite "
+"innerhalb einer Gruppe beginnt sie beim Namen des Handbuchs und führt über "
+"jede Seite oberhalb dieser. Folgen Sie einem beliebigen Teil der Spur, um "
+"eine Ebene nach oben zu gehen."
+
+#: ../../first-visit/finding-your-way.rst:27
+msgid "Searching the guide"
+msgstr "Das Handbuch durchsuchen"
+
+#: ../../first-visit/finding-your-way.rst:29
+msgid ""
+"The search at the right of the top bar searches the whole site, this guide "
+"included. Press it, or press Ctrl+K (⌘K on a Mac), and type a word: the "
+"pages of the guide that hold it are listed under the guide's name, each with"
+" the part of the guide it sits in and a short passage around the word. Press"
+" Enter to see every result on a page of its own."
+msgstr ""
+"Die Suche rechts in der oberen Leiste durchsucht die ganze Website, dieses "
+"Handbuch eingeschlossen. Klicken Sie darauf oder drücken Sie Strg+K (⌘K auf "
+"einem Mac) und geben Sie ein Wort ein: Die Seiten des Handbuchs, die es "
+"enthalten, werden unter dem Namen des Handbuchs aufgelistet, jede mit dem "
+"Teil des Handbuchs, in dem sie steht, und einem kurzen Ausschnitt um das "
+"Wort. Drücken Sie die Eingabetaste, um alle Ergebnisse auf einer eigenen "
+"Seite zu sehen."
+
+#: ../../first-visit/finding-your-way.rst:36
+msgid "On this page"
+msgstr "Auf dieser Seite"
+
+#: ../../first-visit/finding-your-way.rst:38
+msgid ""
+"A long page lists its own headings in a panel beside the text, titled *On "
+"this page*, once the window is wide enough to fit it. Follow a heading to "
+"jump to it. Sub-headings sit under their heading."
+msgstr ""
+"Eine lange Seite listet ihre eigenen Überschriften in einem Feld neben dem "
+"Text auf, mit dem Titel *On this page*, sobald das Fenster breit genug dafür"
+" ist. Folgen Sie einer Überschrift, um zu ihr zu springen. "
+"Unterüberschriften stehen unter ihrer Überschrift."
+
+#: ../../first-visit/finding-your-way.rst:43
+msgid "Previous and next"
+msgstr "Zurück und weiter"
+
+#: ../../first-visit/finding-your-way.rst:45
+msgid ""
+"At the foot of each page, links lead to the page before it and the page "
+"after it, following the order of the sidebar. The first page has no previous"
+" link and the last page has no next link."
+msgstr ""
+"Am Fuß jeder Seite führen Links zur vorigen und zur nächsten Seite, in der "
+"Reihenfolge der Seitenleiste. Die erste Seite hat keinen Zurück-Link und die"
+" letzte keinen Weiter-Link."
+
+#: ../../first-visit/finding-your-way.rst:50
+msgid "Light and dark"
+msgstr "Hell und dunkel"
+
+#: ../../first-visit/finding-your-way.rst:52
+msgid ""
+"The theme control at the bottom of the sidebar switches the look of the "
+"whole site. The demo offers four themes: light, dark, corporate and dracula."
+" Your choice is remembered in the browser. Try the same page in two themes: "
+"the guide reads the same in each."
+msgstr ""
+"Die Farbschema-Auswahl unten in der Seitenleiste ändert das Aussehen der "
+"ganzen Website. Die Demo bietet vier Farbschemata: light, dark, corporate "
+"und dracula. Ihre Wahl merkt sich der Browser. Probieren Sie dieselbe Seite "
+"in zwei Farbschemata aus: Das Handbuch liest sich in jedem gleich."
+
+#: ../../first-visit/finding-your-way.rst:59
+msgid ":ref:`signing-in`, for the button beside the theme control."
+msgstr ":ref:`signing-in`, zur Schaltfläche neben der Farbschema-Auswahl."

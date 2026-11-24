@@ -10,6 +10,7 @@ from django.templatetags.static import static
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from mvp.config import MVP_CONFIG
 from mvp.mounted import MountedApp
@@ -19,6 +20,7 @@ from mvp.search.registry import default_registry
 from mvp_sphinx.docs_build import DocsBuild
 from mvp_sphinx.examples import LiveExamples
 from mvp_sphinx.extracts import LinkRewriter, PageExtract, SectionFinder, plain_text
+from mvp_sphinx.languages import LanguageBuilds
 from mvp_sphinx.menus import DocumentationMenu
 from mvp_sphinx.search import DocsSearch
 from mvp_sphinx.views import BranchView, PageView, SearchView
@@ -51,9 +53,11 @@ class DocumentationApp(MountedApp):
             request is then served wholly from the build chosen for it, its
             pages, files, search, extracts and sidebar alike.
         source_dir: The Sphinx source directory the build is made from, the one
-            that holds ``conf.py``. Only the ``build_docs`` management command
-            reads it, to build from it into ``build_dir``. Serving never does,
-            so leave it out when the build is made some other way.
+            that holds ``conf.py``. The ``build_docs`` management command reads
+            it to build into ``build_dir``. Serving reads only its ``conf.py``
+            ``language``, to know the source language when it chooses among
+            language builds, and never imports Sphinx. Leave it out when the build
+            is made some other way.
         name: What the documentation is called, in the page title, breadcrumbs
             and the host's menu entry.
         icon: The icon name for the host's menu entry.
@@ -197,12 +201,15 @@ class DocumentationApp(MountedApp):
             request: The request being served.
 
         Returns:
-            ``build_dir``, or what it returns for ``request`` when it is a
-            function.
+            What ``build_dir`` returns for ``request`` when it is a function.
+            Otherwise ``build_dir``, or, when it holds one build per language,
+            the build for Django's active language: the language itself, its
+            base language, ``LANGUAGE_CODE``, then the language the
+            documentation is written in.
         """
         if callable(self.build_dir):
             return self.build_dir(request)
-        return self.build_dir
+        return LanguageBuilds(self.build_dir).build_for(get_language(), self.source_dir)
 
     def page_extract(self, address: str, request: HttpRequest) -> PageExtract | None:
         """Return a page of the docs build, for use outside the documentation app.

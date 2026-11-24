@@ -1,0 +1,214 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/typography.rst:2
+msgid "Typography"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:4
+msgid ""
+"The opening paragraph of a page introduces it, so it is drawn a little "
+"larger. Everything after it is body text at a comfortable measure, with "
+"**strong text**, *emphasis*, ``inline code``, :kbd:`Ctrl+Shift+P`, "
+":guilabel:`Save as`, :menuselection:`File --> Export --> PDF`, a `link to"
+" daisyUI <https://daisyui.com>`_, a reference to :doc:`admonitions`, a "
+"cross-reference to :py:func:`textwrap.dedent`, an abbreviation "
+":abbr:`WCAG (Web Content Accessibility Guidelines)`, subscript H\\ "
+":sub:`2`\\ O and superscript E = mc\\ :sup:`2`."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:11
+msgid ""
+"A second paragraph shows how body text reads at length. Documentation is "
+"read in short bursts by people who arrived from a search or a link, so "
+"the first sentence of each paragraph should carry its point, and the rest"
+" should support it. Line length, line height and the space between "
+"paragraphs matter more than the typeface."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:17
+msgid "Second-level heading"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:19
+msgid "Text under a second-level heading."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:22
+msgid "Third-level heading"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:24
+msgid "Text under a third-level heading."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:27
+msgid "Fourth-level heading"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:29
+msgid "Text under a fourth-level heading."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:32
+msgid "Fifth-level heading"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:34
+msgid "Text under a fifth-level heading."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:37
+msgid "Quotes"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:39
+msgid "Simple things should be simple, complex things should be possible."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:41
+msgid "Alan Kay"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:45
+msgid "An epigraph opens a section with somebody else's words."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:47
+msgid "An attribution"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:51
+msgid "A pull quote repeats a line from the text to draw the eye."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:54
+msgid "Line blocks"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:56
+msgid "These lines are"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:57
+msgid "broken exactly"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:58
+msgid "as they were written."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:61
+msgid "Rubrics and topics"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:64
+msgid "A rubric labels a short run of text."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:65
+msgid "A topic"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:67
+msgid "A topic is a self-contained block, set apart from the text around it."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:69
+msgid "A sidebar"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:71
+msgid "A sidebar floats beside the text that refers to it."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:73
+msgid ""
+"Text beside the sidebar. It wraps around it on a wide screen and sits "
+"under it on a narrow one. Enough words are needed here to show the wrap, "
+"so this paragraph keeps going for a few more lines to give the float "
+"something to sit beside."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:78
+msgid "Glossary"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:81
+msgid "Theme"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:83
+msgid "A named set of colours, radii and borders in daisyUI."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:84
+msgid "Token"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:86
+msgid "A CSS variable a theme sets, such as ``--color-primary``."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:88
+msgid "The word :term:`Theme` links to its definition."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:91
+msgid "Version notes"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:93
+msgid "Search as you type."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:96
+msgid "The navbar holds the brand instead of the sidebar."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:99
+msgid "``top_of_page_button``, singular. Use ``top_of_page_buttons``."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:103
+msgid "Footnotes and citations"
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:105
+msgid ""
+"A claim with a footnote [#f1]_ and another [#f2]_, and a citation "
+"[Bringhurst2004]_."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:107
+msgid "The first footnote."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:108
+msgid ""
+"The second footnote, which is longer so that it wraps onto a second line "
+"in the footnote list at the end of the page."
+msgstr ""
+
+#: ../../kitchen-sink/typography.rst:111
+msgid "Robert Bringhurst, *The Elements of Typographic Style*, 2004."
+msgstr ""

@@ -1,6 +1,6 @@
 """Management command that runs the Sphinx build for the project's documentation apps."""
 
-import ast
+import shutil
 import subprocess
 import sys
 from importlib.util import find_spec
@@ -8,8 +8,11 @@ from pathlib import Path
 from typing import Any
 
 from django.core.management.base import BaseCommand, CommandError, CommandParser
+from django.utils.translation import to_language
 from mvp.mounted import MountedApp
 
+from mvp_sphinx.docs_build import DocsBuild
+from mvp_sphinx.languages import LanguageBuilds, SphinxSource, site_languages
 from mvp_sphinx.mounted import DocumentationApp
 
 
@@ -52,32 +55,131 @@ class Command(BaseCommand):
             )
 
         quiet = options["verbosity"] == 0
+        built = 0
         for app in apps:
-            if not quiet:
-                self.stdout.write(f"Building {app.namespace} from {app.source_dir}")
-                self.stdout.flush()
-            # Sphinx runs as its own process, as it does from a shell, so this
-            # one never imports it. Both paths are the project's own settings.
-            status = subprocess.run(  # noqa: S603
-                [
-                    sys.executable,
-                    "-m",
-                    "sphinx",
-                    "-b",
-                    "json",
-                    *self.theme_arguments(app.source_dir),
-                    *(["-q"] if quiet else []),
-                    str(app.source_dir),
-                    str(app.build_dir),
-                ],
-                check=False,
-            ).returncode
-            if status != 0:
-                raise CommandError(
-                    f'Sphinx could not build "{app.namespace}" from {app.source_dir}.'
-                )
+            builds = self.planned_builds(app, quiet)
+            written = [folder for _, folder in builds]
+            self.remove_leftovers(written)
+            for language, build_dir in builds:
+                if not quiet:
+                    into = f" in {language}" if language else ""
+                    self.stdout.write(
+                        f"Building {app.namespace}{into} from {app.source_dir}"
+                    )
+                    self.stdout.flush()
+                # Sphinx runs as its own process, as it does from a shell, so this
+                # one never imports it. Both paths are the project's own settings.
+                status = subprocess.run(  # noqa: S603
+                    [
+                        sys.executable,
+                        "-m",
+                        "sphinx",
+                        "-b",
+                        "json",
+                        *self.theme_arguments(app.source_dir),
+                        *(["-D", f"language={language}"] if language else []),
+                        *(["-q"] if quiet else []),
+                        str(app.source_dir),
+                        str(build_dir),
+                    ],
+                    check=False,
+                ).returncode
+                if status != 0:
+                    raise CommandError(
+                        f'Sphinx could not build "{app.namespace}" '
+                        f"from {app.source_dir}."
+                    )
+                built += 1
+            # Only now, with every build made, so a failed run keeps what was served.
+            self.clear_other_layout(Path(app.build_dir), written)
         if not quiet:
-            self.stdout.write(self.style.SUCCESS(f"Built {len(apps)} docs build(s)."))
+            self.stdout.write(self.style.SUCCESS(f"Built {built} docs build(s)."))
+
+    def planned_builds(
+        self, app: DocumentationApp, quiet: bool
+    ) -> list[tuple[str | None, Path]]:
+        """Return each language to build an app in, with the folder it goes to.
+
+        A source with no translations is built once, straight into
+        ``build_dir``. A translated one is built in the language it is
+        written in and in every translated language the project's
+        ``LANGUAGES`` holds, each into a folder of ``build_dir`` named for the
+        language as Sphinx names it. A translation the project doesn't offer
+        is skipped. Catalogues for the language the source is written in are
+        not a translation.
+
+        Args:
+            app: The documentation app to build.
+            quiet: Whether to leave out the line naming skipped translations.
+
+        Returns:
+            Pairs of a Sphinx language code, or ``None`` for the one build, and
+            the folder to build into.
+        """
+        source = SphinxSource(app.source_dir)
+        translated = source.translations()
+        if not translated:
+            return [(None, Path(app.build_dir))]
+        offered = site_languages()
+        languages = [source.language] + [
+            code for code in translated if to_language(code) in offered
+        ]
+        skipped = [code for code in translated if code not in languages]
+        if skipped and not quiet:
+            self.stdout.write(
+                f"Skipping {app.namespace} in {', '.join(skipped)}: "
+                "not in the project's LANGUAGES."
+            )
+        return [(code, Path(app.build_dir) / code) for code in languages]
+
+    def remove_leftovers(self, written: list[Path]) -> None:
+        """Remove what stands where a language build is about to be written.
+
+        A folder of the old layout that is no language build, such as a section
+        of a single build named like a language, would otherwise be read as
+        pages of the new one.
+
+        Args:
+            written: The folders the builds are about to write into.
+        """
+        for folder in written:
+            if folder.is_symlink():
+                folder.unlink()
+            elif (
+                folder.is_dir()
+                and (folder.parent / DocsBuild.CONTEXT_FILE).exists()
+                and not (folder / DocsBuild.CONTEXT_FILE).exists()
+            ):
+                shutil.rmtree(folder)
+
+    def clear_other_layout(self, build_dir: Path, written: list[Path]) -> None:
+        """Remove from ``build_dir`` what belongs to the layout it is not writing.
+
+        A build that is about to be written into language folders removes the
+        single build ``build_dir`` holds, and any language folder it is not
+        about to write, so a language the project dropped stops being served.
+        A single build removes every language folder. The folders about to be
+        rebuilt stay, because Sphinx's incremental build reuses them. A
+        ``build_dir`` holding no build is left as it is.
+
+        Args:
+            build_dir: The documentation app's build directory.
+            written: The folders the builds are about to write into.
+        """
+        if not build_dir.is_dir():
+            return
+        own_build = (build_dir / DocsBuild.CONTEXT_FILE).exists()
+        writing_languages = build_dir not in written
+        for child in sorted(build_dir.iterdir()):
+            if child in written:
+                continue
+            if LanguageBuilds.is_language_build(child) or (
+                own_build and writing_languages
+            ):
+                if child.is_dir() and not child.is_symlink():
+                    shutil.rmtree(child)
+                else:
+                    child.unlink()
 
     def theme_arguments(self, source_dir: Path) -> list[str]:
         """Return the Sphinx option that sets the default theme, if one is needed.
@@ -89,17 +191,7 @@ class Command(BaseCommand):
             ``-D html_theme=daisyui``, or nothing when ``conf.py`` assigns
             ``html_theme`` itself, so the project's own choice stands.
         """
-        try:
-            tree = ast.parse((Path(source_dir) / "conf.py").read_text(encoding="utf-8"))
-        except (OSError, SyntaxError, ValueError):
-            return []
-        names = {
-            target.id
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Assign)
-            for target in node.targets
-            if isinstance(target, ast.Name)
-        }
+        names = SphinxSource(source_dir).assignments()
         if "html_theme" in names:
             return []
         return ["-D", f"html_theme={self.DEFAULT_THEME}"]

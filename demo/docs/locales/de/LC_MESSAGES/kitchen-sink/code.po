@@ -1,0 +1,56 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/code.md:1
+msgid "Code"
+msgstr ""
+
+#: ../../kitchen-sink/code.md:3
+msgid ""
+"Code blocks sit on daisyUI's neutral colour, as its mockup-code component"
+" does, and their highlighting is drawn from the theme's tokens. Hover a "
+"block to copy it."
+msgstr ""
+
+#: ../../kitchen-sink/code.md:26
+msgid "With a caption, line numbers and emphasised lines"
+msgstr ""
+
+#: ../../kitchen-sink/code.md:28
+msgid "theme.js"
+msgstr ""
+
+#: ../../kitchen-sink/code.md:40
+msgid "A console session"
+msgstr ""
+
+#: ../../kitchen-sink/code.md:49
+msgid "Other languages"
+msgstr ""
+
+#: ../../kitchen-sink/code.md:72
+msgid "A very long line"
+msgstr ""
+
+#: ../../kitchen-sink/code.md:82
+msgid "A literal include"
+msgstr ""

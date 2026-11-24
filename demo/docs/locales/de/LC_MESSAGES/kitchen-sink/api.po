@@ -1,0 +1,201 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/api.rst:2
+msgid "API reference"
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:4
+msgid ""
+"How autodoc output is drawn: signatures on a raised strip, then their "
+"description, parameters and return values."
+msgstr ""
+
+#: of palette:1
+msgid ""
+"A small module documented on the API page, to show how autodoc output is "
+"drawn."
+msgstr ""
+
+#: of palette:3
+msgid "Nothing here is part of the theme."
+msgstr ""
+
+#: of palette.Colour:1
+msgid "A colour in the OKLCH space."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst
+msgid "Parameters"
+msgstr ""
+
+#: of palette.Colour:3
+msgid "Perceived lightness, from 0 to 1."
+msgstr ""
+
+#: of palette.Colour:4
+msgid "How colourful it is, from 0 upwards."
+msgstr ""
+
+#: of palette.Colour:5
+msgid "The hue angle in degrees."
+msgstr ""
+
+#: of palette.Colour.css:1
+msgid "Return the colour as a CSS ``oklch()`` value."
+msgstr ""
+
+#: of palette.DEFAULT_THEMES:1
+msgid "The themes the picker offers when none are named."
+msgstr ""
+
+#: of palette.Mode:1
+msgid "Whether a theme is for light or dark surroundings."
+msgstr ""
+
+#: of palette.Mode.DARK:1
+msgid "A dark background with light text."
+msgstr ""
+
+#: of palette.Mode.LIGHT:1
+msgid "A light background with dark text."
+msgstr ""
+
+#: of palette.Palette:1
+msgid "A named set of colours, as one daisyUI theme defines them."
+msgstr ""
+
+#: of palette.Palette:3
+msgid "The theme's name, as used in ``data-theme``."
+msgstr ""
+
+#: of palette.Palette:4
+msgid "Whether the theme is light or dark."
+msgstr ""
+
+#: of palette.Palette:5
+msgid "Colours by token name, such as ``\"primary\"``."
+msgstr ""
+
+#: of palette.Palette:8
+msgid "Example"
+msgstr ""
+
+#: of palette.Palette.add:1
+msgid "Set the colour for one token."
+msgstr ""
+
+#: of palette.Palette.add:3
+msgid "The token's name without the ``--color-`` prefix."
+msgstr ""
+
+#: of palette.Palette.add:4
+msgid "The colour to use."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst
+msgid "Raises"
+msgstr ""
+
+#: of palette.Palette.add:6
+msgid "If the token's name is empty."
+msgstr ""
+
+#: of palette.Palette.is_dark:1
+msgid "Whether the palette is for dark mode."
+msgstr ""
+
+#: of palette.Palette.to_css:1
+msgid "Return the palette as a CSS rule for its ``data-theme`` selector."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst
+msgid "Returns"
+msgstr ""
+
+#: of palette.Palette.to_css:3
+msgid "One rule, setting a ``--color-*`` variable for each token."
+msgstr ""
+
+#: of palette.contrast_ratio:1
+msgid "Estimate the contrast between two colours from their lightness."
+msgstr ""
+
+#: of palette.contrast_ratio:3
+msgid "A rough estimate for checking a palette, not a WCAG measurement."
+msgstr ""
+
+#: of palette.contrast_ratio:5
+msgid "The text colour."
+msgstr ""
+
+#: of palette.contrast_ratio:6
+msgid "The colour behind the text."
+msgstr ""
+
+#: of palette.contrast_ratio:7
+msgid "Whether the text is large, which needs less contrast."
+msgstr ""
+
+#: of palette.contrast_ratio:9
+msgid "A ratio from 1 to 21."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:13
+msgid "Hand-written entries"
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:18
+msgid "Build the documentation at *source* with *theme*."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:20
+msgid "The directory that holds ``conf.py``."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:21
+msgid "The daisyUI theme to start with."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:22
+msgid "If *source* has no ``conf.py``."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:26
+msgid "The daisyUI theme to build with."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:30
+msgid "Builds this site with another layout code."
+msgstr ""
+
+#: ../../kitchen-sink/api.rst
+msgid "Type"
+msgstr ""
+
+#: ../../kitchen-sink/api.rst
+msgid "Default"
+msgstr ""
+
+#: ../../kitchen-sink/api.rst:36
+msgid "The themes offered to the reader."
+msgstr ""
