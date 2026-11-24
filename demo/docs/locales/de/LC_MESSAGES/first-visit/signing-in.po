@@ -1,0 +1,110 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../first-visit/signing-in.rst:4
+msgid "Signing in"
+msgstr "Anmelden"
+
+#: ../../first-visit/signing-in.rst:6
+msgid ""
+"You do not need an account to read this guide, and you do not need one to "
+"look at the demo's other pages. You sign in to try the parts of the site "
+"that depend on who you are."
+msgstr ""
+"Sie brauchen kein Konto, um dieses Handbuch zu lesen, und auch keines, um "
+"die anderen Seiten der Demo anzusehen. Sie melden sich an, um die Teile der "
+"Website auszuprobieren, die davon abhängen, wer Sie sind."
+
+#: ../../first-visit/signing-in.rst:10
+msgid "The demo comes with three accounts. All three use the password ``password``."
+msgstr ""
+"Die Demo bringt drei Konten mit. Alle drei verwenden das Passwort "
+"``password``."
+
+#: ../../first-visit/signing-in.rst:12
+msgid ""
+"Choose **Log in** at the bottom of the sidebar. It is the button above the "
+"theme control."
+msgstr ""
+"Wählen Sie **Anmelden** unten in der Seitenleiste. Es ist die Schaltfläche "
+"über der Farbschema-Auswahl."
+
+#: ../../first-visit/signing-in.rst:14
+msgid "Type the email address of one of the accounts, and the password."
+msgstr "Geben Sie die E-Mail-Adresse eines der Konten und das Passwort ein."
+
+#: ../../first-visit/signing-in.rst:15
+msgid ""
+"Submit the form. You land on the overview page, and the sidebar now shows "
+"your name where the button was."
+msgstr ""
+"Senden Sie das Formular ab. Sie landen auf der Übersichtsseite, und die "
+"Seitenleiste zeigt nun Ihren Namen dort, wo die Schaltfläche war."
+
+#: ../../first-visit/signing-in.rst:18
+msgid ""
+"To sign out, open the menu your name opens at the bottom of the sidebar and "
+"choose **Log out**."
+msgstr ""
+"Zum Abmelden öffnen Sie das Menü unter Ihrem Namen unten in der Seitenleiste"
+" und wählen **Abmelden**."
+
+#: ../../first-visit/signing-in.rst:22
+msgid "Which account to use"
+msgstr "Welches Konto Sie verwenden"
+
+#: ../../first-visit/signing-in.rst:24
+msgid ""
+":doc:`/reference/accounts` has every address, with what each account can "
+"open. In short, use ``regular.user@example.com`` to see the site as an "
+"ordinary signed-in visitor, and ``staff.user@example.com`` to open the "
+":doc:`staff guide </staff-guide>`."
+msgstr ""
+":doc:`/reference/accounts` listet jede Adresse und was jedes Konto öffnen "
+"kann. Kurz gesagt: Verwenden Sie ``regular.user@example.com``, um die "
+"Website als gewöhnlicher angemeldeter Besucher zu sehen, und "
+"``staff.user@example.com``, um das :doc:`Handbuch für Mitarbeitende </staff-"
+"guide>` zu öffnen."
+
+#: ../../first-visit/signing-in.rst:31
+msgid ""
+"The accounts exist only on the demo. They are made by a command that refuses"
+" to run when the site is not in debug mode, so the password is not something"
+" to reuse anywhere else."
+msgstr ""
+"Die Konten gibt es nur in der Demo. Sie werden von einem Befehl angelegt, "
+"der nicht läuft, wenn die Website nicht im Debug-Modus ist. Verwenden Sie "
+"das Passwort also nirgendwo sonst."
+
+#: ../../first-visit/signing-in.rst:37
+msgid ""
+"Signed in and looking for a guide page? Nothing changes for the pages of "
+"this guide. Only the sidebar's staff entry appears or disappears."
+msgstr ""
+"Sie sind angemeldet und suchen eine Seite des Handbuchs? Für die Seiten "
+"dieses Handbuchs ändert sich nichts. Nur der Eintrag für Mitarbeitende in "
+"der Seitenleiste erscheint oder verschwindet."
+
+#: ../../first-visit/signing-in.rst:40
+msgid "Next, :doc:`finding-your-way`."
+msgstr "Weiter mit :doc:`finding-your-way`."
+

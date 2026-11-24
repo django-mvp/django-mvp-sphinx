@@ -1,0 +1,197 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../reference/accounts.rst:2
+msgid "The demo accounts"
+msgstr ""
+
+#: ../../reference/accounts.rst:4
+msgid ""
+"``seed_demo`` creates three accounts, and all three use the password "
+"``password``. Run it again at any time: it resets each account to this "
+"state."
+msgstr ""
+
+#: ../../reference/accounts.rst:7
+msgid "What each account can open"
+msgstr ""
+
+#: ../../reference/accounts.rst:10
+msgid "Email"
+msgstr ""
+
+#: ../../reference/accounts.rst:11
+msgid "Password"
+msgstr ""
+
+#: ../../reference/accounts.rst:12
+msgid "Role"
+msgstr ""
+
+#: ../../reference/accounts.rst:13
+msgid "Staff guide in the sidebar"
+msgstr ""
+
+#: ../../reference/accounts.rst:14
+msgid "Opens the staff guide"
+msgstr ""
+
+#: ../../reference/accounts.rst:15
+msgid "Sees the guide you are reading"
+msgstr ""
+
+#: ../../reference/accounts.rst:16
+msgid "``regular.user@example.com``"
+msgstr ""
+
+#: ../../reference/accounts.rst:17 ../../reference/accounts.rst:23
+#: ../../reference/accounts.rst:29
+msgid "``password``"
+msgstr ""
+
+#: ../../reference/accounts.rst:18
+msgid "A regular account, signed in but not staff"
+msgstr ""
+
+#: ../../reference/accounts.rst:19
+msgid "No"
+msgstr ""
+
+#: ../../reference/accounts.rst:20
+msgid "No: shown the forbidden page"
+msgstr ""
+
+#: ../../reference/accounts.rst:21 ../../reference/accounts.rst:25
+#: ../../reference/accounts.rst:26 ../../reference/accounts.rst:27
+#: ../../reference/accounts.rst:31 ../../reference/accounts.rst:32
+#: ../../reference/accounts.rst:33
+msgid "Yes"
+msgstr ""
+
+#: ../../reference/accounts.rst:22
+msgid "``staff.user@example.com``"
+msgstr ""
+
+#: ../../reference/accounts.rst:24
+msgid "A staff account"
+msgstr ""
+
+#: ../../reference/accounts.rst:28
+msgid "``super.user@example.com``"
+msgstr ""
+
+#: ../../reference/accounts.rst:30
+msgid "The superuser account, which is also staff"
+msgstr ""
+
+#: ../../reference/accounts.rst:35
+msgid ""
+"Someone who has not signed in sees this guide and the overview page, and "
+"is asked to sign in when they open the staff guide."
+msgstr ""
+
+#: ../../reference/accounts.rst:40
+msgid ""
+"The accounts are for the demo only. Nothing on this page is a secret, so "
+"never reuse the password."
+msgstr ""
+
+#: ../../reference/accounts.rst:44
+msgid "Comparing the accounts"
+msgstr ""
+
+#: ../../reference/accounts.rst:46
+msgid "To see the difference yourself:"
+msgstr ""
+
+#: ../../reference/accounts.rst:48
+msgid ""
+"Sign in as ``regular.user@example.com`` and look at the sidebar. It holds"
+" two entries, the overview and this guide:"
+msgstr ""
+
+#: ../../reference/accounts.rst:54
+msgid "Account"
+msgstr ""
+
+#: ../../reference/accounts.rst:55
+msgid "Entries in the sidebar"
+msgstr ""
+
+#: ../../reference/accounts.rst:56
+msgid "What the staff entry would lead to, if it were there for this account"
+msgstr ""
+
+#: ../../reference/accounts.rst:57
+msgid "Regular"
+msgstr ""
+
+#: ../../reference/accounts.rst:58
+msgid "Overview, this guide"
+msgstr ""
+
+#: ../../reference/accounts.rst:59
+msgid "The forbidden page, because the account is not staff"
+msgstr ""
+
+#: ../../reference/accounts.rst:60
+msgid "Staff or superuser"
+msgstr ""
+
+#: ../../reference/accounts.rst:61
+msgid "Overview, this guide, staff guide"
+msgstr ""
+
+#: ../../reference/accounts.rst:62
+msgid "The staff guide's front page"
+msgstr ""
+
+#: ../../reference/accounts.rst:64
+msgid ""
+"Sign out, sign in as ``staff.user@example.com``, and look again. The "
+"staff guide has joined the list."
+msgstr ""
+
+#: ../../reference/accounts.rst:68
+msgid "For a script"
+msgstr ""
+
+#: ../../reference/accounts.rst:70
+msgid "The same accounts as JSON, for a test that has to sign in:"
+msgstr ""
+
+#: ../../reference/accounts.rst:80
+msgid ""
+"And as a file to take away: :download:`the accounts as a spreadsheet "
+"</accounts.csv>`."
+msgstr ""
+
+#: ../../reference/accounts.rst:84
+msgid "What the command prints"
+msgstr ""
+
+#: ../../reference/accounts.rst:86
+msgid ""
+"Running ``seed_demo`` prints one line per account, then a last line. The "
+"first run says *created*, and later runs say *updated*:"
+msgstr ""
+

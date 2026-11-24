@@ -154,6 +154,7 @@ MVP_CONFIG = {
         "navbar": {
             "end": [
                 "mvp.actions.search",
+                "mvp.actions.language-switcher",
                 "mvp.actions.theme-controller",
                 "mvp.actions.login",
             ],

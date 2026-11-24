@@ -53,9 +53,11 @@ class DocumentationApp(MountedApp):
             request is then served wholly from the build chosen for it, its
             pages, files, search, extracts and sidebar alike.
         source_dir: The Sphinx source directory the build is made from, the one
-            that holds ``conf.py``. Only the ``build_docs`` management command
-            reads it, to build from it into ``build_dir``. Serving never does,
-            so leave it out when the build is made some other way.
+            that holds ``conf.py``. The ``build_docs`` management command reads
+            it to build into ``build_dir``. Serving reads only its ``conf.py``
+            ``language``, to know the source language when it chooses among
+            language builds, and never imports Sphinx. Leave it out when the build
+            is made some other way.
         name: What the documentation is called, in the page title, breadcrumbs
             and the host's menu entry.
         icon: The icon name for the host's menu entry.

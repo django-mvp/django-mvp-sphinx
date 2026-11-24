@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../index.rst:17
+msgid "Using the site"
+msgstr "Die Website benutzen"
+
+#: ../../index.rst:24
+msgid "Reference"
+msgstr "Nachschlagen"
+
+#: ../../index.rst:33
+msgid "Page styles"
+msgstr "Seitenstile"
+
+#: ../../index.rst:39
+msgid "Live examples"
+msgstr "Live-Beispiele"
+
+#: ../../index.rst:-1
+msgid ""
+"How to use the demo site: signing in, finding your way, the staff guide and "
+"the reference."
+msgstr ""
+"So benutzen Sie die Demo-Website: Anmelden, sich zurechtfinden, das Handbuch"
+" für Mitarbeitende und das Nachschlagen."
+
+#: ../../index.rst:-1 ../../index.rst:7
+msgid "Using the demo site"
+msgstr "Die Demo-Website benutzen"
+
+#: ../../index.rst:-1
+msgid "website"
+msgstr ""
+
+#: ../../index.rst:9
+msgid ""
+"Welcome. This is the user guide for the demo site you are looking at. It "
+"tells you how to sign in, how to find your way around, what the staff guide "
+"is and who can open it, and where to look things up."
+msgstr ""
+"Willkommen. Dies ist das Benutzerhandbuch der Demo-Website, die Sie gerade "
+"sehen. Es erklärt, wie Sie sich anmelden, wie Sie sich zurechtfinden, was "
+"das Handbuch für Mitarbeitende ist und wer es öffnen kann, und wo Sie Dinge "
+"nachschlagen."
+
+#: ../../index.rst:13
+msgid ""
+"You can read every page here without signing in. Signing in matters for one "
+"thing only: the staff guide, which is for staff accounts. If you are new, "
+"start with :doc:`first-visit/index`."
+msgstr ""
+"Sie können jede Seite hier lesen, ohne sich anzumelden. Die Anmeldung zählt "
+"nur für eines: das Handbuch für Mitarbeitende, das für Mitarbeiterkonten "
+"gedacht ist. Wenn Sie neu hier sind, beginnen Sie mit :doc:`first-"
+"visit/index`."
+

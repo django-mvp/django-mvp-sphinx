@@ -1,0 +1,67 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/media.md:1
+msgid "Pictures and maths"
+msgstr ""
+
+#: ../../kitchen-sink/media.md:3
+msgid "A figure"
+msgstr ""
+
+#: ../../kitchen-sink/media.md:5
+msgid "The theme's logo, four petals around a yellow centre"
+msgstr ""
+
+#: ../../kitchen-sink/media.md:9
+msgid "The theme's logo. A caption sits under its figure."
+msgstr ""
+
+#: ../../kitchen-sink/media.md:12
+msgid "Maths"
+msgstr ""
+
+#: ../../kitchen-sink/media.md:14
+#, python-brace-format
+msgid ""
+"Inline maths such as $e^{i\\pi} + 1 = 0$ sits in the text. An equation on"
+" its own line is centred:"
+msgstr ""
+
+#: ../../kitchen-sink/media.md:17
+#, python-brace-format
+msgid "\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}"
+msgstr ""
+
+#: ../../kitchen-sink/media.md:21
+#, python-brace-format
+msgid "Equation {eq}`gaussian` has a number you can link to."
+msgstr ""
+
+#: ../../kitchen-sink/media.md:23
+msgid "Embedded media"
+msgstr ""
+
+#: ../../kitchen-sink/media.md:25
+msgid "The theme's logo for dark mode"
+msgstr ""
+

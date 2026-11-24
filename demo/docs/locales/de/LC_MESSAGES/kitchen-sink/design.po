@@ -1,0 +1,147 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../kitchen-sink/design.md:1
+msgid "sphinx-design"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:3
+msgid "sphinx-design's components take their colours from the daisyUI theme."
+msgstr ""
+
+#: ../../kitchen-sink/design.md:5
+msgid "Cards"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:10
+msgid "A card"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:13
+msgid "Body text of the card."
+msgstr ""
+
+#: ../../kitchen-sink/design.md:10
+msgid "A footer"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:16
+msgid "A linked card"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:19
+msgid "The whole card is a link."
+msgstr ""
+
+#: ../../kitchen-sink/design.md:22
+msgid "With an icon"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:25
+msgid "A card with a coloured border."
+msgstr ""
+
+#: ../../kitchen-sink/design.md:29
+msgid "Tabs"
+msgstr ""
+
+#: ../../kitchen-sink/design.md
+msgid "Python"
+msgstr ""
+
+#: ../../kitchen-sink/design.md
+msgid "Logo options"
+msgstr ""
+
+#: ../../kitchen-sink/design.md
+msgid "Layout options"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:52
+msgid "Dropdowns"
+msgstr ""
+
+#: ../../kitchen-sink/design.md
+msgid "A dropdown"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:55
+msgid "Hidden until opened."
+msgstr ""
+
+#: ../../kitchen-sink/design.md
+msgid "An open dropdown with a colour"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:63
+msgid "Open from the start."
+msgstr ""
+
+#: ../../kitchen-sink/design.md:66
+msgid "Buttons and badges"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:71
+msgid "A primary button"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:78
+msgid "An outlined button"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:82
+#, python-brace-format
+msgid ""
+"{bdg-primary}`primary` {bdg-secondary}`secondary` {bdg-success}`success` "
+"{bdg-info}`info` {bdg-warning}`warning` {bdg-danger}`danger` {bdg-"
+"light}`light` {bdg-dark}`dark` {bdg-primary-line}`primary line` {bdg-"
+"success-line}`success line`"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:86
+msgid "Icons"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:88
+#, python-brace-format
+msgid ""
+"{octicon}`heart;1.5em;sd-text-danger` {octicon}`star;1.5em;sd-text-"
+"warning` {octicon}`check-circle;1.5em;sd-text-success` "
+"{octicon}`info;1.5em;sd-text-info`"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:91
+msgid "An article info line"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:93
+msgid "Sam Jennings"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:93
+msgid "November 2026"
+msgstr ""
+
+#: ../../kitchen-sink/design.md:93
+msgid "5 min read"
+msgstr ""
+

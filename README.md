@@ -822,6 +822,58 @@ contents of the build being read. `build_docs` leaves such an app out, because
 it has no one folder to build into: run `sphinx-build` into each folder the
 function returns. Two builds on one site are still two documentation apps.
 
+### Documentation in the reader's language
+
+Sphinx translates a project with gettext catalogues: `.po` files, one for each page and
+language, under the folders `locale_dirs` names in `conf.py` (`locales` by default). Set
+`gettext_compact = False` there to get one catalogue for each page. When the source has
+catalogues for languages the site offers, `build_docs` builds the documentation once for
+each of them and once in the source language, and the site serves each reader the build in
+their language.
+
+```python
+# docs/conf.py
+language = "en"
+locale_dirs = ["locales/"]
+gettext_compact = False
+```
+
+```text
+docs/locales/de/LC_MESSAGES/index.po
+docs/locales/de/LC_MESSAGES/guide/install.po
+```
+
+`python manage.py build_docs` then writes one folder for each language below `build_dir`:
+`build_dir/en/`, `build_dir/de/`. A language is built when it has a catalogue and its
+code is one of the project's `LANGUAGES` (`pt_BR` in Sphinx is `pt-br` in Django). The
+command prints one line for a catalogue it skips because the site doesn't offer its
+language, and none with `--verbosity 0`. A catalogue for the source language alone isn't a
+translation, so a source with only that builds into `build_dir` itself, as before. Each
+language is built in a process of its own, because Sphinx keeps the first language's
+catalogues for the life of a process.
+
+Every request is served from the build for Django's active language, so install
+`django.middleware.locale.LocaleMiddleware` and let readers choose a language, as the
+demo's language switcher does. A reader whose language has no build is served the first of
+the language without its region (`de-at` reads `de`), the project's `LANGUAGE_CODE`, the
+source language, and then the first build there is. Pages, images and downloads, search,
+page extracts, the sidebar and a page's own anchors all follow the build, so a search for
+"Katze" in German reads German pages with German stemming. A paragraph the catalogue
+doesn't translate stays in the source language. Anchors come from the source, so an
+address with an `#anchor` reaches the same section in every language.
+
+A folder of builds is read from disk on every request, so adding a language needs a
+rebuild and no restart. A `build_dir` that holds its own `globalcontext.json` is a single
+build and is served as it is, whatever the active language. A function for `build_dir`
+chooses the build itself and gets no language choice from the package. The command
+removes the folders of a layout it no longer writes before it builds, so changing from one
+build to several, or back, leaves no old pages. A build that fails after that leaves
+nothing to serve until it is built again.
+
+The package's own strings, have a German
+catalogue, and a project overrides it with its own `locale` folder ahead of the package's
+in `LOCALE_PATHS`.
+
 ### Addresses and files served
 
 The images and downloads your pages link to (`_images/` and `_downloads/` in

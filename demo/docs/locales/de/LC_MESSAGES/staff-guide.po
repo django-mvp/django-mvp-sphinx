@@ -1,0 +1,104 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the django-mvp-sphinx
+# demo package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mvp-sphinx demo \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-23 14:16+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../staff-guide.rst:2
+msgid "About the staff guide"
+msgstr ""
+
+#: ../../staff-guide.rst:4
+msgid ""
+"The staff guide is a second, smaller guide that lives next to this one, "
+"at ``/staff-guide/``. It is for people with a staff account, and it "
+"covers what the staff accounts are and what sets them apart."
+msgstr ""
+
+#: ../../staff-guide.rst:9
+msgid "Who can open it"
+msgstr ""
+
+#: ../../staff-guide.rst:11
+msgid ""
+"Only staff accounts can. What happens to everyone else depends on who "
+"they are:"
+msgstr ""
+
+#: ../../staff-guide.rst:13
+msgid "Someone who has not signed in is asked to sign in."
+msgstr ""
+
+#: ../../staff-guide.rst:14
+msgid ""
+"Someone signed in with a regular account is shown the site's forbidden "
+"page."
+msgstr ""
+
+#: ../../staff-guide.rst:16
+msgid "Someone signed in with a staff account or the superuser account reads it."
+msgstr ""
+
+#: ../../staff-guide.rst:19
+msgid ""
+"The sidebar follows the same rule. The staff guide's entry appears only "
+"while you are signed in as staff, so a regular account never sees a link "
+"it cannot use."
+msgstr ""
+
+#: ../../staff-guide.rst:24
+msgid ""
+"Not seeing the entry is not a fault. If you expect to see it, check which"
+" account you signed in with: :doc:`reference/accounts` lists what each "
+"one can open."
+msgstr ""
+
+#: ../../staff-guide.rst:29
+msgid "Trying it"
+msgstr ""
+
+#: ../../staff-guide.rst:31
+msgid ""
+"Sign in with ``staff.user@example.com`` and the password ``password``. "
+"See :doc:`first-visit/signing-in` if you need the steps."
+msgstr ""
+
+#: ../../staff-guide.rst:33
+msgid ""
+"Choose *Staff guide* in the sidebar, or open the `staff guide </staff-"
+"guide/>`_ directly."
+msgstr ""
+
+#: ../../staff-guide.rst:35
+msgid ""
+"Sign out and sign in as ``regular.user@example.com``, then open the "
+"address again to see the forbidden page."
+msgstr ""
+
+#: ../../staff-guide.rst:40
+msgid ""
+"The demo's accounts share one password, and anyone who can reach the site"
+" can sign in as staff. Run it only where you would trust everyone who can"
+" open it."
+msgstr ""
+
+#: ../../staff-guide.rst:45
+msgid "The staff guide's entry in the sidebar, shown to staff accounts only."
+msgstr ""
+

@@ -4,6 +4,8 @@
 # and a menu entry whose URL will not resolve is dropped from the tree.
 
 import re
+import subprocess
+import sys
 from pathlib import Path
 from textwrap import dedent
 from urllib.parse import urldefrag, urljoin
@@ -123,6 +125,48 @@ class TestDemoGuide:
         out = sphinx_build(BASE_DIR / "demo" / "staff_guide")
 
         assert (out / DocsBuild.NAVIGATION_FILE).is_file()
+
+
+@pytest.fixture(scope="module")
+def guide_languages(tmp_path_factory) -> dict[str, Path]:
+    # One process for each language, as the build command runs them.
+    source = BASE_DIR / "demo" / "docs"
+    out = tmp_path_factory.mktemp("demo-guide")
+    for language in ("en", "de"):
+        command = [sys.executable, "-m", "sphinx", "-b", "json", "-q"]
+        command += ["-D", "html_theme=daisyui", "-D", f"language={language}"]
+        subprocess.run(  # noqa: S603 - fixed arguments
+            [*command, str(source), str(out / language)], check=True
+        )
+    return {language: out / language for language in ("en", "de")}
+
+
+class TestTranslatedGuide:
+    def test_the_german_build_translates_the_front_page_title(
+        self, guide_languages
+    ) -> None:
+        assert (
+            DocsBuild(guide_languages["de"]).front_page_title()
+            != DocsBuild(guide_languages["en"]).front_page_title()
+        )
+
+    def test_the_german_build_translates_the_contents(self, guide_languages) -> None:
+        def titles(folder):
+            groups = DocsBuild(folder).navigation()
+            return [entry["title"] for group in groups for entry in group["entries"]]
+
+        assert titles(guide_languages["de"]) != titles(guide_languages["en"])
+
+    def test_both_builds_hold_the_same_pages(self, guide_languages) -> None:
+        def pages(folder):
+            return sorted(path.relative_to(folder) for path in folder.rglob("*.fjson"))
+
+        assert pages(guide_languages["de"]) == pages(guide_languages["en"])
+
+    def test_the_navbar_offers_a_language_switcher(self, client, db) -> None:
+        response = client.get(reverse("overview"))
+
+        assert reverse("set_language") in response.content.decode()
 
 
 def entries(items) -> list:

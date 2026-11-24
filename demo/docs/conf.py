@@ -9,6 +9,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 
 project = "django-mvp-sphinx demo"
+# Translations live in locales/<language>/LC_MESSAGES, one catalogue per page.
+locale_dirs = ["locales/"]
+gettext_compact = False
 html_theme = "daisyui"
 extensions = [
     "mvp_sphinx.navigation",
