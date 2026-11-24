@@ -1,4 +1,4 @@
-"""The languages a docs source is translated into, and the build that serves a reader."""
+"""The languages a docs source is translated into, and the build a reader gets."""
 
 import pytest
 

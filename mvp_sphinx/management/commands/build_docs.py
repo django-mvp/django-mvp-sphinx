@@ -87,7 +87,8 @@ class Command(BaseCommand):
                 ).returncode
                 if status != 0:
                     raise CommandError(
-                        f'Sphinx could not build "{app.namespace}" from {app.source_dir}.'
+                        f'Sphinx could not build "{app.namespace}" '
+                        f"from {app.source_dir}."
                     )
                 built += 1
         if not quiet:

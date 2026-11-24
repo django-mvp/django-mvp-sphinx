@@ -167,5 +167,11 @@ DEP002 = ["sphinx-daisyui"]
 [tool.forge.docs]
 # The extension's functions and class, and the directive it registers, are
 # Sphinx's to call, not a host's. Their one public surface is the module name a
-# host lists in conf.py, which the README quotes.
-exempt-paths = ["mvp_sphinx/navigation.py", "mvp_sphinx/live_example.py"]
+# host lists in conf.py, which the README quotes. The language module is the
+# package's own reading of those catalogues and builds, which the README
+# describes as the feature it serves.
+exempt-paths = [
+    "mvp_sphinx/navigation.py",
+    "mvp_sphinx/live_example.py",
+    "mvp_sphinx/languages.py",
+]

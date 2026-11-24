@@ -26,7 +26,7 @@ DEFAULT_LOCALE_DIRS = ["locales"]
 
 
 class SphinxSource:
-    """A Sphinx source directory, read for the languages it is written and translated in.
+    """A Sphinx source directory, read for its language and its translations.
 
     ``conf.py`` is read as text, so nothing here imports Sphinx or runs the
     project's configuration. A setting that isn't a literal reads as unset.
@@ -74,7 +74,8 @@ class SphinxSource:
     def language(self) -> str:
         """The language the documentation is written in, as Sphinx names it.
 
-        ``conf.py``'s ``language``, or English when it sets none.
+        Returns:
+            ``conf.py``'s ``language``, or English when it sets none.
         """
         return self.value("language", None) or DEFAULT_LANGUAGE
 
@@ -109,7 +110,11 @@ class SphinxSource:
 
 
 def site_languages() -> set[str]:
-    """Return the project's ``LANGUAGES``, in Django's form (``pt-br``)."""
+    """Return the project's ``LANGUAGES``, in Django's form (``pt-br``).
+
+    Returns:
+        The language codes the site offers.
+    """
     return {to_language(code) for code, _name in settings.LANGUAGES}
 
 
@@ -130,6 +135,12 @@ class LanguageBuilds:
         It holds a build and is named for a language Django knows or the
         project offers, so a build of something else kept beside them isn't
         taken for one.
+
+        Args:
+            folder: A folder of the build directory.
+
+        Returns:
+            Whether the folder is a language build.
         """
         return (
             folder.is_dir()
