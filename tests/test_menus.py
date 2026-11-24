@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from django.utils import translation
 from flex_menu import MenuItem
 from mvp.menus import MenuGroup
 
@@ -592,6 +593,96 @@ class TestProjectEntries:
         project_entry("studio", check=lambda request, **kwargs: False)
 
         assert leaves(processed().visible_children) == contents
+
+
+class TestContentsPerBuild:
+    @pytest.fixture(autouse=True)
+    def nothing_read_yet(self, translated_app, monkeypatch) -> None:
+        monkeypatch.setattr(translated_app.menu, "built", {})
+
+    @pytest.fixture
+    def reads(self, monkeypatch) -> list:
+        found = []
+        read = DocsBuild.navigation
+
+        def counting(self):
+            found.append(self.root.name)
+            return read(self)
+
+        monkeypatch.setattr(DocsBuild, "navigation", counting)
+        return found
+
+    @pytest.fixture
+    def draw(self, translated_app, rf):
+        def process(language, address="/docs/"):
+            with translation.override(language):
+                return translated_app.menu.process(rf.get(address))
+
+        return process
+
+    def test_requests_alternating_between_languages_read_each_build_once(
+        self, draw, reads
+    ) -> None:
+        for language in ["de", "en", "de", "en", "de"]:
+            draw(language)
+
+        assert sorted(reads) == ["de", "en"]
+
+    def test_each_language_is_drawn_from_its_own_build(
+        self, draw, translated_build
+    ) -> None:
+        for language in ["de", "en", "de"]:
+            drawn = draw(language)
+
+            expected = DocsBuild(translated_build / language).front_page_title()
+            assert label(drawn.visible_children[0]) == expected
+
+    def test_a_changed_build_is_seen_after_another_language_was_drawn(
+        self, draw, reads, translated_app, translated_build, tmp_path, monkeypatch
+    ) -> None:
+        build = tmp_path / "rebuilt"
+        shutil.copytree(translated_build, build)
+        monkeypatch.setattr(translated_app, "build_dir", build)
+        draw("de")
+        draw("en")
+
+        rewrite_contents(
+            build / "de",
+            lambda groups: groups[0]["entries"].append(
+                {"title": "Added", "url": "added/", "children": []}
+            ),
+        )
+
+        assert "/docs/added/" in leaves(draw("de").visible_children)
+        assert "/docs/added/" not in leaves(draw("en").visible_children)
+        assert reads == ["de", "en", "de"]
+
+    def test_entries_a_project_placed_stay_when_the_language_changes(
+        self, draw, translated_app
+    ) -> None:
+        studio = MenuItem(name="studio", url="/studio/", extra_context={"label": "x"})
+        translated_app.menu.append(studio)
+        try:
+            german = leaves(draw("de").visible_children)
+            english = leaves(draw("en").visible_children)
+        finally:
+            studio.parent = None
+
+        assert german[-1] == english[-1] == "/studio/"
+
+    def test_a_function_build_dir_is_read_once_for_each_build_it_returns(
+        self, translated_app, translated_build, rf, reads, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(
+            translated_app,
+            "build_dir",
+            lambda request: translated_build / request.GET["build"],
+        )
+
+        for build in ["de", "en", "de", "en"]:
+            translated_app.menu.process(rf.get("/docs/", {"build": build}))
+
+        assert sorted(reads) == ["de", "en"]
 
 
 class TestServingSideImports:

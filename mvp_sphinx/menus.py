@@ -117,10 +117,10 @@ class DocumentationMenu(Menu):
     holds the front page alone, and without a title in the file that entry reads
     "Overview".
 
-    The menu is rebuilt only when the navigation file, the build directory or the
-    app's front page address has changed since the last request. An app that
-    chooses its build for each request rebuilds it whenever a request's build
-    differs from the last one's.
+    The contents of each build directory the app has served are kept, and read
+    again only when that build's navigation file or the app's front page address
+    has changed since. An app that serves several builds, one for each language
+    or each site, so reads each of them once, however its requests alternate.
 
     A project adds entries of its own with the menu's ``append``, ``extend`` and
     ``insert``. A rebuild replaces only what the navigation file put there. An
@@ -142,11 +142,14 @@ class DocumentationMenu(Menu):
             parent=self,
             extra_context={"label": _("Overview")},
         )
+        # The contents drawn now: the ones the build for the request holds.
         self.contents: list[MenuItem] = []
         self.lock = threading.Lock()
-        self.stamp: tuple[Any, ...] | None = None
+        # What was read from each build directory: the stamp it was read at,
+        # its contents and the title of its front page.
+        self.built: dict[Any, tuple[tuple[Any, ...], list[MenuItem], Any]] = {}
         # The build directory of the request being processed, for refresh().
-        self.build_dir: Any = None if callable(app.build_dir) else app.build_dir
+        self.build_dir: Any = None
 
     def front_page_url(self, request: "HttpRequest | None", **kwargs: Any) -> str:
         """Return the address the app's front page is served at."""
@@ -187,20 +190,43 @@ class DocumentationMenu(Menu):
         return None
 
     def refresh(self) -> None:
-        """Rebuild the menu's items when the navigation file has changed.
+        """Draw the contents of the build the request chose, reading it if needed.
 
         It reads the build directory of the request being processed, which
-        ``process`` sets in ``build_dir`` before calling it.
+        ``process`` sets in ``build_dir`` before calling it. A build read before
+        and unchanged since is drawn from what was kept.
         """
         prefix = reverse(self.app.landing)
         docs_build = DocsBuild(self.build_dir)
         stamp = (self.build_dir, prefix, docs_build.navigation_stamp())
-        if stamp == self.stamp:
+        kept = self.built.get(self.build_dir)
+        if kept is None or kept[0] != stamp:
+            kept = (stamp, *self.read(docs_build, prefix))
+            self.built[self.build_dir] = kept
+        _, contents, front_page_label = kept
+        if contents is self.contents:
             return
+        self.front_page.extra_context["label"] = front_page_label
+        others = [each for each in self if each not in self.contents]
+        # A project may have taken the front page's entry out.
+        after = others.index(self.front_page) + 1 if self.front_page in others else 0
+        self.children = [*others[:after], *contents, *others[after:]]
+        self.contents = contents
+
+    def read(self, docs_build: DocsBuild, prefix: str) -> tuple[list[MenuItem], Any]:
+        """Read the contents and the front page's title from a build.
+
+        Args:
+            docs_build: The build to read.
+            prefix: The documentation app's own address, which every entry's
+                address is below.
+
+        Returns:
+            The menu's entries for the build's contents, and the label of the
+            front page's entry.
+        """
         groups = docs_build.navigation() or []
-        self.front_page.extra_context["label"] = docs_build.front_page_title() or _(
-            "Overview"
-        )
+        front_page_label = docs_build.front_page_title() or _("Overview")
         branch_url = reverse(f"{self.app.namespace}:branch")
         contents: list[MenuItem] = []
         for number, group in enumerate(groups):
@@ -217,12 +243,7 @@ class DocumentationMenu(Menu):
                 )
             else:
                 contents += entries
-        kept = [each for each in self if each not in self.contents]
-        # A project may have taken the front page's entry out.
-        after = kept.index(self.front_page) + 1 if self.front_page in kept else 0
-        self.children = [*kept[:after], *contents, *kept[after:]]
-        self.contents = contents
-        self.stamp = stamp
+        return contents, front_page_label
 
     def entry_items(
         self, entries: list[dict[str, Any]], prefix: str, branch_url: str, name: str
