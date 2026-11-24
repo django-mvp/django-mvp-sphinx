@@ -112,7 +112,8 @@ def sign_in_address(address: str) -> str:
 def body(response) -> bytes:
     if response.streaming:
         return b"".join(response.streaming_content)
-    return response.content
+    # The language switcher's form holds a token that is masked anew each time.
+    return re.sub(rb'name="csrfmiddlewaretoken" value="[^"]*"', b"", response.content)
 
 
 def asset_addresses(client, guide_build) -> list[str]:
