@@ -271,7 +271,9 @@ link. With no edit address, no page has one.
 ## Assumptions
 
 - Serving the page, its URL and its breadcrumbs come from #4. This feature draws the breadcrumbs
-  in the row above the page's title, beside the edit link, and changes nothing else about them.
+  in the row above the page's title, beside the edit link, with django-mvp's breadcrumbs component,
+  which folds the middle of a trail too long for its row into a menu. It changes nothing else
+  about them.
 - The contents in the app sidebar come from #5. "On this page" holds headings inside the current
   page, and the sidebar holds pages, so neither repeats the other.
 - The links a reader can copy from each heading, and all styling of the page body, come from #7.

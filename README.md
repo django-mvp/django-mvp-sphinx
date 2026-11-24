@@ -868,10 +868,12 @@ component, which django-mvp's stylesheet already holds.
 
 A page is laid out as sphinx-daisyui lays out its own, so the docs read the same
 whether they are built with the theme or served by this package. A row above the
-page's title holds the breadcrumbs, from the documentation's icon for its front
-page through each parent to the page itself, and at its end the page's
-"Edit this page" link when the app has one (see below). The front page has no
-trail. A page is centred, with "On this page" beside it from 1280 pixels wide. The text
+page's title holds the breadcrumbs, from the documentation's front page, marked
+with its icon, through each parent to the page itself, and at its end the page's
+"Edit this page" link when the app has one (see below). The trail is django-mvp's
+breadcrumbs component, so a trail too long for its row folds the steps in the
+middle into a "…" menu, and on a phone the front page's step shrinks to its icon.
+The front page has no trail. A page is centred, with "On this page" beside it from 1280 pixels wide. The text
 is as wide as the theme's: 46rem, which is 736 pixels. To change it, set the
 theme's `--daisy-sphinx-max-width` in your own stylesheet, on `:root` or on any
 element around the page, not on the element that holds the body. The page's
@@ -1393,8 +1395,9 @@ These are the names a project can use, grouped the way a project meets them.
   `template_name`, `get_context_data()`, `get_page_title()`, `get_meta_tags()`,
   `get_headings()`,
   `get_neighbour(key)` (`key` is `"prev"` or `"next"`), `get_breadcrumbs()` and
-  `get_edit_url()`. The breadcrumbs are drawn above the page's title, so the
-  view gives django-mvp's header none.
+  `get_edit_url()`. The breadcrumbs are drawn above the page's title with
+  django-mvp's `mvp.breadcrumbs` component, the front page's step carrying the
+  app's `icon`, so the view gives django-mvp's header none.
 - `mvp_sphinx.views.SearchView` renders the results of a search.
 
 ### Building blocks
@@ -1465,9 +1468,6 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
   screen, hidden from 1280 pixels wide. It takes `headings`.
 - `mvp_sphinx.heading_list` draws nested headings as a list. It takes `headings`.
   Each list has the `mvp-sphinx-toc-list` class and each link `mvp-sphinx-toc-link`.
-- `mvp_sphinx.breadcrumbs` draws the trail above a page's title, with the front
-  page as an icon. It takes `trail`, the view's breadcrumbs, and `icon`, and draws
-  nothing for a trail of one step.
 - `mvp_sphinx.edit_link` draws the "Edit this page" pencil. It takes `href` and
   draws nothing without one.
 - `mvp_sphinx.page_links` draws the links to the previous and next page. It takes

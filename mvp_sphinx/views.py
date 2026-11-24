@@ -106,7 +106,8 @@ class PageView(PageMixin, TemplateView):
 
         Also adds the page's metadata, headings, neighbours, breadcrumbs and the
         address its source is edited at. The breadcrumbs are drawn above the
-        page's title, so the shell's header is given none to draw.
+        page's title, with the app's icon on the front page's step, so the
+        shell's header is given none to draw.
         """
         context = super().get_context_data(**kwargs)
         context["search_url"] = reverse(f"{self.app.namespace}:search")
@@ -115,7 +116,8 @@ class PageView(PageMixin, TemplateView):
         context["headings"] = self.get_headings()
         context["previous_page"] = self.get_neighbour("prev")
         context["next_page"] = self.get_neighbour("next")
-        context["breadcrumbs"] = context["page"]["breadcrumbs"]
+        first, *rest = context["page"]["breadcrumbs"]
+        context["breadcrumbs"] = [{**first, "icon": self.app.icon}, *rest]
         context["page"]["breadcrumbs"] = []
         context["edit_url"] = self.get_edit_url()
         return context

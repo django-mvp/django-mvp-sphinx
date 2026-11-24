@@ -22,7 +22,7 @@
         <c-slot name="header">
           <div class="mvp-sphinx-article-header">
             <div class="mvp-sphinx-article-header-start">
-              <c-mvp_sphinx.breadcrumbs :trail="breadcrumbs" :icon="view.app.icon" />
+              {% if breadcrumbs|length > 1 %}<c-mvp.breadcrumbs :items="breadcrumbs" class="mvp-sphinx-breadcrumbs" />{% endif %}
             </div>
             <div class="mvp-sphinx-article-header-end">
               <c-mvp_sphinx.edit_link :href="edit_url" />

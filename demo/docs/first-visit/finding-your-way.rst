@@ -21,7 +21,8 @@ Breadcrumbs
 
 Above each page's title a trail shows where you are. It starts with a book, which
 leads to the guide's front page, and passes through each page above this one.
-Follow any part of the trail to go up a level. The pencil at the end of the row
+Follow any part of the trail to go up a level. When the trail is too long for the
+screen, the pages in its middle fold into a "…" button: open it to reach them. The pencil at the end of the row
 opens the page's source, if you would like to suggest a change to it.
 
 Searching the guide

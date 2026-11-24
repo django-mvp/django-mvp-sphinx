@@ -43,14 +43,12 @@
   gap: 0.25rem;
 }
 
+/* django-mvp's trail draws and folds the steps. The theme sets them in 14px. */
 .mvp-sphinx-breadcrumbs {
-  padding-block: 0;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  color: var(--mvp-sphinx-text-muted);
 }
 
-.mvp-sphinx-breadcrumbs .bi,
 .mvp-sphinx-edit-link .bi {
   font-size: 1rem;
   line-height: 1;

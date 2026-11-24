@@ -406,11 +406,11 @@ class TestPermissionRule:
     @pytest.fixture(autouse=True)
     def permission_rule(self, docs_app, monkeypatch):
         monkeypatch.setattr(
-            docs_app, "check", user_has_any_permission("auth.view_user")
+            docs_app, "check", user_has_any_permission("auth.view_group")
         )
 
     def test_a_user_granted_the_permission_gets_a_page(self, client, user):
-        user.user_permissions.add(Permission.objects.get(codename="view_user"))
+        user.user_permissions.add(Permission.objects.get(codename="view_group"))
         client.force_login(user)
 
         assert client.get("/docs/page/").status_code == 200

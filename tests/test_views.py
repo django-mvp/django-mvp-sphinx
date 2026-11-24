@@ -152,7 +152,7 @@ class TestBreadcrumbs:
     @staticmethod
     def trail(client, address: str):
         soup = BeautifulSoup(client.get(address).content, "html.parser")
-        return soup.select_one("article").find_previous("nav", class_="breadcrumbs")
+        return soup.select_one("article").find_previous("nav", class_="mvp-crumbs")
 
     def test_the_front_pages_trail_is_the_apps_name(self, client, db, docs_app) -> None:
         crumbs = client.get("/docs/").context["breadcrumbs"]
@@ -172,6 +172,14 @@ class TestBreadcrumbs:
             ("Nested page", None),
         ]
 
+    def test_the_front_pages_step_carries_the_apps_icon(
+        self, client, db, docs_app
+    ) -> None:
+        crumbs = client.get("/docs/section/nested/page/").context["breadcrumbs"]
+
+        assert crumbs[0]["icon"] == docs_app.icon
+        assert all("icon" not in crumb for crumb in crumbs[1:])
+
     def test_the_trail_is_drawn_above_the_page_with_the_apps_name_on_its_first_link(
         self, client, db, docs_app
     ) -> None:
@@ -179,7 +187,7 @@ class TestBreadcrumbs:
 
         links = trail.find_all("a")
         assert [link["href"] for link in links] == ["/docs/", "/docs/section/"]
-        assert links[0]["aria-label"] == str(docs_app.name)
+        assert links[0].get_text(strip=True) == str(docs_app.name)
         assert trail.find(attrs={"aria-current": "page"}).get_text(strip=True) == (
             "Nested page"
         )
