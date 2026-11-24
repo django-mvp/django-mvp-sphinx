@@ -87,8 +87,8 @@ JSON, mount a documentation app pointed at the build, and request each page's ad
    and that heading carries the page's title.
 5. **Given** any served page, **When** it renders, **Then** the browser tab's title names the page
    and the documentation app, and page titles containing markup appear there as plain text.
-6. **Given** the front page, **When** it renders, **Then** the breadcrumbs hold the documentation
-   app alone, as the current location.
+6. **Given** the front page, **When** it renders, **Then** its breadcrumbs hold the documentation
+   app alone, as the current location, and no trail is drawn above its title.
 7. **Given** a page nested under other pages, **When** it renders, **Then** the breadcrumbs lead from
    the documentation app (linking to the front page) through each parent page (each linking to that
    page) to the current page.
@@ -263,7 +263,7 @@ any other, then request pages, a file, a search, an extract and the sidebar with
   the page and the documentation app in the browser tab, as plain text. (US1)
 - **FR-005**: Each served page MUST set breadcrumbs that start at the documentation app, linking to
   the front page, pass through each parent page as a link, and end at the current page. The front
-  page's breadcrumbs hold the documentation app alone. (US1)
+  page's breadcrumbs hold the documentation app alone, and draw no trail. (US1)
 - **FR-006**: Links between pages, and to files, within a page's body MUST resolve to the right
   address under the documentation app's prefix. (US1, US2)
 - **FR-007**: The documentation app MUST serve the images and downloads in the docs build at the

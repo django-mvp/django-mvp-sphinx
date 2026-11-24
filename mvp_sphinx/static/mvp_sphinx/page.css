@@ -16,10 +16,12 @@
    values are the theme's (layout.html, page-toc.html, breadcrumbs.html and
    frame.css), so the pages read the same in both. The theme puts its own
    spacing between the row, the panel and the page, in place of the layout's. */
-.mvp-sphinx-page .mvp-page-layout,
+.mvp-sphinx-page .mvp-page-layout {
+  row-gap: 0;
+}
+
 .mvp-sphinx-page .mvp-page-main {
   gap: 0;
-  column-gap: 2.5rem;
 }
 
 .mvp-sphinx-article-header {

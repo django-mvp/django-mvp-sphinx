@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- A page can link to its source for editing. Give `DocumentationApp` an `edit_url` with `{path}` where the page's source file goes, such as `https://github.com/your-org/your-project/edit/main/docs/{path}`, and every page made from a source file shows an "Edit this page" pencil at the end of the row above its title, opening the source in a new tab. There is no link unless you set one.
+- "On this page" marks the heading being read as the reader scrolls, with `aria-current="location"` on its link, in the column and in the panel alike.
+
+### Changed
+- Pages are laid out the way sphinx-daisyui lays out its own. The breadcrumbs sit in a row above the page's title instead of in the top bar, with the documentation app's `icon` for the front page, and the front page has no trail. "On this page" is a column beside the page from 1280 pixels wide, with a small label and a rule down the left of its headings, and a closed panel under the breadcrumbs on a narrower screen. The "On this page" button in the top bar is gone, which also stops a long translation of its label widening the top bar past a phone's screen. If you override `mvp_sphinx/page.html`, the page now receives the trail as `breadcrumbs` and the edit address as `edit_url`, and `page.breadcrumbs` is empty.
+- `mvp_sphinx.heading_list` draws its lists with the `mvp-sphinx-toc-list` class and its links with `mvp-sphinx-toc-link`, instead of daisyUI's `menu` classes.
+
 ## [v0.10.0] - 2026-11-23
 
 ### Changed
