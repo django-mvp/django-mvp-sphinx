@@ -1,11 +1,14 @@
 {% load i18n %}
-{# @description The current page's own headings, drawn as the page's side panel: a column beside the page that sticks under the header, and a drawer opened from the top bar on a narrower screen. #}
+{# @description The current page's own headings, drawn as a column beside the page from the xl breakpoint, where it sticks under the header as the page scrolls. Below it the column is not shown, and <c-mvp_sphinx.on_this_page_panel> above the title lists the headings instead. #}
 {# @prop headings:list | description:"Headings from PageHeadings; never empty, the page draws nothing otherwise." #}
 <c-vars headings />
 
-{% trans "On this page" as label %}
-<c-mvp.page.side id="mvp-sphinx-on-this-page" :label="label" width="sm" breakpoint="lg">
-  <nav aria-labelledby="mvp-sphinx-on-this-page-label">
-    <c-mvp_sphinx.heading_list :headings="headings" class="menu menu-sm w-full" />
+<c-mvp.page.side id="mvp-sphinx-on-this-page" width="sm" breakpoint="xl" collapse="stack">
+  <c-slot name="label">
+    <c-icon name="list-view" aria-hidden="true" />
+    {% trans "On this page" %}
+  </c-slot>
+  <nav aria-labelledby="mvp-sphinx-on-this-page-label" data-mvp-sphinx-toc="column">
+    <c-mvp_sphinx.heading_list :headings="headings" />
   </nav>
 </c-mvp.page.side>

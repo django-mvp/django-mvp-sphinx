@@ -1,0 +1,23 @@
+{% load i18n %}
+{# @description The trail from the documentation's front page down to the current page, drawn above the page's title: the documentation's icon for its front page, each parent, then the page itself. A trail of one step, the front page's own, draws nothing. #}
+{# @prop trail:list | description:"The breadcrumbs from PageView.get_breadcrumbs: dicts with text and, except the last, href." #}
+{# @prop icon:text | description:"The icon name the front page's step is drawn with: the documentation app's own icon." #}
+<c-vars trail icon />
+
+{% if trail|length > 1 %}
+  <c-breadcrumbs class="mvp-sphinx-breadcrumbs">
+    {% for item in trail %}
+      {% if forloop.first %}
+        <li>
+          <a href="{{ item.href }}" aria-label="{{ item.text }}">
+            <c-icon :name="icon" aria-hidden="true" />
+          </a>
+        </li>
+      {% elif forloop.last %}
+        <li aria-current="page"><span class="truncate">{{ item.text }}</span></li>
+      {% else %}
+        <c-breadcrumbs.item :text="item.text" :href="item.href" only />
+      {% endif %}
+    {% endfor %}
+  </c-breadcrumbs>
+{% endif %}

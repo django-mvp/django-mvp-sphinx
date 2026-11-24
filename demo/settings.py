@@ -126,6 +126,7 @@ EASY_ICONS = {
         "packs": ["mvp.utils.BS5_ICONS"],
         "icons": {
             "overview": "bi bi-house",
+            "book": "bi bi-book",
         },
     },
 }
