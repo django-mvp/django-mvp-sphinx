@@ -112,3 +112,7 @@ msgstr "Nichts passt zu Ihrer Suche."
 #, python-format
 msgid "Search: %(query)s"
 msgstr "Suche: %(query)s"
+
+#: templates/cotton/mvp_sphinx/edit_link.html:7
+msgid "Edit this page"
+msgstr "Diese Seite bearbeiten"

@@ -43,7 +43,7 @@ class TestConf:
     def test_only_top_level_assignments_are_read(self, tmp_path) -> None:
         source = make_source(
             tmp_path / "docs",
-            'language = "de"\n\n\ndef setup(app):\n    language = app.config.language\n',
+            'language = "de"\n\n\ndef setup(app):\n    language = "x"\n',
         )
 
         assert SphinxSource(source).language == "de"
