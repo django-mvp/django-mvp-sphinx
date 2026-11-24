@@ -27,7 +27,7 @@ class DocsSearch:
 
     SEARCH_DATA_FILE = "searchindex.json"
     LANGUAGE_DATA_FILE = "_static/language_data.js"
-    CONTEXT_FILE = "globalcontext.json"
+    CONTEXT_FILE = DocsBuild.CONTEXT_FILE
     WORD_LIMIT = 20
     PASSAGE_LENGTH = 240
     # Sphinx 9 stems English with the english algorithm, Sphinx 8 with porter.
