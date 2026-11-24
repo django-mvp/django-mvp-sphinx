@@ -17,6 +17,8 @@ Issue: #156. Delivers FR-001 – FR-007, FR-010 – FR-012, FR-014; SC-001, SC-0
 - [ ] T003 [US1] build_docs clears the layout it no longer writes
 - [ ] T004 [US1] The documentation app serves the build for the active language
 - [ ] T005 [US1] The sidebar's contents are cached per build folder
+- [x] T010 [US1] build_docs clears the other layout once every build has succeeded
+- [x] T011 [US1] Fixes from the review: regional source language, top-level conf.py names, leftovers, README, alias
 - [ ] T006 [US1] The demo and the documentation
 
 ### T001 — The language module and the translated fixture
