@@ -67,6 +67,7 @@ include = ["/mvp_sphinx", "/README.md", "/LICENSE"]
 # way runs one version of each tool. Ships ruff, mypy, deptry, pre-commit,
 # pytest, pytest-django, pytest-xdist, factory-boy, coverage and django-stubs.
 dev = [
+    "babel>=2.18.0",
     "mvp-shared[dev,test]",
     "myst-parser>=5.2.0",
     "sphinx>=8.1",
@@ -82,7 +83,7 @@ build-backend = "hatchling.build"
 
 # The stylesheet tests read a static asset, which has no module to mirror.
 [tool.forge.conformance]
-non-mirror-paths = ["tests/test_static/"]
+non-mirror-paths = ["tests/test_static/", "tests/test_locale.py"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
