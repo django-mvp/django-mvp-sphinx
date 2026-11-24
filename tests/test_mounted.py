@@ -2,6 +2,7 @@
 
 import re
 import shutil
+import sys
 from pathlib import Path
 from urllib.parse import quote, urljoin
 
@@ -961,3 +962,76 @@ class TestSiteSearchKind:
 
     def test_an_app_the_request_has_not_mounted_finds_nothing(self, rf) -> None:
         assert site_search(quickstart_docs, "install", rf.get("/")) == []
+
+
+def served_title(client, language, address="/docs/"):
+    response = client.get(address, headers={"Accept-Language": language})
+    assert response.status_code == 200
+    return response.context["page_data"]["title"]
+
+
+def built_title(translated_build, folder, path=""):
+    return DocsBuild(translated_build / folder).page(path)["title"]
+
+
+class TestPagesFollowTheLanguage:
+    def test_a_german_reader_is_served_the_german_build(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        assert served_title(client, "de") == built_title(translated_build, "de")
+
+    def test_an_english_reader_is_served_the_english_build(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        assert served_title(client, "en") == built_title(translated_build, "en")
+
+    def test_a_regional_reader_is_served_the_build_of_that_region(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        assert served_title(client, "pt-br") == built_title(translated_build, "pt_BR")
+
+    def test_a_page_the_translation_left_alone_is_served_in_the_german_build(
+        self, client, db, translated_app, translated_build
+    ) -> None:
+        title = served_title(client, "de", "/docs/untranslated/")
+
+        assert title == built_title(translated_build, "de", "untranslated/")
+
+    def test_the_layout_is_read_on_every_request(
+        self, client, db, translated_app, translated_build, tmp_path, monkeypatch
+    ) -> None:
+        shutil.copytree(translated_build / "en", tmp_path / "build" / "en")
+        monkeypatch.setattr(translated_app, "build_dir", tmp_path / "build")
+        assert served_title(client, "de") == built_title(translated_build, "en")
+
+        shutil.copytree(translated_build / "de", tmp_path / "build" / "de")
+
+        assert served_title(client, "de") == built_title(translated_build, "de")
+
+    def test_a_build_dir_holding_a_build_of_its_own_serves_it_in_every_language(
+        self, client, db, translated_app, translated_build, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(translated_app, "build_dir", translated_build / "de")
+
+        assert served_title(client, "en") == built_title(translated_build, "de")
+
+    def test_a_function_build_dir_is_not_given_a_language_choice(
+        self, client, db, translated_app, translated_build, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(
+            translated_app, "build_dir", lambda request: translated_build / "pt_BR"
+        )
+
+        assert served_title(client, "de") == built_title(translated_build, "pt_BR")
+
+    def test_a_reader_is_served_without_sphinx_installed(
+        self, client, db, translated_app, translated_build, monkeypatch
+    ) -> None:
+        for name in [
+            name
+            for name in sys.modules
+            if name == "sphinx" or name.startswith("sphinx.")
+        ]:
+            monkeypatch.setitem(sys.modules, name, None)
+
+        assert served_title(client, "de") == built_title(translated_build, "de")

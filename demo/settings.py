@@ -53,6 +53,9 @@ SITE_ID = 1
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Picks the reader's language: the language switcher's cookie, then the
+    # browser's Accept-Language, then LANGUAGE_CODE. The guide follows it.
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     # The shell puts the site's name in every page title, reading it from
     # request.site. This middleware is what puts it there.
@@ -168,5 +171,8 @@ STATIC_URL = "/static/"
 USE_TZ = True
 USE_I18N = True
 LANGUAGE_CODE = "en-us"
+# The site's languages. The guide is translated into German only, so a reader
+# who picks Italian gets the English guide.
+LANGUAGES = [("en", "English"), ("de", "Deutsch"), ("it", "Italiano")]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
