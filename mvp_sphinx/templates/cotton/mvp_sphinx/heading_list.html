@@ -1,12 +1,13 @@
-{# @description A list of headings, each linking to its anchor, with sub-headings nested in their parent's item. #}
+{# @description A list of headings, each linking to its anchor, with sub-headings nested in their parent's item. Every list carries mvp-sphinx-toc-list and every link mvp-sphinx-toc-link, the classes "On this page" is styled and marked by. #}
 {# @prop headings:list | description:"Dicts with title (safe markup), anchor (#id) and children (the same, nested)." #}
-<c-vars headings />
+{# @prop class:text | description:"Extra classes on the outermost list." #}
+<c-vars headings class />
 
-<ul {{ attrs }}>
+<ul class="mvp-sphinx-toc-list {{ class }}" {{ attrs }}>
   {% for heading in headings %}
     <li>
-      <a href="{{ heading.anchor }}"><span class="text-wrap">{{ heading.title }}</span></a>
-      {% if heading.children %}<c-mvp_sphinx.heading_list :headings="heading.children" />{% endif %}
+      <a href="{{ heading.anchor }}" class="mvp-sphinx-toc-link">{{ heading.title }}</a>
+      {% if heading.children %}<c-mvp_sphinx.heading_list :headings="heading.children" only />{% endif %}
     </li>
   {% endfor %}
 </ul>

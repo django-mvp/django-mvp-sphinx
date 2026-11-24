@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 14:58+0100\n"
+"POT-Creation-Date: 2026-11-24 04:17-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,12 +22,16 @@ msgstr ""
 msgid "Sphinx"
 msgstr ""
 
-#: menus.py:129 menus.py:188
+#: menus.py:143 menus.py:202
 msgid "Overview"
 msgstr ""
 
-#: mounted.py:71
+#: mounted.py:86
 msgid "Documentation"
+msgstr ""
+
+#: templates/cotton/mvp_sphinx/edit_link.html:7
+msgid "Edit this page"
 msgstr ""
 
 #: templates/cotton/mvp_sphinx/live_example.html:14
@@ -51,8 +55,9 @@ msgstr ""
 msgid "Source files"
 msgstr ""
 
-#: templates/cotton/mvp_sphinx/on_this_page.html:6
-#: templates/mvp_sphinx/page.html:19
+#: templates/cotton/mvp_sphinx/on_this_page.html:9
+#: templates/cotton/mvp_sphinx/on_this_page_panel.html:7
+#: templates/cotton/mvp_sphinx/on_this_page_panel.html:8
 msgid "On this page"
 msgstr ""
 
@@ -80,7 +85,7 @@ msgstr ""
 #: templates/cotton/mvp_sphinx/search_form.html:19
 #: templates/cotton/mvp_sphinx/search_modal.html:19
 #: templates/cotton/mvp_sphinx/search_modal.html:26
-#: templates/mvp_sphinx/search.html:9 views.py:256 views.py:270
+#: templates/mvp_sphinx/search.html:9 views.py:277 views.py:291
 msgid "Search"
 msgstr ""
 
@@ -112,7 +117,7 @@ msgstr[1] ""
 msgid "Nothing matched your search."
 msgstr ""
 
-#: views.py:255
+#: views.py:276
 #, python-format
 msgid "Search: %(query)s"
 msgstr ""

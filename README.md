@@ -183,8 +183,8 @@ Each page of the build answers under `docs/`, drawn by your own `base.html`
 inside the application shell. The front page is at `/docs/`, the contents are in
 the app sidebar, and your menu has an entry that leads to the front page. The tab
 title carries the page's title and the app's `name` (Documentation unless you
-change it), and the breadcrumbs lead back through the page's parents to the front
-page.
+change it), and the breadcrumbs above each page's title lead back through its
+parents to the front page.
 
 ### Changing the docs
 
@@ -390,10 +390,11 @@ docs.menu.insert(
 
 ### The page's own headings
 
-On a wide screen, each page lists its own headings beside it, under "On this
-page", and the page's text widens into the room beside the list. The list is
-nested the way the page nests its sections, each entry links to its heading, and
-it stays in view below the top bar as the page scrolls. Sphinx already records
+Each page lists its own headings under "On this page": beside the page on a wide
+screen, where it stays in view below the top bar as the page scrolls, and in a
+closed panel above the title on a narrower one. The list is nested the way the
+page nests its sections, each entry links to its heading, and the heading being
+read is marked as the reader scrolls. Sphinx already records
 that tree in the build, so there is nothing to configure and the site that
 serves the pages still doesn't need Sphinx.
 
@@ -558,6 +559,23 @@ docs = DocumentationApp(
     name=_("Administrator's handbook"),
 )
 ```
+
+### Linking each page to its source
+
+Give the app an `edit_url` and every page shows an "Edit this page" pencil at the
+end of the row above its title, which opens the page's source in a new tab. The
+address is a pattern: `{path}` is replaced with the page's source file below your
+Sphinx source directory, such as `guide/install.rst`. Any host works:
+
+```python
+docs = DocumentationApp(
+    build_dir=settings.BASE_DIR / "docs" / "_build" / "json",
+    edit_url="https://github.com/your-org/your-project/edit/main/docs/{path}",
+)
+```
+
+There is no link unless you set one, and none on a page Sphinx makes without a
+source file, such as the general index.
 
 ### Page metadata
 
@@ -848,7 +866,14 @@ sphinx-design's and sphinx-copybutton's own stylesheets are still yours to load 
 you use them. The stylesheet draws footnote labels with daisyUI's `label`
 component, which django-mvp's stylesheet already holds.
 
-A page is centred, with "On this page" beside it from 1024 pixels wide. The text
+A page is laid out as sphinx-daisyui lays out its own, so the docs read the same
+whether they are built with the theme or served by this package. A row above the
+page's title holds the breadcrumbs, from the documentation's front page, marked
+with its icon, through each parent to the page itself, and at its end the page's
+"Edit this page" link when the app has one (see below). The trail is django-mvp's
+breadcrumbs component, so a trail too long for its row folds the steps in the
+middle into a "…" menu, and on a phone the front page's step shrinks to its icon.
+The front page has no trail. A page is centred, with "On this page" beside it from 1280 pixels wide. The text
 is as wide as the theme's: 46rem, which is 736 pixels. To change it, set the
 theme's `--daisy-sphinx-max-width` in your own stylesheet, on `:root` or on any
 element around the page, not on the element that holds the body. The page's
@@ -905,12 +930,20 @@ badge and btn. A grid's columns follow the width of the text, not the window.
 The demo project's user guide has a page showing every one of these, written in
 MyST: "Kitchen sink", at `/docs/kitchen-sink/`.
 
-"On this page" is django-mvp's side panel. On a wide screen the list is a column
-beside the page that sticks under the header. On a narrower screen an
-"On this page" button in the top bar opens it as a drawer, so a reader can
-reach it anywhere down a long page. Following a heading from the drawer closes
-it and moves to that heading. A page with no headings has neither the
-column nor the button.
+"On this page" is a column beside the page from 1280 pixels wide: a small label,
+then the page's headings with a thin rule down their left edge, sub-headings
+indented. It is django-mvp's side panel, so it sticks under the header as the page
+scrolls. On a narrower screen it is a bordered panel under the breadcrumbs, closed
+until the reader opens it. Following a heading from the panel closes it and moves
+to that heading. A page with no headings has neither.
+
+As the reader scrolls, both mark the heading being read: the last one whose top
+has passed a line 120 pixels from the top of the window, or the last heading of
+all once the foot of the page is reached. Its link carries
+`aria-current="location"`, and each list item around it the
+`mvp-sphinx-toc-on-path` class, so a nested heading's sections stand out too.
+`mvp_sphinx/on_this_page.js` does this, and keeps doing it on a page reached
+through a boosted link.
 
 A heading you follow a link to lands below the header at whatever height it is,
 because django-mvp measures the header and leaves that much room above the
@@ -930,8 +963,9 @@ and in its `head` block if you override that, so the page's metadata does. Rende
 it, because every rule in the theme's stylesheet is scoped to that class. Markup
 of your own inside it, which the stylesheet should leave alone, takes the
 `daisy-sphinx-escape` class. An override of the `content` block also takes over
-drawing "On this page" and the previous and next links, which the page gets as
-`headings`, `previous_page` and `next_page`:
+drawing the breadcrumbs, the edit link, "On this page" and the previous and next
+links, which the page gets as `breadcrumbs`, `edit_url`, `headings`,
+`previous_page` and `next_page`:
 
 ```django
 {% extends "mvp_sphinx/page.html" %}
@@ -1319,8 +1353,11 @@ These are the names a project can use, grouped the way a project meets them.
 
 - `mvp_sphinx.mounted.DocumentationApp` serves one docs build under the prefix
   you mount it at. Its keyword options are `build_dir` (required: a folder, or a
-  function of the request that returns one), `source_dir`, `name`, `icon`,
-  `namespace`, `view_class` and `check`.
+  function of the request that returns one), `source_dir`, `name`, `icon` (which
+  also marks the front page in the breadcrumbs), `namespace`, `view_class`,
+  `check` and `edit_url`.
+- `edit_address(source)` returns where a page's source file is edited, from
+  `edit_url`, or `""` when the app has no `edit_url` or the page no source.
 - `build_dir_for(request)` returns the folder that serves `request`.
 - `menu_item()`, inherited from django-mvp's `MountedApp`, returns the entry to
   add to your own menus.
@@ -1357,7 +1394,10 @@ These are the names a project can use, grouped the way a project meets them.
   `view_class` to change how a page is drawn. A subclass may override
   `template_name`, `get_context_data()`, `get_page_title()`, `get_meta_tags()`,
   `get_headings()`,
-  `get_neighbour(key)` (`key` is `"prev"` or `"next"`) and `get_breadcrumbs()`.
+  `get_neighbour(key)` (`key` is `"prev"` or `"next"`), `get_breadcrumbs()` and
+  `get_edit_url()`. The breadcrumbs are drawn above the page's title with
+  django-mvp's `mvp.breadcrumbs` component, the front page's step carrying the
+  app's `icon`, so the view gives django-mvp's header none.
 - `mvp_sphinx.views.SearchView` renders the results of a search.
 
 ### Building blocks
@@ -1405,7 +1445,8 @@ For a custom view or template:
   in the top bar in the `mvp_sphinx.search_toggle` block, and loads the shortcut
   script in `extra_js`. It leaves that block out when `site_search` is true.
 - `mvp_sphinx/page.html` draws a page. It receives `body`, `body_parts`,
-  `has_examples`, `meta_tags`, `headings`, `previous_page`, `next_page`,
+  `has_examples`, `meta_tags`, `breadcrumbs`, `edit_url`, `headings`,
+  `previous_page`, `next_page`,
   `search_url`, `site_search` and `page_data`. It has the `title`, `head`, `styles` and
   `content` blocks, writes `meta_tags` at the end of `head`, and holds the page's
   body in an element with the `daisy-sphinx-content` class.
@@ -1421,9 +1462,14 @@ For a custom view or template:
 
 Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 
-- `mvp_sphinx.on_this_page` draws a page's headings as the page's side panel. It takes
-  `headings`.
+- `mvp_sphinx.on_this_page` draws a page's headings as a column beside the page
+  from 1280 pixels wide, as django-mvp's side panel. It takes `headings`.
+- `mvp_sphinx.on_this_page_panel` draws them as a closed panel for a narrower
+  screen, hidden from 1280 pixels wide. It takes `headings`.
 - `mvp_sphinx.heading_list` draws nested headings as a list. It takes `headings`.
+  Each list has the `mvp-sphinx-toc-list` class and each link `mvp-sphinx-toc-link`.
+- `mvp_sphinx.edit_link` draws the "Edit this page" pencil. It takes `href` and
+  draws nothing without one.
 - `mvp_sphinx.page_links` draws the links to the previous and next page. It takes
   `previous` and `next`.
 - `mvp_sphinx.search_form` draws the search box on the results page. It takes
@@ -1441,8 +1487,12 @@ Use these in your own templates as `<c-mvp_sphinx.on_this_page />` and so on:
 ### Static files
 
 - `mvp_sphinx/page.css` sets the reading width and surfaces that sphinx-daisyui's
-  page-body stylesheet takes from its host. Every page of a documentation app
-  loads it, after the theme's stylesheet.
+  page-body stylesheet takes from its host, and lays out the breadcrumbs row and
+  "On this page". Every page of a documentation app loads it, after the theme's
+  stylesheet.
+- `mvp_sphinx/on_this_page.js` marks the heading being read in "On this page" and
+  closes the panel when a heading is followed from it. A page with headings loads
+  it.
 - `mvp_sphinx/maths.js` holds the settings for the maths typesetting. A page
   with maths loads it before the library.
 - `mvp_sphinx/search.js` opens the search box with Ctrl+K, or ⌘K on a Mac. Every

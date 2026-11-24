@@ -19,9 +19,11 @@ On a narrow screen the sidebar folds away. A button in the top bar opens it agai
 Breadcrumbs
 -----------
 
-Above each page's title a trail shows where you are. On a page inside a group it
-starts at the name of the guide and passes through each page above this one. Follow
-any part of the trail to go up a level.
+Above each page's title a trail shows where you are. It starts with a book, which
+leads to the guide's front page, and passes through each page above this one.
+Follow any part of the trail to go up a level. When the trail is too long for the
+screen, the pages in its middle fold into a "…" button: open it to reach them. The pencil at the end of the row
+opens the page's source, if you would like to suggest a change to it.
 
 Searching the guide
 -------------------
@@ -35,9 +37,11 @@ every result on a page of its own.
 On this page
 ------------
 
-A long page lists its own headings in a panel beside the text, titled *On this
-page*, once the window is wide enough to fit it. Follow a heading to jump to it.
-Sub-headings sit under their heading.
+A long page lists its own headings in a column beside the text, titled *On this
+page*, once the window is wide enough to fit it. On a narrower window they are in a
+panel under the trail: open it to see them. Follow a heading to jump to it.
+Sub-headings sit under their heading, and the heading you are reading is picked
+out as you scroll.
 
 Previous and next
 -----------------

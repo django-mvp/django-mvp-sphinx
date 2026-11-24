@@ -1,0 +1,11 @@
+{% load i18n %}
+{# @description The current page's own headings in a closed panel above the page's title, for a screen narrower than the xl breakpoint; from it the panel is hidden and <c-mvp_sphinx.on_this_page> is the column beside the page. Following a heading closes the panel. #}
+{# @prop headings:list | description:"Headings from PageHeadings; never empty, the page draws nothing otherwise." #}
+<c-vars headings />
+
+<details class="mvp-sphinx-toc-panel collapse collapse-arrow">
+  <summary class="collapse-title">{% trans "On this page" %}</summary>
+  <nav class="collapse-content" aria-label="{% trans "On this page" %}" data-mvp-sphinx-toc="panel">
+    <c-mvp_sphinx.heading_list :headings="headings" />
+  </nav>
+</details>

@@ -2,6 +2,7 @@
 
 import logging
 from typing import Any
+from urllib.parse import quote
 
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
@@ -66,6 +67,11 @@ class DocumentationApp(MountedApp):
             An anonymous reader it excludes is sent to sign in and back, and a
             signed-in one gets the project's 403 page. An error it raises is a
             server error.
+        edit_url: Where a page's source is edited, as a pattern holding
+            ``{path}``: the page's source file below the Sphinx source
+            directory, such as ``guide/install.rst``. With it, every page made
+            from a source file links there as "Edit this page". Without it, the
+            default, no page does.
 
     Raises:
         ImproperlyConfigured: ``build_dir`` was not given.
@@ -82,6 +88,7 @@ class DocumentationApp(MountedApp):
     namespace = "docs"
     build_dir: Any = None
     source_dir: Any = None
+    edit_url: str = ""
     view_class = PageView
     urls: Any = []
 
@@ -141,6 +148,21 @@ class DocumentationApp(MountedApp):
         else:
             address = reverse(f"{self.namespace}:front_page")
         return f"{address}#{anchor}" if anchor else address
+
+    def edit_address(self, source: str) -> str:
+        """Return where a page's source is edited, or nothing when editing is off.
+
+        Args:
+            source: The page's source file below the Sphinx source directory,
+                ``""`` for a page Sphinx made without one.
+
+        Returns:
+            ``edit_url`` with the source put in for ``{path}``, or an empty
+            string when there is no ``edit_url`` or no source.
+        """
+        if not self.edit_url or not source:
+            return ""
+        return self.edit_url.replace("{path}", quote(source))
 
     def theme_stylesheet(self, build: DocsBuild) -> str:
         """Return the address of the page-body stylesheet the build holds.

@@ -15,18 +15,22 @@
   <link rel="stylesheet" href="{% static 'mvp_sphinx/page.css' %}">
   {% if has_examples %}<link rel="stylesheet" href="{% static 'mvp_sphinx/example.css' %}">{% endif %}
 {% endblock styles %}
-{% block app.navbar.end %}
-  {{ block.super }}
-  {% if headings %}
-    {% trans "On this page" as on_this_page_label %}
-    <c-mvp.page.side.toggle for="mvp-sphinx-on-this-page" :text="on_this_page_label" icon="list-view" class="btn-ghost btn-sm" />
-  {% endif %}
-{% endblock app.navbar.end %}
 {% block content %}
   <c-mvp.page>
     <c-mvp.container width="full" class="mvp-sphinx-page">
       <c-mvp.page.layout>
+        <c-slot name="header">
+          <div class="mvp-sphinx-article-header">
+            <div class="mvp-sphinx-article-header-start">
+              {% if breadcrumbs|length > 1 %}<c-mvp.breadcrumbs :items="breadcrumbs" class="mvp-sphinx-breadcrumbs" />{% endif %}
+            </div>
+            <div class="mvp-sphinx-article-header-end">
+              <c-mvp_sphinx.edit_link :href="edit_url" />
+            </div>
+          </div>
+        </c-slot>
         <div class="min-w-0 w-full">
+          {% if headings %}<c-mvp_sphinx.on_this_page_panel :headings="headings" />{% endif %}
           <article class="daisy-sphinx-content">
             {% for part in body_parts %}
               {% if part.example %}
@@ -50,6 +54,7 @@
 {% block extra_js %}
   {{ block.super }}
   <script src="{% static 'mvp_sphinx/toctree.js' %}" defer></script>
+  {% if headings %}<script src="{% static 'mvp_sphinx/on_this_page.js' %}" defer></script>{% endif %}
   {% if has_maths %}
     <script src="{% static 'mvp_sphinx/maths.js' %}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>

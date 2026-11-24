@@ -1,0 +1,16 @@
+{% load i18n %}
+{# @description A pencil icon linking to where the current page's source is edited, opened in a new tab. Draws nothing without an address. #}
+{# @prop href:text | description:"Where the page's source is edited, from PageView.get_edit_url; empty for no link." #}
+<c-vars href />
+
+{% if href %}
+  {% trans "Edit this page" as label %}
+  <a href="{{ href }}"
+     target="_blank"
+     rel="noopener"
+     class="mvp-sphinx-edit-link btn btn-ghost btn-sm btn-square tooltip tooltip-left"
+     data-tip="{{ label }}"
+     aria-label="{{ label }}">
+    <c-icon name="pencil" aria-hidden="true" />
+  </a>
+{% endif %}

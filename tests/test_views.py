@@ -149,10 +149,13 @@ class TestPageTitle:
 
 
 class TestBreadcrumbs:
-    def test_the_front_page_shows_only_the_apps_name(
-        self, client, db, docs_app
-    ) -> None:
-        crumbs = client.get("/docs/").context["page"]["breadcrumbs"]
+    @staticmethod
+    def trail(client, address: str):
+        soup = BeautifulSoup(client.get(address).content, "html.parser")
+        return soup.select_one("article").find_previous("nav", class_="mvp-crumbs")
+
+    def test_the_front_pages_trail_is_the_apps_name(self, client, db, docs_app) -> None:
+        crumbs = client.get("/docs/").context["breadcrumbs"]
 
         assert [(str(c["text"]), c.get("href")) for c in crumbs] == [
             (str(docs_app.name), None)
@@ -161,13 +164,93 @@ class TestBreadcrumbs:
     def test_a_nested_page_links_back_through_its_parents(
         self, client, db, docs_app
     ) -> None:
-        crumbs = client.get("/docs/section/nested/page/").context["page"]["breadcrumbs"]
+        crumbs = client.get("/docs/section/nested/page/").context["breadcrumbs"]
 
         assert [(str(c["text"]), c.get("href")) for c in crumbs] == [
             (str(docs_app.name), "/docs/"),
             ("The section folder", "/docs/section/"),
             ("Nested page", None),
         ]
+
+    def test_the_front_pages_step_carries_the_apps_icon(
+        self, client, db, docs_app
+    ) -> None:
+        crumbs = client.get("/docs/section/nested/page/").context["breadcrumbs"]
+
+        assert crumbs[0]["icon"] == docs_app.icon
+        assert all("icon" not in crumb for crumb in crumbs[1:])
+
+    def test_the_trail_is_drawn_above_the_page_with_the_apps_name_on_its_first_link(
+        self, client, db, docs_app
+    ) -> None:
+        trail = self.trail(client, "/docs/section/nested/page/")
+
+        links = trail.find_all("a")
+        assert [link["href"] for link in links] == ["/docs/", "/docs/section/"]
+        assert links[0].get_text(strip=True) == str(docs_app.name)
+        assert trail.find(attrs={"aria-current": "page"}).get_text(strip=True) == (
+            "Nested page"
+        )
+
+    def test_the_front_page_draws_no_trail(self, client, db, docs_app) -> None:
+        assert self.trail(client, "/docs/") is None
+
+    def test_the_header_draws_no_second_trail(self, client, db, docs_app) -> None:
+        response = client.get("/docs/section/nested/page/")
+
+        assert response.context["page"]["breadcrumbs"] == []
+
+
+class TestEditLink:
+    PATTERN = "https://example.com/edit/main/docs/{path}"
+
+    @staticmethod
+    def link(client, address: str):
+        soup = BeautifulSoup(client.get(address).content, "html.parser")
+        return soup.find("a", class_="mvp-sphinx-edit-link")
+
+    def test_a_page_links_to_its_source_file(
+        self, client, db, docs_app, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(docs_app, "edit_url", self.PATTERN)
+
+        link = self.link(client, "/docs/section/nested/page/")
+
+        assert (
+            link["href"] == "https://example.com/edit/main/docs/section/nested/page.rst"
+        )
+
+    def test_the_front_page_links_to_its_source_file(
+        self, client, db, docs_app, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(docs_app, "edit_url", self.PATTERN)
+
+        assert self.link(client, "/docs/")["href"].endswith("/docs/index.rst")
+
+    def test_the_link_opens_in_a_new_tab_with_a_name_of_its_own(
+        self, client, db, docs_app, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(docs_app, "edit_url", self.PATTERN)
+
+        link = self.link(client, "/docs/page/")
+
+        assert link["target"] == "_blank"
+        assert "noopener" in link["rel"]
+        assert link["aria-label"]
+
+    def test_a_page_has_no_link_when_the_app_sets_no_address(
+        self, client, db, docs_app, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(docs_app, "edit_url", "")
+
+        assert self.link(client, "/docs/page/") is None
+
+    def test_a_page_sphinx_made_without_a_source_file_has_no_link(
+        self, client, db, docs_app, monkeypatch
+    ) -> None:
+        monkeypatch.setattr(docs_app, "edit_url", self.PATTERN)
+
+        assert self.link(client, "/docs/genindex/") is None
 
 
 class TestServingWithoutSphinx:
@@ -414,7 +497,7 @@ class TestNamingAnApp:
     def test_the_first_breadcrumb_carries_the_name_the_host_gave(
         self, client, db, handbook_app
     ) -> None:
-        crumbs = client.get("/manuals/admin/backups/").context["page"]["breadcrumbs"]
+        crumbs = client.get("/manuals/admin/backups/").context["breadcrumbs"]
 
         assert str(crumbs[0]["text"]) == str(handbook_app.name)
         assert str(DEFAULT_NAME) not in [str(c["text"]) for c in crumbs]
@@ -422,7 +505,7 @@ class TestNamingAnApp:
     def test_the_front_page_breadcrumb_is_the_name_the_host_gave(
         self, client, db, handbook_app
     ) -> None:
-        crumbs = client.get("/manuals/admin/").context["page"]["breadcrumbs"]
+        crumbs = client.get("/manuals/admin/").context["breadcrumbs"]
 
         assert [str(c["text"]) for c in crumbs] == [str(handbook_app.name)]
 
@@ -442,8 +525,8 @@ class TestTwoAppsSideBySide:
     def test_a_nested_page_keeps_its_breadcrumbs_within_its_own_prefix(
         self, client, db, handbook_app, docs_app
     ) -> None:
-        guide = client.get("/docs/section/nested/page/").context["page"]["breadcrumbs"]
-        handbook = client.get("/manuals/admin/backups/").context["page"]["breadcrumbs"]
+        guide = client.get("/docs/section/nested/page/").context["breadcrumbs"]
+        handbook = client.get("/manuals/admin/backups/").context["breadcrumbs"]
 
         assert [c["href"] for c in guide if "href" in c] == ["/docs/", "/docs/section/"]
         assert [c["href"] for c in handbook if "href" in c] == ["/manuals/admin/"]
@@ -1476,33 +1559,28 @@ class TestOnThisPage:
     ) -> None:
         assert self.on_this_page(self.soup(client, "plain/")) is None
 
-    def test_the_panel_carries_the_id_the_toggle_opens(
+    def test_the_panel_above_the_page_lists_the_same_headings(
         self, client, db, reading_app
     ) -> None:
         soup = self.soup(client, "")
 
-        assert soup.find(id="mvp-sphinx-on-this-page") is not None
+        panel = soup.find(attrs={"data-mvp-sphinx-toc": "panel"})
+        column = soup.find(attrs={"data-mvp-sphinx-toc": "column"})
 
-    def test_a_page_with_sections_has_a_toggle_for_the_panel(
-        self, client, db, reading_app
-    ) -> None:
-        soup = self.soup(client, "")
-
-        toggle = soup.find("button", attrs={"aria-controls": "mvp-sphinx-on-this-page"})
-
-        assert toggle is not None
+        assert panel.find_parent("details") is not None
+        assert not panel.find_parent("details").has_attr("open")
+        assert [a["href"] for a in panel.find_all("a")] == [
+            a["href"] for a in column.find_all("a")
+        ]
 
     @pytest.mark.parametrize("address", ["plain/", "search/?q=a"])
-    def test_a_page_with_no_section_has_no_panel_and_no_toggle(
+    def test_a_page_with_no_section_has_no_list_in_either_place(
         self, client, db, reading_app, address
     ) -> None:
         soup = self.soup(client, address)
 
+        assert soup.find(attrs={"data-mvp-sphinx-toc": True}) is None
         assert soup.find(id="mvp-sphinx-on-this-page") is None
-        assert (
-            soup.find("button", attrs={"aria-controls": "mvp-sphinx-on-this-page"})
-            is None
-        )
 
     def test_the_front_page_lists_none_of_the_headings_of_the_pages_it_lists(
         self, client, db, reading_app

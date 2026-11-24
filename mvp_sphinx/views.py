@@ -104,7 +104,10 @@ class PageView(PageMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Add the app's search address and whether the site's search stands in.
 
-        Also adds the page's metadata, headings and neighbours.
+        Also adds the page's metadata, headings, neighbours, breadcrumbs and the
+        address its source is edited at. The breadcrumbs are drawn above the
+        page's title, with the app's icon on the front page's step, so the
+        shell's header is given none to draw.
         """
         context = super().get_context_data(**kwargs)
         context["search_url"] = reverse(f"{self.app.namespace}:search")
@@ -113,6 +116,10 @@ class PageView(PageMixin, TemplateView):
         context["headings"] = self.get_headings()
         context["previous_page"] = self.get_neighbour("prev")
         context["next_page"] = self.get_neighbour("next")
+        first, *rest = context["page"]["breadcrumbs"]
+        context["breadcrumbs"] = [{**first, "icon": self.app.icon}, *rest]
+        context["page"]["breadcrumbs"] = []
+        context["edit_url"] = self.get_edit_url()
         return context
 
     def get_page_title(self) -> str:
@@ -141,6 +148,21 @@ class PageView(PageMixin, TemplateView):
             empty when the page has none.
         """
         return PageHeadings.from_toc(self.page_data.get("toc") or "")
+
+    def get_edit_url(self) -> str:
+        """Return where the page's source is edited, when the app links to it.
+
+        Returns:
+            The app's ``edit_url`` with the page's source file put in, or an
+            empty string when the app sets none or the page has no source file,
+            as for Sphinx's own pages.
+        """
+        source = ""
+        if self.page_data.get("sourcename"):
+            source = self.page_data.get("current_page_name", "") + self.page_data.get(
+                "page_source_suffix", ""
+            )
+        return self.app.edit_address(source)
 
     def get_neighbour(self, key: str) -> dict[str, Any] | None:
         """Return the page before or after this one in reading order.

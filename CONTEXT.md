@@ -62,8 +62,9 @@ document, drawn as a section header in the sidebar.
 _Avoid_: section (that is a part of a page, headed by a heading).
 
 **On this page**:
-The headings of the current page, listed beside it on wide screens. Only the
-current page's headings appear here, never other pages.
+The headings of the current page, listed beside it on wide screens and in a
+closed panel above its title on narrower ones. Only the current page's headings
+appear here, never other pages.
 _Avoid_: toc, table of contents, local contents.
 
 **Reference entry**:

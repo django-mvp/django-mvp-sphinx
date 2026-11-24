@@ -48,6 +48,36 @@ class TestDocumentationApp:
         assert reverse(docs_app.landing) == "/docs/"
 
 
+class TestEditAddress:
+    def test_the_source_is_put_in_for_path(self, tmp_path) -> None:
+        app = DocumentationApp(
+            build_dir=tmp_path, edit_url="https://example.com/{path}?plain=1"
+        )
+
+        assert app.edit_address("guide/install.rst") == (
+            "https://example.com/guide/install.rst?plain=1"
+        )
+
+    def test_a_source_name_is_quoted_for_an_address(self, tmp_path) -> None:
+        app = DocumentationApp(
+            build_dir=tmp_path, edit_url="https://example.com/{path}"
+        )
+
+        assert app.edit_address("guide/first steps.md") == (
+            "https://example.com/guide/first%20steps.md"
+        )
+
+    def test_there_is_no_address_without_an_edit_url(self, tmp_path) -> None:
+        assert DocumentationApp(build_dir=tmp_path).edit_address("index.rst") == ""
+
+    def test_there_is_no_address_without_a_source(self, tmp_path) -> None:
+        app = DocumentationApp(
+            build_dir=tmp_path, edit_url="https://example.com/{path}"
+        )
+
+        assert app.edit_address("") == ""
+
+
 class TestMenuEntry:
     def test_the_entry_leads_to_the_apps_front_page(self, docs_app) -> None:
         assert reverse(docs_app.menu_item().view_name) == "/docs/"
@@ -376,11 +406,11 @@ class TestPermissionRule:
     @pytest.fixture(autouse=True)
     def permission_rule(self, docs_app, monkeypatch):
         monkeypatch.setattr(
-            docs_app, "check", user_has_any_permission("auth.view_user")
+            docs_app, "check", user_has_any_permission("auth.view_group")
         )
 
     def test_a_user_granted_the_permission_gets_a_page(self, client, user):
-        user.user_permissions.add(Permission.objects.get(codename="view_user"))
+        user.user_permissions.add(Permission.objects.get(codename="view_group"))
         client.force_login(user)
 
         assert client.get("/docs/page/").status_code == 200

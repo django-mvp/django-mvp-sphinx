@@ -8,6 +8,8 @@ from mvp_sphinx.mounted import DocumentationApp
 docs = DocumentationApp(
     build_dir=BASE_DIR / "demo" / "docs" / "_build" / "json",
     source_dir=BASE_DIR / "demo" / "docs",
+    icon="book",
+    edit_url="https://github.com/django-mvp/django-mvp-sphinx/edit/main/demo/docs/{path}",
 )
 staff_guide = DocumentationApp(
     build_dir=BASE_DIR / "demo" / "staff_guide" / "_build" / "json",

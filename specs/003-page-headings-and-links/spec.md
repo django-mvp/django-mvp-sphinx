@@ -23,16 +23,21 @@ in reading order."
 
 Two pieces of navigation that live on the page itself, next to the contents in the app sidebar.
 
-- **On this page** lists the current page's headings beside it on wide screens, and behind an
-  "On this page" button in the top bar that opens it as a drawer on narrow ones, nested the way the
-  page nests them, each one linking to its heading. It lists only the current page, never other
-  pages, and a page with no headings below its title has none.
+- **On this page** lists the current page's headings beside it on wide screens, and in a closed
+  panel above the page's title on narrow ones, nested the way the page nests them, each one
+  linking to its heading. The heading being read is marked as the reader scrolls. It lists only
+  the current page, never other pages, and a page with no headings below its title has none.
 - **Previous and next** links end every page, leading to the page before and after it in reading
   order: the order the docs build puts its pages in. The first page has no previous link, and the
   last has no next.
 
-The contents in the app sidebar belong to #5. Styling the page body, including the links a reader
-can copy from each heading, belongs to #7.
+- **Edit this page** links each page to its source in the project's repository, when the project
+  turns it on, from the end of the row of breadcrumbs above the page's title.
+
+The page is laid out the way the sphinx-daisyui theme lays out its own pages, so the docs read the
+same whether they are built with the theme or served by this package. The contents in the app
+sidebar belong to #5. Styling the page body, including the links a reader can copy from each
+heading, belongs to #7.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -67,9 +72,14 @@ second page has no "On this page" at all.
    other page.
 7. **Given** a page with sections, **When** the list is read by assistive technology, **Then** it
    is a navigation region with a name of its own, distinct from the sidebar's navigation.
-8. **Given** a page with sections on a narrow screen, **When** the reader activates the
-   "On this page" button, **Then** the list opens over the page, and following a heading from it
-   closes the list and moves to that heading. A page with no sections shows no button.
+8. **Given** a page with sections on a narrow screen, **When** the reader opens the closed
+   "On this page" panel above the page's title, **Then** it lists the same headings, and following
+   a heading from it closes the panel and moves to that heading. A page with no sections shows no
+   panel.
+9. **Given** a page with sections, **When** the reader scrolls, **Then** the list marks the heading
+   being read: the last one whose top has passed a reading line near the top of the window, or the
+   last heading once the foot of the page is reached. Its parent headings are marked as on its
+   path, and the panel marks the same heading as the column.
 
 ---
 
@@ -131,6 +141,37 @@ the next link leads to the inserted page.
 
 ---
 
+### User Story 4 - Link each page to its source for editing (Priority: P3)
+
+A developer whose project serves its docs through this package wants readers to be able to suggest
+a change to a page. They give their documentation app the address of a page's source in their
+repository once, as a pattern into which the page's source path is put. Every page made from a
+source file then shows an "Edit this page" pencil at the end of the row above its title, opening
+the source in a new tab.
+
+**Why this priority**: It saves a reader hunting for the source in the repository, but nothing on
+the page depends on it, and a project that keeps its docs private does not want it at all.
+
+**Independent Test**: Serve a docs build with an app given an edit address. A page made from a
+source file links to that address with its source path put in, and Sphinx's general index has no
+link. With no edit address, no page has one.
+
+**Acceptance Scenarios**:
+
+1. **Given** an app with an edit address, **When** a reader opens a page made from a source file,
+   **Then** the page links to the address with the page's source file, below the Sphinx source
+   directory, put in for `{path}`.
+2. **Given** an app with no edit address, **When** a reader opens any page, **Then** it has no edit
+   link.
+3. **Given** an app with an edit address, **When** a reader opens a page Sphinx made without a
+   source file, such as the general index, **Then** it has no edit link.
+4. **Given** an edit link, **When** a reader follows it, **Then** it opens in a new tab, and the
+   link has an accessible name of its own.
+5. **Given** an edit address on any host, **When** a page links to it, **Then** the link is the
+   address with the path put in and nothing else changed, so it need not be GitHub.
+
+---
+
 ### Edge Cases
 
 - **A page with only one section**: it still has "On this page", holding that one entry. The rule
@@ -157,14 +198,16 @@ the next link leads to the inserted page.
 - Q: What does "reading order" mean when the issue does not define it? → A: The previous and next
   page the docs build records for each page. Sphinx derives them from the toctrees, so reading
   order is the order the contents list the pages in, front page first.
-- Q: What happens to "On this page" on narrow screens? → A: The list is behind an "On this page"
-  button in the top bar, which opens it as a drawer over the page. Following a heading from the
-  drawer closes it and moves to that heading. The top bar stays in view down a
-  long page, so the list is in reach wherever the reader is. A page with no sections shows no
-  button. Where the list sits and at what width it becomes a drawer is judged by eye, not by a
-  test.
-- Q: Does the list mark the section being read as the reader scrolls? → A: No. The issue does not
-  ask for it and it needs script to follow scrolling. It can be asked for separately.
+- Q: What happens to "On this page" on narrow screens? → A: The list is in a closed panel under
+  the breadcrumbs, above the page's title, as sphinx-daisyui draws it. Following a heading from the
+  panel closes it and moves to that heading. A page with no sections shows no panel. Where the list
+  sits and at what width it moves beside the page is judged by eye, not by a test.
+- Q: Does the list mark the section being read as the reader scrolls? → A: Yes, as sphinx-daisyui
+  marks it: the last heading whose top has passed a reading line near the top of the window, and
+  the last heading at the foot of the page. The column and the panel mark the same heading.
+- Q: Where does the edit address come from, and is the link on by default? → A: The project gives
+  it once, on its documentation app, as a pattern holding `{path}`. It is off until the project
+  sets one, since a project's repository may not be public.
 - Q: Do the previous and next links sit on pages outside reading order, or lead outside the
   documentation app? → A: Neither. A page with no previous or next page in the build has no link
   for it, and every link leads to a page of the same documentation app.
@@ -195,6 +238,13 @@ the next link leads to the inserted page.
   the time of the request, so a rebuild shows on the next request without a restart. (US3)
 - **FR-011**: Serving "On this page" and the previous and next links MUST NOT import Sphinx or start
   a build. They are read from the docs build like the page itself. (US1, US2, US3)
+- **FR-012**: "On this page" MUST mark the heading being read with `aria-current="location"` on its
+  link, in the column and in the panel, and mark the list items around it as on its path. (US1)
+- **FR-013**: When its documentation app has an edit address, a page made from a source file MUST
+  link to that address with its source file put in for `{path}`, opening in a new tab, with an
+  accessible name of its own. (US4)
+- **FR-014**: A page MUST have no edit link when its app has no edit address or the page has no
+  source file. (US4)
 
 ### Key Entities
 
@@ -202,6 +252,8 @@ the next link leads to the inserted page.
   Each has a title and the anchor of its heading, and may hold headings nested under it.
 - **Previous and next page**: the neighbours of a page in reading order, as the docs build records
   them. Each has a title and the page it leads to. A page may have either, both or neither.
+- **Edit address**: where a page's source is edited, a pattern the project gives its documentation
+  app once, holding `{path}` for the page's source file below the Sphinx source directory.
 
 ## Success Criteria *(mandatory)*
 
@@ -218,8 +270,10 @@ the next link leads to the inserted page.
 
 ## Assumptions
 
-- Serving the page, its URL and its breadcrumbs come from #4. This feature adds to the page it
-  serves and changes none of that.
+- Serving the page, its URL and its breadcrumbs come from #4. This feature draws the breadcrumbs
+  in the row above the page's title, beside the edit link, with django-mvp's breadcrumbs component,
+  which folds the middle of a trail too long for its row into a menu. It changes nothing else
+  about them.
 - The contents in the app sidebar come from #5. "On this page" holds headings inside the current
   page, and the sidebar holds pages, so neither repeats the other.
 - The links a reader can copy from each heading, and all styling of the page body, come from #7.

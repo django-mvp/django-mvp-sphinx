@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "mvp_forms",
     "flex_menu",
     "django_cotton",
+    # Where django-mvp keeps each person's preferences, on the user model.
+    "object_preferences",
     # Reloads the browser on a change to a template, a stylesheet or Python. It
     # arrives with the shared development bundle rather than a pin of its own,
     # and its middleware removes itself from the chain unless DEBUG is on.
@@ -57,6 +59,9 @@ MIDDLEWARE = [
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Shows a signed-in person times in their timezone and pages in their
+    # language. It reads the user, so it sits below authentication.
+    "mvp.middleware.PreferencesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Last, because it rewrites the response body to insert its script tag and
@@ -70,6 +75,10 @@ MIDDLEWARE = [
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 ROOT_URLCONF = "demo.urls"
+
+# django-mvp stores each person's preferences on the user model, so the demo has
+# one of its own.
+AUTH_USER_MODEL = "demo.User"
 
 TEMPLATES = [
     {
@@ -126,6 +135,7 @@ EASY_ICONS = {
         "packs": ["mvp.utils.BS5_ICONS"],
         "icons": {
             "overview": "bi bi-house",
+            "book": "bi bi-book",
         },
     },
 }
