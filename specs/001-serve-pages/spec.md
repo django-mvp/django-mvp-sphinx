@@ -205,7 +205,7 @@ and read the `<meta>` tags in the head of each.
 2. **Given** any served page, **When** it renders, **Then** its head carries exactly one viewport
    tag, the one the host project's base template sets.
 3. **Given** a page whose source gives it no metadata, **When** it renders, **Then** its head carries
-   the same tags as the host project's own pages and no others.
+   the same tags as the host project's own pages, the preview tags of spec 011 and no others.
 
 ---
 
@@ -293,7 +293,8 @@ any other, then request pages, a file, a search, an extract and the sidebar with
   (US1)
 - **FR-018**: Each served page MUST carry in its head the metadata tags its source gives it, and
   MUST NOT add a viewport tag of its own beside the one the host project's base template sets.
-  (US5)
+  (US5) The preview tags spec 011 adds stand beside them, and give way to any tag of the same
+  name or property that the source sets.
 - **FR-019**: A host project MUST be able to give a documentation app a function of the request in
   place of its build folder, and each request MUST then be served wholly from the folder the
   function returns: its page, files, search, page extracts and sidebar. A folder given as before
