@@ -10,6 +10,19 @@
   padding-top: 1.5rem;
 }
 
+/* Where there is no column, on a narrower screen or a page with no headings,
+   the page is the reading width and the gutters, so the "On this page" panel,
+   the article and the links under it share one centred column. */
+.mvp-sphinx-page:not(:has(#mvp-sphinx-on-this-page)) {
+  max-width: calc(var(--daisy-sphinx-max-width, 46rem) + 2rem);
+}
+
+@media (width < 80rem) {
+  .mvp-sphinx-page {
+    max-width: calc(var(--daisy-sphinx-max-width, 46rem) + 2rem);
+  }
+}
+
 /* The page is laid out as sphinx-daisyui lays out its own: the breadcrumbs and
    the edit link in a row above the title, "On this page" in a closed panel under
    that row on a narrower screen, and in a column beside the page from xl. The

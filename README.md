@@ -926,8 +926,9 @@ with its icon, through each parent to the page itself, and at its end the page's
 "Edit this page" link when the app has one (see below). The trail is django-mvp's
 breadcrumbs component, so a trail too long for its row folds the steps in the
 middle into a "…" menu, and on a phone the front page's step shrinks to its icon.
-The front page has no trail. A page is centred, with "On this page" beside it from 1280 pixels wide. The text
-is as wide as the theme's: 46rem, which is 736 pixels. To change it, set the
+The front page has no trail. A page is centred, with "On this page" beside it from 1280 pixels wide. On a
+narrower screen, or on a page with no headings, the page is as wide as its text, so the "On this page" panel
+and the text line up. The text is as wide as the theme's: 46rem, which is 736 pixels. To change it, set the
 theme's `--daisy-sphinx-max-width` in your own stylesheet, on `:root` or on any
 element around the page, not on the element that holds the body. The page's
 container grows and shrinks with it, so the "On this page" column keeps its place:
