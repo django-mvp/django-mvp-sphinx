@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.11.1] - 2026-11-27
+
 ### Fixed
 - Below 1280 pixels wide, and on a page with no headings, a page kept room for the "On this page" column it no longer showed, so its text sat to one side of an empty strip and was narrower than the "On this page" panel above it. The page is now as wide as its text there, centred, with the panel the same width.
 
